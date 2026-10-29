@@ -79,7 +79,7 @@
   "_speech": "Station Security: whoever posted the job, not the crew. Clara (Direct, Firm and Confident), already in five recipes; his ear decides. No names, places, factions or currency.",
   "recap": "An armed crew had a stockpile of contraband in cargo containers beside their base over <Planet>. I blew up every container. Whatever was in them won't be sold now.",
   "recapSay": [
-    "That's the last one. Whatever was in there, nobody's selling it now."
+    "That's the last one gone."
   ],
   "_recap": "The grouped ending, as 23a: stage 100 carries the recap and the closing radio. boardspace refuses a recapSay today (one beat, so the closing line was its say); with a group it wants this. Reward placement follows 23a.",
   "_reward": "med, capped. 23a's grouped ending carries no reward tier, so where it goes on a grouped board ending is Eliza's."

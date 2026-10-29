@@ -49,7 +49,7 @@
         "text": "The shuttle takes the crate aboard and turns for the planet below."
       },
       "say": [
-        "They're aboard. There are people down here who've been waiting since spring, and some of them had stopped asking."
+        "They're aboard. There are people down here who've been waiting since spring."
       ],
       "reward": "med"
     }

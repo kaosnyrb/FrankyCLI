@@ -73,7 +73,7 @@
       "objective": "Deal with the buyer",
       "journal": "The buyer came to collect the batch at the <Place> and found it condemned, and me. The parts go nowhere now.",
       "say": [
-        "She came for them? Of course she did. Well, she won't be selling them to anyone."
+        "So she came for them. Those parts won't be sold to anyone now."
       ],
       "reward": "med"
     }

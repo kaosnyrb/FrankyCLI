@@ -46,7 +46,7 @@
       "objective": "Defeat the Ecliptic commander at the <Place>",
       "journal": "The Ecliptic commander at the <Place> is dead. The contract will be close by.",
       "say": [
-        "Commander's down? Then find that contract. It'll be close by, they never let it out of reach."
+        "The commander's down. Find that contract, it'll be close by."
       ]
     },
     {

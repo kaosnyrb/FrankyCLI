@@ -37,7 +37,7 @@
       "name": "Sealed Cargo Crate",
       "item": "Signal Amplifier",
       "say": [
-        "You've got it? The satellite's close. Take it straight there."
+        "That's the part. The satellite's close, so take it straight there."
       ]
     },
     {
@@ -52,7 +52,7 @@
         "text": "The amplifier slots into place. The satellite's beacon comes back on, slow and steady."
       },
       "say": [
-        "That's the signal back. Pilots can see the approach again. Shame about the freighter. Glad something on it made it."
+        "That's the signal back. At least something off that freighter made it."
       ],
       "reward": "med"
     }

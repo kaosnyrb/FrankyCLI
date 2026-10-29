@@ -89,7 +89,7 @@
       "item": "Crew Pay Case",
       "_item": "Jessica 2026-10-19: a noun that is safe at any site, which the old 'Signed-Out Consignment (1 of 2)' was guarding against.",
       "say": [
-        "You've got it? Put it in the locker and sign the ledger. I'll close the docket."
+        "That's the pay. Put it in the locker and sign the ledger, and I'll close the docket."
       ]
     },
     {
@@ -107,7 +107,7 @@
     "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17"
   },
   "broadcast": [
-    "This is dispatch. A crew on site haven't been paid this week. The courier with their ledger never arrived. Find where it stopped."
+    "This is dispatch. A crew on site haven't been paid this week, because the courier with their ledger never arrived, so find out where it stopped."
   ],
   "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides."
 }

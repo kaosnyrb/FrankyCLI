@@ -45,7 +45,7 @@
       "objective": "Defeat the Ecliptic collector at the <Place>",
       "journal": "The Ecliptic collector at the <Place> is dead. Nobody's coming round the homesteads next month for their cut.",
       "say": [
-        "He's really gone? Then we're keeping this month's money. And next month's."
+        "He's gone, so this month's money stays with us."
       ],
       "reward": "med"
     }

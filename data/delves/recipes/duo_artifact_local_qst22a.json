@@ -41,7 +41,7 @@
       "objective": "Kill the Terrormorph at the <Place>",
       "journal": "The Terrormorph at the <Place> is dead. The survey log closes at nineteen entries, and the twentieth is mine.",
       "say": [
-        "That's it down? Then the log closes at nineteen entries, and we go back in at first light."
+        "That's it down. The log closes at nineteen entries, and we go back in at first light."
       ],
       "reward": "med"
     }

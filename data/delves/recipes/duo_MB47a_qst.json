@@ -43,7 +43,7 @@
       "_model": "The right object at last: ruled out on land (his, via Kim, 10-12) because it is a space object. Kim's scale note says it sinks 10.45 m, a space ring. S13 used it in orbit.",
       "name": "Navigation Satellite",
       "say": [
-        "There it is. It's broadcasting again. Every approach just got a lot less exciting."
+        "There it is, broadcasting again. The approach is lit."
       ],
       "reward": "med",
       "_message": "Dropped 2026-10-26: his MB01 repair activator shows its own start and success messages, so a message box of mine would stack on them (Eliza's catch; my call)."

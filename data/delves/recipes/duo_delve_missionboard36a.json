@@ -33,7 +33,7 @@
       "name": "Crew Container",
       "item": "Crew Container",
       "say": [
-        "You've got it? That's everything we own. We packed it when we thought we'd be leaving her, and then we didn't, and by then it was already gone."
+        "That's the one. Everything we own is in there. We packed it when we thought we'd be leaving her, and by the time we knew we weren't, it was already gone."
       ]
     },
     {
@@ -49,7 +49,7 @@
         "text": "The freighter's hold opens and takes the container in."
       },
       "say": [
-        "It's aboard. The company can send someone for their crates whenever they like, and I'm going down to open ours."
+        "It's aboard. I'm going down to open it."
       ],
       "reward": "med"
     }

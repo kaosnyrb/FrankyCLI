@@ -120,7 +120,7 @@
       "type": "deliver",
       "at": "RECenterLocRef",
       "objective": "Bring the cool box back",
-      "journal": "Somebody's Friday lollies fell off a hauler at the <Place>. I found the cool box and the cups and brought them back. I got first pick. It's a rule now.",
+      "journal": "Somebody's Friday lollies fell off a hauler at the <Place>. I found the cool box and the cups and brought them back. I got first pick.",
       "model": "Meshes\\SetDressing\\BeachProps\\BeachBlanket01.nif",
       "name": "Lolly Friday",
       "say": [

@@ -49,7 +49,7 @@
       "objective": "Defeat the quartermaster at the <Place>",
       "journal": "The quartermaster at the <Place> is dead. She kept a ledger, and it is still in there somewhere.",
       "say": [
-        "That's her? Now the ledger. Without it she's just someone who was rude to us."
+        "That's her down. Now the ledger, because without it nothing sticks."
       ]
     },
     {
@@ -79,7 +79,7 @@
       "objective": "Get the ledger out of the <Place>",
       "journal": "I took the quartermaster down and got her ledger out of the <Place>, through the people sent down to stop it.",
       "say": [
-        "You're out with it? Then it's done. Every name in that book is about to have a very long week."
+        "You're out with the ledger, so it's done. Everyone named in it will be hearing from us."
       ],
       "reward": "med"
     }
@@ -90,7 +90,7 @@
     "elevenlabs": "pqHfZKP75CvOlQylNhV4"
   },
   "broadcast": [
-    "You're at the site. The quartermaster's inside. So's her ledger, and I want both of them dealt with. She'll call for help when it starts. She always does."
+    "You're at the site. The quartermaster's inside. So's her ledger, and I want both of them dealt with. She'll call for help when it starts, she always does."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

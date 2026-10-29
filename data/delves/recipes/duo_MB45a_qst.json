@@ -51,7 +51,7 @@
       "objective": "Clear the occupiers' reinforcements at the <Place>",
       "journal": "The occupiers called for help the moment they saw me, and it came down in pods. It's dead now. Their leader is still at the <Place>, and so is the wounded surveyor.",
       "say": [
-        "Was that them? The pods? Their boss is still in there. So am I."
+        "That was the pods coming down. Their boss is still in there, and so am I."
       ]
     },
     {
@@ -71,7 +71,7 @@
       "objective": "Defeat the occupiers' leader at the <Place>",
       "journal": "The occupiers' leader at the <Place> is dead. The surveyor they had pinned is still alive.",
       "say": [
-        "It's gone quiet. Is that you? I'm by the wall. I'd wave, but it hurts."
+        "It's gone quiet. I'm by the wall, and I can't get up on my own."
       ]
     },
     {

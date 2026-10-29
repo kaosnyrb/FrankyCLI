@@ -49,9 +49,9 @@
       "objective": "Destroy the cache of texts at the <Place>",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Cache of Banned Texts",
-      "journal": "The cache at the <Place> went up with every book in it. Somebody thought those books were worth a gunfight. I still don't know what was in them, and nobody asked me to know.",
+      "journal": "The cache at the <Place> went up with every book in it. Somebody thought those books were worth a gunfight. I still don't know what was in them.",
       "say": [
-        "I can see the smoke from here on the feed. I'll file it as done and not ask what was in them, which is the only part of this job I've ever been good at."
+        "I can see the smoke from here on the feed. I'll file it as done, and I won't ask what was in them."
       ],
       "reward": "easy"
     }

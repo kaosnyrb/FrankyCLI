@@ -31,7 +31,7 @@
       "objective": "Destroy the toll ship",
       "journal": "The toll ship over <Planet> is gone. Everything it took off the haulers is somewhere in what's left of it.",
       "say": [
-        "That's them finished? Their hold will have come apart with the rest of them, so have a look through what's floating."
+        "That's them finished. Their hold will have come apart with the rest of them, so look through what's floating."
       ]
     },
     {
@@ -40,7 +40,7 @@
       "objective": "Recover the seized cargo from the wreck",
       "journal": "I recovered the cargo the toll crew took off the haulers over <Planet>. Most of it still has its owners' marks on it.",
       "say": [
-        "I can see my own container on your manifest from here. I'll put the word out, and everyone who paid them can come and claim theirs."
+        "I can see my own container on your manifest from here. I'll put the word out so everyone who paid them can claim theirs."
       ],
       "reward": "med",
       "at": "se_GeneralMarkerLocRef01"

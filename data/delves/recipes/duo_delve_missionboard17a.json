@@ -49,7 +49,7 @@
       "objective": "Defeat the occupiers' leader at the <Place>",
       "journal": "The occupiers' leader at the <Place> is dead. She kept the payroll close.",
       "say": [
-        "Is that her? The payroll will be somewhere she could keep an eye on it."
+        "That's her. The payroll will be somewhere she could keep an eye on it."
       ]
     },
     {

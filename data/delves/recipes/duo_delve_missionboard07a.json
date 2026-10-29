@@ -85,7 +85,7 @@
       "objective": "Get clear of the <Place>",
       "journal": "Three charges set on the cache at the <Place>. Their reinforcements came down in pods at the door as I came out, and I got clear anyway. The rest is the client's.",
       "say": [
-        "That's you out? And still standing? Then the cache is ours to deal with. Get some distance."
+        "You're out. Get some distance, the cache is ours to deal with now."
       ],
       "reward": "med"
     }

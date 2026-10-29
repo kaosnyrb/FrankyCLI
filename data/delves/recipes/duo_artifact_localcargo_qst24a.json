@@ -105,7 +105,7 @@
       "objective": "Bring the Relay Online",
       "journal": "A comms relay bound for the <Place> was shipped in two crates, and neither arrived whole. I found the dish, took the transmitter back from the thieves and brought the relay online.",
       "say": [
-        "We're live. Half the crew's already queuing to call home. The other half are pretending they aren't."
+        "We're live, and half the crew's already queuing to call home."
       ]
     }
   ],

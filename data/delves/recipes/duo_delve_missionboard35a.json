@@ -67,7 +67,7 @@
       },
       "_slate": "STAND-IN for an AUDIO data-slate: each entry one phase of its scene, her voice, read in order. The entries are the story; the journal and card never repeat them.",
       "say": [
-        "Got it? Don't listen to it. Actually, listen to it if you like. It's mostly rocks."
+        "That's my diary. Bring it to me, I'm not far."
       ]
     },
     {
@@ -75,7 +75,7 @@
       "place": "second",
       "at": "RECenterLocRef",
       "objective": "Return the diary to the prospector at the <SecondPlace>",
-      "journal": "A prospector ran from her claim at the <Place> and left her diary behind. I brought it back to her at the <SecondPlace>. She's fine, and she's not rich.",
+      "journal": "A prospector ran from her claim at the <Place> and left her diary behind. I brought it back to her at the <SecondPlace>.",
       "person": {
         "name": "Ines Calder",
         "template": "UC_NA_MASTWorkerFemale03",
@@ -84,7 +84,7 @@
         "elevenlabs": "pFZP5JQG7iQjIQuC4Bku",
         "hellos": [
           [
-            "Oh. Hello. Sorry, I'm still jumpy."
+            "Oh. Hello. I'm still a bit jumpy."
           ],
           [
             "If you're selling coffee, I'll buy all of it."
@@ -130,7 +130,7 @@
     "elevenlabs": "pFZP5JQG7iQjIQuC4Bku"
   },
   "broadcast": [
-    "You're at my old claim? My diary's in there somewhere. It's small, it's scuffed, and it's full of rubbish about rocks. Whoever's in there now won't want it. I do."
+    "You're at my old claim? My diary's in there somewhere. It's small and scuffed and full of notes about rocks, and whoever's in there now won't want it."
   ],
   "_speech": "One woman, three ways: the diary, the radio, the conversation. Lily (Velvety Actress), in one recipe so far; his ear decides. Not narrow, so roles only aloud."
 }

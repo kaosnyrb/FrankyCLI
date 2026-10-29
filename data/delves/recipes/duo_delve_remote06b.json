@@ -45,7 +45,7 @@
       "objective": "Clear the creatures out of the <Place>",
       "journal": "Everything that came up out of the cave at the <Place> is dead. The survey camera is still somewhere down here.",
       "say": [
-        "All quiet? Then the camera should be where we dropped it, right by where we broke through."
+        "It's quiet. The camera should be where we dropped it, right by where we broke through."
       ]
     },
     {
@@ -57,7 +57,7 @@
       "name": "Survey Camera Case",
       "item": "Survey Camera",
       "say": [
-        "You've got it? Send me the footage. It's mostly dark. And then it isn't. I'm going to need a minute."
+        "That's the camera. Send me the footage. It's mostly dark. And then it isn't. I'm going to need a minute."
       ],
       "reward": "med"
     }

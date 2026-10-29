@@ -105,7 +105,7 @@
       "objective": "Defeat the raiders' boss at the <SecondPlace>",
       "journal": "The raiders' boss at the <SecondPlace> is dead. Nobody is coming for the stockwoman's cattle tonight.",
       "say": [
-        "Is it done? Then I'll count them in tonight, and for once it'll be the same number as this morning."
+        "It's done. I'll count them in tonight, and it'll be the same number as this morning."
       ],
       "reward": "med"
     }

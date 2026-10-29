@@ -52,7 +52,7 @@
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Survey Terminal",
       "say": [
-        "You're in? It says she pulled everything to a drive before they ran. It'll be in the site safe, further in."
+        "You're in. It says she pulled everything to a drive before they ran, so it'll be in the site safe, further in."
       ]
     },
     {
@@ -66,7 +66,7 @@
       "item": "Survey Data Drive",
       "_model": "Kim's C5 data drive is unbuilt (quest-objects.md), so the drive travels in the C1 sealed courier case he cleared 2026-10-12.",
       "say": [
-        "That's the drive? That's the whole season. Now get out of there. Nobody's paid enough to stay."
+        "That's the drive, and the whole season's on it. Now get out of there."
       ],
       "reward": "med"
     }

@@ -39,7 +39,7 @@
     {
       "type": "pickup",
       "say": [
-        "That's its tracker back on. I can see it from here. Which means they can too. Get ready."
+        "That's its tracker back on. I can see it from here, which means they can too, so get ready."
       ],
       "_say": "On the pickup because a beat's say plays when its stage is SET, and wave 1 spawns on this stage (Eliza's move on 02a, 2026-10-12). The speaker is off-world and can only see the tracker, so the warning is about the tracker.",
       "at": "REMarkerMediumLocRef",
@@ -74,7 +74,7 @@
       "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
       "name": "Courier Pickup Beacon",
       "say": [
-        "We've got it. There's a colony waiting on those cultures, and now they won't have to."
+        "We've got it. There's a colony waiting on those cultures, and they'll be on their way tonight."
       ]
     }
   ],

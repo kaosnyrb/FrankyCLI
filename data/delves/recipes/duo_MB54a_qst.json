@@ -38,7 +38,7 @@
       "at": "LocDungeonCenterMarkerLocRef",
       "group": "vents",
       "objective": "Close the vents",
-      "journal": "One vent closed. The readout dropped straight away, which is the nicest thing a readout has done for me all week.",
+      "journal": "One vent closed. The readout dropped straight away.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Vent Control"
     },
@@ -70,6 +70,6 @@
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line.",
   "recap": "The <Place> was venting from three places at once. I closed all three, and the site can be worked again.",
   "recapSay": [
-    "Readings are coming down everywhere. I'll be in tomorrow with a mask and a very long list, and for once the first thing on it isn't the gas."
+    "Readings are coming down everywhere. I'll be in tomorrow with a mask to start on the repairs."
   ]
 }

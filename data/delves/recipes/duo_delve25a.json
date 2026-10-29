@@ -54,7 +54,7 @@
       "model": "Meshes\\ccs\\salvagerstash01.nif",
       "name": "Pirate Store",
       "say": [
-        "Store's spoiled? Then they'll go somewhere else to steal. Not our problem."
+        "That's the store spoiled. With nowhere to keep it, they'll stop taking our runs."
       ],
       "reward": "med"
     }

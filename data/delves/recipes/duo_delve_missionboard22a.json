@@ -49,7 +49,7 @@
       "objective": "Defeat the occupiers' leader at the <Place>",
       "journal": "The occupiers' leader at the <Place> is dead. Her shipment is still staged to go.",
       "say": [
-        "She's down? Then the shipment's next. Lock it at the loading terminal before anyone else can send it."
+        "That's her down. The shipment's next, so lock it at the loading terminal before anyone else can send it."
       ]
     },
     {

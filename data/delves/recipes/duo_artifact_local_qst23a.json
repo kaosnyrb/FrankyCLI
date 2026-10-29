@@ -48,7 +48,7 @@
       "objective": "Defeat the Spacer captain at the <Place>",
       "journal": "The Spacer captain at the <Place> is dead and her crew have scattered. The night shift can come out of the stores.",
       "say": [
-        "Their captain's down? Then I'm unlocking the stores, and nobody goes back to work until I've counted heads."
+        "Their captain's down. I'm unlocking the stores, and nobody goes back to work until I've counted heads."
       ],
       "reward": "med"
     }

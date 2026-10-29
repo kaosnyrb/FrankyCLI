@@ -46,7 +46,7 @@
       "objective": "Clear the creatures from the <Place>",
       "journal": "Nothing's living at the <Place> any more except the weeds. The assessor can come and sign it off.",
       "say": [
-        "The assessor's on her way. She says she'll need to check the weeds as well. I've told her you don't do weeds."
+        "The assessor's on her way, so we can finally get the place signed off."
       ],
       "reward": "med"
     }

@@ -65,7 +65,7 @@
       "objective": "Deal with whoever holds the <Place> now",
       "journal": "Whoever came after the unit held the <Place> for themselves. They don't now. The unit's tags should be close.",
       "say": [
-        "You found them? Then bring the tags home. That's all anyone here is asking for."
+        "You've found them. Bring the tags home, that's all anyone here is asking for."
       ]
     },
     {
@@ -81,7 +81,7 @@
         "text": "Six sets of tags on one chain, in a case shut with a twist of wire. The sixth set is on the outside of the bundle: the last one added, by whoever closed it."
       },
       "say": [
-        "All six? I'll tell the families before anyone else gets the chance to tell them wrong."
+        "All six. I'll tell the families myself, before anyone else does."
       ],
       "reward": "med"
     }

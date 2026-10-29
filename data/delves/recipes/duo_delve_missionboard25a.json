@@ -49,7 +49,7 @@
       "objective": "Clear the occupiers from the <Place>",
       "journal": "Whoever was holding the <Place> is dead. The regulator is still in there.",
       "say": [
-        "That's them? Then the regulator's ours. Pull it, and be quick. We're not the only ones who know it's there."
+        "That's them dealt with. Pull the regulator and be quick, we're not the only ones who know it's there."
       ]
     },
     {
@@ -57,7 +57,7 @@
       "at": "LocDungeonCenterMarkerLocRef",
       "item": "Plant Regulator",
       "objective": "Recover the plant regulator",
-      "journal": "I pulled the regulator out of the <Place>. It's heavier than it looks and worth more than my ship.",
+      "journal": "I pulled the regulator out of the <Place>. It's heavier than it looks.",
       "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
       "name": "Regulator Housing",
       "message": {
@@ -77,9 +77,9 @@
         }
       },
       "objective": "Get the regulator out",
-      "journal": "I salvaged the regulator from the <Place>, and the people who dropped in to take it off me at the door didn't.",
+      "journal": "I salvaged the regulator from the <Place> and got it out past the people who dropped in to take it.",
       "say": [
-        "You've still got it? With them landing on top of you? Then the rights are ours, and so's the regulator. Bring it home."
+        "You've still got it, even with them landing on top of you. Bring it home."
       ],
       "reward": "med"
     }
@@ -90,7 +90,7 @@
     "elevenlabs": "inKOuEy40NdNVHxcqekZ"
   },
   "broadcast": [
-    "The regulator's in there somewhere central. We own the rights to it. Other people don't care about rights. Be quick."
+    "The regulator's in there somewhere central. We own the rights to it, but other people don't care about rights, so be quick."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

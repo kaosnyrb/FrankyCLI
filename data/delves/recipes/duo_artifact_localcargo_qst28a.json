@@ -64,7 +64,7 @@
       ],
       "defend": 2,
       "say": [
-        "Link's up. Clean signal, first time. Go home. You've earned it."
+        "Link's up, and the signal's clean first time."
       ],
       "style": [
         "squad",
@@ -79,6 +79,6 @@
     "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17"
   },
   "broadcast": [
-    "We've lost a relay down there. The replacement transmitter's at the site. Fit it to the dish and stay with it while it aligns. It'll be loud. Loud draws company."
+    "We've lost a relay down there. The replacement transmitter's at the site. Fit it to the dish and stay with it while it aligns. It'll be loud, and loud draws company."
   ]
 }

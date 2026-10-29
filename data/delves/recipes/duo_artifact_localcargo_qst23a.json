@@ -90,7 +90,7 @@
       "objective": "Get the Reclaimer Running",
       "journal": "A water reclaimer bound for the <Place> was shipped in two crates, and neither reached it whole. I found the lost housing, recovered the stolen filter core and got the reclaimer running.",
       "say": [
-        "Water's in the line. First clean water in a week. You can taste the difference. You can actually taste it."
+        "Water's in the line. That's the first clean water we've had in a week."
       ]
     }
   ],

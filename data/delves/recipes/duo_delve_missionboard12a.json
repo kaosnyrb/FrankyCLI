@@ -72,7 +72,7 @@
         "horde"
       ],
       "say": [
-        "All quiet? Their run just went sailing past. Nobody out there knows where to land now."
+        "Their run just went straight past. Without the beacons, nobody out there knows where to land."
       ],
       "reward": "med"
     }
@@ -83,7 +83,7 @@
     "elevenlabs": "cjVigY5qzO86Huf0OWal"
   },
   "broadcast": [
-    "There are three beacons in there guiding their runs in. Turn them all off. Somebody's waiting on that delivery. They'll come and ask."
+    "There are three beacons in there guiding their runs in. Turn them all off. Somebody's waiting on that delivery, and they'll come and ask."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

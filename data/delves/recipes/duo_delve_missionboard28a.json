@@ -57,7 +57,7 @@
         "text": "The regulator seats and the satellite powers up. Its channels open, one by one."
       },
       "say": [
-        "We're back on. Every channel's open. And I don't think anyone's going to try that again."
+        "We're back on, and every channel's open."
       ],
       "reward": "med"
     }

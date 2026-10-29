@@ -51,7 +51,7 @@
         ]
       },
       "greeting": [
-        "You took the posting? Then you know I walked out. My discharge papers are still in there. The officer wouldn't sign them, so I signed myself out."
+        "If you've read the posting, you know I walked out. My discharge papers are still in there. The officer wouldn't sign them, so I signed myself out."
       ],
       "exchanges": [
         {
@@ -92,7 +92,7 @@
       "objective": "Deal with the officer",
       "journal": "The officer at the <Place> won't be keeping anyone else here. Her office is open now.",
       "say": [
-        "Is she...? Right. Then the papers are in her office. Bring them out to me."
+        "Is she...? Right. The papers are in her office, so bring them out to me."
       ]
     },
     {
@@ -108,7 +108,7 @@
         "text": "Hers, on top, with the signature box empty. Under them, eleven more just like it."
       },
       "say": [
-        "You've got them? All of them? Then I'm not a deserter any more. I'm just someone who left."
+        "That's all of them. So I'm not a deserter any more. I'm just someone who left."
       ],
       "reward": "med"
     }

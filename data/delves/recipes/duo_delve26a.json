@@ -35,7 +35,7 @@
       "journal": "The raiders' boss at the <Place> had the freighter's nav core. I took it off him. Then a ship set down outside, and the rest of his crew came in after it.",
       "item": "Freighter Nav Core",
       "say": [
-        "That's my core? Hang on. Something's just set down outside. That'll be the rest of them, and they'll want it back."
+        "That's my core. Hang on, something's just set down outside. That'll be the rest of them, and they'll want it back."
       ]
     },
     {
@@ -55,7 +55,7 @@
         "horde"
       ],
       "say": [
-        "That's the last of them? I'll send someone for the core. Don't sell it, I'll know."
+        "That's the last of them. I'll send someone for the core."
       ],
       "reward": "med"
     }

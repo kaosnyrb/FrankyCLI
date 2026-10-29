@@ -49,7 +49,7 @@
       "objective": "Defeat the guard captain at the <Place>",
       "journal": "The guard captain at the <Place> is dead. The pilot's cell runs off a terminal somewhere inside.",
       "say": [
-        "Is that the one with the keys? Then she's in a cell off their terminal. Open it."
+        "That one had the keys. She's in a cell off their terminal, so open it."
       ]
     },
     {

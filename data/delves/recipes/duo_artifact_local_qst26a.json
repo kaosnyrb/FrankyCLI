@@ -41,7 +41,7 @@
       "objective": "Dismantle the checkpoint robot at the <Place>",
       "journal": "The checkpoint robot at the <Place> is scrap. It asked me for my papers as well.",
       "say": [
-        "Is it down? Then I'm walking through. Forty metres to my own door, and nobody asking me for anything."
+        "It's down. I'm walking through, forty metres to my own door, and nobody asking me for anything."
       ],
       "reward": "med"
     }

@@ -119,7 +119,7 @@
       "objective": "Recover the transceiver core from the <SecondPlace>",
       "journal": "The raiders' leader at the <SecondPlace> had the transceiver core. I took it back. It needs fitting in the relay satellite over <Planet>.",
       "say": [
-        "Wait, is that you? You got it? Then it's the satellite with no lights on. You can't miss it. Well, you can. Please don't."
+        "That's the part. It goes to the satellite with no lights on, you can't miss it."
       ]
     },
     {
@@ -131,7 +131,7 @@
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
       "name": "Relay Satellite",
       "say": [
-        "There it is. We can hear the whole sky again. First call I've made in nine days, and it's to say thank you."
+        "There it is, we can hear the whole sky again. Thank you."
       ],
       "message": {
         "title": "Relay Restored",

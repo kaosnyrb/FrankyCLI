@@ -49,7 +49,7 @@
       "objective": "Clear the occupiers from the <Place>",
       "journal": "Whoever was running the <Place> is dead. The night-shift worker is somewhere inside.",
       "say": [
-        "Is it quiet? Then she'll come out for a friendly voice. Probably. She's very particular."
+        "It's quiet now. She'll come out for a friendly voice, so go and find her."
       ]
     },
     {
@@ -102,7 +102,7 @@
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Shift Clock",
       "say": [
-        "Did it take? It took. Look at that number. I am going to be very difficult about that number."
+        "It took. Look at that number, she's owed every hour of it."
       ],
       "reward": "med"
     }

@@ -43,7 +43,7 @@
       "type": "use",
       "at": "RECenterLocRef",
       "objective": "Sound the alarm at the <Place>",
-      "journal": "The Ashta have been circling the <Place> for a week. I sounded the alarm, and everyone there got behind a wall, which is the Akila answer to most things.",
+      "journal": "The Ashta have been circling the <Place> for a week. I sounded the alarm, and everyone there got behind a wall.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Outpost Alarm",
       "_model": "The field terminal, approved, as 16a. A siren or a floodlight mast would say it better; Kim's shelf.",
@@ -55,7 +55,7 @@
       "type": "hold",
       "at": "RECenterLocRef",
       "objective": "Hold the <Place> against the Ashta",
-      "journal": "The Ashta came at the <Place> three times and didn't get in. Out here past the walls of Akila City, that's about as good as it gets.",
+      "journal": "The Ashta came at the <Place> three times and didn't get in.",
       "waves": 3,
       "size": [
         2,
@@ -71,7 +71,7 @@
       "revealObjective": "Kill the Ashta",
       "defend": 1,
       "say": [
-        "That's the pack gone, back out into the grass. Ashta were hunting this ground long before anyone built a wall on Akila. They haven't forgotten it."
+        "That's the pack gone, back out into the grass, and everyone here is safe."
       ],
       "reward": "med"
     }

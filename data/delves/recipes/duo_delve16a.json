@@ -119,7 +119,7 @@
       "type": "deliver",
       "at": "RECenterLocRef",
       "objective": "Fit the power cells to the relay",
-      "journal": "A sergeant keeping a relay post alone at the <Place> needed two power cells carried. I carried them. She said next, and meant it.",
+      "journal": "A sergeant keeping a relay post alone at the <Place> needed two power cells carried. I carried them, and the relay is up.",
       "model": "Meshes\\ccs\\relaydish01.nif",
       "name": "Relay",
       "say": [

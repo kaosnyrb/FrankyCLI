@@ -48,7 +48,7 @@
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Scrubber Control",
       "say": [
-        "That's the scrubbers back on. The crew can come back now. Tell me you didn't leave any of them in there."
+        "That's the scrubbers back on, so the crew can come back now."
       ],
       "reward": "med"
     }

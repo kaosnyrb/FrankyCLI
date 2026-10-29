@@ -36,7 +36,7 @@
       "_model": "STAND-IN: the only object proven in orbit.",
       "name": "Flight Recorder",
       "say": [
-        "You've got it? Then we'll finally know. The crew will be glad. They've been telling the same story to anyone who'll listen."
+        "That's the recorder. Now we'll finally know what happened, and so will the crew."
       ],
       "reward": "med"
     }
