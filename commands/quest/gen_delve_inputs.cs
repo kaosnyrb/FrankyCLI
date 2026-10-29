@@ -30,6 +30,8 @@ namespace FrankyCLI
             public (INpcGetter tmpl, FormKey voice)? Speaker;   // ResolveSpeaker's, shared with the space build
             /// <summary>By place index: the creature list of who is there.</summary>
             public readonly Dictionary<int, FormKey> WhoLists = new();
+            /// <summary>By beat index: a hold's allies list.</summary>
+            public readonly Dictionary<int, FormKey> Allies = new();
             /// <summary>By beat index, for defeat and clear: the target and the lists the fight draws from.</summary>
             public readonly Dictionary<int, FightForms> Fights = new();
             /// <summary>By (beat, exchange): a talk exchange's perk.</summary>
@@ -124,6 +126,14 @@ namespace FrankyCLI
                 var f = OwnOrMaster<IFormListGetter>(myMod, env, w.list ?? "");
                 if (f == null) { Console.WriteLine($"REFUSED: FormList '{w.list}' ({PlaceKey[p]}.who.list) is not in {t.mod} or one of its masters."); fail++; continue; }
                 inputs.WhoLists[p] = f.FormKey;
+            }
+            // A hold's allies list, own-or-master as a person's company list is.
+            for (int i = 0; i < r.beats.Count; i++)
+            {
+                if (r.beats[i].allies is not Company al) continue;
+                var f = OwnOrMaster<IFormListGetter>(myMod, env, al.list ?? "");
+                if (f == null) { Console.WriteLine($"REFUSED: beat {i + 1} allies.list '{al.list}' is not a FormList in {t.mod} or one of its masters."); fail++; continue; }
+                inputs.Allies[i] = f.FormKey;
             }
             // A craft's bench and ingredients, own-or-master (ResolveIngredient's rule: never a plugin that is not a master).
             for (int i = 0; i < r.beats.Count; i++)

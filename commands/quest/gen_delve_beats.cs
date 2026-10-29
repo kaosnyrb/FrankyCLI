@@ -251,6 +251,8 @@ namespace FrankyCLI
                             Fatal($"beat {i + 1} defends beat {d}, a {dt.type}, which leaves no object standing to defend; defend a use or a deliver.");
                     }
                 }
+                if (b.allies != null && b.type != "hold")
+                    Fatal($"beat {i + 1} sets allies and is a {b.type}; only a hold places allies, so they would be silently ignored.");
                 if (!IsFight(b) && (b.target != null || b.gang != null || b.enemies != null || b.loot != null || b.support != null))
                     Fatal($"beat {i + 1} sets target, gang, enemies, loot or support and is a {b.type}; only a defeat or a clear spawns a fight, so they would be silently ignored.");
                 if (b.name != null && Tokens(b.name).Any())

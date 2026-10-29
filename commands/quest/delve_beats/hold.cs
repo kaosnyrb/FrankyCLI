@@ -75,6 +75,15 @@ namespace FrankyCLI
                     Fatal($"beat {i + 1} is a hold: it has no object of its own (the waves come to a marker), so model, name and replace would be ignored.");
                 if (b.objective is string ho && ho.Contains('('))
                     Warn($"beat {i + 1}'s objective has a bracket; the build appends the counter \"(n/{b.waves})\" itself.");
+                if (b.allies is { } al)
+                {
+                    if (string.IsNullOrWhiteSpace(al.list)) Fatal($"beat {i + 1} allies has no list, so nobody would stand with him.");
+                    if (al.min < 1 || al.max < al.min) Fatal($"beat {i + 1} allies needs 1 <= min <= max; it has {al.min}-{al.max}.");
+                    else if (al.max > 8) Warn($"beat {i + 1} allies.max is {al.max}; with the waves on top, that is a crowd the navmesh may not seat.");
+                    else Console.WriteLine($"  beat {i + 1} allies: {al.min}-{al.max} from {al.list}, placed just before the first wave");
+                }
+                if (IsBoard(t) && i == 0)
+                    Console.WriteLine($"  beat {i + 1} (hold) is a board's step one: its first wave waits for him to come within {ApproachDistance:0} of its marker, not the accept");
             }
 
             /// <summary>
@@ -140,6 +149,10 @@ namespace FrankyCLI
             {
                 var hm = build.FightMarker(i, "Spawn");
                 build.slotOf[i] = new BeatSlot { markerAlias = (int)hm.ID, activatorAlias = -1, journalStage = build.beatStage[i] };
+                // His rule, 2026-10-29: "Missionboard beats should generally only happen when the player is near". A board's
+                // step one begins at the ACCEPT, so a hold there sent its first wave while he stood at the board. It waits for
+                // his approach instead, a fight's shape: a spawned stage, set by our distance hook on the marker (Enter).
+                if (WaitsForApproach(build, i)) build.spawnedStage[i] = SpawnedStageBase + i;
                 build.waveAliases[i] = new List<int>();
                 int nw = build.steps.First(s => s.Beats.Contains(i)).Waves;
                 for (int w = 0; w < nw; w++)
@@ -209,7 +222,38 @@ namespace FrankyCLI
             /// <summary>The first wave comes when the step begins, ahead of any fight's spawn or recover's holder.</summary>
             internal override int EnterRank => 0;
 
-            internal override void Enter(BeatsBuild build, int b, int stage) => SpawnWave(build, b, 0, stage);
+            /// <summary>
+            /// A board's step one waits for his approach (WaitsForApproach); every other hold starts when its step does, as it
+            /// always has, because there he is already at the place. Allies come first, in the same fragment as wave 1.
+            /// </summary>
+            internal override void Enter(BeatsBuild build, int b, int stage)
+            {
+                int at = stage;
+                if (build.spawnedStage.TryGetValue(b, out int spawned))
+                {
+                    int marker = build.slotOf[b].markerAlias;
+                    // Our copy of the stock hook, never the stock name: a board's step-one marker may already wear
+                    // DefaultAliasOnDistanceLessThan for the arrival, and an alias carries a script once (fight.cs's reason).
+                    var near = DistanceHook(build.clone.FormKey, build.t.playerAlias, spawned, stage);
+                    near.Name = NearScript;
+                    AttachHook(build.vma, build.clone.FormKey, marker, near, HookEntry.FindOrCreate, false, build.bm, spawned, stage);
+                    build.bm.SpawnHooks.Add((marker, build.t.playerAlias));
+                    Console.WriteLine($"  +near    : beat {b + 1} (hold) marker alias {marker} {NearScript} sets {spawned} after {stage}: the first wave comes when he is within {ApproachDistance}");
+                    at = spawned;
+                }
+                if (build.r.beats[b].allies is { } al)
+                {
+                    string mk = $"Alias_Beat{b + 1}Spawn";
+                    build.props.Add(("ReferenceAlias", mk, build.clone.FormKey, build.slotOf[b].markerAlias));
+                    build.props.Add(("FormList", $"Allies{b + 1}", build.inputs.Allies[b], -1));
+                    build.Add(at, $"duo_delve_lib.PlaceCompany({mk}, Allies{b + 1}, {al.min}, {al.max}, 8.0)   ; allies, before the first wave");
+                    Console.WriteLine($"  +allies  : beat {b + 1} (hold) {al.min}-{al.max} from {al.list} round marker alias {build.slotOf[b].markerAlias}, stage {at}");
+                }
+                SpawnWave(build, b, 0, at);
+            }
+
+            /// <summary>A board's step one: begun by the accept, so it must wait for him.</summary>
+            private static bool WaitsForApproach(BeatsBuild build, int i) => IsBoard(build.t) && build.steps[0].Beats.Contains(i);
 
             /// <summary>
             /// Each wave down: the counter ticks (and redisplays the objective, which is the player's only feedback: no

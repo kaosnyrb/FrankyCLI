@@ -657,6 +657,14 @@ namespace FrankyCLI
             /// <summary>beats, a hold, OPTIONAL: the earlier beat (1-based) whose object is defended, which the objective points at. Absent = the spawn marker.</summary>
             public int? defend { get; set; }
             /// <summary>
+            /// beats, a hold, OPTIONAL: friendlies who hold with him, {list, min, max}: min to max drawn from a FormList, placed
+            /// round the hold's marker by PlaceCompany (a talk person's company call) just BEFORE the first wave, in the same
+            /// fragment, so they are there when it comes. His pick 2026-10-29 ("a"), off Jessica's Raiders (missionboard43a-e,
+            /// her letter "friendlies on a hold"). No package and no aggression set: their own AI, as a support team's once it
+            /// arrives. Absent = he holds alone.
+            /// </summary>
+            public Company? allies { get; set; }
+            /// <summary>
             /// beats, a hold, OPTIONAL: seconds a wave may stay alive before the quest moves on without it
             /// (the stuck-enemy guard: his infestation driver's 180 s pity timer). Absent = 180.
             /// </summary>
