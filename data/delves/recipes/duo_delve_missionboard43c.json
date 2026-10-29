@@ -1,0 +1,60 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard43c",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica, as Ruth Pargeter",
+  "source": "his 2026-10-29 06:14 \"are we making too many 'special' ones? Wondering how we make daily driver ones people wouldnt mind replaying\", then \"lets try some plain first\"",
+  "_note": [
+    "THE PEN-NAME TEST, his 2026-10-29 07:02: \"thinking we take one delve and write it as a few pennames to see where we end up\". 43a is the plain one in my own default voice; b to e are the SAME job, beat and numbers, a different person on the radio, each written from her cartridge. Letter variants, so if one works it is a real replay copy.",
+    "PEN NAME: home-office office/pennames/ruth-pargeter.json. Her heat checks do not apply; her voice does."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "Quiet sites with residents; here they are the people being defended, so the words keep them alive."
+  },
+  "prose": {
+    "name": "Defense: Raiders at the <Place> on <Planet>",
+    "briefing": "The <Place> has been raided twice this month, each time by more people than the last. A third is due.",
+    "card": "Defense contract. Raiders are expected to attack the <Place> on <Planet>. Hold the site until they withdraw. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "hold",
+      "at": "RECenterLocRef",
+      "waves": 3,
+      "size": [
+        2,
+        4
+      ],
+      "style": [
+        "squad",
+        "squad",
+        "horde"
+      ],
+      "objective": "Hold the <Place> against the raiders",
+      "journal": "The third raid on the <Place> this month. Three waves, more each time, the same as before. This time they left with nothing.",
+      "say": [
+        "That's the third time, and the first time they've left without anything."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Settlement Clerk",
+    "voice": "GenericFemale01",
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w"
+  },
+  "broadcast": [
+    "They've come twice this month, both times a little after dark, and both times there were more of them than the time before. Tonight would be the third."
+  ],
+  "_speech": "Ruth Pargeter's register, voiced by the issuer. His ear decides the voice."
+}
