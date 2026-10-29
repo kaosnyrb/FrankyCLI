@@ -1,5 +1,5 @@
 {
-  "FormKey": "003DD1:du_overtime.esm",
+  "FormKey": "0041C5:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -18,7 +18,7 @@
   "Timestamp": 0,
   "Unknown": 0,
   "TextDisplayGlobals": [
-    "003DD6:du_overtime.esm"
+    "0041CA:du_overtime.esm"
   ],
   "MissionBoardInfoPanels": [],
   "DialogConditions": [],
@@ -30,7 +30,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "A survey team set three seismic sensors at the \u003CAlias=DungeonLocation\u003E and left before anyone came back to read them. Nobody builds on that ground until someone does.",
+          "Entry": "A survey team set three seismic sensors at the \u003CAlias=DungeonLocation\u003E and left without reading them. Nobody builds on that ground until someone reads them.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -52,7 +52,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "This sensor had been knocked off true. I set it level again and pulled its readings.",
+          "Entry": "This sensor had been knocked off true. Someone had chalked a level mark on the casing, so I set it back to the mark and pulled its readings.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -74,7 +74,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "Dust had drifted over this sensor up to the lid. I dug it out and the readings were still there.",
+          "Entry": "This sensor had been buried up to the lid. Whoever dug it in had dug it deep and written the date on the lid. The readings were still there.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -96,7 +96,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "This sensor was still logging on its own, weeks after the team left. I copied everything it had.",
+          "Entry": "This sensor was still recording, weeks after the team left. Nobody had switched it off. I copied everything it had.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -206,7 +206,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003DD1:du_overtime.esm",
+              "FirstLink": "0041C5:du_overtime.esm",
               "SecondParameter": 10
             }
           ]
@@ -228,7 +228,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003DD1:du_overtime.esm",
+              "FirstLink": "0041C5:du_overtime.esm",
               "SecondParameter": 20
             }
           ]
@@ -250,7 +250,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003DD1:du_overtime.esm",
+              "FirstLink": "0041C5:du_overtime.esm",
               "SecondParameter": 30
             }
           ]
@@ -446,7 +446,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "003DD2:du_overtime.esm",
+        "Object": "0041C6:du_overtime.esm",
         "AliasID": 1,
         "Create": 0,
         "Level": 0
@@ -497,7 +497,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "003DD3:du_overtime.esm",
+        "Object": "0041C7:du_overtime.esm",
         "AliasID": 11,
         "Create": 0,
         "Level": 0
@@ -525,7 +525,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "003DD4:du_overtime.esm",
+        "Object": "0041C8:du_overtime.esm",
         "AliasID": 33,
         "Create": 0,
         "Level": 0
@@ -553,7 +553,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "003DD5:du_overtime.esm",
+        "Object": "0041C9:du_overtime.esm",
         "AliasID": 35,
         "Create": 0,
         "Level": 0
@@ -575,7 +575,7 @@
           "Name": "Counter1",
           "Flags": 1,
           "Object": {
-            "Form": "003DD6:du_overtime.esm",
+            "Form": "0041CA:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -585,7 +585,37 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "003DDD:du_overtime.esm",
+            "Form": "0041D4:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Beat1Message",
+          "Flags": 1,
+          "Object": {
+            "Form": "0041CB:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Beat2Message",
+          "Flags": 1,
+          "Object": {
+            "Form": "0041CC:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Beat3Message",
+          "Flags": 1,
+          "Object": {
+            "Form": "0041CD:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -668,7 +698,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003DD1:du_overtime.esm",
+            "Form": "0041C5:du_overtime.esm",
             "Alias": 5,
             "Unused": 0
           }
@@ -696,7 +726,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003DD1:du_overtime.esm",
+            "Form": "0041C5:du_overtime.esm",
             "Alias": 2,
             "Unused": 0
           }
@@ -736,7 +766,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003DD1:du_overtime.esm",
+            "Form": "0041C5:du_overtime.esm",
             "Alias": 12,
             "Unused": 0
           }
@@ -776,7 +806,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003DD1:du_overtime.esm",
+            "Form": "0041C5:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -816,7 +846,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003DD1:du_overtime.esm",
+            "Form": "0041C5:du_overtime.esm",
             "Alias": 36,
             "Unused": 0
           }
@@ -853,7 +883,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "003DDA:du_overtime.esm",
+        "FormKey": "0041D1:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -862,7 +892,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst20a_say1_scene",
         "Flags": 129,
-        "Quest": "003DD1:du_overtime.esm",
+        "Quest": "0041C5:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -893,12 +923,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003DD8:du_overtime.esm"
+            "Topic": "0041CF:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "003DDD:du_overtime.esm",
+        "FormKey": "0041D4:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -907,7 +937,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst20a_say2_scene",
         "Flags": 128,
-        "Quest": "003DD1:du_overtime.esm",
+        "Quest": "0041C5:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -938,14 +968,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003DDB:du_overtime.esm"
+            "Topic": "0041D2:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "003DD8:du_overtime.esm",
+        "FormKey": "0041CF:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -954,7 +984,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst20a_say1_topic",
         "Priority": 50,
-        "Quest": "003DD1:du_overtime.esm",
+        "Quest": "0041C5:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -962,11 +992,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003DD9:du_overtime.esm"
+          "0041D0:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003DD9:du_overtime.esm",
+            "FormKey": "0041D0:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -974,27 +1004,27 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_localcargo_qst20a_say1_info",
-            "Speaker": "003DD7:du_overtime.esm",
+            "Speaker": "0041CE:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 15832,
+                "WEMFile": 16847,
                 "EmotionOut": 0,
-                "ResponseText": "A survey team set three seismic sensors down there, then left before anyone came back to read them. Nobody\u0027s building on that ground until we\u0027ve seen those readings.",
+                "ResponseText": "A survey team set three seismic sensors down there and left without reading them. Nobody\u0027s building on that ground until we\u0027ve seen those readings.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "CE6CA603"
+                "TextHash": "39F25E84"
               }
             ]
           }
         ]
       },
       {
-        "FormKey": "003DDB:du_overtime.esm",
+        "FormKey": "0041D2:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1003,7 +1033,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst20a_say2_topic",
         "Priority": 50,
-        "Quest": "003DD1:du_overtime.esm",
+        "Quest": "0041C5:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1011,11 +1041,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003DDC:du_overtime.esm"
+          "0041D3:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003DDC:du_overtime.esm",
+            "FormKey": "0041D3:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1023,20 +1053,20 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_localcargo_qst20a_say2_info",
-            "Speaker": "003DD7:du_overtime.esm",
+            "Speaker": "0041CE:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 15835,
+                "WEMFile": 16850,
                 "EmotionOut": 0,
-                "ResponseText": "That\u0027s all three. Data\u0027s coming through. Huh. The ground\u0027s been busier than we thought.",
+                "ResponseText": "That\u0027s all three, and the data\u0027s coming through.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "DFB0E6BD"
+                "TextHash": "CDA9A692"
               }
             ]
           }

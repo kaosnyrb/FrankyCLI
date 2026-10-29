@@ -1,5 +1,5 @@
 {
-  "FormKey": "003AF4:du_overtime.esm",
+  "FormKey": "004015:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E2671:Starfield.esm",
-  "MissionBoardDescription": "Local Contract. Our freighter came down on \u003CAlias=TargetPlanetLocation\u003E with a consignment still aboard, and spacers have found the wreck. Recover the crate from the \u003CAlias=TargetLocation\u003E and deliver it to the \u003CAlias=FinalLocation\u003E. Payment on delivery.",
+  "MissionBoardDescription": "Shipping Firm Contract. Recover our crate from the wreck at the \u003CAlias=TargetLocation\u003E and deliver it to the \u003CAlias=FinalLocation\u003E. Spacers present. Payment on delivery.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [
@@ -145,7 +145,7 @@
       "LogEntries": [
         {
           "Flags": 1,
-          "Entry": "A freighter went down at the \u003CAlias=TargetLocation\u003E and spacers were picking over the wreck. I took the consignment off them and delivered it to the \u003CAlias=FinalLocation\u003E, where it was meant to go.",
+          "Entry": "A freighter went down at the \u003CAlias=TargetLocation\u003E and spacers were picking over the wreck. I got the consignment out from under them and delivered it to the \u003CAlias=FinalLocation\u003E, where it was meant to go.",
           "Note": "Mission Complete",
           "Conditions": [
             {
@@ -160,7 +160,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003AF4:du_overtime.esm",
+              "FirstLink": "004015:du_overtime.esm",
               "SecondParameter": 10
             }
           ],
@@ -197,7 +197,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003AF4:du_overtime.esm",
+              "FirstLink": "004015:du_overtime.esm",
               "SecondParameter": 10
             }
           ],
@@ -470,7 +470,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "003AF5:du_overtime.esm",
+        "Object": "004016:du_overtime.esm",
         "AliasID": 20,
         "Create": 0,
         "Level": 0
@@ -481,7 +481,7 @@
       "Kind": "loc",
       "ID": 22,
       "Name": "FinalLocation",
-      "Flags": 8388864,
+      "Flags": 8388865,
       "ALFG": 0,
       "Conditions": [
         {
@@ -602,7 +602,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "003AF6:du_overtime.esm",
+        "Object": "004017:du_overtime.esm",
         "AliasID": 23,
         "Create": 0,
         "Level": 0
@@ -616,7 +616,7 @@
     "ExtraBindDataVersion": 3,
     "Versioning": 0,
     "FragmentScript": {
-      "Name": "duo_qf_duo_delve_missionboard03a",
+      "Name": "duo_qf_MB42a_qst",
       "Flags": 0,
       "Properties": [
         {
@@ -624,7 +624,7 @@
           "Name": "Alias_Beat1Target",
           "Flags": 1,
           "Object": {
-            "Form": "003AF4:du_overtime.esm",
+            "Form": "004015:du_overtime.esm",
             "Alias": 21,
             "Unused": 0
           }
@@ -644,7 +644,7 @@
           "Name": "Beat1Message",
           "Flags": 1,
           "Object": {
-            "Form": "003AF8:du_overtime.esm",
+            "Form": "004019:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -654,7 +654,7 @@
           "Name": "Item1",
           "Flags": 1,
           "Object": {
-            "Form": "003AF7:du_overtime.esm",
+            "Form": "004018:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -667,7 +667,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_duo_delve_missionboard03a",
+        "ScriptName": "duo_qf_MB42a_qst",
         "FragmentName": "Fragment_Stage_0010_Item_00"
       },
       {
@@ -675,7 +675,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_duo_delve_missionboard03a",
+        "ScriptName": "duo_qf_MB42a_qst",
         "FragmentName": "Fragment_Stage_0016_Item_00"
       },
       {
@@ -683,7 +683,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_duo_delve_missionboard03a",
+        "ScriptName": "duo_qf_MB42a_qst",
         "FragmentName": "Fragment_Stage_0020_Item_00"
       },
       {
@@ -691,7 +691,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_duo_delve_missionboard03a",
+        "ScriptName": "duo_qf_MB42a_qst",
         "FragmentName": "Fragment_Stage_0100_Item_00"
       }
     ],
@@ -735,7 +735,7 @@
             "Name": "PlayerStarSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "003AF4:du_overtime.esm",
+              "Form": "004015:du_overtime.esm",
               "Alias": 0,
               "Unused": 0
             }
@@ -745,7 +745,7 @@
             "Name": "TargetSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "003AF4:du_overtime.esm",
+              "Form": "004015:du_overtime.esm",
               "Alias": 8,
               "Unused": 0
             }
@@ -755,7 +755,7 @@
             "Name": "TargetPlanetLocation",
             "Flags": 1,
             "Object": {
-              "Form": "003AF4:du_overtime.esm",
+              "Form": "004015:du_overtime.esm",
               "Alias": 2,
               "Unused": 0
             }
@@ -765,7 +765,7 @@
             "Name": "TargetLocation",
             "Flags": 1,
             "Object": {
-              "Form": "003AF4:du_overtime.esm",
+              "Form": "004015:du_overtime.esm",
               "Alias": 5,
               "Unused": 0
             }
@@ -775,7 +775,7 @@
             "Name": "PrimaryRef",
             "Flags": 1,
             "Object": {
-              "Form": "003AF4:du_overtime.esm",
+              "Form": "004015:du_overtime.esm",
               "Alias": 3,
               "Unused": 0
             }
@@ -785,7 +785,7 @@
             "Name": "PlayerShip",
             "Flags": 1,
             "Object": {
-              "Form": "003AF4:du_overtime.esm",
+              "Form": "004015:du_overtime.esm",
               "Alias": 9,
               "Unused": 0
             }
@@ -808,7 +808,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003AF4:du_overtime.esm",
+            "Form": "004015:du_overtime.esm",
             "Alias": 11,
             "Unused": 0
           }
@@ -842,7 +842,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003AF4:du_overtime.esm",
+            "Form": "004015:du_overtime.esm",
             "Alias": 21,
             "Unused": 0
           }
@@ -869,16 +869,10 @@
                 "Name": "ItemToGive",
                 "Flags": 1,
                 "Object": {
-                  "Form": "003AF7:du_overtime.esm",
+                  "Form": "004018:du_overtime.esm",
                   "Alias": -1,
                   "Unused": 0
                 }
-              },
-              {
-                "Type": "Bool",
-                "Name": "ShouldDisableAfterSuccessfulActivation",
-                "Flags": 1,
-                "Bool": true
               }
             ]
           },
@@ -891,7 +885,7 @@
                 "Name": "TargetAlias",
                 "Flags": 1,
                 "Object": {
-                  "Form": "003AF4:du_overtime.esm",
+                  "Form": "004015:du_overtime.esm",
                   "Alias": 32,
                   "Unused": 0
                 }
@@ -926,7 +920,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003AF4:du_overtime.esm",
+            "Form": "004015:du_overtime.esm",
             "Alias": 24,
             "Unused": 0
           }

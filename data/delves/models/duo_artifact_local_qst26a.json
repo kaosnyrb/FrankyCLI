@@ -1,5 +1,5 @@
 {
-  "FormKey": "003D86:du_overtime.esm",
+  "FormKey": "004184:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -71,7 +71,7 @@
       "LogEntries": [
         {
           "Flags": 1,
-          "Entry": "The checkpoint robot at the \u003CAlias=DungeonLocation\u003E is scrap. It asked me for my papers as well.",
+          "Entry": "The checkpoint robot at the \u003CAlias=DungeonLocation\u003E is scrap, and the road past it is open.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -144,7 +144,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003D86:du_overtime.esm",
+              "FirstLink": "004184:du_overtime.esm",
               "SecondParameter": 900
             }
           ]
@@ -331,7 +331,7 @@
           "Name": "Alias_Beat1Marker",
           "Flags": 1,
           "Object": {
-            "Form": "003D86:du_overtime.esm",
+            "Form": "004184:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -341,7 +341,7 @@
           "Name": "Alias_Beat1Target",
           "Flags": 1,
           "Object": {
-            "Form": "003D86:du_overtime.esm",
+            "Form": "004184:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -361,7 +361,7 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "003D8D:du_overtime.esm",
+            "Form": "00418B:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -419,7 +419,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003D86:du_overtime.esm",
+            "Form": "004184:du_overtime.esm",
             "Alias": 5,
             "Unused": 0
           }
@@ -447,7 +447,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003D86:du_overtime.esm",
+            "Form": "004184:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -481,7 +481,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003D86:du_overtime.esm",
+            "Form": "004184:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -496,7 +496,7 @@
                 "Name": "TargetAlias",
                 "Flags": 1,
                 "Object": {
-                  "Form": "003D86:du_overtime.esm",
+                  "Form": "004184:du_overtime.esm",
                   "Alias": 32,
                   "Unused": 0
                 }
@@ -528,7 +528,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "003D8A:du_overtime.esm",
+        "FormKey": "004188:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -537,7 +537,7 @@
         },
         "EditorID": "duo_artifact_local_qst26a_say1_scene",
         "Flags": 129,
-        "Quest": "003D86:du_overtime.esm",
+        "Quest": "004184:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -568,12 +568,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003D88:du_overtime.esm"
+            "Topic": "004186:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "003D8D:du_overtime.esm",
+        "FormKey": "00418B:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -582,7 +582,7 @@
         },
         "EditorID": "duo_artifact_local_qst26a_say2_scene",
         "Flags": 128,
-        "Quest": "003D86:du_overtime.esm",
+        "Quest": "004184:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -613,14 +613,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003D8B:du_overtime.esm"
+            "Topic": "004189:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "003D88:du_overtime.esm",
+        "FormKey": "004186:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -629,7 +629,7 @@
         },
         "EditorID": "duo_artifact_local_qst26a_say1_topic",
         "Priority": 50,
-        "Quest": "003D86:du_overtime.esm",
+        "Quest": "004184:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -637,11 +637,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003D89:du_overtime.esm"
+          "004187:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003D89:du_overtime.esm",
+            "FormKey": "004187:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -649,27 +649,27 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_local_qst26a_say1_info",
-            "Speaker": "003D87:du_overtime.esm",
+            "Speaker": "004185:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 15752,
+                "WEMFile": 16774,
                 "EmotionOut": 0,
-                "ResponseText": "There\u0027s a robot on my road home, asking me for papers I\u0027ve never had. I\u0027m forty metres from my own front door, and it won\u0027t let me any closer. It also has a gun.",
+                "ResponseText": "There\u0027s a robot on my road home, asking me for papers I\u0027ve never had. It turned me back forty metres from my own front door. It also has a gun.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "60DA69B5"
+                "TextHash": "FFAA97F3"
               }
             ]
           }
         ]
       },
       {
-        "FormKey": "003D8B:du_overtime.esm",
+        "FormKey": "004189:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -678,7 +678,7 @@
         },
         "EditorID": "duo_artifact_local_qst26a_say2_topic",
         "Priority": 50,
-        "Quest": "003D86:du_overtime.esm",
+        "Quest": "004184:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -686,11 +686,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003D8C:du_overtime.esm"
+          "00418A:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003D8C:du_overtime.esm",
+            "FormKey": "00418A:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -698,20 +698,20 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_local_qst26a_say2_info",
-            "Speaker": "003D87:du_overtime.esm",
+            "Speaker": "004185:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 15755,
+                "WEMFile": 16777,
                 "EmotionOut": 0,
-                "ResponseText": "Is it down? Then I\u0027m walking through. Forty metres to my own door, and nobody asking me for anything.",
+                "ResponseText": "It\u0027s down? Then I\u0027m going home, and nobody\u0027s asking me for anything.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "3B958B3C"
+                "TextHash": "2C84A604"
               }
             ]
           }

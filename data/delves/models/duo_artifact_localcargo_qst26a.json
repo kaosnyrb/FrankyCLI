@@ -1,5 +1,5 @@
 {
-  "FormKey": "003E3F:du_overtime.esm",
+  "FormKey": "00423D:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -18,7 +18,7 @@
   "Timestamp": 0,
   "Unknown": 0,
   "TextDisplayGlobals": [
-    "003E43:du_overtime.esm"
+    "004241:du_overtime.esm"
   ],
   "MissionBoardInfoPanels": [],
   "DialogConditions": [],
@@ -30,7 +30,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "The crew at the \u003CAlias=DungeonLocation\u003E have three water reclaimers down and nobody spare to look at them. I said I\u0027d go and get them running.",
+          "Entry": "The crew at the \u003CAlias=DungeonLocation\u003E have three water reclaimers down and nobody who can fix them. I\u0027m going to get them running.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -73,7 +73,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "The faulty reclaimer had a clogged intake filter. I\u0027ve swapped in a clean one and it\u0027s drawing water again.",
+          "Entry": "A few of the crew were standing round this one when I got there. Its intake filter was clogged, and somebody had rinsed the old one and put it back more than once. I\u0027ve swapped in a clean one and it\u0027s drawing water again.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -95,7 +95,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "The leaking reclaimer only needed its hose clamps tightened. It\u0027s holding pressure now.",
+          "Entry": "The leaking reclaimer only needed its hose clamps tightened. Someone had wrapped the hose in tape to get another week out of it. It\u0027s holding pressure now.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -117,7 +117,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "The stalled reclaimer had a seized pump. I\u0027ve freed it, reset the breaker, and it\u0027s running.",
+          "Entry": "The stalled reclaimer had a seized pump, and the breaker label had worn off from being flipped so often. I\u0027ve freed it, reset the breaker, and it\u0027s running.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -160,7 +160,7 @@
       "LogEntries": [
         {
           "Flags": 1,
-          "Entry": "The crew at the \u003CAlias=DungeonLocation\u003E had three water reclaimers down and nobody spare. I found what was wrong with each one and got all three running again.",
+          "Entry": "The crew at the \u003CAlias=DungeonLocation\u003E had three water reclaimers down and nobody who could fix them. I found what was wrong with each one and got all three running again.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -206,7 +206,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003E3F:du_overtime.esm",
+              "FirstLink": "00423D:du_overtime.esm",
               "SecondParameter": 10
             }
           ]
@@ -228,7 +228,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003E3F:du_overtime.esm",
+              "FirstLink": "00423D:du_overtime.esm",
               "SecondParameter": 20
             }
           ]
@@ -250,7 +250,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003E3F:du_overtime.esm",
+              "FirstLink": "00423D:du_overtime.esm",
               "SecondParameter": 30
             }
           ]
@@ -433,7 +433,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "003E40:du_overtime.esm",
+        "Object": "00423E:du_overtime.esm",
         "AliasID": 1,
         "Create": 0,
         "Level": 0
@@ -484,7 +484,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "003E41:du_overtime.esm",
+        "Object": "00423F:du_overtime.esm",
         "AliasID": 11,
         "Create": 0,
         "Level": 0
@@ -512,7 +512,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "003E42:du_overtime.esm",
+        "Object": "004240:du_overtime.esm",
         "AliasID": 33,
         "Create": 0,
         "Level": 0
@@ -534,7 +534,7 @@
           "Name": "Counter1",
           "Flags": 1,
           "Object": {
-            "Form": "003E43:du_overtime.esm",
+            "Form": "004241:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -544,7 +544,7 @@
           "Name": "Alias_Beat1Target",
           "Flags": 1,
           "Object": {
-            "Form": "003E3F:du_overtime.esm",
+            "Form": "00423D:du_overtime.esm",
             "Alias": 2,
             "Unused": 0
           }
@@ -564,7 +564,37 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "003E4A:du_overtime.esm",
+            "Form": "00424B:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Beat1Message",
+          "Flags": 1,
+          "Object": {
+            "Form": "004242:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Beat2Message",
+          "Flags": 1,
+          "Object": {
+            "Form": "004243:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Beat3Message",
+          "Flags": 1,
+          "Object": {
+            "Form": "004244:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -646,7 +676,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003E3F:du_overtime.esm",
+            "Form": "00423D:du_overtime.esm",
             "Alias": 5,
             "Unused": 0
           }
@@ -674,7 +704,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003E3F:du_overtime.esm",
+            "Form": "00423D:du_overtime.esm",
             "Alias": 2,
             "Unused": 0
           }
@@ -714,7 +744,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003E3F:du_overtime.esm",
+            "Form": "00423D:du_overtime.esm",
             "Alias": 12,
             "Unused": 0
           }
@@ -754,7 +784,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003E3F:du_overtime.esm",
+            "Form": "00423D:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -794,7 +824,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003E3F:du_overtime.esm",
+            "Form": "00423D:du_overtime.esm",
             "Alias": 32,
             "Unused": 0
           }
@@ -809,7 +839,7 @@
                 "Name": "TargetAlias",
                 "Flags": 1,
                 "Object": {
-                  "Form": "003E3F:du_overtime.esm",
+                  "Form": "00423D:du_overtime.esm",
                   "Alias": 2,
                   "Unused": 0
                 }
@@ -841,7 +871,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "003E47:du_overtime.esm",
+        "FormKey": "004248:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -850,7 +880,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst26a_say1_scene",
         "Flags": 129,
-        "Quest": "003E3F:du_overtime.esm",
+        "Quest": "00423D:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -881,12 +911,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003E45:du_overtime.esm"
+            "Topic": "004246:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "003E4A:du_overtime.esm",
+        "FormKey": "00424B:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -895,7 +925,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst26a_say2_scene",
         "Flags": 128,
-        "Quest": "003E3F:du_overtime.esm",
+        "Quest": "00423D:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -926,14 +956,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003E48:du_overtime.esm"
+            "Topic": "004249:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "003E45:du_overtime.esm",
+        "FormKey": "004246:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -942,7 +972,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst26a_say1_topic",
         "Priority": 50,
-        "Quest": "003E3F:du_overtime.esm",
+        "Quest": "00423D:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -950,11 +980,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003E46:du_overtime.esm"
+          "004247:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003E46:du_overtime.esm",
+            "FormKey": "004247:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -962,27 +992,27 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_localcargo_qst26a_say1_info",
-            "Speaker": "003E44:du_overtime.esm",
+            "Speaker": "004245:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 15941,
+                "WEMFile": 16966,
                 "EmotionOut": 0,
-                "ResponseText": "Three reclaimers down, and nobody spare to look at them. We\u0027re down to what\u0027s in the tanks, and the tanks don\u0027t last.",
+                "ResponseText": "Three reclaimers down, and nobody here who can fix them. We\u0027re down to what\u0027s in the tanks, and the tanks don\u0027t last.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "4675DE07"
+                "TextHash": "28C77FDE"
               }
             ]
           }
         ]
       },
       {
-        "FormKey": "003E48:du_overtime.esm",
+        "FormKey": "004249:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -991,7 +1021,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst26a_say2_topic",
         "Priority": 50,
-        "Quest": "003E3F:du_overtime.esm",
+        "Quest": "00423D:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -999,11 +1029,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003E49:du_overtime.esm"
+          "00424A:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003E49:du_overtime.esm",
+            "FormKey": "00424A:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1011,20 +1041,20 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_localcargo_qst26a_say2_info",
-            "Speaker": "003E44:du_overtime.esm",
+            "Speaker": "004245:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 15944,
+                "WEMFile": 16969,
                 "EmotionOut": 0,
-                "ResponseText": "All three are running. You\u0027ve saved us a very long week.",
+                "ResponseText": "All three running. The tanks will hold now.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "95D6C31C"
+                "TextHash": "313F00DA"
               }
             ]
           }

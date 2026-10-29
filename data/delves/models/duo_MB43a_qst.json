@@ -1,5 +1,5 @@
 {
-  "FormKey": "003C43:du_overtime.esm",
+  "FormKey": "00401A:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E2671:Starfield.esm",
-  "MissionBoardDescription": "Data Recovery. A survey crew evacuated the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E and left their site terminal locked. Recover the code, unlock the terminal and retrieve the survey data. Expect the reason they left to still be there. Payment on completion.",
+  "MissionBoardDescription": "Local Contract. Recover the survey data from the evacuated \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E. Payment on contract completion.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [
@@ -123,7 +123,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "The survey lead kept her terminal code in her toolbox by the way in, behind a photo of two kids and a dog. The terminal is somewhere inside the \u003CAlias=TargetLocation\u003E.",
+          "Entry": "I found the survey lead\u0027s terminal code in her toolbox by the way in, behind a photo of two kids and a dog. Now I need to find the terminal inside the \u003CAlias=TargetLocation\u003E.",
           "Note": "Ready stage",
           "Conditions": [],
           "StageCompleteDatas": [
@@ -146,7 +146,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "The code worked. The terminal says the lead pulled everything to a drive before they ran and locked it in the site safe, further in.",
+          "Entry": "I\u0027ve unlocked the terminal. The lead pulled everything to a drive before they ran, so I need to find the site safe further in.",
           "Note": "Ready stage",
           "Conditions": [],
           "StageCompleteDatas": [
@@ -169,7 +169,7 @@
       "LogEntries": [
         {
           "Flags": 1,
-          "Entry": "A survey crew ran from the \u003CAlias=TargetLocation\u003E and left a season\u0027s data behind. I found the lead\u0027s code by the door, unlocked their terminal, and took the drive out of the safe at the bottom of the place.",
+          "Entry": "A survey crew ran from the \u003CAlias=TargetLocation\u003E and left a season\u0027s data behind. I found the lead\u0027s code by the way in, unlocked their terminal, and took the drive out of the safe further in.",
           "Note": "Mission Complete",
           "Conditions": [
             {
@@ -184,7 +184,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003C43:du_overtime.esm",
+              "FirstLink": "00401A:du_overtime.esm",
               "SecondParameter": 10
             }
           ],
@@ -221,7 +221,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003C43:du_overtime.esm",
+              "FirstLink": "00401A:du_overtime.esm",
               "SecondParameter": 10
             }
           ],
@@ -537,7 +537,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "003C44:du_overtime.esm",
+        "Object": "00401B:du_overtime.esm",
         "AliasID": 20,
         "Create": 0,
         "Level": 0
@@ -565,7 +565,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "003C45:du_overtime.esm",
+        "Object": "00401C:du_overtime.esm",
         "AliasID": 23,
         "Create": 0,
         "Level": 0
@@ -593,7 +593,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "003C46:du_overtime.esm",
+        "Object": "00401D:du_overtime.esm",
         "AliasID": 33,
         "Create": 0,
         "Level": 0
@@ -615,7 +615,7 @@
           "Name": "Say1",
           "Flags": 1,
           "Object": {
-            "Form": "003C4C:du_overtime.esm",
+            "Form": "004023:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -625,7 +625,7 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "003C4F:du_overtime.esm",
+            "Form": "004026:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -635,7 +635,7 @@
           "Name": "Say3",
           "Flags": 1,
           "Object": {
-            "Form": "003C52:du_overtime.esm",
+            "Form": "004029:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -645,7 +645,7 @@
           "Name": "Beat1Message",
           "Flags": 1,
           "Object": {
-            "Form": "003C48:du_overtime.esm",
+            "Form": "00401F:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -655,7 +655,7 @@
           "Name": "Alias_Beat3Target",
           "Flags": 1,
           "Object": {
-            "Form": "003C43:du_overtime.esm",
+            "Form": "00401A:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -744,7 +744,7 @@
             "Name": "PlayerStarSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "003C43:du_overtime.esm",
+              "Form": "00401A:du_overtime.esm",
               "Alias": 0,
               "Unused": 0
             }
@@ -754,7 +754,7 @@
             "Name": "TargetSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "003C43:du_overtime.esm",
+              "Form": "00401A:du_overtime.esm",
               "Alias": 8,
               "Unused": 0
             }
@@ -764,7 +764,7 @@
             "Name": "TargetPlanetLocation",
             "Flags": 1,
             "Object": {
-              "Form": "003C43:du_overtime.esm",
+              "Form": "00401A:du_overtime.esm",
               "Alias": 2,
               "Unused": 0
             }
@@ -774,7 +774,7 @@
             "Name": "TargetLocation",
             "Flags": 1,
             "Object": {
-              "Form": "003C43:du_overtime.esm",
+              "Form": "00401A:du_overtime.esm",
               "Alias": 5,
               "Unused": 0
             }
@@ -784,7 +784,7 @@
             "Name": "PrimaryRef",
             "Flags": 1,
             "Object": {
-              "Form": "003C43:du_overtime.esm",
+              "Form": "00401A:du_overtime.esm",
               "Alias": 3,
               "Unused": 0
             }
@@ -794,7 +794,7 @@
             "Name": "PlayerShip",
             "Flags": 1,
             "Object": {
-              "Form": "003C43:du_overtime.esm",
+              "Form": "00401A:du_overtime.esm",
               "Alias": 9,
               "Unused": 0
             }
@@ -817,7 +817,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003C43:du_overtime.esm",
+            "Form": "00401A:du_overtime.esm",
             "Alias": 11,
             "Unused": 0
           }
@@ -851,7 +851,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003C43:du_overtime.esm",
+            "Form": "00401A:du_overtime.esm",
             "Alias": 21,
             "Unused": 0
           }
@@ -891,7 +891,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003C43:du_overtime.esm",
+            "Form": "00401A:du_overtime.esm",
             "Alias": 24,
             "Unused": 0
           }
@@ -931,7 +931,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003C43:du_overtime.esm",
+            "Form": "00401A:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -958,7 +958,7 @@
                 "Name": "ItemToGive",
                 "Flags": 1,
                 "Object": {
-                  "Form": "003C47:du_overtime.esm",
+                  "Form": "00401E:du_overtime.esm",
                   "Alias": -1,
                   "Unused": 0
                 }
@@ -975,7 +975,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003C43:du_overtime.esm",
+            "Form": "00401A:du_overtime.esm",
             "Alias": 20,
             "Unused": 0
           }
@@ -990,7 +990,7 @@
                 "Name": "TargetAlias",
                 "Flags": 1,
                 "Object": {
-                  "Form": "003C43:du_overtime.esm",
+                  "Form": "00401A:du_overtime.esm",
                   "Alias": 32,
                   "Unused": 0
                 }
@@ -1022,7 +1022,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "003C4C:du_overtime.esm",
+        "FormKey": "004023:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1031,7 +1031,7 @@
         },
         "EditorID": "duo_MB43a_qst_say1_scene",
         "Flags": 128,
-        "Quest": "003C43:du_overtime.esm",
+        "Quest": "00401A:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1062,12 +1062,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003C4A:du_overtime.esm"
+            "Topic": "004021:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "003C4F:du_overtime.esm",
+        "FormKey": "004026:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1076,7 +1076,7 @@
         },
         "EditorID": "duo_MB43a_qst_say2_scene",
         "Flags": 128,
-        "Quest": "003C43:du_overtime.esm",
+        "Quest": "00401A:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1107,12 +1107,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003C4D:du_overtime.esm"
+            "Topic": "004024:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "003C52:du_overtime.esm",
+        "FormKey": "004029:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1121,7 +1121,7 @@
         },
         "EditorID": "duo_MB43a_qst_say3_scene",
         "Flags": 128,
-        "Quest": "003C43:du_overtime.esm",
+        "Quest": "00401A:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1152,14 +1152,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003C50:du_overtime.esm"
+            "Topic": "004027:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "003C4A:du_overtime.esm",
+        "FormKey": "004021:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1168,7 +1168,7 @@
         },
         "EditorID": "duo_MB43a_qst_say1_topic",
         "Priority": 50,
-        "Quest": "003C43:du_overtime.esm",
+        "Quest": "00401A:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1176,11 +1176,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003C4B:du_overtime.esm"
+          "004022:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003C4B:du_overtime.esm",
+            "FormKey": "004022:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1188,27 +1188,27 @@
               "VersionControl": 0
             },
             "EditorID": "duo_MB43a_qst_say1_info",
-            "Speaker": "003C49:du_overtime.esm",
+            "Speaker": "004020:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 15434,
+                "WEMFile": 16417,
                 "EmotionOut": 0,
-                "ResponseText": "You\u0027re on site? The terminal\u0027s locked, and our lead wrote the code down somewhere near the door. She always does. Mind yourself in there. Whatever ran us out hasn\u0027t left.",
+                "ResponseText": "You\u0027re on site? The terminal\u0027s locked, and our lead wrote the code down somewhere by the way in. She always does. Mind yourself in there.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "6BA21FA2"
+                "TextHash": "17E82950"
               }
             ]
           }
         ]
       },
       {
-        "FormKey": "003C4D:du_overtime.esm",
+        "FormKey": "004024:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1217,7 +1217,7 @@
         },
         "EditorID": "duo_MB43a_qst_say2_topic",
         "Priority": 50,
-        "Quest": "003C43:du_overtime.esm",
+        "Quest": "00401A:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1225,11 +1225,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003C4E:du_overtime.esm"
+          "004025:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003C4E:du_overtime.esm",
+            "FormKey": "004025:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1237,27 +1237,27 @@
               "VersionControl": 0
             },
             "EditorID": "duo_MB43a_qst_say2_info",
-            "Speaker": "003C49:du_overtime.esm",
+            "Speaker": "004020:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 15437,
+                "WEMFile": 16420,
                 "EmotionOut": 0,
-                "ResponseText": "You\u0027re in? It says she pulled everything to a drive before they ran. It\u0027ll be in the site safe, further in.",
+                "ResponseText": "You\u0027re through? Then she\u0027ll have pulled it all to a drive before they ran. She always does that too. It\u0027ll be in the site safe, further in.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "32D981C5"
+                "TextHash": "71946ED8"
               }
             ]
           }
         ]
       },
       {
-        "FormKey": "003C50:du_overtime.esm",
+        "FormKey": "004027:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1266,7 +1266,7 @@
         },
         "EditorID": "duo_MB43a_qst_say3_topic",
         "Priority": 50,
-        "Quest": "003C43:du_overtime.esm",
+        "Quest": "00401A:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1274,11 +1274,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003C51:du_overtime.esm"
+          "004028:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003C51:du_overtime.esm",
+            "FormKey": "004028:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1286,20 +1286,20 @@
               "VersionControl": 0
             },
             "EditorID": "duo_MB43a_qst_say3_info",
-            "Speaker": "003C49:du_overtime.esm",
+            "Speaker": "004020:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 15440,
+                "WEMFile": 16423,
                 "EmotionOut": 0,
-                "ResponseText": "That\u0027s the drive? That\u0027s the whole season. Now get out of there. Nobody\u0027s paid enough to stay.",
+                "ResponseText": "That\u0027s the drive, and the whole season\u0027s on it. Now get out of there.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "A574E558"
+                "TextHash": "C464C77D"
               }
             ]
           }

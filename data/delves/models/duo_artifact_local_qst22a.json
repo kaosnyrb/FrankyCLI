@@ -1,5 +1,5 @@
 {
-  "FormKey": "003D65:du_overtime.esm",
+  "FormKey": "004163:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -28,7 +28,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "A survey crew at the \u003CAlias=DungeonLocation\u003E logged a Terrormorph working the ground around their site, then pulled out. The log runs to nineteen entries. The first thirteen are sightings. The last six are kills.",
+          "Entry": "A survey crew at the \u003CAlias=DungeonLocation\u003E logged a Terrormorph working the ground around their site, then pulled out. The log runs to nineteen entries, and only the first thirteen are sightings.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -71,7 +71,7 @@
       "LogEntries": [
         {
           "Flags": 1,
-          "Entry": "The Terrormorph at the \u003CAlias=DungeonLocation\u003E is dead. The survey log closes at nineteen entries, and the twentieth is mine.",
+          "Entry": "The Terrormorph at the \u003CAlias=DungeonLocation\u003E is dead. The survey log closes at nineteen entries.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -144,7 +144,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003D65:du_overtime.esm",
+              "FirstLink": "004163:du_overtime.esm",
               "SecondParameter": 900
             }
           ]
@@ -316,7 +316,7 @@
           "Name": "Alias_Beat1Marker",
           "Flags": 1,
           "Object": {
-            "Form": "003D65:du_overtime.esm",
+            "Form": "004163:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -326,7 +326,7 @@
           "Name": "Alias_Beat1Target",
           "Flags": 1,
           "Object": {
-            "Form": "003D65:du_overtime.esm",
+            "Form": "004163:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -346,7 +346,7 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "003D6C:du_overtime.esm",
+            "Form": "00416A:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -404,7 +404,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003D65:du_overtime.esm",
+            "Form": "004163:du_overtime.esm",
             "Alias": 5,
             "Unused": 0
           }
@@ -432,7 +432,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003D65:du_overtime.esm",
+            "Form": "004163:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -466,7 +466,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003D65:du_overtime.esm",
+            "Form": "004163:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -481,7 +481,7 @@
                 "Name": "TargetAlias",
                 "Flags": 1,
                 "Object": {
-                  "Form": "003D65:du_overtime.esm",
+                  "Form": "004163:du_overtime.esm",
                   "Alias": 32,
                   "Unused": 0
                 }
@@ -513,7 +513,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "003D69:du_overtime.esm",
+        "FormKey": "004167:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -522,7 +522,7 @@
         },
         "EditorID": "duo_artifact_local_qst22a_say1_scene",
         "Flags": 129,
-        "Quest": "003D65:du_overtime.esm",
+        "Quest": "004163:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -553,12 +553,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003D67:du_overtime.esm"
+            "Topic": "004165:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "003D6C:du_overtime.esm",
+        "FormKey": "00416A:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -567,7 +567,7 @@
         },
         "EditorID": "duo_artifact_local_qst22a_say2_scene",
         "Flags": 128,
-        "Quest": "003D65:du_overtime.esm",
+        "Quest": "004163:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -598,14 +598,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003D6A:du_overtime.esm"
+            "Topic": "004168:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "003D67:du_overtime.esm",
+        "FormKey": "004165:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -614,7 +614,7 @@
         },
         "EditorID": "duo_artifact_local_qst22a_say1_topic",
         "Priority": 50,
-        "Quest": "003D65:du_overtime.esm",
+        "Quest": "004163:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -622,11 +622,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003D68:du_overtime.esm"
+          "004166:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003D68:du_overtime.esm",
+            "FormKey": "004166:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -634,27 +634,27 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_local_qst22a_say1_info",
-            "Speaker": "003D66:du_overtime.esm",
+            "Speaker": "004164:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 15719,
+                "WEMFile": 16741,
                 "EmotionOut": 0,
-                "ResponseText": "We\u0027ve logged the thing nineteen times now. The first thirteen entries are sightings, and the last six aren\u0027t. Everyone\u0027s pulled back off the site until it\u0027s dead, and we\u0027d like to go back.",
+                "ResponseText": "We\u0027ve logged the thing nineteen times now. The first thirteen entries are sightings, and the last six aren\u0027t. We\u0027ve pulled our people off the site until it\u0027s dead, and we\u0027d like to go back.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "1A335FCF"
+                "TextHash": "125C9E76"
               }
             ]
           }
         ]
       },
       {
-        "FormKey": "003D6A:du_overtime.esm",
+        "FormKey": "004168:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -663,7 +663,7 @@
         },
         "EditorID": "duo_artifact_local_qst22a_say2_topic",
         "Priority": 50,
-        "Quest": "003D65:du_overtime.esm",
+        "Quest": "004163:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -671,11 +671,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003D6B:du_overtime.esm"
+          "004169:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003D6B:du_overtime.esm",
+            "FormKey": "004169:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -683,20 +683,20 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_local_qst22a_say2_info",
-            "Speaker": "003D66:du_overtime.esm",
+            "Speaker": "004164:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 15722,
+                "WEMFile": 16744,
                 "EmotionOut": 0,
-                "ResponseText": "That\u0027s it down? Then the log closes at nineteen entries, and we go back in at first light.",
+                "ResponseText": "That\u0027s it down. The log closes at nineteen entries, and we go back in at first light.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "4E2E218A"
+                "TextHash": "707846F2"
               }
             ]
           }

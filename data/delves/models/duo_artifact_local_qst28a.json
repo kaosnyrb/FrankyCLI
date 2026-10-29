@@ -1,5 +1,5 @@
 {
-  "FormKey": "003DAC:du_overtime.esm",
+  "FormKey": "0041A5:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -7,7 +7,7 @@
     "VersionControl": 0
   },
   "EditorID": "duo_artifact_local_qst28a",
-  "Name": "Assault: Spacer Drop on \u003CAlias=targetPlanet\u003E",
+  "Name": "Strike: Spacer Drop on \u003CAlias=targetPlanet\u003E",
   "Data": {
     "Flags": 655360,
     "Priority": 10,
@@ -28,7 +28,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "Spacers are dropping onto the \u003CAlias=DungeonLocation\u003E by pod. UC Security is sending a team down to retake the site, and they want someone already on the ground when the team arrives.",
+          "Entry": "Spacers are dropping onto the \u003CAlias=DungeonLocation\u003E by pod. The UC is sending a team down to retake the site, and they want someone already on the ground when the team arrives.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -71,7 +71,7 @@
       "LogEntries": [
         {
           "Flags": 1,
-          "Entry": "The Spacers who dropped onto the \u003CAlias=DungeonLocation\u003E are dead. The UC team is holding the site until its owners come back.",
+          "Entry": "The Spacers at the \u003CAlias=DungeonLocation\u003E are dead. The UC team is holding the site.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -144,7 +144,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003DAC:du_overtime.esm",
+              "FirstLink": "0041A5:du_overtime.esm",
               "SecondParameter": 900
             }
           ]
@@ -362,7 +362,7 @@
             "Conditions": [],
             "VoiceTypes": "Null",
             "PackageData": [
-              "003DAD:du_overtime.esm"
+              "0041A6:du_overtime.esm"
             ]
           }
         }
@@ -393,7 +393,7 @@
           "Name": "Alias_Beat1Spawn",
           "Flags": 1,
           "Object": {
-            "Form": "003DAC:du_overtime.esm",
+            "Form": "0041A5:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -403,7 +403,7 @@
           "Name": "Alias_Beat1Enemies",
           "Flags": 1,
           "Object": {
-            "Form": "003DAC:du_overtime.esm",
+            "Form": "0041A5:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -423,7 +423,7 @@
           "Name": "Alias_Beat1Landing",
           "Flags": 1,
           "Object": {
-            "Form": "003DAC:du_overtime.esm",
+            "Form": "0041A5:du_overtime.esm",
             "Alias": 35,
             "Unused": 0
           }
@@ -453,7 +453,7 @@
           "Name": "Alias_Beat1Support",
           "Flags": 1,
           "Object": {
-            "Form": "003DAC:du_overtime.esm",
+            "Form": "0041A5:du_overtime.esm",
             "Alias": 36,
             "Unused": 0
           }
@@ -463,7 +463,7 @@
           "Name": "Alias_Beat1Fight",
           "Flags": 1,
           "Object": {
-            "Form": "003DAC:du_overtime.esm",
+            "Form": "0041A5:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -473,7 +473,7 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "003DB4:du_overtime.esm",
+            "Form": "0041AD:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -531,7 +531,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003DAC:du_overtime.esm",
+            "Form": "0041A5:du_overtime.esm",
             "Alias": 5,
             "Unused": 0
           }
@@ -559,7 +559,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003DAC:du_overtime.esm",
+            "Form": "0041A5:du_overtime.esm",
             "Alias": 35,
             "Unused": 0
           }
@@ -580,7 +580,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003DAC:du_overtime.esm",
+            "Form": "0041A5:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -626,7 +626,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003DAC:du_overtime.esm",
+            "Form": "0041A5:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -641,7 +641,7 @@
                 "Name": "TargetAlias",
                 "Flags": 1,
                 "Object": {
-                  "Form": "003DAC:du_overtime.esm",
+                  "Form": "0041A5:du_overtime.esm",
                   "Alias": 32,
                   "Unused": 0
                 }
@@ -673,7 +673,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "003DB1:du_overtime.esm",
+        "FormKey": "0041AA:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -682,7 +682,7 @@
         },
         "EditorID": "duo_artifact_local_qst28a_say1_scene",
         "Flags": 129,
-        "Quest": "003DAC:du_overtime.esm",
+        "Quest": "0041A5:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -713,12 +713,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003DAF:du_overtime.esm"
+            "Topic": "0041A8:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "003DB4:du_overtime.esm",
+        "FormKey": "0041AD:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -727,7 +727,7 @@
         },
         "EditorID": "duo_artifact_local_qst28a_say2_scene",
         "Flags": 128,
-        "Quest": "003DAC:du_overtime.esm",
+        "Quest": "0041A5:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -758,14 +758,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003DB2:du_overtime.esm"
+            "Topic": "0041AB:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "003DAF:du_overtime.esm",
+        "FormKey": "0041A8:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -774,7 +774,7 @@
         },
         "EditorID": "duo_artifact_local_qst28a_say1_topic",
         "Priority": 50,
-        "Quest": "003DAC:du_overtime.esm",
+        "Quest": "0041A5:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -782,11 +782,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003DB0:du_overtime.esm"
+          "0041A9:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003DB0:du_overtime.esm",
+            "FormKey": "0041A9:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -794,27 +794,27 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_local_qst28a_say1_info",
-            "Speaker": "003DAE:du_overtime.esm",
+            "Speaker": "0041A7:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 15791,
+                "WEMFile": 16808,
                 "EmotionOut": 0,
-                "ResponseText": "Ground team, this is the drop lead. We\u0027re on our way to you now, so keep your head up and your weapon out. They\u0027re coming in by pod, and they\u0027ll be shooting before the doors are open. Hold them at the site and we\u0027ll be right behind you.",
+                "ResponseText": "Ground team, this is the drop lead. We\u0027re on our way to you now, so keep your head up and your weapon out. Hostiles are coming in by pod, and they\u0027ll be shooting before the doors are open. Push into the site and we\u0027ll be right behind you.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "6DE83B06"
+                "TextHash": "2D1B74B6"
               }
             ]
           }
         ]
       },
       {
-        "FormKey": "003DB2:du_overtime.esm",
+        "FormKey": "0041AB:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -823,7 +823,7 @@
         },
         "EditorID": "duo_artifact_local_qst28a_say2_topic",
         "Priority": 50,
-        "Quest": "003DAC:du_overtime.esm",
+        "Quest": "0041A5:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -831,11 +831,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003DB3:du_overtime.esm"
+          "0041AC:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003DB3:du_overtime.esm",
+            "FormKey": "0041AC:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -843,20 +843,20 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_local_qst28a_say2_info",
-            "Speaker": "003DAE:du_overtime.esm",
+            "Speaker": "0041A7:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 15794,
+                "WEMFile": 16811,
                 "EmotionOut": 0,
-                "ResponseText": "That\u0027s the last of them. Good shooting out there, honestly, I owe you one. We\u0027ll hold it from here until the owners are back. Go on, you\u0027ve earned the quiet.",
+                "ResponseText": "That\u0027s the last of them. Good shooting. We\u0027ll hold it from here. Go on, you\u0027ve earned the quiet.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "6751714E"
+                "TextHash": "9B0A5E74"
               }
             ]
           }
