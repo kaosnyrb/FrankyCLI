@@ -41,6 +41,12 @@
         "horde"
       ],
       "objective": "Hold the <Place> against the raiders",
+      "allies": {
+        "list": "duo_GangMembersList_UC",
+        "min": 2,
+        "max": 4
+      },
+      "_allies": "His pick 2026-10-29, 'let's do UC Marines': armed friendlies (Eliza's allies field, 05647b1), placed just before wave 1. No voiced line counts them, since the number varies.",
       "journal": "The third raid on the <Place> this month. Three waves, more each time, the same as before. This time they left with nothing.",
       "say": [
         "That's the third time, and the first time they've left without anything."

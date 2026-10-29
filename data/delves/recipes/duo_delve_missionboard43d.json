@@ -41,6 +41,12 @@
         "horde"
       ],
       "objective": "Hold the <Place> against the raiders",
+      "allies": {
+        "list": "duo_GangMembersList_UC",
+        "min": 2,
+        "max": 4
+      },
+      "_allies": "His pick 2026-10-29, 'let's do UC Marines': armed friendlies (Eliza's allies field, 05647b1), placed just before wave 1. No voiced line counts them, since the number varies.",
       "journal": "Raiders came at the <Place> three times. I held the door for the woman who runs the canteen, and they left without the dinner.",
       "say": [
         "That's them gone, and the dinner's still on the stove. Come in and eat, you've earned the big bowl."
