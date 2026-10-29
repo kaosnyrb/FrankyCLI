@@ -29,7 +29,7 @@
   "prose": {
     "name": "Rescue: Night Shift on <Planet>",
     "briefing": "One worker on the night shift hid when the <Place> was taken. She's still in there, and she's been very patient about it.",
-    "card": "Rescue contract. A night-shift worker is still inside the <Place> on <Planet>. Locate her and see her out. Payment on contract completion."
+    "card": "Local Contract. See the night-shift worker out of the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {
@@ -47,7 +47,7 @@
         "chance": 25
       },
       "objective": "Clear the occupiers from the <Place>",
-      "journal": "Whoever was running the <Place> is dead. The night-shift worker is somewhere inside.",
+      "journal": "Whoever was running the <Place> is dead. Now I need to find the night-shift worker somewhere inside.",
       "say": [
         "It's quiet now. She'll come out for a friendly voice, so go and find her."
       ]
@@ -56,7 +56,7 @@
       "type": "talk",
       "at": "REWoundedMarkerLocRef",
       "objective": "Find the night-shift worker",
-      "journal": "The night-shift worker had been hiding in the <Place> since it was taken. Before she'd leave, she wanted clocking out.",
+      "journal": "The night-shift worker had been hiding in the <Place> since it was taken. She won't leave until she's clocked out, so I need to clock her out at the door.",
       "person": {
         "name": "Dot Ferreira",
         "template": "UC_NA_MASTWorkerFemale02",

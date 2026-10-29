@@ -22,17 +22,17 @@
     "_altitude": "Eliza, 2026-10-27, filling Jessica's place.orbit stand-in: on boardspace the place IS the orbit, so there is no field to name it, and the value it needs is 47a's (MB01e's altitude; his MB01a's 20.589 never filled in his StoryManager log, BS1 filled on this)."
   },
   "prose": {
-    "name": "Salvage: Satellite Part over <Planet>",
+    "name": "Recovery: Satellite Part over <Planet>",
     "briefing": "The freighter bringing a replacement part for the navigation satellite over <Planet> broke up in orbit. The part is still somewhere in the wreckage.",
-    "card": "Salvage and repair contract. A freighter carrying a replacement part for the navigation satellite over <Planet> broke up in orbit. Recover the part from the wreckage and fit it to the satellite. Payment on contract completion."
+    "card": "Local Contract. Recover the satellite part from the freighter wreckage over <Planet> and fit it. Payment on contract completion."
   },
   "beats": [
     {
       "type": "pickup",
       "at": "se_GeneralMarkerLocRef01",
       "_at": "A space-cell marker; which two the cell offers is Eliza's.",
-      "objective": "Recover the signal amplifier from the freighter wreckage",
-      "journal": "The freighter's wreckage is still in orbit over <Planet>, and the signal amplifier was in a sealed crate inside it. I've got it. Now it needs fitting to the navigation satellite.",
+      "objective": "Recover the signal amplifier from the wreckage",
+      "journal": "The freighter's wreckage is still in orbit over <Planet>, and the signal amplifier was in a sealed crate inside it. I've got it, and now I need to fit it to the navigation satellite.",
       "model": "Meshes\\ccs\\wreckcargocrate01.nif",
       "name": "Sealed Cargo Crate",
       "item": "Signal Amplifier",
@@ -43,7 +43,7 @@
     {
       "type": "deliver",
       "at": "se_TravelMarkerLocRefB02",
-      "objective": "Fit the signal amplifier to the navigation satellite",
+      "objective": "Fit the amplifier to the satellite",
       "journal": "A freighter broke up in orbit over <Planet> with the navigation satellite's replacement part aboard. I found it in the wreckage and fitted it. The satellite is broadcasting again.",
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
       "name": "Navigation Satellite",

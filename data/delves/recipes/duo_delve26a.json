@@ -31,8 +31,8 @@
     {
       "type": "recover",
       "at": "LocDungeonBossLocRef",
-      "objective": "Take the nav core from the raiders' boss at the <Place>",
-      "journal": "The raiders' boss at the <Place> had the freighter's nav core. I took it off him. Then a ship set down outside, and the rest of his crew came in after it.",
+      "objective": "Take the nav core from the boss at the <Place>",
+      "journal": "I took the freighter's nav core off the raiders' boss at the <Place>. Then a ship set down outside, and now I need to hold on to the core while the rest of his crew come in.",
       "item": "Freighter Nav Core",
       "say": [
         "That's my core. Hang on, something's just set down outside. That'll be the rest of them, and they'll want it back."

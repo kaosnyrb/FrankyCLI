@@ -46,16 +46,16 @@
     "_theme": "Both ends are working sites with an engineer at them, so no natural landmarks and no caves."
   },
   "prose": {
-    "name": "Cargo Run: Engineer's Toolbox to <SecondPlanet>",
+    "name": "Hauling: Engineer's Toolbox to <SecondPlanet>",
     "briefing": "A retiring engineer at the <Place> wants her toolbox taken to the apprentice she trained, who runs his own site at the <SecondPlace> now.",
-    "card": "Private cargo run. Collect one toolbox from the <Place>, <Planet> and deliver it to the <SecondPlace>, <SecondPlanet>. Handle with care. Payment on delivery."
+    "card": "Local Contract. Deliver a toolbox from the <Place>, <Planet> to the <SecondPlace>, <SecondPlanet>. Payment on delivery."
   },
   "beats": [
     {
       "type": "talk",
       "at": "RECenterLocRef",
       "objective": "Talk to the engineer at the <Place>",
-      "journal": "The engineer is retiring and wants her toolbox to go to the apprentice she trained. She says he'll pretend he doesn't need it.",
+      "journal": "The retiring engineer wants her toolbox to go to the apprentice she trained, who she says will pretend he doesn't need it. I need to collect it and take it to him.",
       "person": {
         "name": "Odile Rasmussen",
         "template": "UC_NA_MASTWorkerFemale03",
@@ -109,7 +109,7 @@
       "type": "pickup",
       "at": "REMarkerMediumLocRef",
       "objective": "Collect the toolbox",
-      "journal": "It's heavier than it looks. Every tool in it has been cleaned and oiled, and the big wrench is wrapped in a cloth on its own.",
+      "journal": "I've got the toolbox. Every tool in it has been cleaned and oiled, and the big wrench is wrapped in a cloth on its own. Now I need to take it to the apprentice.",
       "model": "Meshes\\Architecture\\City\\Akila\\Unique\\Toolbox\\AK_Toolbox_01_Closed.nif",
       "name": "Engineer's Toolbox",
       "item": "Retired Engineer's Toolbox"
@@ -118,7 +118,7 @@
       "type": "talk",
       "place": "second",
       "at": "RECenterLocRef",
-      "objective": "Deliver the toolbox to the engineer at the <SecondPlace>",
+      "objective": "Deliver the toolbox to the apprentice at the <SecondPlace>",
       "journal": "I delivered the toolbox. He opened it, found the wrench in its cloth, and didn't say anything for a while.",
       "reward": "med",
       "person": {

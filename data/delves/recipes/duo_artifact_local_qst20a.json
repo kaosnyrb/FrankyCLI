@@ -49,7 +49,7 @@
       "at": "LocDungeonBossLocRef",
       "item": "Homesteader's Bag",
       "objective": "Recover the stolen belongings from the <Place>",
-      "journal": "The raider leading them at the <Place> had the homesteader's bag. I took it back. She's waiting at the <SecondPlace>."
+      "journal": "I took the homesteader's bag back from the raider leading them at the <Place>. I need to return it to her at the <SecondPlace>."
     },
     {
       "type": "talk",

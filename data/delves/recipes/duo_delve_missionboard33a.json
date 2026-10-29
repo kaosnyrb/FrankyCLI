@@ -36,14 +36,14 @@
   "prose": {
     "name": "Defense: Ashta at the <Place> on <Planet>",
     "briefing": "The <Place> sits out past Akila City's walls, in Ashta country. A pack has been testing it for a week, and the Rangers have their hands full.",
-    "card": "Defense contract. An Ashta pack has been hitting our outpost out past the walls of Akila City for a week, and the Rangers can't spare anyone. Sound the alarm and help us see the next attack through. Payment on contract completion."
+    "card": "Local Contract. Help the outpost at the <Place> on <Planet> hold against the Ashta. Payment on contract completion."
   },
   "beats": [
     {
       "type": "use",
       "at": "RECenterLocRef",
       "objective": "Sound the alarm at the <Place>",
-      "journal": "The Ashta have been circling the <Place> for a week. I sounded the alarm, and everyone there got behind a wall.",
+      "journal": "The Ashta have been circling the <Place> for a week. I sounded the alarm and everyone got behind a wall, and now I need to hold the <Place> against them.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Outpost Alarm",
       "_model": "The field terminal, approved, as 16a. A siren or a floodlight mast would say it better; Kim's shelf.",

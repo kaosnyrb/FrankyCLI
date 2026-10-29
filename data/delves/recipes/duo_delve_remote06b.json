@@ -43,7 +43,7 @@
         "chance": 25
       },
       "objective": "Clear the creatures out of the <Place>",
-      "journal": "Everything that came up out of the cave at the <Place> is dead. The survey camera is still somewhere down here.",
+      "journal": "Everything that came up out of the cave at the <Place> is dead. I need to find the survey camera somewhere down here.",
       "say": [
         "It's quiet. The camera should be where we dropped it, right by where we broke through."
       ]

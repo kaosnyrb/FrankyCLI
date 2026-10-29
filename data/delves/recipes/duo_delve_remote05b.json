@@ -44,7 +44,7 @@
         "chance": 25
       },
       "objective": "Defeat the Ecliptic commander at the <Place>",
-      "journal": "The Ecliptic commander at the <Place> is dead. The contract will be close by.",
+      "journal": "The Ecliptic commander at the <Place> is dead. I need to find the contract, which will be close by.",
       "say": [
         "The commander's down. Find that contract, it'll be close by."
       ]

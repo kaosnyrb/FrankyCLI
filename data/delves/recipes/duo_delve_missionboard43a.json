@@ -31,7 +31,7 @@
   "prose": {
     "name": "Defense: Raiders at the <Place> on <Planet>",
     "briefing": "Raiders have hit the <Place> twice this month and they're due back. The people there would like someone with a gun to stand with them.",
-    "card": "Defense contract. Raiders are expected to attack the <Place> on <Planet>. Hold the site until they withdraw. Payment on contract completion."
+    "card": "Local Contract. Hold the <Place> on <Planet> against raiders. Payment on contract completion."
   },
   "beats": [
     {

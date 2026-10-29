@@ -29,14 +29,14 @@
   "prose": {
     "name": "Recovery: The Deed on <Planet>",
     "briefing": "The owner of the <Place> died and left it to a niece, who has arrived to find it full of armed strangers.",
-    "card": "Private contract. The new owner of the <Place> on <Planet> requires the deed from the site safe before her claim can be filed. The site is occupied. Payment on contract completion."
+    "card": "Private Contract. Recover the deed from the safe at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {
       "type": "talk",
       "at": "LocDungeonOutsideEntranceMarkerLocRef",
       "objective": "Talk to the new owner outside the <Place>",
-      "journal": "The new owner of the <Place> is waiting at the door. Her uncle left her the plant, and the deed is in the safe inside.",
+      "journal": "The new owner of the <Place> is waiting at the door. Her uncle left her the plant and the deed is in the safe inside, so I need to deal with whoever runs it now.",
       "person": {
         "name": "Imogen Vey",
         "template": "UC_NA_MASTWorkerFemale01",
@@ -89,7 +89,7 @@
         "chance": 25
       },
       "objective": "Deal with whoever runs the <Place> now",
-      "journal": "Whoever ran the <Place> is dead. The safe is somewhere close.",
+      "journal": "Whoever ran the <Place> is dead. Now I need to find the safe, which is somewhere close.",
       "say": [
         "Was that the one in charge? Oh, good. I'll add that to the notes. Under 'staff'."
       ]

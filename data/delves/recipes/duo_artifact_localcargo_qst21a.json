@@ -33,7 +33,7 @@
     "_theme": "No natural or cave sites: his 09a ruling 2026-10-12 once waves spawn close behind the player, and the base's own exclusions."
   },
   "prose": {
-    "name": "Extraction: Core Samples on <Planet>",
+    "name": "Recovery: Core Samples on <Planet>",
     "briefing": "A mining crew was run off the <Place> and had to leave a case of core samples behind. They want it back, and whoever ran them off may not have gone far."
   },
   "beats": [
@@ -69,7 +69,7 @@
     {
       "type": "deliver",
       "at": "RECenterLocRef",
-      "objective": "Take the samples to the crew's drop beacon",
+      "objective": "Take the samples to the drop beacon",
       "journal": "I got the crew's core samples out of the <Place> under fire and left them at their drop beacon for pickup.",
       "model": "Meshes\\ccs\\commsmast01.nif",
       "name": "Crew Drop Beacon",

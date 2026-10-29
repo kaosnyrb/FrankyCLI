@@ -31,9 +31,9 @@
     "_theme": "Military sites. The family's marker set: outside entrance, centre, item markers, boss, wounded."
   },
   "prose": {
-    "name": "Relief: Pinned Surveyor on <Planet>",
+    "name": "Rescue: Pinned Surveyor on <Planet>",
     "briefing": "A survey detail walked into the <Place> thinking it was empty. It wasn't. Two of them got out; one is still in there, wounded.",
-    "card": "Relief contract. A survey detail is pinned down at the <Place> on <Planet>, with one wounded. Clear the site and reach them. Expect the occupiers to call for more. Payment on contract completion."
+    "card": "Local Contract. A survey detail is pinned down at the <Place> on <Planet>, one wounded. Reach them. Payment on contract completion."
   },
   "beats": [
     {
@@ -49,7 +49,7 @@
         }
       },
       "objective": "Clear the occupiers' reinforcements at the <Place>",
-      "journal": "The occupiers called for help the moment they saw me, and it came down in pods. It's dead now. Their leader is still at the <Place>, and so is the wounded surveyor.",
+      "journal": "The occupiers called for help the moment they saw me, and it came down in pods. I've dealt with it, and now I need to get to their leader and the wounded surveyor inside the <Place>.",
       "say": [
         "That was the pods coming down. Their boss is still in there, and so am I."
       ]
@@ -69,7 +69,7 @@
         "chance": 25
       },
       "objective": "Defeat the occupiers' leader at the <Place>",
-      "journal": "The occupiers' leader at the <Place> is dead. The surveyor they had pinned is still alive.",
+      "journal": "I've killed the occupiers' leader at the <Place>. Now I need to reach the surveyor they had pinned down.",
       "say": [
         "It's gone quiet. I'm by the wall, and I can't get up on my own."
       ]

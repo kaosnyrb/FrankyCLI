@@ -39,7 +39,7 @@
       "type": "talk",
       "at": "RECenterLocRef",
       "objective": "Report to the sergeant at the <Place>",
-      "journal": "The sergeant at the <Place> keeps the relay running alone. Two power cells are waiting at the drop. She wants them in the relay, left bay first.",
+      "journal": "The sergeant at the <Place> keeps the relay running alone. I need to fetch the two power cells from the drop and fit them, left bay first.",
       "person": {
         "name": "Sergeant Okafor",
         "template": "UC_NA_MASTWorkerFemale03",

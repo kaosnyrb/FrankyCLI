@@ -40,7 +40,7 @@
       "at": "LocDungeonBossLocRef",
       "item": "Prospector's Claim Papers",
       "objective": "Recover the prospector's claim papers from the <Place>",
-      "journal": "The raider leading them at the <Place> had the prospector's claim papers. I took them back. He's waiting at the <SecondPlace>."
+      "journal": "I took the prospector's claim papers back from the raider leading them at the <Place>. I need to return them to him at the <SecondPlace>."
     },
     {
       "type": "talk",

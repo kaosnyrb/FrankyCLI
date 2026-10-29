@@ -26,9 +26,9 @@
     "_theme": "Industrial dungeons; the delve marker set."
   },
   "prose": {
-    "name": "Repair: Coolant Pumps on <Planet>",
+    "name": "Repairs: Coolant Pumps on <Planet>",
     "briefing": "The <Place> can't restart until its coolant pumps are fixed, and the engineer who could fix them won't go back in.",
-    "card": "Repair contract. Two coolant pumps at the <Place> on <Planet> have failed. A toolbox is waiting at the entrance. Restore both pumps. The site is occupied. Payment on contract completion."
+    "card": "Local Contract. Repair the two coolant pumps at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {
@@ -36,7 +36,7 @@
       "at": "LocDungeonOutsideEntranceMarkerLocRef",
       "item": "Engineer's Toolbox",
       "objective": "Collect the toolbox at the <Place>",
-      "journal": "The engineer left her toolbox at the door, with a note taped to the lid: pumps, both, inside. Take your time.",
+      "journal": "The engineer left her toolbox at the door, with a note taped to the lid: pumps, both, inside. Take your time. I need to fix both pumps.",
       "model": "Meshes\\Architecture\\City\\Akila\\Unique\\Toolbox\\AK_Toolbox_01_Closed.nif",
       "name": "Engineer's Toolbox"
     },

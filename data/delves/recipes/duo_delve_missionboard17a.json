@@ -29,7 +29,7 @@
   "prose": {
     "name": "Recovery: Workers' Payroll on <Planet>",
     "briefing": "When the occupiers took the <Place>, they took the workers' payroll with it. The foreman is waiting outside.",
-    "card": "Recovery contract. The payroll for the <Place> on <Planet> was seized with the site. Recover it and return it to the site foreman, who is waiting outside. Payment on contract completion."
+    "card": "Local Contract. Recover the workers' payroll from the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {
@@ -47,7 +47,7 @@
         "chance": 25
       },
       "objective": "Defeat the occupiers' leader at the <Place>",
-      "journal": "The occupiers' leader at the <Place> is dead. She kept the payroll close.",
+      "journal": "The occupiers' leader at the <Place> is dead. Now I need to find the payroll, which she kept close.",
       "say": [
         "That's her. The payroll will be somewhere she could keep an eye on it."
       ]
@@ -57,7 +57,7 @@
       "at": "LocDungeonItemMarker03LocRef",
       "item": "Payroll Case",
       "objective": "Recover the payroll",
-      "journal": "The payroll case was where the leader could watch it, still sealed. Not a credit missing. The foreman is outside the <Place>.",
+      "journal": "The payroll case was where the leader could watch it, still sealed, not a credit missing. I need to take it to the foreman outside the <Place>.",
       "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
       "name": "Payroll Case",
       "message": {

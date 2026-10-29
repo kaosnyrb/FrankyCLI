@@ -20,7 +20,7 @@
   "prose": {
     "name": "Strike: Toll Ship over <Planet>",
     "briefing": "A crew in orbit over <Planet> has been stopping haulers and taking one container from each as a toll. They keep everything they've taken in their own hold.",
-    "card": "Strike contract. A hostile vessel over <Planet> is extorting cargo from passing haulers. Destroy it and recover the seized cargo. Expect resistance. Payment on contract completion."
+    "card": "Local Contract. Destroy the toll ship over <Planet> and recover its cargo. Payment on contract completion."
   },
   "beats": [
     {
@@ -29,7 +29,7 @@
       "target": "SHIP, UNBUILT",
       "_target": "A hostile ship, as 28a's. Not an Npc.",
       "objective": "Destroy the toll ship",
-      "journal": "The toll ship over <Planet> is gone. Everything it took off the haulers is somewhere in what's left of it.",
+      "journal": "The toll ship over <Planet> is gone. I need to find the haulers' cargo in what's left of it.",
       "say": [
         "That's them finished. Their hold will have come apart with the rest of them, so look through what's floating."
       ]

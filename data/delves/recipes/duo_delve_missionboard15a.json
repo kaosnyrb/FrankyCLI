@@ -28,16 +28,16 @@
     "_theme": "Military sites; the family's marker set."
   },
   "prose": {
-    "name": "Discharge: Deserter's Papers on <Planet>",
+    "name": "Recovery: Deserter's Papers on <Planet>",
     "briefing": "A soldier walked out of the <Place> and won't go back in. Her discharge papers are still inside.",
-    "card": "Private contract. A former soldier is waiting outside the <Place> on <Planet>. Recover her discharge papers from inside. Discretion appreciated. Payment on contract completion."
+    "card": "Private Contract. Recover a soldier's discharge papers from the <Place> on <Planet>. Discretion appreciated. Payment on contract completion."
   },
   "beats": [
     {
       "type": "talk",
       "at": "LocDungeonOutsideEntranceMarkerLocRef",
       "objective": "Talk to the soldier outside the <Place>",
-      "journal": "The soldier outside the <Place> walked out and won't go back. Her discharge papers are inside, with the officer who kept them.",
+      "journal": "The soldier outside the <Place> walked out and won't go back. Her discharge papers are inside with the officer who kept them, and I need to get them.",
       "person": {
         "name": "Corporal Mabry",
         "template": "UC_NA_MASTWorkerFemale03",
@@ -90,7 +90,7 @@
         "chance": 25
       },
       "objective": "Deal with the officer",
-      "journal": "The officer at the <Place> won't be keeping anyone else here. Her office is open now.",
+      "journal": "The officer at the <Place> won't be keeping anyone else here. Her office is open, so I need to find the papers inside.",
       "say": [
         "Is she...? Right. The papers are in her office, so bring them out to me."
       ]

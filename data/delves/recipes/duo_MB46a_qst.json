@@ -29,7 +29,7 @@
   "prose": {
     "name": "Rescue: Captured Pilot on <Planet>",
     "briefing": "A pilot set down near the <Place> to wait out a fault, and the occupiers took her inside. She is still alive.",
-    "card": "Rescue contract. One of our pilots is held at the <Place> on <Planet>. Recover her alive. Her ship can be replaced. Payment on contract completion."
+    "card": "Local Contract. One of our pilots is held at the <Place> on <Planet>. Recover her alive. Payment on contract completion."
   },
   "beats": [
     {
@@ -47,7 +47,7 @@
         "chance": 25
       },
       "objective": "Defeat the guard captain at the <Place>",
-      "journal": "The guard captain at the <Place> is dead. The pilot's cell runs off a terminal somewhere inside.",
+      "journal": "I've dealt with the guard captain at the <Place>. Now I need to find the terminal that opens the pilot's cell.",
       "say": [
         "That one had the keys. She's in a cell off their terminal, so open it."
       ]
@@ -56,7 +56,7 @@
       "type": "use",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Open the holding cell",
-      "journal": "The cell terminal's lock was a four digit code. It was 1-2-3-4. The pilot is free inside the <Place>.",
+      "journal": "The cell's lock was a four digit code, and it was 1-2-3-4. The pilot is free, and I need to talk to her.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Holding Cell Terminal"
     },

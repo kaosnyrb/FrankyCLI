@@ -50,7 +50,7 @@
     "_themes": "THREE DISJOINT POOLS, so no two links can be one site: the end is peopled (keeping the base's no-natural, no-cave exclusions); the first slate is at an unpeopled NATURAL site; the second at an unpeopled MILITARY one (DROPPED 2026-10-13, his: 'I couldn't test, think the requirements are too narrow. Let's drop the Military keyword req': now any unpeopled, non-natural site, still disjoint from both). Split on the two biggest themes in the pool (gen_delve keywords, 2026-10-08: Natural 121, Military 119); 'infrastructure and not peopled' was 16. Which fiction suits which site is Jessica's call."
   },
   "prose": {
-    "name": "Search: Soldier's Letters on <Planet>",
+    "name": "Recovery: Soldier's Letters on <Planet>",
     "briefing": "I came across a soldier's note pointing to a cache at the <SecondPlace>. Whatever he left there, he never came back for it."
   },
   "beats": [
@@ -60,7 +60,7 @@
       "place": "second",
       "objective": "Search the cache at the <SecondPlace>",
       "item": "Private's Field Note",
-      "journal": "The cache held a note from a private. His letters are stashed at the <ThirdPlace>, and he asks whoever finds this to see they get home.",
+      "journal": "The cache held a note from a private. His letters are stashed at the <ThirdPlace>, and he asks whoever finds this to see they get home. I need to find them.",
       "model": "Meshes\\ccs\\fieldcache01.nif",
       "message": {
         "title": "Field Note",
@@ -74,7 +74,7 @@
       "place": "third",
       "objective": "Find the private's letters at the <ThirdPlace>",
       "item": "Private's Unsent Letters",
-      "journal": "I've found the private's letters at the <ThirdPlace>. They're all addressed to his sister at the <Place>, so that's where they're going.",
+      "journal": "I've found the private's letters at the <ThirdPlace>. They're all addressed to his sister at the <Place>, so I need to take them to her.",
       "model": "Meshes\\ccs\\lettercache01.nif",
       "message": {
         "title": "Unsent Letters",

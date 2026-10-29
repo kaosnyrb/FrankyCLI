@@ -57,7 +57,7 @@
       "type": "pickup",
       "at": "REMarkerMediumLocRef",
       "objective": "Find the courier's crate at the <SecondPlace>",
-      "journal": "The courier's crate was out at the <SecondPlace> with the payroll ledger still in it. The pay itself went ahead to the site's locker.",
+      "journal": "I found the courier's crate at the <SecondPlace> with the payroll ledger still in it. The pay went ahead to the site's locker, so I need to take the ledger there.",
       "item": "Payroll Ledger",
       "_item": "Jessica 2026-10-19: a noun that is safe at any site, which the old 'Signed-Out Consignment (1 of 2)' was guarding against.",
       "say": [
@@ -72,7 +72,7 @@
       "type": "use",
       "at": "REContainerLocRef",
       "objective": "Sign for the pay at the <Place>",
-      "journal": "The pay locker at the <Place> had been forced and emptied. Whoever took it can't have gone far.",
+      "journal": "The pay locker at the <Place> has been forced and emptied. I need to find whoever took the pay, and they can't have gone far.",
       "say": [
         "The locker's been forced. The ledger's here. The pay isn't. Somebody knew it was coming. Go and get it back."
       ],
@@ -85,7 +85,7 @@
       "type": "recover",
       "at": "RETravelB1LocRef",
       "objective": "Recover the crew's pay",
-      "journal": "The crew's pay was out at the edge of the site, with the people who forced the locker. I took it back.",
+      "journal": "I took the crew's pay back from the people who forced the locker. Now I need to put it in the locker and sign the ledger.",
       "item": "Crew Pay Case",
       "_item": "Jessica 2026-10-19: a noun that is safe at any site, which the old 'Signed-Out Consignment (1 of 2)' was guarding against.",
       "say": [

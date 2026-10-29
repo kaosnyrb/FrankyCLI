@@ -18,7 +18,7 @@
   "prose": {
     "name": "Bounty: Crimson Fleet Raiders on <Planet>",
     "briefing": "Crimson Fleet drove the crew off the <Place> and are stripping its machinery for parts. Their leader is the one keeping them there. If the leader goes down, the rest won't hold the site for long.",
-    "card": "Crimson Fleet raiders have taken the <Place> on <Planet> and are stripping its machinery. Their leader is keeping them there. Remove the leader and the site is ours again. Payment on contract completion."
+    "card": "Local Contract. Crimson Fleet raiders hold the <Place> on <Planet>. Remove their leader. Payment on contract completion."
   },
   "speaker": {
     "name": "Site Crew",

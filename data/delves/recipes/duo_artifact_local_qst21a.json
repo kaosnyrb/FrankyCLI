@@ -57,7 +57,7 @@
       "type": "talk",
       "at": "RECenterLocRef",
       "objective": "Talk to the hauler at the <Place>",
-      "journal": "Raiders jumped a hauler and took her cargo, a crate of water filters, to the <SecondPlace>. She asked me to finish her run and take them to the <ThirdPlace>.",
+      "journal": "Raiders jumped a hauler and took her cargo, a crate of water filters, to the <SecondPlace>. I need to get the filters back and finish her run to the <ThirdPlace>.",
       "person": {
         "name": "Rhea Dunmore",
         "template": "UC_NA_MASTWorkerFemale02",
@@ -108,7 +108,7 @@
       "at": "LocDungeonBossLocRef",
       "item": "Crate of Water Filters",
       "objective": "Recover the filter crate from the <SecondPlace>",
-      "journal": "The raiders' leader at the <SecondPlace> had the crate of water filters. I took it back. It still needs to reach the <ThirdPlace>."
+      "journal": "I took the crate of water filters back from the raiders' leader at the <SecondPlace>. Now I need to finish the run to the <ThirdPlace>."
     },
     {
       "type": "talk",

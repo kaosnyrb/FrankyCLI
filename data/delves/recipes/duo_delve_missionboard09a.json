@@ -28,16 +28,16 @@
     "_theme": "Military sites; the family's marker set."
   },
   "prose": {
-    "name": "Uplink: Unsent Letters on <Planet>",
+    "name": "Defense: Unsent Letters on <Planet>",
     "briefing": "When the <Place> fell, its outbound mail was still queued on the site terminal: a month of letters home that never went. The occupiers will wipe it. The terminal can still send them, slowly.",
-    "card": "Data contract. The site terminal at the <Place> on <Planet> holds a queue of unsent personal correspondence. Start the uplink and keep it running until the queue clears. Expect resistance. Payment on contract completion."
+    "card": "Local Contract. Send the unsent mail from the terminal at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {
       "type": "use",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Start the uplink at the <Place>",
-      "journal": "The uplink is running. The queue is four hundred and twelve letters long and it sends them one at a time. Something in the <Place> has noticed.",
+      "journal": "The uplink is running. The queue is four hundred and twelve letters long and it sends them one at a time. Something in the <Place> has noticed, and I need to keep the terminal running.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Site Uplink Terminal",
       "say": [

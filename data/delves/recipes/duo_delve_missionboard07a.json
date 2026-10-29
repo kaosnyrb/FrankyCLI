@@ -27,9 +27,9 @@
     "_theme": "Military sites; the family's marker set."
   },
   "prose": {
-    "name": "Demolition: Weapons Cache on <Planet>",
+    "name": "Sabotage: Weapons Cache on <Planet>",
     "briefing": "The occupiers of the <Place> are sitting on a weapons cache. A demolition team went in and didn't come out. Their charges are still by the door.",
-    "card": "Demolition contract. The <Place> on <Planet> holds a weapons cache that must not change hands again. Our last team left their charges at the entrance. Set them on the cache and withdraw. Payment on contract completion."
+    "card": "Local Contract. Destroy the weapons cache at the <Place> on <Planet>. Charges are at the entrance. Payment on contract completion."
   },
   "beats": [
     {
@@ -37,7 +37,7 @@
       "at": "LocDungeonOutsideEntranceMarkerLocRef",
       "item": "Demolition Charges",
       "objective": "Collect the demolition charges at the <Place>",
-      "journal": "The last team's charges were by the way in, still sealed. They never got past the door. The cache is inside the <Place>.",
+      "journal": "I found the last team's charges by the way in, still sealed. They never got past the door. Now I need to set them on the cache inside.",
       "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
       "name": "Demolition Case",
       "message": {

@@ -19,16 +19,16 @@
     "_altitude": "His 2026-10-27 32 (MB01's band top, 'feels cool'), as remote_qst20a."
   },
   "prose": {
-    "name": "Salvage: Jettisoned Hold over <Planet>",
+    "name": "Recovery: Jettisoned Hold over <Planet>",
     "briefing": "A freighter dumped her hold in orbit over <Planet> to outrun raiders. The containers are still drifting, and her captain would like them back before the company counts what's missing.",
-    "card": "Salvage contract. A crew container jettisoned in orbit over <Planet> is to be recovered and returned to the freighter that lost it. Payment on contract completion."
+    "card": "Local Contract. Return a jettisoned crew container to its freighter over <Planet>. Payment on contract completion."
   },
   "beats": [
     {
       "type": "pickup",
       "at": "se_GeneralMarkerLocRef02",
       "objective": "Recover the crew's container over <Planet>",
-      "journal": "The last container wasn't freight. When the crew thought they'd have to abandon ship, they packed everything they owned into it, and it went out with the cargo.",
+      "journal": "The last container wasn't freight. When the crew thought they'd have to abandon ship, they packed everything they owned into it. I need to return it to the freighter.",
       "model": "Meshes\\ccs\\wreckcargocrate01.nif",
       "name": "Crew Container",
       "item": "Crew Container",

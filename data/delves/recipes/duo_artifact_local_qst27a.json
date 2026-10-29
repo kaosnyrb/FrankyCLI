@@ -46,7 +46,7 @@
       "type": "talk",
       "at": "RECenterLocRef",
       "objective": "Talk to the stockwoman at the <Place>",
-      "journal": "A stockwoman at the <Place> is losing two head of cattle a week to raiders, who drive them to their boss at the <SecondPlace>. She asked me to deal with him.",
+      "journal": "A stockwoman at the <Place> is losing two head of cattle a week to raiders, who drive them to their boss at the <SecondPlace>. I need to deal with him.",
       "person": {
         "name": "Maura Ketley",
         "template": "UC_NA_MASTWorkerFemale01",

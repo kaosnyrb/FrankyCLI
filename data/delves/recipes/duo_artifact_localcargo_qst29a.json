@@ -44,7 +44,7 @@
     "_theme": "An abandoned camp here, a working dig there. The base's own exclusions at both ends: no caves, no natural sites; a dig crew camps by kit, not in the wild."
   },
   "prose": {
-    "name": "Supply Run: Dig Site on <SecondPlanet>",
+    "name": "Hauling: Dig Site on <SecondPlanet>",
     "briefing": "A survey crew moved their dig off <Planet>, and their last supply drop landed at the old camp anyway. Someone should get it to them."
   },
   "beats": [
@@ -52,7 +52,7 @@
       "type": "use",
       "at": "RECenterLocRef",
       "objective": "Check the camp beacon at the <Place>",
-      "journal": "The beacon at the <Place> is still broadcasting the crew's new site: the <SecondPlace> on <SecondPlanet>. Their supplies arrived after they left.",
+      "journal": "The beacon at the <Place> is still broadcasting the crew's new site: the <SecondPlace> on <SecondPlanet>. Their supplies arrived after they left, so I need to take them out there.",
       "model": "Meshes\\ccs\\commsmast01.nif",
       "name": "Abandoned Camp Beacon",
       "say": [

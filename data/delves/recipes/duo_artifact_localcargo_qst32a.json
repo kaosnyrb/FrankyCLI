@@ -42,7 +42,7 @@
     "_theme": "Two worked sites, one person at each, both placed. Not natural and not a cave: these are people who work somewhere."
   },
   "prose": {
-    "name": "Errand: Personal Delivery on <Planet>",
+    "name": "Hauling: Personal Delivery on <Planet>",
     "briefing": "Someone at the <Place> wants a package carried to the <SecondPlace>. The posting says personal, and discreet, twice."
   },
   "beats": [
@@ -50,7 +50,7 @@
       "type": "talk",
       "at": "RECenterLocRef",
       "objective": "Talk to the sender at the <Place>",
-      "journal": "The sender wants a present carried to a woman at the <SecondPlace>. He would take it himself, but he has tried that twice. He's marked where it is.",
+      "journal": "The sender wants a present carried to a woman at the <SecondPlace>. He would take it himself, but he has tried that twice. I need to collect it where he's marked and take it to her.",
       "person": {
         "name": "Owen Pike",
         "template": "UC_NA_MASTWorkerMale01",

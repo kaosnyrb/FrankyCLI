@@ -27,7 +27,7 @@
     "_theme": "A built site the Spacers have taken: somewhere worth sending a ship for."
   },
   "prose": {
-    "name": "Assault: Spacer Drop on <Planet>",
+    "name": "Strike: Spacer Drop on <Planet>",
     "briefing": "Spacers are dropping onto the <Place> by pod. UC Security is sending a team down to retake the site, and they want someone already on the ground when the team arrives."
   },
   "beats": [

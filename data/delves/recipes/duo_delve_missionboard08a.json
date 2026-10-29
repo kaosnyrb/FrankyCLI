@@ -28,7 +28,7 @@
   "prose": {
     "name": "Recovery: Last Report on <Planet>",
     "briefing": "A unit was holding the <Place> and stopped reporting twelve days ago. Their records office wants to know what happened, and wants their tags back.",
-    "card": "Recovery contract. A unit stationed at the <Place> on <Planet> has not reported in twelve days. Find out what happened to them and recover their tags. The site may be occupied. Payment on contract completion."
+    "card": "Local Contract. Find out what happened to the unit at the <Place> on <Planet> and recover their tags. Payment on contract completion."
   },
   "beats": [
     {
@@ -63,7 +63,7 @@
         "chance": 25
       },
       "objective": "Deal with whoever holds the <Place> now",
-      "journal": "Whoever came after the unit held the <Place> for themselves. They don't now. The unit's tags should be close.",
+      "journal": "I've cleared the people who took the <Place> from the unit. Now I need to find their tags, which should be close.",
       "say": [
         "You've found them. Bring the tags home, that's all anyone here is asking for."
       ]

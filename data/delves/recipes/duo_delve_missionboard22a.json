@@ -27,9 +27,9 @@
     "_theme": "Industrial dungeons; the delve marker set."
   },
   "prose": {
-    "name": "Seizure: Purifier Shipment on <Planet>",
+    "name": "Strike: Purifier Shipment on <Planet>",
     "briefing": "The <Place> built a run of water purifiers for the settlements nearby before the occupiers took it. Now the whole run is staged to go to whoever pays most.",
-    "card": "Seizure contract. A shipment of water purifiers staged at the <Place> on <Planet> must not leave. Lock it down at the loading terminal and hold until it is secured. Payment on contract completion."
+    "card": "Local Contract. Stop the purifier shipment leaving the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {
@@ -47,7 +47,7 @@
         "chance": 25
       },
       "objective": "Defeat the occupiers' leader at the <Place>",
-      "journal": "The occupiers' leader at the <Place> is dead. Her shipment is still staged to go.",
+      "journal": "The occupiers' leader at the <Place> is dead. Now I need to lock her shipment at the loading terminal before it goes.",
       "say": [
         "That's her down. The shipment's next, so lock it at the loading terminal before anyone else can send it."
       ]
@@ -56,7 +56,7 @@
       "type": "use",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Lock the shipment at the loading terminal",
-      "journal": "The shipment is locked at the terminal. Nobody can send it now without a code they don't have, and the settlements get their water.",
+      "journal": "The shipment is locked at the terminal and nobody can send it without a code. Now I need to hold the way in against whoever comes to collect it.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Loading Terminal",
       "say": [

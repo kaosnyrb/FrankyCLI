@@ -25,7 +25,7 @@
   "prose": {
     "name": "Recovery: Stolen Part over <Planet>",
     "briefing": "A ship hit the supply run to the communications satellite over <Planet> and kept the replacement part. It hasn't left orbit.",
-    "card": "Recovery contract. A ship stole the replacement part for the communications satellite over <Planet> and is still in orbit. Deal with the ship, recover the part and fit it to the satellite. Payment on contract completion."
+    "card": "Local Contract. Recover the stolen satellite part over <Planet> and fit it. Payment on contract completion."
   },
   "beats": [
     {
@@ -34,13 +34,13 @@
       "target": "SHIP, UNBUILT",
       "_target": "A hostile ship, levelled, whatever the space shell's own target ship is or Eliza's pick. Not an Npc.",
       "objective": "Destroy the ship that took the part",
-      "journal": "The ship that hit the supply run is gone. The part should be somewhere in what's left of it."
+      "journal": "The ship that hit the supply run is gone. I need to find the part in what's left of it."
     },
     {
       "type": "recover",
       "item": "Power Regulator",
       "objective": "Recover the power regulator from the wreck",
-      "journal": "I took the power regulator back off the ship that stole it. It needs fitting to the communications satellite over <Planet>.",
+      "journal": "I took the power regulator back off the ship that stole it. I need to fit it to the communications satellite over <Planet>.",
       "say": [
         "That's our part. Now get it to the satellite before anyone else gets ideas."
       ]
@@ -48,7 +48,7 @@
     {
       "type": "deliver",
       "at": "se_TravelMarkerLocRefB02",
-      "objective": "Fit the power regulator to the communications satellite",
+      "objective": "Fit the regulator to the satellite",
       "journal": "A ship stole the communications satellite's replacement part and sat in orbit over <Planet> with it. I took it back and fitted it. The satellite is back on.",
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
       "name": "Communications Satellite",

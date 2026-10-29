@@ -36,7 +36,7 @@
   "prose": {
     "name": "Fabrication: Pressure Regulator for the <Place> on <Planet>",
     "briefing": "The water reclaimer at the <Place> blew its pressure regulator. Nobody out there can make another, and they've been rationing water since.",
-    "card": "Fabrication contract. The water reclaimer at the <Place> on <Planet> has blown its pressure regulator, and nobody out there can make another. Build one at an industrial workbench and deliver it by hand. Payment on delivery."
+    "card": "Local Contract. Build a pressure regulator for the <Place> on <Planet> and deliver it by hand. Payment on delivery."
   },
   "beats": [
     {
@@ -62,8 +62,8 @@
       },
       "_craft": "BUILT 2026-10-26 (Eliza): type craft, a COBJ cloned off his duo_co_MB11a, live from the accept until the item is made. Ingredients are placeholders, his balance.",
       "item": "Pressure Regulator",
-      "objective": "Build a pressure regulator for the <Place> at an industrial workbench",
-      "journal": "The <Place> needs a pressure regulator for its water reclaimer. I built one. Now it has to go out to them by hand."
+      "objective": "Build a pressure regulator at a workbench",
+      "journal": "I've built the pressure regulator the <Place> needs. Now I need to take it out to them by hand."
     },
     {
       "type": "talk",

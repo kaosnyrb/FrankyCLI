@@ -28,9 +28,9 @@
     "_theme": "Military sites; the family's marker set."
   },
   "prose": {
-    "name": "Resupply: Holdouts on <Planet>",
+    "name": "Hauling: Holdouts on <Planet>",
     "briefing": "A handful of soldiers are still holding part of the <Place>. They are out of almost everything.",
-    "card": "Resupply contract. Friendly forces are holding a position inside the <Place> on <Planet>. A medical crate is waiting at the entrance. Deliver it to them. Payment on contract completion."
+    "card": "Local Contract. Take the medical crate to the holdouts inside the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {
@@ -38,7 +38,7 @@
       "at": "LocDungeonOutsideEntranceMarkerLocRef",
       "item": "Medical Crate",
       "objective": "Collect the medical crate at the <Place>",
-      "journal": "The medical crate was waiting by the way in, dropped by somebody who didn't want to come any closer. The holdouts are deeper inside the <Place>.",
+      "journal": "I found the medical crate by the way in, dropped by somebody who didn't want to come any closer. Now I need to get it to the holdouts deeper inside.",
       "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
       "name": "Medical Crate"
     },
@@ -57,7 +57,7 @@
         "chance": 25
       },
       "objective": "Break through to the holdouts",
-      "journal": "The ones keeping the holdouts pinned at the <Place> are dead. The way to them is open.",
+      "journal": "The ones keeping the holdouts pinned at the <Place> are dead. The way to them is open, and I need to bring them the crate.",
       "say": [
         "That's the way clear. Go to them, they've been waiting a long time."
       ]

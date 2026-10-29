@@ -27,9 +27,9 @@
     "_theme": "Industrial dungeons; the delve marker set."
   },
   "prose": {
-    "name": "Salvage: Plant Regulator on <Planet>",
+    "name": "Recovery: Plant Regulator on <Planet>",
     "briefing": "The <Place> is a wreck, but its regulator is worth more than everything else in it, and everyone knows it.",
-    "card": "Salvage contract. We hold the salvage rights to the <Place> on <Planet>. Recover the plant regulator. Others may contest it. Payment on contract completion."
+    "card": "Local Contract. Recover the plant regulator from the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {
@@ -47,7 +47,7 @@
         "chance": 25
       },
       "objective": "Clear the occupiers from the <Place>",
-      "journal": "Whoever was holding the <Place> is dead. The regulator is still in there.",
+      "journal": "Whoever was holding the <Place> is dead. Now I need to pull the regulator out.",
       "say": [
         "That's them dealt with. Pull the regulator and be quick, we're not the only ones who know it's there."
       ]
@@ -57,7 +57,7 @@
       "at": "LocDungeonCenterMarkerLocRef",
       "item": "Plant Regulator",
       "objective": "Recover the plant regulator",
-      "journal": "I pulled the regulator out of the <Place>. It's heavier than it looks.",
+      "journal": "I've pulled the regulator out. Now I need to get it out of the <Place>.",
       "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
       "name": "Regulator Housing",
       "message": {

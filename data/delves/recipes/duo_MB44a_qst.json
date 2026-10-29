@@ -39,7 +39,7 @@
   "prose": {
     "name": "Recovery: Family Compass on <Planet>",
     "briefing": "Raiders hit a freighter carrying a family's belongings to <SecondPlace> and took the hold to the <Place>. The family only wants one thing back: a brass compass that came from Earth.",
-    "card": "Raiders took the hold of a freighter carrying our belongings, and are holding it at the <Place> on <Planet>. Keep whatever else you find. We want one thing back, a brass compass. Return it to us in <SecondPlace>. Payment on contract completion."
+    "card": "Local Contract. Raiders at the <Place> on <Planet> hold our belongings. Recover a brass compass and return it to <SecondPlace>. Payment on contract completion."
   },
   "beats": [
     {
@@ -58,7 +58,7 @@
         "chance": 25
       },
       "objective": "Defeat the raiders' leader at the <Place>",
-      "journal": "The raiders' leader at the <Place> is dead. The family's compass will be with whatever they took off the freighter.",
+      "journal": "I've dealt with the raiders' leader at the <Place>. Now I need to find the family's compass among what they took off the freighter.",
       "say": [
         "If they're dealt with, it'll be in with everything they took off us. Please look carefully, it's small."
       ]
@@ -68,7 +68,7 @@
       "at": "RECenterLocRef",
       "item": "Brass Compass",
       "objective": "Find the compass in the raiders' takings",
-      "journal": "I found the family's brass compass in the raiders' takings at the <Place>. It goes back to them in <SecondPlace>.",
+      "journal": "I found the family's brass compass in the raiders' takings at the <Place>. I need to return it to them in <SecondPlace>.",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Raiders' Takings",
       "_model": "The footlocker, approved (objects.md) and his own pick for a chest in the open. Here it is what it looks like: where raiders keep what they took.",

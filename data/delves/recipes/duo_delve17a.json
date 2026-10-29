@@ -30,7 +30,7 @@
     "_theme": "A worked site with a small team on it. She is placed by the talk beat: NonHostile mostly has nobody."
   },
   "prose": {
-    "name": "Errand: Cool Box on <Planet>",
+    "name": "Hauling: Cool Box on <Planet>",
     "briefing": "Someone at the <Place> has lost a cool box off a hauler. The posting has three exclamation marks and promises a lolly."
   },
   "beats": [
@@ -38,7 +38,7 @@
       "type": "talk",
       "at": "RECenterLocRef",
       "objective": "Talk to the organiser at the <Place>",
-      "journal": "The organiser at the <Place> lost the cool box for the team's Friday lollies off a hauler. It's out on the site somewhere, with a bag of cups. She says there's five minutes before they go soft.",
+      "journal": "The organiser at the <Place> lost the cool box for the team's Friday lollies off a hauler. I need to find it and the bag of cups before the lollies go soft.",
       "person": {
         "name": "Tess Ambry",
         "template": "UC_NA_MASTWorkerFemale03",

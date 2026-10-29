@@ -39,7 +39,7 @@
   "prose": {
     "name": "Sabotage: Banned Texts on <Planet>",
     "briefing": "A cache of banned texts has turned up at the <Place>, with an armed crew sitting on it. The posting wants them destroyed, not collected, and doesn't say why.",
-    "card": "Administrative Contract. A cache of prohibited texts has been located at the <Place> on <Planet>. Armed resistance is expected. Destroy the material on site. Do not remove or copy it. Payment on contract completion."
+    "card": "Administrative Contract. Destroy the prohibited texts at the <Place> on <Planet>. Do not copy them. Payment on contract completion."
   },
   "beats": [
     {

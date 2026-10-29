@@ -27,16 +27,16 @@
     "_theme": "Industrial dungeons; the delve marker set."
   },
   "prose": {
-    "name": "Shutdown: Runaway Plant on <Planet>",
+    "name": "Repairs: Runaway Plant on <Planet>",
     "briefing": "The <Place> has been running unattended since its crew fled, and its owners say it won't last much longer.",
-    "card": "Shutdown contract. The <Place> on <Planet> is running unattended and over its limits. Reach the control terminal and complete a safe shutdown. The site is occupied. Payment on contract completion."
+    "card": "Local Contract. Shut down the runaway plant at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {
       "type": "use",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Start the shutdown at the <Place>",
-      "journal": "The shutdown is running. The plant announces every step of it over the speakers, very politely, to everyone, including the people with guns.",
+      "journal": "The shutdown is running, and the plant announces every step of it over the speakers, very politely, to everyone, including the people with guns. I need to keep the terminal safe until it finishes.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Plant Control Terminal",
       "say": [
@@ -46,7 +46,7 @@
     {
       "type": "hold",
       "at": "LocDungeonCenterMarkerLocRef",
-      "objective": "Keep the terminal running until the shutdown completes",
+      "objective": "Defend the terminal during the shutdown",
       "journal": "The <Place> is cold. Its system announced the last step and then had nothing left to say.",
       "waves": 3,
       "size": [

@@ -21,16 +21,16 @@
     "_altitude": "His 2026-10-27 32 (MB01's band top, 'feels cool'), as remote_qst20a."
   },
   "prose": {
-    "name": "Courier: Sealed Container over <Planet>",
+    "name": "Hauling: Sealed Container over <Planet>",
     "briefing": "A sealed container is waiting in orbit over <Planet> for a courier who won't ask what's in it. The receiving end is a station.",
-    "card": "Courier contract. Collect a sealed container in orbit over <Planet> and deliver it unopened to the receiving station. Do not open the container. Payment on contract completion."
+    "card": "Local Contract. Deliver a sealed container over <Planet> to the receiving station unopened. Payment on contract completion."
   },
   "beats": [
     {
       "type": "pickup",
       "at": "se_GeneralMarkerLocRef01",
       "objective": "Collect the sealed container over <Planet>",
-      "journal": "The container's seal is older than anything else on it, and it's light for its size. I'm not to open it.",
+      "journal": "The container's seal is older than anything else on it, and it's light for its size. I'm not to open it, only deliver it to the station.",
       "model": "Meshes\\ccs\\wreckcargocrate01.nif",
       "name": "Sealed Container",
       "item": "Sealed Container",
@@ -41,7 +41,7 @@
     {
       "type": "deliver",
       "at": "se_TravelMarkerLocRefB02",
-      "objective": "Deliver the sealed container to the receiving station",
+      "objective": "Deliver the container to the station",
       "journal": "I delivered the sealed container. It held a jar of soil from Earth, sealed before anyone left, and the woman who received it went very quiet.",
       "model": "STATION, UNPICKED",
       "_model": "A small station static in orbit, not boardable. His or Kim's pick.",

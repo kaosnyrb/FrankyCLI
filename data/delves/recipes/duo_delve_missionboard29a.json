@@ -35,14 +35,14 @@
   "prose": {
     "name": "Recovery: Weather Satellite Part on <Planet>",
     "briefing": "Raiders took the replacement core for the weather satellite over <Planet> off its courier. Their leader at the <Place> has it.",
-    "card": "Recovery contract. The replacement core for the weather satellite over <Planet> was taken to the <Place>, and the leader there has it. Recover the core and fit it to the satellite. Payment on contract completion."
+    "card": "Local Contract. Recover the weather satellite's core from the <Place> and fit it. Payment on contract completion."
   },
   "beats": [
     {
       "type": "pickup",
       "at": "LocDungeonItemMarker03LocRef",
       "objective": "Recover the sensor core from the <Place>",
-      "journal": "The raiders' leader at the <Place> had the weather satellite's sensor core. I took it back. It needs fitting to the satellite over <Planet>.",
+      "journal": "I took the weather satellite's sensor core back from the raiders' leader at the <Place>. I need to fit it to the satellite over <Planet>.",
       "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
       "_model": "The C1 sealed courier case he cleared 2026-10-12 (04a's), which is what a courier would carry it in.",
       "name": "Courier's Case",
@@ -55,7 +55,7 @@
       "type": "deliver",
       "place": "third",
       "at": "se_TravelMarkerLocRefB02",
-      "objective": "Fit the sensor core to the weather satellite",
+      "objective": "Fit the core to the weather satellite",
       "journal": "Raiders at the <Place> took the weather satellite's replacement core off its courier. I took it back and fitted it in orbit over <Planet>. The satellite is reading the weather again.",
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
       "name": "Weather Satellite",

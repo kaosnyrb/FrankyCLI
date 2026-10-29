@@ -27,9 +27,9 @@
     "_theme": "Industrial dungeons; the delve marker set."
   },
   "prose": {
-    "name": "Investigation: Fire at the Works on <Planet>",
+    "name": "Survey: Fire at the Works on <Planet>",
     "briefing": "The owners of the <Place> claimed for a fire. The insurer thinks somebody set it, and wants proof either way.",
-    "card": "Investigation contract. The <Place> on <Planet> burned and its owners have claimed. Examine where the fire started and recover any evidence. The site is occupied. Payment on contract completion."
+    "card": "Insurance Contract. Find where the fire at the <Place> on <Planet> started. Payment on contract completion."
   },
   "beats": [
     {

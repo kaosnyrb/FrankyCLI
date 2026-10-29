@@ -44,7 +44,7 @@
     }
   },
   "prose": {
-    "name": "Search: Lost Walker near the <Place> on <Planet>",
+    "name": "Rescue: Lost Walker near the <Place> on <Planet>",
     "briefing": "A colonist at the <Place> says his mother went out on her morning walk yesterday and never came back."
   },
   "beats": [
@@ -52,7 +52,7 @@
       "type": "talk",
       "at": "RECenterLocRef",
       "objective": "Talk to the colonist at the <Place>",
-      "journal": "A colonist at the <Place> says his mother went out on her morning walk yesterday and never came back. I said I'd find her.",
+      "journal": "A colonist at the <Place> says his mother went out on her morning walk yesterday and never came back. I need to go and find her.",
       "person": {
         "name": "Davit Orrel",
         "template": "UC_NA_MASTWorkerMale02",

@@ -37,7 +37,7 @@
   "prose": {
     "name": "Infestation: Creatures in the <Place> on <Planet>",
     "briefing": "Something nested in the middle of the <Place> and the crew pulled out. The air scrubbers have been off since.",
-    "card": "Infestation contract. Something has nested in the <Place> on <Planet>, and the crew pulled out. Get to the control terminal and restart the air scrubbers. Expect company. Payment on contract completion."
+    "card": "Local Contract. Clear the creatures from the <Place> on <Planet> and restart its air scrubbers. Payment on contract completion."
   },
   "beats": [
     {

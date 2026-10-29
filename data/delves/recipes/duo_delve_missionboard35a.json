@@ -44,14 +44,14 @@
   "prose": {
     "name": "Recovery: Prospector's Diary on <Planet>",
     "briefing": "A prospector ran from her claim at the <Place> when strangers turned up, and left her diary behind. She's at the <SecondPlace> now, and she'd like it back.",
-    "card": "Recovery contract. A prospector had to leave her claim at the <Place> on <Planet> in a hurry and left her diary behind. It's worth nothing to anyone else. Bring it back to her at the <SecondPlace>. The site is occupied. Payment on delivery."
+    "card": "Local Contract. Recover a prospector's diary from the <Place> and bring it to the <SecondPlace>. Payment on delivery."
   },
   "beats": [
     {
       "type": "pickup",
       "at": "REMarkerMediumLocRef",
       "objective": "Find the prospector's diary at the <Place>",
-      "journal": "I found the prospector's diary at the <Place>. Fifteen days of her claim, recorded. She's waiting at the <SecondPlace>.",
+      "journal": "I found the prospector's diary at the <Place>, fifteen days of her claim recorded. She's waiting at the <SecondPlace>, so I need to take it to her.",
       "item": "Prospector's Diary",
       "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
       "_model": "STAND-IN: the slate itself is tiny on the ground. A dataslate on a crate (Kim's U4, not built) is the right look.",

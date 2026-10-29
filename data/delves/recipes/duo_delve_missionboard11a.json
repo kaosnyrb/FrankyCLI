@@ -29,7 +29,7 @@
   "prose": {
     "name": "Bounty: The Quartermaster on <Planet>",
     "briefing": "Whoever runs supplies at the <Place> has been selling stolen stock back to the people it was taken from. Her ledger proves it.",
-    "card": "Bounty contract. The quartermaster at the <Place> on <Planet> is wanted. Proof is required: recover her ledger. Payment on contract completion."
+    "card": "Local Contract. The quartermaster at the <Place> on <Planet> is wanted. Bring her ledger. Payment on contract completion."
   },
   "beats": [
     {
@@ -47,7 +47,7 @@
         "chance": 25
       },
       "objective": "Defeat the quartermaster at the <Place>",
-      "journal": "The quartermaster at the <Place> is dead. She kept a ledger, and it is still in there somewhere.",
+      "journal": "The quartermaster at the <Place> is dead. Now I need to find her ledger, which is still in there somewhere.",
       "say": [
         "That's her down. Now the ledger, because without it nothing sticks."
       ]
@@ -57,7 +57,7 @@
       "at": "LocDungeonItemMarker03LocRef",
       "item": "Quartermaster's Ledger",
       "objective": "Recover the quartermaster's ledger",
-      "journal": "The quartermaster kept every sale. Same crates, same buyers, sold twice. The ledger is mine now.",
+      "journal": "The quartermaster kept every sale: same crates, same buyers, sold twice. I've got the ledger, and now I need to get it out of the <Place>.",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Quartermaster's Footlocker",
       "message": {

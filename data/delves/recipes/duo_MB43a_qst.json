@@ -29,14 +29,14 @@
   "prose": {
     "name": "Recovery: Survey Data on <Planet>",
     "briefing": "A survey crew pulled out of the <Place> in a hurry and left a season's data locked on their site terminal. The lead wrote the code down somewhere.",
-    "card": "Data Recovery. A survey crew evacuated the <Place> on <Planet> and left their site terminal locked. Recover the code, unlock the terminal and retrieve the survey data. Expect the reason they left to still be there. Payment on completion."
+    "card": "Local Contract. Recover the survey data from the evacuated <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {
       "type": "use",
       "at": "LocDungeonOutsideEntranceMarkerLocRef",
       "objective": "Find the terminal code at the <Place>",
-      "journal": "The survey lead kept her terminal code in her toolbox by the way in, behind a photo of two kids and a dog. The terminal is somewhere inside the <Place>.",
+      "journal": "I found the survey lead's terminal code in her toolbox by the way in, behind a photo of two kids and a dog. Now I need to find the terminal inside the <Place>.",
       "model": "Meshes\\Architecture\\City\\Akila\\Unique\\Toolbox\\AK_Toolbox_01_Closed.nif",
       "name": "Survey Lead's Toolbox",
       "message": {
@@ -48,7 +48,7 @@
       "type": "use",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Unlock the survey terminal",
-      "journal": "The code worked. The terminal says the lead pulled everything to a drive before they ran and locked it in the site safe, further in.",
+      "journal": "I've unlocked the terminal. The lead pulled everything to a drive before they ran, so I need to find the site safe further in.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Survey Terminal",
       "say": [

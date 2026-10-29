@@ -49,7 +49,7 @@
       "at": "REContainerLocRef",
       "replace": true,
       "objective": "Collect the spare parts at the <Place>",
-      "journal": "I picked up a crate of spare parts at the <Place>.",
+      "journal": "I picked up a crate of spare parts at the <Place>. I need to take it to the <SecondPlace>.",
       "model": "Meshes\\ccs\\wreckcargocrate01.nif",
       "name": "Parts Crate",
       "item": "Spare Parts Crate",

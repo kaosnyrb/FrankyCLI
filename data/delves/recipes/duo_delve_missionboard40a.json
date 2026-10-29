@@ -20,7 +20,7 @@
   "prose": {
     "name": "Recovery: Lost Container over <Planet>",
     "briefing": "A cargo container slipped its mooring during a transfer over <Planet> and has been drifting ever since. The owners want it picked up. The manifest says machine parts.",
-    "card": "Recovery contract. A cargo container is adrift in orbit over <Planet>. Recover it. Contents listed as machine parts. Payment on contract completion."
+    "card": "Local Contract. Recover a drifting cargo container over <Planet>. Contents: machine parts. Payment on contract completion."
   },
   "beats": [
     {

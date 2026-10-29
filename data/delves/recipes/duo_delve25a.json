@@ -27,7 +27,7 @@
   "prose": {
     "name": "Strike: Pirate Store on <Planet>",
     "briefing": "Crimson Fleet raids on <Planet> picked up the moment they had somewhere to keep what they took. That somewhere is the <Place>.",
-    "card": "Local Contract. Crimson Fleet are storing stolen cargo at the <Place> on <Planet>. Clear the site and spoil the store so it cannot be used again. Payment on contract completion."
+    "card": "Local Contract. Spoil the pirate store at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {
@@ -44,7 +44,7 @@
         "chance": 25
       },
       "objective": "Clear the Crimson Fleet from the <Place>",
-      "journal": "The pirates holding the <Place> are dead. Their store is still there, and still full."
+      "journal": "I've cleared the pirates out of the <Place>. Now I need to spoil their store, which is still full."
     },
     {
       "type": "use",

@@ -56,7 +56,7 @@
     "_third": "The BUYER, a militia post. Non-hostile AND infrastructure, as 06."
   },
   "prose": {
-    "name": "Salvage: Militia Clasp on <Planet>",
+    "name": "Recovery: Militia Clasp on <Planet>",
     "briefing": "A salvager's note says he left a militia clasp at the <SecondPlace> and never went back for it. Something has nested there since."
   },
   "beats": [
@@ -134,6 +134,10 @@
     "_say": "Jessica's message text, spoken (his 2026-10-12: the call should be radio, not a box). Two cuts and no new words: \"I'm at the <ThirdPlace>.\" (a voice cannot say a token; the objective names the place) and the sign-off (the subtitle carries the speaker's name)."
   },
   "_people": "Names checked against his who's-who (office/staff/bryn/people.md): no family name. Templates from the talkable set, 02 so neither person shares a face with 06's. Outfits and company lists are placeholders, his to dress.",
-  "speaker": { "name": "Post Quartermaster", "voice": "GenericFemale01", "elevenlabs": "XW70ikSsadUbinwLMZ5w" },
+  "speaker": {
+    "name": "Post Quartermaster",
+    "voice": "GenericFemale01",
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w"
+  },
   "_speech": "One line: the quartermaster's call, as radio (offer.say, his 2026-10-12). It plays after the find's box is closed, so his \"either or\" holds: the offer's box is gone. Voice: Annie K, calm, grounded, unheard in game until his listen."
 }

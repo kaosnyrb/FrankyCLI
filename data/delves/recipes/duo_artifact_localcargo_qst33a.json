@@ -57,7 +57,7 @@
     "_themes": "His settlement at a quiet built site (people there, the reason the relay matters), the raiders at a built hostile site, the satellite overhead."
   },
   "prose": {
-    "name": "Repair: Relay Satellite over <Planet>",
+    "name": "Repairs: Relay Satellite over <Planet>",
     "briefing": "The relay satellite over <Planet> went dark, and the settlers at the <Place> have been cut off since. The replacement part never arrived. Raiders took it to the <SecondPlace>."
   },
   "beats": [
@@ -65,7 +65,7 @@
       "type": "talk",
       "at": "RECenterLocRef",
       "objective": "Talk to the settler at the <Place>",
-      "journal": "The relay over <Planet> is dead and the settlers at the <Place> can't call anyone. Their replacement part was taken by raiders at the <SecondPlace>. I said I'd get it and fit it.",
+      "journal": "The relay over <Planet> is dead and the settlers at the <Place> can't call anyone. Raiders at the <SecondPlace> took the replacement part, and I need to get it back and fit it.",
       "person": {
         "name": "Bram Ostrow",
         "template": "UC_NA_MASTWorkerMale02",
@@ -117,7 +117,7 @@
       "_at": "Was LocDungeonBossLocRef until 2026-10-22: a boss-marker second place is almost always a military dungeon (101 of 107), so the quest only started on a map with one close by (32p1 failed, 32p2 on the medium marker played; his: local missions are very map dependent, so there is a cap on the complexity of locations).",
       "item": "Transceiver Core",
       "objective": "Recover the transceiver core from the <SecondPlace>",
-      "journal": "The raiders' leader at the <SecondPlace> had the transceiver core. I took it back. It needs fitting in the relay satellite over <Planet>.",
+      "journal": "I took the transceiver core back from the raiders' leader at the <SecondPlace>. I need to fit it in the relay satellite over <Planet>.",
       "say": [
         "That's the part. It goes to the satellite with no lights on, you can't miss it."
       ]
@@ -126,7 +126,7 @@
       "type": "deliver",
       "place": "third",
       "at": "se_TravelMarkerLocRefB02",
-      "objective": "Fit the transceiver core in the relay satellite",
+      "objective": "Fit the core in the relay satellite",
       "journal": "The relay over <Planet> went dark and raiders at the <SecondPlace> had its replacement core. I got it back and fitted it in orbit. The settlers at the <Place> can call out again.",
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
       "name": "Relay Satellite",

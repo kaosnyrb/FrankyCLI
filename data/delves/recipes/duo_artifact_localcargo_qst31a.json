@@ -47,7 +47,7 @@
     "_theme": "A quiet worked site for the site hand to be at (he is placed by the talk beat; NonHostile mostly has nobody). The drop is anywhere that is not a cave."
   },
   "prose": {
-    "name": "Inquiry: Survey Crate on <Planet>",
+    "name": "Hauling: Survey Crate on <Planet>",
     "briefing": "A survey crew left their samples behind at the <Place>. A site hand there is holding them. I should go and ask him for the crate."
   },
   "beats": [
@@ -55,7 +55,7 @@
       "type": "talk",
       "at": "RECenterLocRef",
       "objective": "Talk to the site hand at the <Place>",
-      "journal": "The site hand says the crew left in a hurry and took his crate by mistake, lunch and all. Ours is still here. He's marked where.",
+      "journal": "The site hand says the crew left in a hurry and took his crate by mistake, lunch and all. Ours is still here, and I need to find it where he's marked.",
       "person": {
         "name": "Tobias Wren",
         "template": "UC_NA_MASTWorkerMale01",

@@ -29,7 +29,7 @@
   "prose": {
     "name": "Infestation: Nesting Predators at the <Place> on <Planet>",
     "briefing": "A survey crew wants to work the <Place>, and something has moved in.",
-    "card": "Infestation contract. Predators are nesting at the <Place> on <Planet>, and a survey crew needs the site clear. Clear them out. Payment on contract completion."
+    "card": "Local Contract. Clear the predators nesting at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

@@ -40,7 +40,7 @@
       "at": "LocDungeonBossLocRef",
       "item": "Trader's Strongbox",
       "objective": "Recover the trader's strongbox from the <Place>",
-      "journal": "The spacers at the <Place> had the trader's strongbox. I took it back. He's waiting at his stall in <SecondPlace>."
+      "journal": "I took the trader's strongbox back from the spacers at the <Place>. I need to return it to his stall in <SecondPlace>."
     },
     {
       "type": "talk",

@@ -27,9 +27,9 @@
     "_theme": "Military sites; the family's marker set."
   },
   "prose": {
-    "name": "Intercept: Courier's Orders on <Planet>",
+    "name": "Bounty: Courier's Orders on <Planet>",
     "briefing": "A courier is carrying the occupiers' orders through the <Place>. Whatever they say is coming hasn't arrived yet.",
-    "card": "Intercept contract. A courier is moving orders through the <Place> on <Planet>. Intercept her and recover the orders' contents. Payment on contract completion."
+    "card": "Local Contract. Intercept the courier at the <Place> on <Planet> and read her orders. Payment on contract completion."
   },
   "beats": [
     {
@@ -47,7 +47,7 @@
         "chance": 25
       },
       "objective": "Stop the courier at the <Place>",
-      "journal": "The courier at the <Place> is dead. Her orders are coded for the site's own terminal.",
+      "journal": "The courier at the <Place> is dead. Her orders are coded, so I need to read them on the site's own terminal.",
       "say": [
         "That's her. Her orders will be coded, but their terminal can read them if you can get to it."
       ]
@@ -56,7 +56,7 @@
       "type": "use",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Decode the orders",
-      "journal": "The orders were for reinforcements, landing at the entrance, on the hour. It's nearly the hour.",
+      "journal": "The orders were for reinforcements, landing at the entrance, on the hour. It's nearly the hour, so I need to be at the entrance when they land.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Site Terminal",
       "say": [
