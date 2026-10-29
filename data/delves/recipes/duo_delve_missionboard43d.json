@@ -41,7 +41,7 @@
         "horde"
       ],
       "objective": "Hold the <Place> against the raiders",
-      "journal": "Raiders came at the <Place> three times. I held the door while the woman who runs the canteen kept up a running commentary. They left without the dinner.",
+      "journal": "Raiders came at the <Place> three times. I held the door for the woman who runs the canteen, and they left without the dinner.",
       "say": [
         "That's them gone, and the dinner's still on the stove. Come in and eat, you've earned the big bowl."
       ],

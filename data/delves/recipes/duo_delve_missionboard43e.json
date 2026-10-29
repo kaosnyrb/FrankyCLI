@@ -23,7 +23,7 @@
   },
   "prose": {
     "name": "Defense: Raiders at the <Place> on <Planet>",
-    "briefing": "Raiders are due back at the <Place> tonight. The settlers have made sandwiches for whoever turns up to help.",
+    "briefing": "Raiders are due back at the <Place> tonight, and the volunteer who posted the job is thrilled anyone answered.",
     "card": "Local Contract. Hold the <Place> on <Planet> against raiders. Payment on contract completion."
   },
   "beats": [
@@ -41,15 +41,15 @@
         "horde"
       ],
       "objective": "Hold the <Place> against the raiders",
-      "journal": "Raiders came at the <Place> three times and didn't get in. Somebody had made sandwiches for after, and they were good sandwiches.",
+      "journal": "Raiders came at the <Place> three times and didn't get in. The volunteer who called me in was still delighted about it an hour later.",
       "say": [
-        "That's them gone! And it's only half past, so there's still time for tea, and the sandwiches made it, all of them!"
+        "That's them gone! And it's only half past, so there's still time for tea!"
       ],
       "reward": "med"
     }
   ],
   "speaker": {
-    "name": "Settler",
+    "name": "Volunteer",
     "voice": "GenericFemale01",
     "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
   },
