@@ -45,14 +45,14 @@
   },
   "prose": {
     "name": "Rescue: Lost Walker near the <Place> on <Planet>",
-    "briefing": "A colonist at the <Place> says his mother went out on her morning walk yesterday and never came back."
+    "briefing": "A colonist at the <Place> says his mother went out on her morning walk and hasn't come back for lunch."
   },
   "beats": [
     {
       "type": "talk",
       "at": "RECenterLocRef",
       "objective": "Talk to the colonist at the <Place>",
-      "journal": "A colonist at the <Place> says his mother went out on her morning walk yesterday and never came back. I need to go and find her.",
+      "journal": "A colonist at the <Place> says his mother went out on her morning walk and hasn't come back for lunch. I need to go and find her.",
       "person": {
         "name": "Davit Orrel",
         "template": "UC_NA_MASTWorkerMale02",
@@ -66,13 +66,13 @@
         ]
       },
       "greeting": [
-        "You heard the call? It's my mum. She goes walking every morning and she's always back for lunch. Yesterday she wasn't, and she still isn't."
+        "You heard the call? It's my mum. She goes walking every morning and she's always back for lunch. Today she isn't."
       ],
       "exchanges": [
         {
           "prompt": "I'll find her.",
           "reply": [
-            "She'll be out there somewhere. If she's hurt, call me. If she's fine, tell her I'm not cross. I am a bit cross."
+            "She'll be out there somewhere. If she's hurt, call me. If she's fine, tell her I'm not cross."
           ]
         },
         {
@@ -94,7 +94,7 @@
       "place": "second",
       "at": "REMarkerMediumLocRef",
       "objective": "Find the missing walker near the <SecondPlace>",
-      "journal": "A colonist at the <Place> sent me after his mother, who'd gone out walking and not come back. I found her near the <SecondPlace>, sat on a warm rock and quite all right, just turned round. I pointed her home.",
+      "journal": "A colonist at the <Place> sent me after his mother, who'd gone out walking that morning and not come back. I found her near the <SecondPlace>, sat on a warm rock and quite all right, just turned round. I pointed her home.",
       "person": {
         "name": "Maud Orrel",
         "template": "UC_NA_MASTWorkerFemale03",
@@ -103,12 +103,12 @@
         "elevenlabs": "XW70ikSsadUbinwLMZ5w",
         "hellos": [
           [
-            "Oh, hello. Lovely afternoon for it."
+            "Oh, hello. Lovely spot for it."
           ]
         ]
       },
       "greeting": [
-        "Hello. I'm sitting down because the rock's warm, not because anything's wrong. I've just got a bit turned round. Every hill out here looks like every other hill."
+        "Hello. I'm sitting down because I like this rock, it holds the sun. Nothing's wrong. I came round the far side for a change, and from here every hill looks like every other hill."
       ],
       "exchanges": [
         {
@@ -120,23 +120,23 @@
         {
           "prompt": "He says he's not cross.",
           "reply": [
-            "That means he is. It's all right, it's a nice sort of cross. It means he'd have missed me."
+            "That means he is. It's all right, it's a nice sort of cross."
           ]
         },
         {
           "prompt": "Were you frightened?",
           "reply": [
-            "Not really. I had my flask and the sun was out all afternoon. I thought someone would come along eventually, and here you are."
+            "Not really. I had my flask and the rock was warm. I thought someone would come along eventually, and here you are."
           ]
         },
         {
           "prompt": "Why do you walk out here?",
           "reply": [
-            "Because it's quiet, the ground's warm, and nobody needs anything from me. It's the best hour of my day. Today I had about nine of them."
+            "Because it's quiet and nobody needs anything from me. It's the best hour of my day."
           ]
         }
       ],
-      "_talk": "Exchange 0 points her home and ends the Delve. 'He says he's not cross' is set up by her son's closing reply; 'son' by his greeting ('my mum'). Hers is Edie Mallow's register: she is fine, and the reader learns she likes warm ground, a flask and an hour nobody needs anything from her.",
+      "_talk": "Exchange 0 points her home and ends the Delve. 'He says he's not cross' is set up by her son's closing reply; 'son' by his greeting ('my mum'). Hers is Edie Mallow's register: she is fine, and the greeting carries the one thing she likes (this rock, it holds the sun), so a player who takes exchange 0 first still leaves with it. One clock: she went out THIS morning (Frances Hale, 2026-10-29, rework applied).",
       "reward": "easy"
     }
   ],
@@ -146,7 +146,7 @@
     "elevenlabs": "iP95p4xoKVk53GoZ742B"
   },
   "broadcast": [
-    "If anyone's near the colony, we've got someone missing. She went out walking yesterday morning and didn't come back, and she knows that ground better than anyone."
+    "If anyone's near the colony, we've got someone missing. She went out walking this morning and she's not back for lunch. I know how that sounds, but she's never late."
   ],
   "_speech": "The son on the radio and in person (Chris, Charming, Down-to-Earth); his mother is Annie K, one of the two voices heard in game, and calm is exactly her. His ear decides."
 }
