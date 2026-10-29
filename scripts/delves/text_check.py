@@ -122,6 +122,7 @@ def main():
         placed = bool(place.get("who")) or any(isinstance(place.get(k), dict) and place[k].get("who")
                                                 for k in ("second", "third"))
         placed = placed or any((b.get("person") or {}).get("company") or b.get("support") for b in d.get("beats") or [])
+        placed = placed or bool((d.get("approach") or {}).get("civilians"))
         if not placed:
             for field, t in spoken_and_read(d):
                 m = PEOPLE.search(t)
