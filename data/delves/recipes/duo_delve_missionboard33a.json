@@ -43,12 +43,12 @@
       "type": "use",
       "at": "RECenterLocRef",
       "objective": "Sound the alarm at the <Place>",
-      "journal": "The Ashta have been circling the <Place> for a week. I sounded the alarm and everyone got behind a wall, and now I need to hold the <Place> against them.",
+      "journal": "The Ashta have been circling the <Place> for a week. I sounded the alarm and everyone took cover, and now I need to hold the <Place> against them.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Outpost Alarm",
       "_model": "The field terminal, approved, as 16a. A siren or a floodlight mast would say it better; Kim's shelf.",
       "say": [
-        "That's the alarm. Everybody's inside. The Ashta will have heard it too. They always come when it goes off."
+        "That's the alarm. Everybody's under cover. The Ashta will have heard it too."
       ]
     },
     {
@@ -71,7 +71,7 @@
       "revealObjective": "Kill the Ashta",
       "defend": 1,
       "say": [
-        "That's the pack gone, back out into the grass, and everyone here is safe."
+        "That's the pack gone, back out into the open. They'll be back."
       ],
       "reward": "med"
     }
@@ -82,7 +82,7 @@
     "elevenlabs": "EXAVITQu4vr4xnSDxMaL"
   },
   "broadcast": [
-    "You made it out past the walls? Get the alarm going so everyone gets inside. The Ashta come in from the long grass, and they come fast. The Rangers can't get out here till tomorrow. Tonight it's us and you."
+    "You made it out here? Get the alarm going so everyone takes cover. This was Ashta ground before anybody built on it. They come in from the open ground, and they come fast. The Rangers can't get out here in time. It's us and you."
   ],
   "_speech": "The outpost's lead, steady, has done this before. Sarah (Mature, Reassuring, Confident), in two recipes; his ear decides. Narrow, so places, factions and the creature may be said aloud (his exemption, 2026-10-26)."
 }

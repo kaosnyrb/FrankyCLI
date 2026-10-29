@@ -27,9 +27,9 @@
     "_theme": "Any site the board can place that is not a cave or a quiet (residents) site, so the pool is wide enough to repeat in. Natural landmarks alone were a pool of 3 (lint 10-29)."
   },
   "prose": {
-    "name": "Infestation: Nesting Predators at the <Place> on <Planet>",
+    "name": "Infestation: Predators at the <Place> on <Planet>",
     "briefing": "A survey crew wants to work the <Place>, and something has moved in.",
-    "card": "Local Contract. Clear the predators nesting at the <Place> on <Planet>. Payment on contract completion."
+    "card": "Local Contract. Clear the predators that have moved into the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {
@@ -46,9 +46,9 @@
         "chance": 25
       },
       "objective": "Clear the predators from the <Place>",
-      "journal": "Predators had been nesting at the <Place>. I cleared them out, and the survey crew can get to work.",
+      "journal": "Predators had moved into the <Place>. I cleared them out, and the survey crew can get to work.",
       "say": [
-        "That's it clear. I'll send the crew up in the morning."
+        "That's it clear. I'll send the crew out in the morning."
       ],
       "reward": "med"
     }
@@ -59,7 +59,7 @@
     "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
   },
   "broadcast": [
-    "We've a crew wanting to start work out there, and something's moved in since anyone last looked. Clear it out so they can get on with it."
+    "We've a crew wanting to start work out there, and something's moved in. Clear it out so they can get on with it."
   ],
   "_speech": "A crew lead who would rather be working. Lucy; his ear decides."
 }

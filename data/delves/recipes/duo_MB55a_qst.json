@@ -28,7 +28,7 @@
   },
   "prose": {
     "name": "Repairs: Runaway Plant on <Planet>",
-    "briefing": "The <Place> has been running unattended since its crew fled, and its owners say it won't last much longer.",
+    "briefing": "The <Place> has been running since its crew fled and somebody else moved in, and its owners say it won't last much longer.",
     "card": "Local Contract. Shut down the runaway plant at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
@@ -36,7 +36,7 @@
       "type": "use",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Start the shutdown at the <Place>",
-      "journal": "The shutdown is running, and the plant announces every step of it over the speakers, very politely, to everyone, including the people with guns. I need to keep the terminal safe until it finishes.",
+      "journal": "The shutdown is running, and the plant has announced it over the speakers, politely, to everyone, including the people with guns. I need to keep the terminal safe until it finishes.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Plant Control Terminal",
       "say": [
@@ -47,7 +47,7 @@
       "type": "hold",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Defend the terminal during the shutdown",
-      "journal": "The <Place> is cold. Its system announced the last step and then had nothing left to say.",
+      "journal": "I held the terminal until the shutdown finished. The <Place> is cold.",
       "waves": 3,
       "size": [
         3,

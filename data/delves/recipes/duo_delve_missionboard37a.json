@@ -30,28 +30,28 @@
       "type": "pickup",
       "at": "se_GeneralMarkerLocRef01",
       "objective": "Collect the sealed container over <Planet>",
-      "journal": "The container's seal is older than anything else on it, and it's light for its size. I'm not to open it. I need to deliver it to the station.",
+      "journal": "It's light for its size, and I'm not to open it. I need to deliver it to the station.",
       "model": "Meshes\\ccs\\wreckcargocrate01.nif",
       "name": "Sealed Container",
       "item": "Sealed Container",
       "say": [
-        "It's aboard. Bring it in slowly, I'll be waiting at the dock."
+        "It's aboard. Bring it to the station."
       ]
     },
     {
       "type": "deliver",
       "at": "se_TravelMarkerLocRefB02",
       "objective": "Deliver the container to the station",
-      "journal": "I delivered the sealed container. It held a jar of soil from Earth, sealed before anyone left, and the woman who received it went very quiet.",
+      "journal": "I delivered the sealed container. It held soil from Earth, sealed by her family the year they left.",
       "model": "STATION, UNPICKED",
       "_model": "A small station static in orbit, not boardable. His or Kim's pick.",
       "name": "Receiving Station",
       "message": {
         "title": "Container Delivered",
-        "text": "The seal breaks with a long hiss. Inside is a single jar of dark soil, labelled by hand."
+        "text": "The container is taken aboard the station."
       },
       "say": [
-        "It's soil. From the first home, from before. My grandmother sealed it the year they left, and I have never once seen it opened."
+        "It's soil. My family sealed it the year they left. Nobody's opened it since."
       ],
       "reward": "med"
     }
@@ -62,7 +62,7 @@
     "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
-    "The container's sealed and it stays that way. Collect it and bring it to the station, and please don't fly like you're in a hurry, because it can't be replaced."
+    "The container's sealed and it stays that way. Collect it and bring it to the station. Don't open it."
   ],
   "_speech": "Businesslike until the last line. Annie K, heard on 32a; his ear decides."
 }

@@ -42,14 +42,14 @@
       "objective": "Recover the power regulator from the wreck",
       "journal": "I took the power regulator back off the ship that stole it. I need to fit it to the communications satellite over <Planet>.",
       "say": [
-        "That's our part. Now get it to the satellite before anyone else gets ideas."
+        "That's our part."
       ]
     },
     {
       "type": "deliver",
       "at": "se_TravelMarkerLocRefB02",
       "objective": "Fit the regulator to the satellite",
-      "journal": "A ship stole the communications satellite's replacement part and sat in orbit over <Planet> with it. I took it back and fitted it. The satellite is back on.",
+      "journal": "A ship stole the communications satellite's replacement part and sat in orbit over <Planet> with it. I destroyed the ship, took the part out of the wreck and fitted it. The satellite is back on.",
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
       "name": "Communications Satellite",
       "message": {
@@ -57,7 +57,7 @@
         "text": "The regulator seats and the satellite powers up. Its channels open, one by one."
       },
       "say": [
-        "We're back on, and every channel's open."
+        "We're back on."
       ],
       "reward": "med"
     }

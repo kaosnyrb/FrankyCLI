@@ -28,7 +28,7 @@
   },
   "prose": {
     "name": "Recovery: Plant Regulator on <Planet>",
-    "briefing": "The <Place> is a wreck, but its regulator is worth more than everything else in it, and everyone knows it.",
+    "briefing": "The regulator at the <Place> is worth more than everything else in it, and everyone knows it.",
     "card": "Local Contract. Recover the plant regulator from the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
@@ -47,9 +47,9 @@
         "chance": 25
       },
       "objective": "Clear the occupiers from the <Place>",
-      "journal": "Whoever was holding the <Place> is dead. Now I need to pull the regulator out.",
+      "journal": "The occupiers' leader is dead. Now I need to pull the regulator out.",
       "say": [
-        "That's them dealt with. Pull the regulator and be quick, we're not the only ones who know it's there."
+        "That's their leader down. Pull the regulator, we're not the only ones who know it's there."
       ]
     },
     {
@@ -62,7 +62,7 @@
       "name": "Regulator Housing",
       "message": {
         "title": "Plant Regulator",
-        "text": "The size of a lunchbox and heavier than it has any right to be. A sticker on it reads PROPERTY OF, and nothing after."
+        "text": "The size of a lunchbox and heavier than it looks. A sticker on it reads PROPERTY OF, and nothing after."
       }
     },
     {
@@ -77,9 +77,9 @@
         }
       },
       "objective": "Get the regulator out",
-      "journal": "I salvaged the regulator from the <Place> and got it out past the people who dropped in to take it.",
+      "journal": "I salvaged the regulator from the <Place> and kept it from the people who came to take it.",
       "say": [
-        "You've still got it, even with them landing on top of you. Bring it home."
+        "You've still got it, even with the competition coming for it. Bring it home."
       ],
       "reward": "med"
     }
@@ -90,7 +90,7 @@
     "elevenlabs": "inKOuEy40NdNVHxcqekZ"
   },
   "broadcast": [
-    "The regulator's in there somewhere central. We own the rights to it, but other people don't care about rights, so be quick."
+    "The regulator's at that site. We own the rights to it, but other people don't care about rights, so be quick."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

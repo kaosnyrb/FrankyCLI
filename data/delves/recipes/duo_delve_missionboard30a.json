@@ -35,7 +35,7 @@
   },
   "prose": {
     "name": "Strike: Contraband Stockpile over <Planet>",
-    "briefing": "An armed crew is sitting on a stockpile of contraband in cargo containers beside their base over <Planet>. Nobody wants it sold.",
+    "briefing": "An armed crew is sitting on a stockpile of contraband in cargo containers beside their base over <Planet>. Station security doesn't want it sold.",
     "card": "Local Contract. Destroy the contraband containers in orbit over <Planet>. Payment on contract completion."
   },
   "beats": [
@@ -49,13 +49,13 @@
       "_model": "A space cargo container his MB01-style activator can wear. His or Kim's pick.",
       "name": "Contraband Container",
       "_group": "Three containers, any order, one objective counting them (his 'a few'), as 01a's three sensors on the ground. boardspace refuses a group today.",
-      "journal": "The first container went up like it was full of something that wanted to burn. Two more."
+      "journal": "That container went up like it was full of something that wanted to burn."
     },
     {
       "type": "use",
       "group": "stockpile",
       "at": "se_GeneralMarkerLocRef01",
-      "journal": "Another container gone. The crew's ships know exactly what I'm doing now.",
+      "journal": "That container's gone. The crew's ships are still on me.",
       "model": "CARGO CONTAINER, UNPICKED",
       "name": "Contraband Container"
     },
@@ -65,7 +65,7 @@
       "at": "se_GeneralMarkerLocRef02",
       "model": "CARGO CONTAINER, UNPICKED",
       "name": "Contraband Container",
-      "journal": "The last container is gone."
+      "journal": "That's one less container for the crew to sell."
     }
   ],
   "speaker": {
@@ -74,7 +74,7 @@
     "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
   },
   "broadcast": [
-    "You're close enough to see them now. Those containers are the job. Their ships will be on you the moment you start. Don't stop to argue with them. Just make sure none of it's left."
+    "You're close enough to see the containers now. They're the job. The crew's ships won't let you work in peace. Don't stop to fight them unless you have to. Just make sure none of it's left."
   ],
   "_speech": "Station Security: whoever posted the job, not the crew. Clara (Direct, Firm and Confident), already in five recipes; his ear decides. No names, places, factions or currency.",
   "recap": "An armed crew had a stockpile of contraband in cargo containers beside their base over <Planet>. I blew up every container. Whatever was in them won't be sold now.",

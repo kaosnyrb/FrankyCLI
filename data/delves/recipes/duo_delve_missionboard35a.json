@@ -61,13 +61,13 @@
         "audio": [
           "Day one. The readings are better than the survey said. I might actually be rich. Don't get excited.",
           "Day nine. Still not rich. Found a lot of rock that looks like money and isn't. Drank the last of the good coffee.",
-          "Day fourteen. Lights on the ridge again last night. Probably nothing. I've started sleeping with my boots on.",
-          "Day fifteen. They're not nothing. I'm going now. If someone finds this, I'm fine. I'm just not coming back for the drill."
+          "Day fourteen. Lights again last night. Probably nothing. I've started sleeping with my boots on.",
+          "Day fifteen. They're not nothing. I'm going now. If someone finds this, I'm fine. I'm just not coming back for my kit."
         ]
       },
       "_slate": "STAND-IN for an AUDIO data-slate: each entry one phase of its scene, her voice, read in order. The entries are the story; the journal and card never repeat them.",
       "say": [
-        "That's my diary. Bring it to me, I'm not far."
+        "You've got it? Bring it to me. I'll be waiting."
       ]
     },
     {
@@ -75,7 +75,7 @@
       "place": "second",
       "at": "RECenterLocRef",
       "objective": "Return the diary to the prospector at the <SecondPlace>",
-      "journal": "A prospector ran from her claim at the <Place> and left her diary behind. I brought it back to her at the <SecondPlace>.",
+      "journal": "I found the prospector's diary at the <Place> and gave it back to her at the <SecondPlace>.",
       "person": {
         "name": "Ines Calder",
         "template": "UC_NA_MASTWorkerFemale03",
@@ -92,23 +92,23 @@
         ]
       },
       "greeting": [
-        "You found it. I honestly thought it was gone. Did you listen to it? Everyone listens to it."
+        "You found it. I honestly thought it was gone. Did you listen to it?"
       ],
       "exchanges": [
         {
           "prompt": "Here's your diary.",
           "reply": [
-            "Thank you. Fifteen days of my life, and most of them about coffee. I'd give you more, but you know how much coffee I had left."
+            "Thank you. Fifteen days of my life in there, and most of it rock."
           ]
         },
         {
           "prompt": "I listened to it.",
           "reply": [
-            "Then you know I'm not rich. I'll go back for the drill one day. Not soon."
+            "Then you know I'm not rich. I'll go back for my kit one day. Not soon."
           ]
         },
         {
-          "prompt": "Who was on the ridge?",
+          "prompt": "Who did you see?",
           "reply": [
             "I never saw them properly. Lights, then voices, then I stopped waiting to find out."
           ]
@@ -116,7 +116,7 @@
         {
           "prompt": "How are you holding up?",
           "reply": [
-            "Ask me in a year. Right now, a bed with walls round it is worth more than anything I dug up."
+            "Ask me in a year. Right now, a night's sleep with my boots off is worth more than anything I dug up."
           ]
         }
       ],
@@ -130,7 +130,7 @@
     "elevenlabs": "pFZP5JQG7iQjIQuC4Bku"
   },
   "broadcast": [
-    "You're at my old claim? My diary's in there somewhere. It's small and scuffed and full of notes about rocks, and whoever's in there now won't want it."
+    "You're at my old claim? My diary's there somewhere. It's small and scuffed and full of notes about rocks, and nobody else will want it."
   ],
   "_speech": "One woman, three ways: the diary, the radio, the conversation. Lily (Velvety Actress), in one recipe so far; his ear decides. Not narrow, so roles only aloud."
 }

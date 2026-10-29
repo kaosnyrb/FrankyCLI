@@ -44,17 +44,17 @@
         "chance": 25
       },
       "objective": "Clear the Crimson Fleet from the <Place>",
-      "journal": "I've cleared the pirates out of the <Place>. Now I need to spoil their store, which is still full."
+      "journal": "I've cleared the pirates out of the <Place>. Now I need to spoil their store."
     },
     {
       "type": "use",
       "at": "RECenterLocRef",
       "objective": "Spoil the pirate store",
-      "journal": "I opened the pirates' store at the <Place> to the weather and cut the seals on every crate. Whatever they come back for won't be worth carrying.",
+      "journal": "I spoiled the pirates' store at the <Place>. Whatever they come back for won't be worth carrying.",
       "model": "Meshes\\ccs\\salvagerstash01.nif",
       "name": "Pirate Store",
       "say": [
-        "That's the store spoiled. With nowhere to keep it, they'll stop taking our runs."
+        "That's the store spoiled. They'll have to find somewhere else now."
       ],
       "reward": "med"
     }
@@ -65,7 +65,7 @@
     "elevenlabs": "iP95p4xoKVk53GoZ742B"
   },
   "broadcast": [
-    "Every run we lose ends up in the same place. Clear it out and spoil what's in there. If they've nowhere to keep it, they stop taking it."
+    "Every run we lose ends up in the same place. Clear them out and spoil what's in there. If they've nowhere to keep it, they stop taking it."
   ],
   "_speech": "Radio rules: no names, places, factions or currency. Voice is 11b's 'Chris', still unheard; his ear decides."
 }

@@ -36,7 +36,7 @@
       "type": "talk",
       "at": "LocDungeonOutsideEntranceMarkerLocRef",
       "objective": "Talk to the new owner outside the <Place>",
-      "journal": "The new owner of the <Place> is waiting at the door. Her uncle left her the plant and the deed is in the safe inside, so I need to deal with whoever runs it now.",
+      "journal": "The new owner of the <Place> is waiting outside. Her uncle left her the plant and the deed is in the safe inside, so I need to deal with whoever runs it now.",
       "person": {
         "name": "Imogen Vey",
         "template": "UC_NA_MASTWorkerFemale01",
@@ -50,19 +50,13 @@
         ]
       },
       "greeting": [
-        "You're the contractor? Wonderful. My uncle left me this place. He did not mention the people with guns."
+        "Wonderful. My uncle left me this place. I met him twice, he gave me a calculator both times. He did not mention the people with guns."
       ],
       "exchanges": [
         {
           "prompt": "I'll get your deed.",
           "reply": [
             "It's in the safe, inside. Whoever's in charge in there will have the safe. They always have the safe, don't they?"
-          ]
-        },
-        {
-          "prompt": "Did you know your uncle well?",
-          "reply": [
-            "I met him twice. He gave me a calculator both times. I think that's why he left me a factory."
           ]
         },
         {
@@ -89,9 +83,9 @@
         "chance": 25
       },
       "objective": "Deal with whoever runs the <Place> now",
-      "journal": "Whoever ran the <Place> is dead. Now I need to find the safe, which is somewhere close.",
+      "journal": "Whoever was in charge in there is dead. Now I need to open the safe.",
       "say": [
-        "Was that the one in charge? Oh, good. I'll add that to the notes. Under 'staff'."
+        "Was that the one in charge? Oh. Oh, good. I think. I'm writing that down under 'staff', I don't know where else it goes."
       ]
     },
     {
@@ -99,15 +93,15 @@
       "at": "LocDungeonItemMarker03LocRef",
       "item": "Property Deed",
       "objective": "Recover the deed from the safe",
-      "journal": "The niece who inherited the <Place> has her deed. I dealt with the people running it and took it out of the safe.",
+      "journal": "I took the niece's deed out of the safe at the <Place>, after dealing with the people running it.",
       "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
       "name": "Site Safe",
       "message": {
         "title": "Property Deed",
-        "text": "The deed, folded in three, and a calculator. Taped to the calculator: for the next one."
+        "text": "The deed, folded in three, on top of a calculator. Taped to the calculator: for the next one."
       },
       "say": [
-        "That's the deed. I suppose I own a factory now."
+        "That's the deed. I suppose I own all this now."
       ],
       "reward": "med"
     }

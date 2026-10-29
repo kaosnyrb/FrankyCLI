@@ -20,7 +20,7 @@
   },
   "prose": {
     "name": "Recovery: Ghost Freighter over <Planet>",
-    "briefing": "A freighter has been drifting dark in orbit over <Planet> for months with her hold intact. Nobody ever came back for her, and the colony below would like to know why.",
+    "briefing": "A freighter has been drifting dark in orbit over <Planet> for months. Nobody ever came back for her, and the colony below would like to know why.",
     "card": "Local Contract. Recover the cargo from the derelict freighter over <Planet> for the colony below. Payment on contract completion."
   },
   "beats": [
@@ -28,19 +28,19 @@
       "type": "pickup",
       "at": "se_GeneralMarkerLocRef01",
       "objective": "Recover the medical supplies from the freighter over <Planet>",
-      "journal": "The freighter's manifest says she was carrying the colony's medical supplies, and her company reported the whole cargo lost. I've taken it out of her hold, and I need to hand it to the colony's shuttle.",
+      "journal": "The colony's medical supplies were still in her hold, and her company reported the whole cargo lost. I've taken a crate of them out, and I need to hand it to the colony's shuttle.",
       "model": "Meshes\\ccs\\wreckcargocrate01.nif",
       "name": "Medical Supply Crate",
       "item": "Medical Supplies",
       "say": [
-        "Lost with everything aboard, they told us, and they claimed for every crate. Our shuttle's coming up to meet you, so hand them across, and I'll deal with the company myself."
+        "Lost with everything aboard, they told us, and they claimed for every crate. Our shuttle's coming up to meet you, so hand it across, and I'll deal with the company myself."
       ]
     },
     {
       "type": "deliver",
       "at": "se_TravelMarkerLocRefB02",
       "objective": "Deliver the supplies to the shuttle",
-      "journal": "The freighter over <Planet> was never lost. Her company claimed her cargo and left her drifting. I delivered the colony's medical supplies to their shuttle.",
+      "journal": "The freighter over <Planet> was never lost. Her company claimed for her cargo and left her drifting. I delivered the colony's medical supplies to their shuttle.",
       "model": "SHUTTLE, UNPICKED",
       "_model": "A small shuttle static in orbit, not boardable. His or Kim's pick.",
       "name": "Colony Shuttle",
@@ -49,7 +49,7 @@
         "text": "The shuttle takes the crate aboard and turns for the planet below."
       },
       "say": [
-        "They're aboard. There are people down here who've been waiting since spring."
+        "It's aboard. There are people down here who've been waiting since she went quiet."
       ],
       "reward": "med"
     }

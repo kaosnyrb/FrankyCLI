@@ -54,7 +54,7 @@
       "name": "Parts Crate",
       "item": "Spare Parts Crate",
       "say": [
-        "That's the one. Take it over whenever you're ready, there's no rush on the road."
+        "That's the one. Take it over, there's no rush on the road."
       ]
     },
     {
@@ -67,7 +67,7 @@
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Parts Drop",
       "say": [
-        "They've signed for it. That'll keep them running for another month."
+        "The drop's logged it. That'll keep them running for another month."
       ],
       "reward": "easy"
     }

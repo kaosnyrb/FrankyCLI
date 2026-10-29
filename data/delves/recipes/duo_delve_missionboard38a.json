@@ -20,7 +20,7 @@
   "prose": {
     "name": "Strike: Toll Ship over <Planet>",
     "briefing": "A crew in orbit over <Planet> has been stopping haulers and taking one container from each as a toll. They keep everything they've taken in their own hold.",
-    "card": "Local Contract. Destroy the toll ship over <Planet> and recover its cargo. Payment on contract completion."
+    "card": "Local Contract. Destroy the toll ship over <Planet> and recover the cargo it took. Payment on contract completion."
   },
   "beats": [
     {
@@ -36,11 +36,11 @@
     },
     {
       "type": "recover",
-      "item": "Seized Cargo",
-      "objective": "Recover the seized cargo from the wreck",
+      "item": "Stolen Cargo",
+      "objective": "Recover the stolen cargo from the wreck",
       "journal": "I recovered the cargo the toll crew took off the haulers over <Planet>. Most of it still has its owners' marks on it.",
       "say": [
-        "I can see my own container on your manifest from here. I'll put the word out so everyone who paid them can claim theirs."
+        "I can see my own container on your manifest from here. I'll put the word out that they're gone."
       ],
       "reward": "med",
       "at": "se_GeneralMarkerLocRef01"
@@ -52,7 +52,7 @@
     "elevenlabs": "7QTeMqXOsYj1AQaKLcrf"
   },
   "broadcast": [
-    "That's the ship that's been stopping us. They took one container off me last week and another this morning, and they're sitting on all of it, so take them apart and get our cargo back out of what's left."
+    "That's the ship that's been stopping us. They took one container off me last week and another one since, and they're sitting on all of it, so take them apart and get our cargo back out of what's left."
   ],
   "_speech": "A hauler who's had enough. The male voice from 23a; his ear decides."
 }
