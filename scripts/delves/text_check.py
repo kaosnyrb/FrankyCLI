@@ -21,6 +21,12 @@ PER-LINE FAULTS (each fails the run):
            so it may not say first or last), any ending (the last beat, or a choose ending), and a beat whose
            next step is said by the objective of a talk that follows in the same place.
   DASH     an em dash in any of it (his 2026-09-11 ruling; vanilla has none either).
+  PEOPLE   the words put allies beside the player (a count of them, "four of us", "you make five", "held the
+           middle with four settlers", "stand with us") and no place in the recipe has a `who`. His, 2026-10-29:
+           "do we have a check on when we mention people who should be present?", on 43b's sergeant counting four
+           shooters at a site where the build places nobody. Every field the player reads OR hears, because the
+           claim is about the world, not the wording. ⚠ `who` has no armed friendly kind (workers are civilians),
+           so a count of shooters is never true today: the fix is the words.
   SPEAKER  two letter variants of one family share a speaker name. The subtitles show it (his, 2026-10-29), so
            the same name tells a replaying player it is the same person, whatever the lines do. Frances Hale's
            forced pick on the raiders, 43a and 43e, both "Settler".
@@ -48,6 +54,33 @@ NEXT = re.compile(r"\b(I need to|I have to|I should|I'll need to|I've got to)\b"
 FIRST = re.compile(r"\b(I|I've|I'm|I'd|I'll|me|my)\b")
 NOT_VERBS = {"The", "A", "An", "One", "This", "That", "Their", "Her", "His"}
 DASH = "—"
+NUM = r"(?:two|three|four|five|six|seven|eight|\d+)"
+PEOPLE = re.compile(
+    rf"\b{NUM} of us (?:can|could|will|are|left|holding|here)\b|\byou make {NUM}\b|\b{NUM} (?:people|settlers|soldiers|of them) who can (?:shoot|fight)\b"
+    rf"|\bwith {NUM} (?:settlers|soldiers|people|others)\b"
+    r"|\b(?:held|hold|holding|fought|stand|standing|stood)\b[^.]{0,40}?\bwith (?:us|them|the settlers|the soldiers)\b",
+    re.I)
+
+
+def spoken_and_read(d):
+    """(field, text) for everything the player reads or hears; maker notes (_keys) and record fields skipped."""
+    skip = {"at", "model", "target", "list", "template", "outfit", "voice", "elevenlabs", "type", "place", "item",
+            "name", "style", "size", "species", "deal", "id", "author", "source", "schema", "theme", "choose", "group"}
+
+    def walk(o, key):
+        if isinstance(o, str):
+            if key not in skip:
+                yield key, o
+        elif isinstance(o, list):
+            for x in o:
+                yield from walk(x, key)
+        elif isinstance(o, dict):
+            for k, v in o.items():
+                if not k.startswith("_"):
+                    yield from walk(v, k)
+    for k in ("prose", "broadcast", "beats", "recap", "recapSay", "offer", "deadline"):
+        if k in d:
+            yield from walk(d[k], k)
 
 
 def words(t):
@@ -83,6 +116,14 @@ def main():
             body = card.split(".", 1)[1] if "." in card else card
             if words(body) > 25:
                 flag(rid, "CARD", "card", f"{words(body)} words: {card}")
+        place = d.get("place") or {}
+        placed = bool(place.get("who")) or any(isinstance(place.get(k), dict) and place[k].get("who")
+                                                for k in ("second", "third"))
+        if not placed:
+            for field, t in spoken_and_read(d):
+                m = PEOPLE.search(t)
+                if m:
+                    flag(rid, "PEOPLE", field, f"\"{m.group(0)}\" but nobody is placed: {t}")
         beats = d.get("beats") or []
         for i, b in enumerate(beats):
             o = b.get("objective")
@@ -124,7 +165,7 @@ def main():
     if journals:
         pct = 100 * first / journals
         print(f"\nRATES: journal first person {pct:.0f}% {'WARN, floor 75%' if pct < 75 else 'ok (floor 75%, vanilla 87%)'}")
-    print(f"\n{hits} flagged. TYPE, PAYER, CLOSER, CARD, OBJ, NEXT, DASH and SPEAKER (see the header).")
+    print(f"\n{hits} flagged. TYPE, PAYER, CLOSER, CARD, OBJ, NEXT, DASH, PEOPLE and SPEAKER (see the header).")
     return 1 if hits else 0
 
 

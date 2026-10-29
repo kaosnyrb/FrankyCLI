@@ -23,7 +23,7 @@
   },
   "prose": {
     "name": "Defense: Raiders at the <Place> on <Planet>",
-    "briefing": "Raiders have hit the <Place> twice this month, both times after dark. The settlers there have four people who can shoot and want a fifth.",
+    "briefing": "Raiders have hit the <Place> twice this month, both times after dark. The settlers there want someone who can shoot.",
     "card": "Local Contract. Hold the <Place> on <Planet> against raiders. Payment on contract completion."
   },
   "beats": [
@@ -41,7 +41,7 @@
         "horde"
       ],
       "objective": "Hold the <Place> against the raiders",
-      "journal": "Three waves at the <Place>, the last one the largest. Held the middle with four settlers who could shoot. Next: count who's hurt.",
+      "journal": "Three waves at the <Place>, the last one the largest. Held the middle until they stopped coming. Next: count who's hurt.",
       "say": [
         "Three waves, and they've stopped. Reload, then we count who's hurt."
       ],
@@ -54,7 +54,7 @@
     "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
   },
   "broadcast": [
-    "Hold the middle of the site until they stop coming. Four of us can shoot and you make five, and they'll be here after dark."
+    "Hold the middle of the site until they stop coming. They'll be here after dark."
   ],
   "_speech": "Vance Okonkwo-Reyes's register, voiced by the issuer. His ear decides the voice."
 }

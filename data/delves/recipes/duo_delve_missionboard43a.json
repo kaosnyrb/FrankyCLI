@@ -30,7 +30,7 @@
   },
   "prose": {
     "name": "Defense: Raiders at the <Place> on <Planet>",
-    "briefing": "Raiders have hit the <Place> twice this month and they're due back. The people there would like someone with a gun to stand with them.",
+    "briefing": "Raiders have hit the <Place> twice this month and they're due back. The people there would like someone with a gun.",
     "card": "Local Contract. Hold the <Place> on <Planet> against raiders. Payment on contract completion."
   },
   "beats": [
@@ -61,7 +61,7 @@
     "elevenlabs": "7QTeMqXOsYj1AQaKLcrf"
   },
   "broadcast": [
-    "Nobody here's slept right since the first time. They're back tonight, and we need someone who can shoot standing with us."
+    "Nobody here's slept right since the first time. They're back tonight, and we need someone who can shoot."
   ],
   "_speech": "Tired, practical. The technician's voice from 54a; his ear decides."
 }
