@@ -52,7 +52,7 @@
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Survey Terminal",
       "say": [
-        "You're in. It says she pulled everything to a drive before they ran, so it'll be in the site safe, further in."
+        "You're through? Then she'll have pulled it all to a drive before they ran. She always does that too. It'll be in the site safe, further in."
       ]
     },
     {
@@ -60,7 +60,7 @@
       "at": "LocDungeonItemMarker03LocRef",
       "_at": "2026-10-23 (Eliza): was LocDungeonBossContainerLocRef, which tags the boss crate itself, so the case was created inside it (his play: 'you couldn't actually reach it'). The item markers are 'used to put quest items in dungeons' (his). 03 is the nearest to the boss crate: same cell in 71 of 71 boss dungeons, median 18 m (gen_delve spread --dungeons).",
       "objective": "Recover the survey data from the site safe",
-      "journal": "A survey crew ran from the <Place> and left a season's data behind. I found the lead's code by the door, unlocked their terminal, and took the drive out of the safe at the bottom of the place.",
+      "journal": "A survey crew ran from the <Place> and left a season's data behind. I found the lead's code by the way in, unlocked their terminal, and took the drive out of the safe further in.",
       "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
       "name": "Sealed Data Case",
       "item": "Survey Data Drive",
@@ -77,7 +77,7 @@
     "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
   },
   "broadcast": [
-    "You're on site? The terminal's locked, and our lead wrote the code down somewhere near the door. She always does. Mind yourself in there. Whatever ran us out hasn't left."
+    "You're on site? The terminal's locked, and our lead wrote the code down somewhere by the way in. She always does. Mind yourself in there."
   ],
   "_speech": "Radio rules: no names, places, factions or currency. Voice is remote06b's 'Lucy' (a survey crew there too, the same register), used once so far; his ear decides."
 }

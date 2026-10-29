@@ -74,12 +74,12 @@
         "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17",
         "hellos": [
           [
-            "Watch your step. The dish cables run everywhere."
+            "You heard us, then. Good."
           ]
         ]
       },
       "greeting": [
-        "Our relay satellite's dead, and we can't call anyone. The new core for it got taken by raiders on the way here. If you've got a ship, you're the most useful person I've seen all week."
+        "No relay means no supply runs, no weather warnings, no doctor. The new core for it got taken by raiders on the way here. If you've got a ship, you're the most useful person I've seen all week."
       ],
       "exchanges": [
         {
@@ -97,13 +97,13 @@
         {
           "prompt": "Why does it matter so much?",
           "reply": [
-            "No relay, no calls. No supply runs, no weather warnings, no doctor. We've been shouting at the sky for nine days."
+            "No relay, no calls. We've been shouting at the sky for nine days."
           ]
         },
         {
           "prompt": "Could you rig something in the meantime?",
           "reply": [
-            "I tried. The dish down here can hear the satellite fine. It just won't answer. It's the core or nothing."
+            "I tried. Our set down here can hear the satellite fine. It just won't answer. It's the core or nothing."
           ],
           "perk": "BackgroundCyberneticist"
         }
@@ -119,7 +119,7 @@
       "objective": "Recover the transceiver core from the <SecondPlace>",
       "journal": "I took the transceiver core back from the raiders' leader at the <SecondPlace>. I need to fit it in the relay satellite over <Planet>.",
       "say": [
-        "That's the part. It goes to the satellite with no lights on, you can't miss it."
+        "Got it? It goes to the satellite with no lights on, you can't miss it."
       ]
     },
     {
@@ -131,7 +131,7 @@
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
       "name": "Relay Satellite",
       "say": [
-        "There it is, we can hear the whole sky again. Thank you."
+        "There it is, we can call out again. Thank you."
       ],
       "message": {
         "title": "Relay Restored",
@@ -146,7 +146,7 @@
     "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17"
   },
   "broadcast": [
-    "This is a short-range set, so if you can hear me, you're close. Our relay's dead and we can't call out. We need someone with a ship."
+    "Our relay's dead and we can't call out, so this is going out on a slate. We need someone with a ship."
   ],
   "_speech": "Same voice on the radio and in person. The broadcast says short-range on purpose: with the relay dead, nobody far off could hear it. CwhRBWXzGAHq8TQ4Fs17 is the docs' Relay Control example voice; his ear decides."
 }

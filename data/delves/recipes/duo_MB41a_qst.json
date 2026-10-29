@@ -48,7 +48,7 @@
   "prose": {
     "name": "Hauling: Engineer's Toolbox to <SecondPlanet>",
     "briefing": "A retiring engineer at the <Place> wants her toolbox taken to the apprentice she trained, who runs his own site at the <SecondPlace> now.",
-    "card": "Local Contract. Deliver a toolbox from the <Place>, <Planet> to the <SecondPlace>, <SecondPlanet>. Payment on delivery."
+    "card": "Delivery Contract. Deliver a toolbox from the <Place>, <Planet> to the <SecondPlace>, <SecondPlanet>. Payment on delivery."
   },
   "beats": [
     {
@@ -64,18 +64,18 @@
         "elevenlabs": "pFZP5JQG7iQjIQuC4Bku",
         "hellos": [
           [
-            "Mind the cables, love. Everyone trips on that one."
+            "Mind your feet, love."
           ]
         ]
       },
       "greeting": [
-        "You're the hauler? I'm retiring, and my toolbox goes to the lad I trained. It's only one box, but it's the one that matters."
+        "You're the hauler? I'm retiring, and my toolbox goes to the lad I trained. The big wrench in it was my mother's."
       ],
       "exchanges": [
         {
           "prompt": "Where's the box going?",
           "reply": [
-            "He runs his own site now, off-world. The box is by the door. Don't let him tell you he doesn't need it."
+            "He runs his own site now, off-world. The box is just there. Don't let him tell you he doesn't need it."
           ]
         },
         {
@@ -87,19 +87,7 @@
         {
           "prompt": "What's in it?",
           "reply": [
-            "Every tool I ever trusted. Half of them I made. The big wrench was my mother's, so tell him to mind it."
-          ]
-        },
-        {
-          "prompt": "Was he a good apprentice?",
-          "reply": [
-            "The worst. Asked why about everything. Took me a year to see that was the point."
-          ]
-        },
-        {
-          "prompt": "Will you miss it?",
-          "reply": [
-            "The work? No. The lad? Don't you dare tell him I said yes."
+            "Every tool I ever trusted. Half of them I made. Tell him to mind the wrench."
           ]
         }
       ],
@@ -119,7 +107,7 @@
       "place": "second",
       "at": "RECenterLocRef",
       "objective": "Deliver the toolbox to the apprentice at the <SecondPlace>",
-      "journal": "I delivered the toolbox. He opened it, found the wrench in its cloth, and didn't say anything for a while.",
+      "journal": "I delivered the toolbox to her apprentice. He said he'd call her tonight.",
       "reward": "med",
       "person": {
         "name": "Kit Navarro",
@@ -129,30 +117,24 @@
         "elevenlabs": "inKOuEy40NdNVHxcqekZ",
         "hellos": [
           [
-            "Can I help? Sorry, it's a mess in here."
+            "Can I help? Sorry, it's a mess."
           ]
         ]
       },
       "greeting": [
-        "That's her box. She actually sent it. She said she'd sell it first."
+        "That's her box. She actually sent it."
       ],
       "exchanges": [
         {
           "prompt": "She wanted you to have it.",
           "reply": [
-            "She told me I'd never be ready for this box. I suppose that means I am. I'll call her tonight."
+            "She told me I'd never be ready for this box. I'll call her tonight."
           ]
         },
         {
           "prompt": "She said you'd pretend you didn't need it.",
           "reply": [
-            "Ha. I've been borrowing a wrench off the cook for a month. Don't tell her that."
-          ]
-        },
-        {
-          "prompt": "What did she teach you?",
-          "reply": [
-            "To ask why. Every time. She called me the worst apprentice she ever had for it. She's the reason I know any of the answers."
+            "Ha. I've been borrowing a wrench for a month. Don't tell her that."
           ]
         }
       ],

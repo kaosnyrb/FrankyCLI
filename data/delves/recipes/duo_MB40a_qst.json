@@ -17,7 +17,7 @@
   },
   "prose": {
     "name": "Bounty: Crimson Fleet Raiders on <Planet>",
-    "briefing": "Crimson Fleet drove the crew off the <Place> and are stripping its machinery for parts. Their leader is the one keeping them there. If the leader goes down, the rest won't hold the site for long.",
+    "briefing": "Crimson Fleet have moved in on the <Place> and are stripping its machinery for parts. Their leader is the one keeping them there. If I take the leader down, the rest won't hold the site for long.",
     "card": "Local Contract. Crimson Fleet raiders hold the <Place> on <Planet>. Remove their leader. Payment on contract completion."
   },
   "speaker": {
@@ -26,7 +26,7 @@
     "elevenlabs": "CjIKi1zuI666pVsFrtyU"
   },
   "broadcast": [
-    "Raiders took our site, and they're pulling the machinery apart. We got out with what we could carry. Their leader's keeping them there. Take the leader down."
+    "Raiders have moved in on our site, and they're pulling the machinery apart. Some of us got out with what we could carry. Their leader's keeping them there. Take the leader down."
   ],
   "beats": [
     {
@@ -44,9 +44,9 @@
         "chance": 25
       },
       "objective": "Defeat the raid leader at the <Place>",
-      "journal": "The raid leader at the <Place> is dead. Whoever's left won't hold the site for long without them.",
+      "journal": "I killed the raid leader at the <Place>.",
       "say": [
-        "That's the leader down. The rest won't hang about now. Good work, mate."
+        "That's the leader down. The rest won't hang about now."
       ]
     }
   ],

@@ -74,7 +74,7 @@
       "_model": "The footlocker, approved (objects.md) and his own pick for a chest in the open. Here it is what it looks like: where raiders keep what they took.",
       "message": {
         "title": "Brass Compass",
-        "text": "Under someone's good shoes and a box of cutlery, wrapped in a sock: a brass compass, worn smooth on one side where a thumb has rested on it for a very long time."
+        "text": "Wrapped in a sock at the bottom of the raiders' takings: a brass compass, worn smooth on one side where a thumb has rested on it for a very long time."
       }
     },
     {
@@ -83,7 +83,7 @@
       "at": "AutofillGeneric01",
       "_at": "2026-10-23 (Eliza): New Atlantis's one AutofillGeneric01 spot (133415), city01a's shape after his 'lets just go for autofill 01 and see' for Akila. The lint refused RECenterLocRef here: no city carries a POI marker. Whether the spot reads as where a family that just moved in lives is his eye.",
       "objective": "Return the compass to the family in <SecondPlace>",
-      "journal": "Raiders took a family's belongings to the <Place>. I went in and brought back the one thing they wanted, a brass compass their great-grandmother carried from Earth.",
+      "journal": "Raiders took a family's belongings to the <Place>. I went in and brought back the one thing the family wanted back, a brass compass that came from Earth.",
       "person": {
         "name": "Nell Ashby",
         "template": "UC_NA_MASTWorkerFemale03",
@@ -92,12 +92,12 @@
         "elevenlabs": "r5iFzIytiA1rzjhWFCjW",
         "hellos": [
           [
-            "We've only just moved in, so everything's still in boxes."
+            "We've only just moved in. Not that there's much to move in with."
           ]
         ]
       },
       "greeting": [
-        "The raiders who hit our freighter took everything we own. Did they still have the compass?"
+        "Did they still have the compass?"
       ],
       "exchanges": [
         {
@@ -109,7 +109,7 @@
         {
           "prompt": "Why this and not the rest?",
           "reply": [
-            "The rest was furniture. You can buy furniture. This came from Earth. My grandmother's grandmother carried it on one of the first ships out, and it's been in somebody's pocket ever since."
+            "The rest is just things. You can buy things again. This came from Earth. My grandmother's grandmother carried it on one of the first ships out, and it's been in somebody's pocket ever since."
           ]
         },
         {

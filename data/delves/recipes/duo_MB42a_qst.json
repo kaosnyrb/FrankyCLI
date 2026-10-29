@@ -56,7 +56,7 @@
   "prose": {
     "name": "Recovery: Crash Site Cargo on <Planet>",
     "briefing": "A freighter came down at the <Place> with a consignment still aboard. Spacers got to the wreck first. The shipping firm wants its crate delivered to the <SecondPlace>.",
-    "card": "Local Contract. Recover our crate from the wreck at the <Place> and deliver it to the <SecondPlace>. Spacers present. Payment on delivery.",
+    "card": "Shipping Firm Contract. Recover our crate from the wreck at the <Place> and deliver it to the <SecondPlace>. Spacers present. Payment on delivery.",
     "_card": "Jessica's board.body verbatim, moved into the built field (ELIZA 2026-10-15). Style guide 33 s4: the issuer's we, payer on line one, flat, stock closer. Her board.title was prose.name already."
   },
   "beats": [
@@ -70,7 +70,7 @@
       "name": "Wreck Cargo Crate",
       "message": {
         "title": "Wreck Cargo Crate",
-        "text": "The crate came through the crash in better shape than the ship did. The seals are scorched, but they held."
+        "text": "The crate's seals are scorched, but they held."
       }
     },
     {
@@ -78,7 +78,7 @@
       "at": "RECenterLocRef",
       "place": "second",
       "objective": "Deliver the crate to the <SecondPlace>",
-      "journal": "A freighter went down at the <Place> and spacers were picking over the wreck. I took the consignment off them and delivered it to the <SecondPlace>, where it was meant to go.",
+      "journal": "A freighter went down at the <Place> and spacers were picking over the wreck. I got the consignment out from under them and delivered it to the <SecondPlace>, where it was meant to go.",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Consignee Drop",
       "reward": "med",
