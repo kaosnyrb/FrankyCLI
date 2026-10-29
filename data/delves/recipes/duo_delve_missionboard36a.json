@@ -20,7 +20,7 @@
   },
   "prose": {
     "name": "Recovery: Jettisoned Hold over <Planet>",
-    "briefing": "A freighter dumped her hold in orbit over <Planet> to outrun raiders. The containers are still drifting, and her captain would like them back before the company counts what's missing.",
+    "briefing": "A freighter dumped her hold in orbit over <Planet> to outrun raiders. The containers are still drifting, and her captain wants one of them back: the crew's own.",
     "card": "Local Contract. Return a jettisoned crew container to its freighter over <Planet>. Payment on contract completion."
   },
   "beats": [
@@ -28,12 +28,12 @@
       "type": "pickup",
       "at": "se_GeneralMarkerLocRef02",
       "objective": "Recover the crew's container over <Planet>",
-      "journal": "The last container wasn't freight. When the crew thought they'd have to abandon ship, they packed everything they owned into it. I need to return it to the freighter.",
+      "journal": "The container the captain wanted wasn't freight. When the crew thought they'd have to abandon ship, they packed everything they owned into it. I need to return it to the freighter.",
       "model": "Meshes\\ccs\\wreckcargocrate01.nif",
       "name": "Crew Container",
       "item": "Crew Container",
       "say": [
-        "That's the one. Everything we own is in there. We packed it when we thought we'd be leaving her, and by the time we knew we weren't, it was already gone."
+        "That's the one. We packed it when we thought we'd be leaving her. Then I dumped the hold to get away, and it went out with the rest."
       ]
     },
     {
@@ -62,5 +62,6 @@
   "broadcast": [
     "That's our cargo out there, what's left of it after we dumped the lot to get away. The company's salvagers can fetch the freight. I want the crew's container, because that one isn't freight, and it's the one with everything we own in it."
   ],
-  "_speech": "The captain, tired and a little embarrassed. Clara, in five recipes; his ear decides."
+  "_speech": "The captain, tired and a little embarrassed. Clara, in five recipes; his ear decides.",
+  "_review": "Frances Hale 2026-10-29, rework applied: one motive (the crew's container only), the fact said once aloud, 'last' gone, and she owns the order (forced pick: yes)."
 }
