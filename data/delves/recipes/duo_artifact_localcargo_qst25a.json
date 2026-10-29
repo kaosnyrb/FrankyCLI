@@ -56,7 +56,7 @@
       "objective": "Recover the medal from <SecondPlace>",
       "message": {
         "title": "Service Medal",
-        "text": "The name on the back is worn past reading. The service number under it is not, and the record lists next of kin at the <Place>."
+        "text": "The name on the back is worn past reading. The rank and service number under it are not: a sergeant's, and the record lists next of kin at the <Place>."
       },
       "item": "Colony War Service Medal",
       "model": "Meshes\\ccs\\salvagerstash01.nif",
@@ -74,7 +74,7 @@
       "journal": "I found a sergeant's Colony War medal in a salvager's stash and took it home to his family at the <Place>.",
       "message": {
         "title": "Returned",
-        "text": "His daughter turns the medal over twice, says nothing for a while, and puts it in her pocket. She pays what she can."
+        "text": "His daughter turns the medal over twice, says nothing for a while, and sets it on the memorial. She pays what she can."
       },
       "model": "Meshes\\Architecture\\City\\Akila\\Unique\\Memorial\\AK_Memorial_Podium.nif",
       "name": "Family Memorial",
@@ -126,7 +126,7 @@
     "journal": "The engraving is worn past reading, but his service record lists family at the <Place>. Word travels fast. A curator wants the medal for his war room and will pay more than the family can. It's my call.",
     "_journal": "His play 2026-10-08: \"the log doesn't read quite right, I think the family delivery one is skipped\". The log shows only the NEWEST stage's line, and the driver sets 50 (the family line) and 60 (this one) in the same instant, so 50 is never seen. So this line carries both of Jessica's sentences, verbatim, family first; her \"I should take it to them\" is dropped as the one clause the choice contradicts. ⏳ Jessica's to reword as one line if she likes.",
     "say": [
-      "You're the one with the Colony War medal?",
+      "Word gets around. You're the one with the Colony War medal?",
       "I keep a war room. People come to see what the war cost.",
       "The family can't pay what I can. Come see me. Your call."
     ],

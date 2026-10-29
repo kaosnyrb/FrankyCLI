@@ -67,7 +67,7 @@
       "objective": "Recover the clasp from the <SecondPlace>",
       "message": {
         "title": "Militia Clasp",
-        "text": "The stash is under the nest debris, intact. The name on the clasp is scratched away, but the militia number is not, and the roster lists a brother at the <Place>."
+        "text": "The stash is where he left it, intact. The name on the clasp is scratched away, but the number is not, and it traces to a dead man with a brother at the <Place>."
       },
       "item": "Militia Long Service Clasp",
       "model": "Meshes\\ccs\\buriedstash01.nif",
@@ -78,11 +78,11 @@
       "choose": "ending",
       "at": "RECenterLocRef",
       "place": "main",
-      "objective": "Return the clasp to his brother",
+      "objective": "Take the clasp to his brother",
       "journal": "I dug a militia clasp out of an infested stash and took it to the soldier's brother at the <Place>.",
       "message": {
         "title": "Returned",
-        "text": "His brother holds it up to the light to read the number, then pins it to his own jacket. He pays what he can."
+        "text": "His brother reads the number off it before he has it to the light, then sets it on the shrine. He pays what he can."
       },
       "model": "Meshes\\Architecture\\City\\Akila\\Unique\\Memorial\\AK_Memorial_Podium.nif",
       "name": "Family Shrine",
@@ -104,10 +104,10 @@
       "at": "RECenterLocRef",
       "place": "third",
       "objective": "Sell the clasp to the militia post",
-      "journal": "I dug a militia clasp out of an infested stash and sold it to a militia post for their case of honours.",
+      "journal": "I dug a militia clasp out of an infested stash and sold it to a militia post for their unit's honours.",
       "message": {
         "title": "Sold",
-        "text": "The quartermaster pays in full and sets it in the case by the door, between two others with the same unit number."
+        "text": "The quartermaster pays in full and sets it in the footlocker, between two others from his unit."
       },
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Unit Footlocker",
@@ -125,10 +125,10 @@
     }
   ],
   "offer": {
-    "journal": "The clasp's militia number matches a soldier whose brother lives at the <Place>. A militia post wants it for their case of honours and will pay more than he can. It's my call.",
+    "journal": "The clasp's militia number matches a dead soldier whose brother lives at the <Place>. A militia post wants it for their unit's honours and will pay more than he can. It's my call.",
     "say": [
-      "Heard you pulled a militia clasp out of that nest.",
-      "We keep the old unit's honours in a case by the door, so the new lot know whose post it is.",
+      "Word gets round. Heard you pulled a militia clasp out of that infested hole.",
+      "We keep the old unit's honours in a footlocker, so the new lot know whose post it is.",
       "I'll pay more than his brother can."
     ],
     "_say": "Jessica's message text, spoken (his 2026-10-12: the call should be radio, not a box). Two cuts and no new words: \"I'm at the <ThirdPlace>.\" (a voice cannot say a token; the objective names the place) and the sign-off (the subtitle carries the speaker's name)."

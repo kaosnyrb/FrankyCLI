@@ -25,7 +25,7 @@
   },
   "prose": {
     "name": "Dismantle: Security Robot on <Planet>",
-    "briefing": "The last owners of the <Place> left their security robot running when they went. It's still guarding the place, from everyone, including the people who've just bought it."
+    "briefing": "The last owners of the <Place> left their security robot running when they went. It's still guarding the place, including from the people who've just bought it."
   },
   "beats": [
     {
@@ -37,9 +37,9 @@
         "chance": 25
       },
       "objective": "Dismantle the security robot at the <Place>",
-      "journal": "The security robot at the <Place> is scrap. It was still running its last owners' patrol route. Nobody had told it they'd gone.",
+      "journal": "The security robot at the <Place> is scrap, and the new owners can move in.",
       "say": [
-        "It's down. We've been living in the ship for a fortnight, so tonight we sleep in the house."
+        "It's down. We've been living in the ship for a fortnight, so tonight we sleep in our own place."
       ],
       "reward": "med"
     }

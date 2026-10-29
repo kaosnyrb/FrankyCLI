@@ -20,7 +20,7 @@
   },
   "prose": {
     "name": "Bounty: Crimson Fleet Raiders on <Planet>",
-    "briefing": "Crimson Fleet drove the crew off the <Place> and are stripping its machinery for parts. Their leader is the one keeping them there. If the leader goes down, the rest won't hold the site for long."
+    "briefing": "Crimson Fleet have dug in at the <Place> and are stripping it for parts. Their leader is the one keeping them there. If the leader goes down, the rest won't hold the site for long."
   },
   "speaker": {
     "name": "Site Crew",
@@ -46,9 +46,9 @@
         "chance": 25
       },
       "objective": "Defeat the raid leader at the <Place>",
-      "journal": "The raid leader at the <Place> is dead. Whoever's left won't hold the site for long without them.",
+      "journal": "The raid leader at the <Place> is dead. Whoever's left won't hold the site for long without their leader.",
       "say": [
-        "Boss is down. Watch them scatter. Never gets old, that."
+        "Boss is down. Right, we'll have our site back, then."
       ]
     }
   ],

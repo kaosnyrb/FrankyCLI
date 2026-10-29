@@ -29,7 +29,7 @@
   },
   "prose": {
     "name": "Bounty: Crimson Fleet Raider on <Planet>",
-    "briefing": "A Crimson Fleet raider has holed up at the <Place> with a few of his crew. He comes down to take water from the homesteads round about. They have pooled what they can for whoever stops him."
+    "briefing": "A Crimson Fleet raider has holed up at the <Place> with a few of a crew. The raider comes down to take water from the homesteads round about. They have pooled what they can for whoever puts a stop to it."
   },
   "beats": [
     {
@@ -47,9 +47,9 @@
         "chance": 25
       },
       "objective": "Defeat the Crimson Fleet raider at the <Place>",
-      "journal": "The raider at the <Place> is dead. The homesteads round about can stop counting their water.",
+      "journal": "The raider at the <Place> is dead. The homesteads round about have their tank back on.",
       "say": [
-        "He's done, then? I'll turn the tank back on. We've had it off since Thursday."
+        "That's done, then? I'll turn the tank back on. We've had it off since Thursday."
       ],
       "reward": "med"
     }
@@ -60,7 +60,7 @@
     "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
   },
   "broadcast": [
-    "There's a man up the way who comes down for our water. He's been four times since the rains stopped. We've put a bit together between us for whoever stops him."
+    "There's one of that lot up the way who comes down for our water. Four times now, since the rains stopped. We've put a bit together between us for whoever puts a stop to it."
   ],
   "_speech": "Radio rules: no names, places, factions or currency ('a bit put together', never how much). Voice is 'Lucy' (British, casual), used twice so far, on survey crews; his ear decides."
 }
