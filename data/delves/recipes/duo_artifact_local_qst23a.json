@@ -46,9 +46,9 @@
         "chance": 25
       },
       "objective": "Defeat the Spacer captain at the <Place>",
-      "journal": "The Spacer captain at the <Place> is dead and her crew have scattered. The night shift can come out of the stores.",
+      "journal": "The Spacer captain at the <Place> is dead, and the night shift is still behind a locked door.",
       "say": [
-        "Their captain's down. I'm unlocking the stores, and nobody goes back to work until I've counted heads."
+        "Their captain's down, and the rest won't hold together long. I'll open the stores once I've counted heads."
       ],
       "reward": "med"
     }
@@ -59,7 +59,7 @@
     "elevenlabs": "EXAVITQu4vr4xnSDxMaL"
   },
   "broadcast": [
-    "A crew's come down near us, armed, and they're on their way in. I've locked the night shift in the stores. If that crew reaches the door, it's the night shift who pay for it, so get here first."
+    "A crew's come down near us, armed, and they're on their way in. I've locked the night shift in the stores. Get between that crew and the door."
   ],
   "_speech": "Radio rules: no names, places, factions or currency ('a ship', never whose). Voice is remote02a's 'Sarah' (mature, confident), used once so far; his ear decides."
 }

@@ -37,7 +37,7 @@
     {
       "type": "pickup",
       "at": "REMarkerMediumLocRef",
-      "objective": "Find the team's spare power cell at the <Place>",
+      "objective": "Find a power cell for the terminal at the <Place>",
       "model": "Meshes\\SetDressing\\PowerCell\\PowerCell01.nif",
       "name": "Spare Power Cell",
       "item": "Research Terminal Cell"
@@ -46,11 +46,11 @@
       "type": "deliver",
       "at": "RECenterLocRef",
       "objective": "Power the research terminal",
-      "journal": "The terminal is powered and the team is copying their files off-world. The uplink lit up every receiver nearby, and somebody is coming to see. I need to hold until the copy finishes.",
+      "journal": "The terminal is powered and the team is copying their files off-world. Something will have noticed. I need to hold until the copy finishes.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Research Terminal",
       "say": [
-        "We've got a connection. Copying now. Keep them off it."
+        "We've got a connection. Copying now. Keep anything off it."
       ]
     },
     {
@@ -65,7 +65,7 @@
       ],
       "defend": 2,
       "say": [
-        "That's the last file, all of it. Three years of work, and it's safe."
+        "That's all of it. Three years of work, and it's safe."
       ],
       "style": [
         "squad",
@@ -80,7 +80,7 @@
     "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
-    "We had to leave our data behind. The terminal still has it. It just needs power. Get it running and keep it running until we've copied everything."
+    "We had to leave our data behind. The terminal still has it. It just needs power. The copy's slow, and you won't be alone out there long. Get it running and keep it running until we've copied everything."
   ],
   "_speech": "Radio rules: no names, no places. Voice was ElevenLabs' 'Alice, Clear, Engaging Educator'; his ear 2026-10-27: \"Elevenlabs voice sounds like a phone system instead of a person\". Recast to Annie K, heard in game on 32a without complaint (voices.md)."
 }

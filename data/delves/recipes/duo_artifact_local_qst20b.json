@@ -40,14 +40,14 @@
       "at": "LocDungeonBossLocRef",
       "item": "Prospector's Claim Papers",
       "objective": "Recover the prospector's claim papers from the <Place>",
-      "journal": "I took the prospector's claim papers back from the raider leading them at the <Place>. I need to return them to him at the <SecondPlace>."
+      "journal": "I took the prospector's claim papers back from the raider leading the gang at the <Place>. I need to return them to him at the <SecondPlace>."
     },
     {
       "type": "talk",
       "place": "second",
       "at": "RECenterLocRef",
       "objective": "Return the claim papers to the prospector at the <SecondPlace>",
-      "journal": "Raiders took a prospector's claim papers to the <Place>. I went in after them and brought them back. He'd got as far as the door himself.",
+      "journal": "Raiders took a prospector's claim papers to the <Place>. I went in after them and brought them back.",
       "person": {
         "name": "Tomas Reyburn",
         "template": "UC_NA_MASTWorkerMale02",
@@ -56,24 +56,18 @@
         "elevenlabs": "iP95p4xoKVk53GoZ742B",
         "hellos": [
           [
-            "Mind the edge. It's further down than it looks."
+            "You're back."
           ]
         ]
       },
       "greeting": [
-        "They took my drill as well, and I couldn't care less about the drill. Go on, then. Did they still have them?"
+        "They took my drill as well, and I couldn't care less about the drill. I got as far as the door myself, heard them laughing, and walked back out. Did they still have them?"
       ],
       "exchanges": [
         {
-          "prompt": "I found your claim papers.",
+          "prompt": "I've got your claim papers.",
           "reply": [
-            "That's them. Eleven years of survey work, and it fits in a case. Without this I'm just a man standing in a hole."
-          ]
-        },
-        {
-          "prompt": "You could have gone in yourself.",
-          "reply": [
-            "I did. Got as far as the door, heard them laughing, and walked back out. I'm not proud of it."
+            "That's them. Eleven years on that ground, and it fits in a case."
           ]
         },
         {

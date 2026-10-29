@@ -47,11 +47,11 @@
       "type": "pickup",
       "at": "REMarkerMediumLocRef",
       "objective": "Find the Reclaimer Housing at the <SecondPlace>",
-      "journal": "I found the housing crate, dropped well short of where it was going. The manifest says a filter core was sent on ahead. I should take the housing to the <Place>.",
+      "journal": "I found the housing crate at the <SecondPlace>, strapped down, with a route chalked on the lid. Whoever carried it meant to come back. The manifest says a filter core went on ahead. I should take the housing to the <Place>.",
       "place": "second",
       "message": {
         "title": "Manifest",
-        "text": "The manifest lists two crates for the <Place>: this one, the reclaimer housing, and a filter core sent on ahead. Signed out, never signed in."
+        "text": "The manifest lists two crates for the <Place>: this one, the reclaimer housing, never signed in, and a filter core, signed in. Someone has chalked a route on the lid."
       },
       "item": "Reclaimer Housing (1 of 2)",
       "_item": "Jessica's, 2026-09-24 pm (office/projects/delves/testcase-01-two-halves.md, 'MESSAGE BOXES, AND THE PART GETS A NAME'), on his 'we might need message boxes as the piece missing is super vague'. They replace 'Signed-Out Consignment'. Her rule, narrowed: name the objects, never describe the site.",
@@ -63,12 +63,12 @@
       "type": "use",
       "at": "RECenterLocRef",
       "objective": "Deliver the Housing to the <Place>",
-      "journal": "The filter core reached the <Place> two days ago and was taken from its crate overnight. Without it the reclaimer stays offline. I need to find whoever took it.",
+      "journal": "The filter core reached the <Place> and was taken. Without it the reclaimer stays offline. I need to find whoever took it.",
       "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
       "name": "Water Reclaimer",
       "_name": "His ask, 2026-09-24: \"change the delivery point to like a machine? it's the water plant thing\". The base activator is BossContainer_Science01 named 'Delivery Location'. WaterFiltrationCart01 is Eliza's placeholder pick (alternative: the LargeWaterStorage tanks); 'Water Reclaimer' is Jessica's own noun for the job.",
       "say": [
-        "That's the housing. The core's gone. Someone opened the crate in the night. We need it back, or we're drinking recycled for another week."
+        "That's the housing. Now the core. We need it back, or we're off site another week."
       ]
     },
     {
@@ -88,9 +88,9 @@
       "returnTo": 2,
       "at": "RECenterLocRef",
       "objective": "Get the Reclaimer Running",
-      "journal": "A water reclaimer bound for the <Place> was shipped in two crates, and neither reached it whole. I found the lost housing, recovered the stolen filter core and got the reclaimer running.",
+      "journal": "A water reclaimer bound for the <Place> was shipped in two crates. One never arrived and the other was robbed after it did. I found the lost housing, recovered the stolen filter core and got the reclaimer running.",
       "say": [
-        "Water's in the line. That's the first clean water we've had in a week."
+        "Water's in the line. We're coming back."
       ]
     }
   ],
@@ -102,7 +102,7 @@
     "elevenlabs": "dgkKQcJqyy5AP0dqleUU"
   },
   "broadcast": [
-    "We're still waiting on a reclaimer housing that was signed out to us and never turned up. Until it does, the whole site's on rationed water."
+    "We're still waiting on a reclaimer housing that never turned up, and someone's walked off with the filter core. Until we have both, nobody's back on site."
   ],
   "_broadcast": "Added 2026-10-27 with 24a's, his 'There's like no radio at the start' (same family, same gap).",
   "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides. His \"either or\" 2026-10-09: a beat carries a spoken line OR a message box, never both; the spoken beats lost their boxes."

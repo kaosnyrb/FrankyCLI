@@ -43,9 +43,9 @@
         "chance": 25
       },
       "objective": "Put down the escaped specimens at the <Place>",
-      "journal": "Every specimen that walked out of the broken pens is dead at the <Place>. Their keeper asked how they went, and I told them: fighting.",
+      "journal": "Every specimen that walked out of the broken pens is dead at the <Place>. Their keeper asked how they went, and I said: fighting.",
       "say": [
-        "So every one of them went down fighting, the way their mothers did. Thank you for doing it properly, and doing it quickly. I will write each of their names in the pen book tonight."
+        "So every one of them went down fighting, the way their mothers did. Thank you for doing it properly. I will write each of their names in the pen book tonight."
       ],
       "reward": "med"
     }

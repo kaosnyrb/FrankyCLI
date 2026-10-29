@@ -47,7 +47,7 @@
   },
   "prose": {
     "name": "Recovery: Relay Dish on <Planet>",
-    "briefing": "The <Place> has been without a comms relay for over a week. The dish was signed out to them and never arrived, so I should find where it stopped.",
+    "briefing": "The <Place> has been without long-range comms for over a week. The dish was signed out to them and never arrived, so I should find where it stopped.",
     "_prose": "Artifact family title shape, Category: thing on <Planet> (style guide 4b), as testcase 01. Journal lines follow section 3: first person, what just happened then what next, about 23 words, and beat 4 is the standalone recap."
   },
   "beats": [
@@ -55,7 +55,7 @@
       "type": "pickup",
       "at": "REMarkerMediumLocRef",
       "objective": "Find the Relay Dish at the <SecondPlace>",
-      "journal": "I found the dish crate, set down well short of the <Place>. The tag says the transmitter went ahead on its own. I should take the dish there.",
+      "journal": "I found the dish crate at the <SecondPlace>, nowhere near the <Place>. The tag says the transmitter went ahead on its own. I should take the dish there.",
       "place": "second",
       "message": {
         "title": "Shipping Tag",
@@ -71,14 +71,14 @@
       "type": "use",
       "at": "RECenterLocRef",
       "objective": "Deliver the Dish to the <Place>",
-      "journal": "The transmitter reached the <Place> and was taken from its crate before anyone could fit it. Without it the dish is just a dish. I need to find who took it.",
+      "journal": "The transmitter's crate at the <Place> was open and empty when I got there. Without it the dish is just a dish. I need to find who took it.",
       "model": "Meshes\\ccs\\relaydish01.nif",
       "name": "Comms Relay",
       "_model": "2026-10-08, his kitbash: a comms console with an antenna mast, Overtime's own asset (packed in du_overtime - Main.ba2 and Main_ps.ba2). Replaced two vanilla dishes the same morning: TripodFloor01 HANGS below its origin (OBND z -2.14 to +0.06) and sat 2.1 m underground; A_01 stands on its origin but is a dish lying on the ground (his: 'the dish is good but just sitting on the ground'). Before using a mesh as a placed activator, read its lowest z.",
       "_relaydish": "2026-10-08 09:3x, his go: the FIRST kitbash the office built without NifSkope (spike office/spikes/2026-10-08-kitbash-without-nifskope.md): his machinebase console with a quarter-scale vanilla SatelliteDish_A_01 pasted at 2.2 m, turned 90. Tree bounds z 0.00..3.19, STANDS. Loose in Steam Data for the test; NOT yet in either archive, so it must be packed before a release.",
       "_name": "PLACEHOLDER, Jessica's pick 2026-10-02 off `gen_inspect static Satellite`: a free-standing tripod dish (RadarDish01 and the CommRadarDish stack were the alternatives). Never seen in game as an activator; his eye decides whether it reads and sits right.",
       "say": [
-        "The dish is no good without the transmitter, and someone's walked off with it. Whoever took it is trying to sell it. Get it back."
+        "I've had the mount ready all week. The dish is no good without the transmitter, and its crate's open. Someone had it before we did. Get it back."
       ]
     },
     {
@@ -103,7 +103,7 @@
       "returnTo": 2,
       "at": "RECenterLocRef",
       "objective": "Bring the Relay Online",
-      "journal": "A comms relay bound for the <Place> was shipped in two crates, and neither arrived whole. I found the dish, took the transmitter back from the thieves and brought the relay online.",
+      "journal": "A comms relay bound for the <Place> was shipped in two crates. One stopped short and the other was robbed. I found the dish, took the transmitter back from the thieves and brought the relay online.",
       "say": [
         "We're live, and half the crew's already queuing to call home."
       ]
@@ -117,7 +117,7 @@
     "elevenlabs": "wCizWKvnaS3LOIUwHo98"
   },
   "broadcast": [
-    "We've been without a relay for over a week. The dish was signed out to us and it never turned up, so somewhere between there and here, it's sitting in a crate."
+    "We've had no long-range comms for over a week. The dish was signed out to us and it never turned up, so it's sitting in a crate somewhere."
   ],
   "_broadcast": "Added 2026-10-27, his: 'There's like no radio at the start of this one'. One take; it sets up the crate (the pickup's box) without naming a place.",
   "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides. His \"either or\" 2026-10-09: a beat carries a spoken line OR a message box, never both; the spoken beats lost their boxes."
