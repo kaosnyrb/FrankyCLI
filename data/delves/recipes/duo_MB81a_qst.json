@@ -1,0 +1,85 @@
+{
+  "schema": 2,
+  "id": "duo_MB81a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 22:08 \"ok now lets look at eve combat missions\", then 22:09 \"yup\"",
+  "_note": [
+    "THE COMBAT FAMILY, 9: THE TURRETS. Plan: home-office office/projects/delves/combat-family.md.",
+    "EVE's stasis towers: defences that shoot first. Three turrets in any order, then whoever's left.",
+    "STAND-IN: real firing turrets (the model is a placeholder; a destroy on a static does not shoot back). Same",
+    "family as MB64a's mines. Pay: hard."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A built site a crew has fortified."
+  },
+  "prose": {
+    "name": "Strike: Gun Emplacements at the <Place> on <Planet>",
+    "briefing": "The crew at the <Place> has put up automated turrets. The watch wants the guns down and the crew cleared.",
+    "card": "Local Contract. Destroy the turrets at the <Place> on <Planet> and clear the crew. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "destroy",
+      "group": "turrets",
+      "at": "RECenterLocRef",
+      "model": "TURRET, UNPICKED",
+      "_model": "STAND-IN: a firing turret, hostile from arrival. Eliza's.",
+      "name": "Turret",
+      "objective": "Destroy the turrets at the <Place>",
+      "journal": "That turret's scrap."
+    },
+    {
+      "type": "destroy",
+      "group": "turrets",
+      "at": "REMarkerMediumLocRef",
+      "model": "TURRET, UNPICKED",
+      "_model": "STAND-IN: a firing turret, hostile from arrival. Eliza's.",
+      "name": "Turret",
+      "journal": "That turret won't be shooting at anyone again."
+    },
+    {
+      "type": "destroy",
+      "group": "turrets",
+      "at": "REContainerLocRef",
+      "model": "TURRET, UNPICKED",
+      "_model": "STAND-IN: a firing turret, hostile from arrival. Eliza's.",
+      "name": "Turret",
+      "journal": "That turret's down."
+    },
+    {
+      "type": "clear",
+      "at": "REMarkerMediumLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 3,
+        "max": 5,
+        "species": "mix"
+      },
+      "objective": "Clear the crew from the <Place>",
+      "journal": "I knocked out the turrets at the <Place> and cleared the crew.",
+      "say": [
+        "That's the place quiet. Nice work on the guns."
+      ],
+      "reward": "hard"
+    }
+  ],
+  "speaker": {
+    "name": "Assault Lead",
+    "voice": "GenericMale01",
+    "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
+  },
+  "broadcast": [
+    "Their guns shoot before they ask. Take the turrets out first, then deal with whoever's left."
+  ],
+  "_speech": "Military, economical. A stand-in voice; his ear decides."
+}

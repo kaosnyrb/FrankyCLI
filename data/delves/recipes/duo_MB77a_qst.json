@@ -1,0 +1,72 @@
+{
+  "schema": 2,
+  "id": "duo_MB77a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 22:08 \"ok now lets look at eve combat missions\", then 22:09 \"yup\"",
+  "_note": [
+    "THE COMBAT FAMILY, 5: WORLDS COLLIDE. Plan: home-office office/projects/delves/combat-family.md.",
+    "EVE's Worlds Collide: two factions already fighting when you arrive, and you pick a side by whose boss you kill.",
+    "STAND-INS: place.feud (two lists spawned hostile to each other) and the second boss; choose endings on a board",
+    "are Eliza's to confirm. Voiced lines name neither faction. Pay: hard."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A built site two crews are fighting over.",
+    "feud": {
+      "a": "duo_GangMembersList_Spacer",
+      "b": "ECLIPTIC LIST, UNPICKED",
+      "min": 3,
+      "max": 5
+    },
+    "_feud": "STAND-IN: two gangs at the site, hostile to each other and to him. Eliza's field."
+  },
+  "prose": {
+    "name": "Strike: Feud at the <Place> on <Planet>",
+    "briefing": "Two crews are fighting over the <Place>. The settlement nearby doesn't care who wins, as long as it ends.",
+    "card": "Local Contract. Two crews are fighting over the <Place> on <Planet>. End it. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "choose": "side",
+      "at": "RECenterLocRef",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "objective": "Kill the spacers' boss at the <Place>",
+      "journal": "I killed the spacers' boss at the <Place>, and the mercenaries had the field.",
+      "say": [
+        "That's one boss down. The other crew can have the place, for now."
+      ],
+      "reward": "hard"
+    },
+    {
+      "type": "defeat",
+      "choose": "side",
+      "at": "REMarkerMediumLocRef",
+      "target": "ECLIPTIC BOSS, UNPICKED",
+      "objective": "Kill the mercenaries' boss at the <Place>",
+      "journal": "I killed the mercenaries' boss at the <Place>, and the spacers had the field.",
+      "say": [
+        "That's their boss down. The others won't stay long without a fight to have."
+      ],
+      "reward": "hard"
+    }
+  ],
+  "speaker": {
+    "name": "Settlement Watch",
+    "voice": "GenericMale01",
+    "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
+  },
+  "broadcast": [
+    "Two crews are shooting it out at that site. Pick one and finish the other's boss. Whoever's left will owe us some quiet."
+  ],
+  "_speech": "Tired of the noise. A stand-in voice; his ear decides."
+}

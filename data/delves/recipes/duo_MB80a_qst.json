@@ -1,0 +1,63 @@
+{
+  "schema": 2,
+  "id": "duo_MB80a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 22:08 \"ok now lets look at eve combat missions\", then 22:09 \"yup\"",
+  "_note": [
+    "THE COMBAT FAMILY, 8: RECON. Plan: home-office office/projects/delves/combat-family.md.",
+    "EVE's recon missions: reach the point and leave; the fight is optional. Plant a tracker, then get clear.",
+    "STAND-INS: a landed ship static (model); beat type 'escape' (done at a distance from the site). Eliza's. Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A built site with a crew's ship on the ground."
+  },
+  "prose": {
+    "name": "Sabotage: Tracker at the <Place> on <Planet>",
+    "briefing": "A crew's ship is down at the <Place>. Someone wants a tracker on it, and the crew none the wiser.",
+    "card": "Private Contract. Plant a tracker on the ship at the <Place> on <Planet>, then leave. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "model": "LANDED SHIP, UNPICKED",
+      "_model": "A landed-ship static he can walk up to.",
+      "name": "Crew's Ship",
+      "objective": "Plant the tracker on the crew's ship",
+      "journal": "The tracker's on. I need to get clear of the <Place>.",
+      "say": [
+        "Tracker's live. Walk, don't run."
+      ]
+    },
+    {
+      "type": "escape",
+      "distance": 300,
+      "_type": "STAND-IN: not a beat yet. Done when he is this far from the site. Eliza's.",
+      "objective": "Get clear of the <Place>",
+      "journal": "I put a tracker on a crew's ship at the <Place> and walked away.",
+      "say": [
+        "You're clear. Now we see where they go."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Contact",
+    "voice": "GenericFemale01",
+    "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
+  },
+  "broadcast": [
+    "Their ship's on the ground. Put a tracker on it and walk away. If you're shooting, something's gone wrong."
+  ],
+  "_speech": "Quiet, careful. A stand-in voice; his ear decides."
+}

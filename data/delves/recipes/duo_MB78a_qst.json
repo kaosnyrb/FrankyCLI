@@ -1,0 +1,63 @@
+{
+  "schema": 2,
+  "id": "duo_MB78a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 22:08 \"ok now lets look at eve combat missions\", then 22:09 \"yup\"",
+  "_note": [
+    "THE COMBAT FAMILY, 6: THE COMMANDER. Plan: home-office office/projects/delves/combat-family.md.",
+    "EVE's commander spawn: a small chance a named commander joins and drops better loot. NOTHING in the words",
+    "mentions it, so every line holds whether he comes or not: the surprise is the game's, never the writer's.",
+    "STAND-IN: enemies.commander (chance, target, loot). Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A built site a gang holds."
+  },
+  "prose": {
+    "name": "Strike: Dug-In Gang at the <Place> on <Planet>",
+    "briefing": "A gang has dug in at the <Place>. The watch wants them cleared out.",
+    "card": "Local Contract. Clear the gang dug in at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "clear",
+      "at": "REMarkerMediumLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 4,
+        "max": 6,
+        "species": "mix",
+        "commander": {
+          "chance": 10,
+          "target": "COMMANDER, UNPICKED",
+          "loot": "BETTER LOOT LIST, UNPICKED"
+        },
+        "_commander": "STAND-IN: a 10% chance a named commander joins the last of them. Eliza's field."
+      },
+      "objective": "Clear the gang from the <Place>",
+      "journal": "I cleared the gang dug in at the <Place>.",
+      "say": [
+        "That's them cleared. Anything you took off them is yours."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Watch Sergeant",
+    "voice": "GenericMale01",
+    "elevenlabs": "N2lVS1w4EtoT3dr4eOWO"
+  },
+  "broadcast": [
+    "There's a gang dug in at that site, the ordinary kind. Clear them out."
+  ],
+  "_speech": "Unexcited, which is the point. A stand-in voice; his ear decides."
+}

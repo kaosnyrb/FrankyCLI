@@ -1,0 +1,85 @@
+{
+  "schema": 2,
+  "id": "duo_MB74a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 22:08 \"ok now lets look at eve combat missions\", then 22:09 \"yup\"",
+  "_note": [
+    "THE COMBAT FAMILY, 2: THE TIMED RUN. Plan: home-office office/projects/delves/combat-family.md.",
+    "Abyssal Deadspace's timer: clear the site and shut the reactor down before it fails. The deadline field exists",
+    "(17a). The words stay replay-true; only the mechanic has a clock. The fail text claims no explosion nobody sees.",
+    "Pay: hard."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeDungeon_ThemeIndustrial"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Industrial interiors, which carry a reactor's worth of machinery."
+  },
+  "prose": {
+    "name": "Danger: Failing Reactor at the <Place> on <Planet>",
+    "briefing": "The reactor at the <Place> is failing, and the crew holding the site won't let anyone near the controls.",
+    "card": "Local Contract. Clear the <Place> on <Planet> and shut down its reactor before it fails. Time-critical. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "clear",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 4,
+        "max": 6,
+        "species": "mix"
+      },
+      "objective": "Clear the crew from the <Place>",
+      "journal": "The crew at the <Place> is down. I need to reach the reactor controls before it fails.",
+      "say": [
+        "They're down. Now the reactor, and quickly."
+      ]
+    },
+    {
+      "type": "use",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Reactor Control",
+      "objective": "Shut down the reactor at the <Place>",
+      "message": {
+        "title": "Reactor Control",
+        "text": "The shutdown takes. Something very large winds down and stops."
+      },
+      "journal": "I cleared the <Place> and shut its reactor down before it failed.",
+      "say": [
+        "It's down. That was closer than I'd like."
+      ],
+      "reward": "hard"
+    }
+  ],
+  "speaker": {
+    "name": "Safety Inspector",
+    "voice": "GenericFemale01",
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w"
+  },
+  "broadcast": [
+    "That reactor is failing and the people sitting on it don't care. Clear them, get to the controls, shut it down. You don't have long."
+  ],
+  "_speech": "Tight, professional, scared underneath. A stand-in voice; his ear decides.",
+  "deadline": {
+    "after": 1,
+    "seconds": 300,
+    "until": 2,
+    "_deadline": "Five minutes from arrival (17a's shape). The number is his to tune on play.",
+    "fail": {
+      "say": [
+        "Too late. It's past saving. Get clear."
+      ],
+      "journal": "I didn't reach the reactor controls at the <Place> in time."
+    }
+  }
+}

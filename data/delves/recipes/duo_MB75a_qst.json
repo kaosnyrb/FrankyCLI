@@ -1,0 +1,70 @@
+{
+  "schema": 2,
+  "id": "duo_MB75a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 22:08 \"ok now lets look at eve combat missions\", then 22:09 \"yup\"",
+  "_note": [
+    "THE COMBAT FAMILY, 3: TURN THE STRUCTURE. Plan: home-office office/projects/delves/combat-family.md.",
+    "EVE's retrieve-the-goods-from-a-structure: break the crew's stash open, take the shipment. A destroy, then a",
+    "pickup where it stood (MB58a's shape). STAND-IN: the explosion (a blast that resolves). Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A built site a crew holds.",
+    "who": {
+      "kind": "spacers",
+      "list": "duo_GangMembersList_Spacer",
+      "min": 3,
+      "max": 5,
+      "beat": 1
+    }
+  },
+  "prose": {
+    "name": "Recovery: Stolen Shipment at the <Place> on <Planet>",
+    "briefing": "A crew at the <Place> keeps a stolen shipment in a locked stash. The insurer wants it back.",
+    "card": "Insurance Contract. Recover a stolen shipment from the crew's stash at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "destroy",
+      "at": "RECenterLocRef",
+      "explosion": "BLAST EXPLOSION, UNPICKED",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "_model": "A heavy locked strongbox if one fits.",
+      "name": "Locked Stash",
+      "objective": "Break open the crew's stash at the <Place>",
+      "journal": "The stash at the <Place> is open. I need to take back the stolen shipment."
+    },
+    {
+      "type": "pickup",
+      "at": "RECenterLocRef",
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "name": "Stolen Shipment",
+      "item": "Stolen Shipment",
+      "objective": "Recover the stolen shipment",
+      "journal": "I broke open a crew's stash at the <Place> and took back the shipment they stole.",
+      "say": [
+        "That's ours. The claim's closed."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Freight Insurer",
+    "voice": "GenericMale01",
+    "elevenlabs": "N2lVS1w4EtoT3dr4eOWO"
+  },
+  "broadcast": [
+    "That crew keeps our shipment in a locked box they think nobody can open. Open it the loud way and bring it back."
+  ],
+  "_speech": "Dry, a man with a form for everything. A stand-in voice; his ear decides."
+}

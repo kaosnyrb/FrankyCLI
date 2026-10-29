@@ -1,0 +1,75 @@
+{
+  "schema": 2,
+  "id": "duo_MB73a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 22:08 \"ok now lets look at eve combat missions\", then 22:09 \"yup\"",
+  "_note": [
+    "THE COMBAT FAMILY, 1: THE CALL FOR HELP. Plan: home-office office/projects/delves/combat-family.md.",
+    "EVE's trigger ship: the kill you came for starts the real fight. A defeat, then a hold. Buildable today. Pay: hard."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A built site a crew holds."
+  },
+  "prose": {
+    "name": "Bounty: Crew Boss at the <Place> on <Planet>",
+    "briefing": "A crew boss at the <Place> has a price on their head, and their crew will call for help the moment the boss goes down.",
+    "card": "Local Contract. Eliminate the crew boss at the <Place> on <Planet>. Expect reinforcements. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "RECenterLocRef",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "gang": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 2,
+        "max": 4,
+        "species": "mix"
+      },
+      "objective": "Eliminate the crew boss at the <Place>",
+      "journal": "The crew boss at the <Place> is dead, and the crew called for help. I need to hold until it stops coming.",
+      "say": [
+        "That's the boss. They'll have called for help by now. Dig in."
+      ]
+    },
+    {
+      "type": "hold",
+      "at": "RECenterLocRef",
+      "waves": 3,
+      "size": [
+        2,
+        4
+      ],
+      "style": [
+        "squad",
+        "squad",
+        "horde"
+      ],
+      "objective": "Hold the <Place> against the reinforcements",
+      "journal": "I killed the crew boss at the <Place> and held off the help their crew called in.",
+      "say": [
+        "That's the last of their help. Nobody else is coming for that crew."
+      ],
+      "reward": "hard"
+    }
+  ],
+  "speaker": {
+    "name": "Settlement Marshal",
+    "voice": "GenericMale01",
+    "elevenlabs": "7QTeMqXOsYj1AQaKLcrf"
+  },
+  "broadcast": [
+    "Their boss is the job. Fair warning, that crew don't fight alone for long. Take the boss down and expect company."
+  ],
+  "_speech": "Fair and blunt. A stand-in voice; his ear decides."
+}

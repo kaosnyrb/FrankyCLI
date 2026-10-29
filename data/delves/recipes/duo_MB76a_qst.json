@@ -1,0 +1,66 @@
+{
+  "schema": 2,
+  "id": "duo_MB76a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 22:08 \"ok now lets look at eve combat missions\", then 22:09 \"yup\"",
+  "_note": [
+    "THE COMBAT FAMILY, 4: ESCALATION. Plan: home-office office/projects/delves/combat-family.md.",
+    "EVE's expeditions: finishing a site hands you a lead to a harder one. A plain clear whose close points onward.",
+    "STAND-IN: top-level next (the Delve dealt on completion, by slate). The biggest lever in the family: any Delve",
+    "could chain. The second Delve is unwritten until the field is real. Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A built site a gang holds."
+  },
+  "prose": {
+    "name": "Strike: Gang at the <Place> on <Planet>",
+    "briefing": "A gang at the <Place> has been raiding the haulers. The watch wants them gone.",
+    "card": "Local Contract. Clear the gang from the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "clear",
+      "at": "REMarkerMediumLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 4,
+        "max": 6,
+        "species": "mix"
+      },
+      "objective": "Clear the gang from the <Place>",
+      "message": {
+        "title": "Courier's Slate",
+        "text": "One of them carried a slate: coordinates for another site, and a note. Bring the rest here."
+      },
+      "journal": "I cleared the gang at the <Place>. One of them carried a slate pointing at another site.",
+      "say": [
+        "That's them. And they weren't the whole outfit, by the sound of it."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Watch Captain",
+    "voice": "GenericFemale01",
+    "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
+  },
+  "broadcast": [
+    "There's a gang at that site taking our haulers apart. Clear them out."
+  ],
+  "_speech": "Plain; she has a lot of these. A stand-in voice; his ear decides.",
+  "next": {
+    "id": "MB76A LEAD, UNWRITTEN",
+    "via": "slate"
+  },
+  "_next": "STAND-IN: on completion, deal the named Delve (a harder site, the rest of the outfit) by the slate. Eliza's field."
+}

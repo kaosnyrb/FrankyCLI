@@ -1,0 +1,69 @@
+{
+  "schema": 2,
+  "id": "duo_MB82a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 22:08 \"ok now lets look at eve combat missions\", then 22:09 \"yup\"",
+  "_note": [
+    "THE COMBAT FAMILY, 10: THE HOSTAGES. Plan: home-office office/projects/delves/combat-family.md.",
+    "EVE's rescue missions. Free the captives, walk them out.",
+    "STAND-INS: place.captives (three placed, held at the site) and beat type 'escort' (they follow him; done when",
+    "they are clear). Eliza's. Pay: hard."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A built site a crew holds.",
+    "captives": {
+      "count": 3,
+      "at": "RECenterLocRef",
+      "_captives": "STAND-IN: three captives placed, held. Eliza's."
+    }
+  },
+  "prose": {
+    "name": "Rescue: Captives at the <Place> on <Planet>",
+    "briefing": "A crew at the <Place> is holding three people from a nearby settlement. Their families want them home.",
+    "card": "Local Contract. Free the captives held at the <Place> on <Planet> and escort them out. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "_model": "A cell lock or door panel if one fits.",
+      "name": "Cell Lock",
+      "objective": "Free the captives at the <Place>",
+      "journal": "The captives are free. I need to get them clear of the <Place>.",
+      "say": [
+        "That's them out. Bring them home slowly."
+      ]
+    },
+    {
+      "type": "escort",
+      "distance": 300,
+      "_type": "STAND-IN: not a beat yet. The captives follow him; done when they are clear.",
+      "objective": "Escort the captives clear of the <Place>",
+      "journal": "I freed three captives at the <Place> and walked them out.",
+      "say": [
+        "All three. Thank you. I mean it."
+      ],
+      "reward": "hard"
+    }
+  ],
+  "speaker": {
+    "name": "Settlement Elder",
+    "voice": "GenericFemale01",
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w"
+  },
+  "broadcast": [
+    "They've got three of ours at that site. Get them out and walk them clear. They'll follow you, they just won't be quick."
+  ],
+  "_speech": "Steady for their sake. A stand-in voice; his ear decides."
+}

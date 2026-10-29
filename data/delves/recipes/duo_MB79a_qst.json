@@ -1,0 +1,53 @@
+{
+  "schema": 2,
+  "id": "duo_MB79a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 22:08 \"ok now lets look at eve combat missions\", then 22:09 \"yup\"",
+  "_note": [
+    "THE COMBAT FAMILY, 7: THE BURNER. Plan: home-office office/projects/delves/combat-family.md.",
+    "EVE's burner missions: one elite enemy, alone, better than you. A duel, not a gang. A defeat with no gang.",
+    "STAND-IN: the target and its level offset (beats[0].level). Pay: hard."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A built site with one occupant who matters."
+  },
+  "prose": {
+    "name": "Bounty: The Lone Gun at the <Place> on <Planet>",
+    "briefing": "One fighter at the <Place>, alone, and better than most who've tried. The bounty office wants them gone.",
+    "card": "Local Contract. Eliminate a lone, highly dangerous fighter at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "RECenterLocRef",
+      "target": "ELITE TARGET, UNPICKED",
+      "level": "+5",
+      "_level": "STAND-IN: the target spawns this many levels above him. Eliza's.",
+      "objective": "Eliminate the lone fighter at the <Place>",
+      "journal": "I killed the lone fighter at the <Place>.",
+      "say": [
+        "Alone, and you still won. I'll stop worrying about you."
+      ],
+      "reward": "hard"
+    }
+  ],
+  "speaker": {
+    "name": "Bounty Clerk",
+    "voice": "GenericFemale01",
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w"
+  },
+  "broadcast": [
+    "One of them, alone, and better than you. I'd send someone else if I had someone else."
+  ],
+  "_speech": "Honest to a fault. A stand-in voice; his ear decides."
+}
