@@ -67,7 +67,7 @@
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Parts Drop",
       "say": [
-        "They've signed for it. That'll keep them running for another month, and nobody has to call me about it."
+        "They've signed for it. That'll keep them running for another month."
       ],
       "reward": "easy"
     }

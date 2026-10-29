@@ -48,7 +48,7 @@
       "objective": "Clear the predators from the <Place>",
       "journal": "Predators had been nesting at the <Place>. I cleared them out, and the survey crew can get to work.",
       "say": [
-        "All clear? Then I'll send the crew up in the morning, and they can stop asking me when."
+        "All clear? Then I'll send the crew up in the morning."
       ],
       "reward": "med"
     }

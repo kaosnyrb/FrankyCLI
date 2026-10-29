@@ -50,7 +50,7 @@
       "objective": "Hold the <Place> against the raiders",
       "journal": "Raiders came at the <Place> three times. I held it with the people who live there until they gave up.",
       "say": [
-        "That's them off. They'll think twice before they come back, and we might get a proper night's sleep."
+        "That's them off. We'll get a proper night's sleep tonight."
       ],
       "reward": "med"
     }
