@@ -30,7 +30,7 @@
       "type": "pickup",
       "at": "se_GeneralMarkerLocRef01",
       "objective": "Collect the sealed container over <Planet>",
-      "journal": "The container's seal is older than anything else on it, and it's light for its size. I'm not to open it, only deliver it to the station.",
+      "journal": "The container's seal is older than anything else on it, and it's light for its size. I'm not to open it. I need to deliver it to the station.",
       "model": "Meshes\\ccs\\wreckcargocrate01.nif",
       "name": "Sealed Container",
       "item": "Sealed Container",
