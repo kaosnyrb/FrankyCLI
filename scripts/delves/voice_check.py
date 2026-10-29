@@ -30,6 +30,9 @@ one Delve and a drone across sixty. Each has a cap on how many recipes may carry
 code is unchanged, because the fix is a judgement about which ones earn it). Measured 2026-10-27 before the first
 pass, in the 70 Delves without a pen name: "Good." as a beat 24, a closing "Thank you" 20, the board's "You're at
 the site?" opener 16, "Is that you/them?" 6, "That's it. That's X" 4, "Tell me that's a X" 3.
+Four more added 2026-10-29 after his "Sassy ending lines are becoming a tic", measured in recipes BEFORE that pass:
+a check-in question opening a say 40, "X? Then Y." 27, an apologising hello 5, a broadcast's short last line 13. THE SASSY TAIL ITSELF IS NOT HERE: a wry last clause is meaning, not pattern (about
+45 of 63 closing lines by eye, 2026-10-29), so it is read, not counted.
 
 WHAT IT CANNOT SEE, stated rather than papered. A LONE line ("They may still be watching for it.", his catch
 on the Culture Canister): each list item is its own take, so a fragment that only works after the line before
@@ -58,13 +61,18 @@ NOUN = re.compile(
     r"\b(UC|United Colonies|Freestar|Collective|Crimson Fleet|Ecliptic|Va'?ruun|House Va'?ruun|Constellation"
     r"|Rangers?|Vanguard|SysDef|Ryujin|Neon|Akila|New Atlantis|Jemison|Cydonia|Paradiso|Volii|Cheyenne|Alpha Centauri"
     r"|credits?|creds|Spacers?)\b")
-TICS = [  # (name, pattern, cap on recipes, flags)
+TICS = [  # (name, pattern, cap on recipes, flags[, where]): where, if given, is a regex on the field the line sits in
     ('"X? Good." / "Good." as a beat', r"\bGood\.", 6, 0),
     ('"Thank you" to close', r"\bthank you\b", 8, re.I),
     ('"You\'re at the site?" opener', r"^You're at the site\?", 2, 0),
     ('"Is that you/them?" opener', r"^(Is|Was) (that|it) (you|them|her|the)", 6, 0),
     ('"That\'s it. That\'s X."', r"^That's (it|them)\. That's", 1, 0),
     ('"Tell me that\'s a X"', r"Tell me that'?s", 1, 0),
+    # 2026-10-29, after his "Sassy ending lines are becoming a tic" and the audit that followed it.
+    ('a say opening on a check-in question ("You\'ve got it?")', r"^[^.!?]{1,40}\?", 15, 0, r"say|recapSay"),
+    ('"X? Then Y." (a question, then its own answer)', r"\?\s+Then\b", 6, 0),
+    ('a hello that apologises ("Sorry, ...")', r"^(Oh\. )?(Hello\. )?Sorry\b", 2, 0, r"hello"),
+    ('a broadcast ending on a short line of its own', r"[.?!]\s+(\S+\s+){0,3}\S+[.?!]$", 6, 0, r"^broadcast$"),
 ]
 DASH = "—"
 
@@ -151,14 +159,16 @@ def main():
             if len(takes) > 1 and len(" ".join(takes)) <= 250:
                 hits += 1
                 print(f"{rid:40} {'SHARD':14} {where:16} " + " | ".join(takes))
-    tic_hits = {name: set() for name, *_ in TICS}
+    tic_hits = {t[0]: set() for t in TICS}
     for rid, d in load(a.rev, a.id):
-        for _, line in spoken(d):
-            for name, pat, cap, fl in TICS:
+        for where, line in spoken(d):
+            for name, pat, cap, fl, *w in TICS:
+                if w and w[0] and not re.search(w[0], where):
+                    continue
                 if re.search(pat, line, fl):
                     tic_hits[name].add(rid)
     print("\nTICS (recipes carrying each; over the cap warns, the exit code is unchanged):")
-    for name, pat, cap, fl in TICS:
+    for name, pat, cap, *_ in TICS:
         n = len(tic_hits[name])
         print(f"  {'WARN' if n > cap else 'ok  '} {n:3}/{cap:<3} {name}")
     print(f"\n{hits} flagged line(s). PAY, DASH, NOUN and SHARD are his catches; a LONE line is not checked (see the header).")
