@@ -42,12 +42,12 @@
   },
   "prose": {
     "name": "Sabotage: Ecliptic Scanners on <Planet>",
-    "briefing": "The Ecliptic have a scanner array at the <Place> watching everything that moves on <Planet>, and a crew sitting on it. The settlers who posted the job want every scanner destroyed.",
+    "briefing": "The Ecliptic have a scanner array at the <Place> watching the settlers' haulers, and somebody has parked a crew on it. The settlers who posted the job want every scanner destroyed.",
     "card": "Local Contract. Destroy the Ecliptic scanner array at the <Place> on <Planet>. Payment on completion."
   },
-  "recap": "The Ecliptic scanners at the <Place> are wrecked, all three. Whatever the mercenaries want to know about <Planet> now, they'll have to come and see it with their own eyes.",
+  "recap": "The Ecliptic scanners at the <Place> are wrecked, all three. The settlers can move their haulers without being counted.",
   "recapSay": [
-    "Their screens just went dark, every one of them. We're loading the haulers now, and we'll be gone before anyone out there works out it isn't a fault."
+    "That's the last of them. We're loading the haulers now, and we'll be gone before they get another one up."
   ],
   "beats": [
     {
@@ -64,7 +64,7 @@
       "group": "spoof",
       "at": "RETravelA1LocRef",
       "ring": "infrastructure",
-      "journal": "This one counted ships landing and taking off. Whoever's watching will have to count them by eye.",
+      "journal": "This scanner counted ships landing and taking off.",
       "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
       "name": "Ecliptic Landing Scanner"
     },
@@ -73,7 +73,7 @@
       "group": "spoof",
       "at": "RETravelB1LocRef",
       "ring": "infrastructure",
-      "journal": "This scanner logged heat signatures, and it's in pieces now, still warm.",
+      "journal": "This scanner logged heat signatures. It's in pieces now.",
       "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
       "name": "Ecliptic Thermal Scanner"
     }

@@ -35,7 +35,7 @@
   },
   "prose": {
     "name": "Fabrication: Pressure Regulator for the <Place> on <Planet>",
-    "briefing": "The water reclaimer at the <Place> blew its pressure regulator. Nobody out there can make another, and they've been rationing water since.",
+    "briefing": "The water reclaimer at the <Place> lost its pressure regulator. Nobody out there can make another, and they've been rationing water since.",
     "card": "Local Contract. Build a pressure regulator for the <Place> on <Planet> and deliver it by hand. Payment on delivery."
   },
   "beats": [
@@ -68,8 +68,8 @@
     {
       "type": "talk",
       "at": "RECenterLocRef",
-      "objective": "Deliver the pressure regulator to the <Place>",
-      "journal": "The water reclaimer at the <Place> blew its pressure regulator, and nobody out there could make another. I built one and handed it over. They'll have running water by tonight.",
+      "objective": "Deliver the pressure regulator to the crew lead at the <Place>",
+      "journal": "I built the <Place> a pressure regulator and handed it over. They'll have running water within the hour.",
       "person": {
         "name": "Noor Halvorsen",
         "template": "UC_NA_MASTWorkerFemale03",
@@ -78,15 +78,12 @@
         "elevenlabs": "r5iFzIytiA1rzjhWFCjW",
         "hellos": [
           [
-            "I'd offer you a drink, but the water's off. That's the problem."
-          ],
-          [
-            "Mind the tanks. They're empty, but they're heavy."
+            "I'd offer you a drink, but the water's off."
           ]
         ]
       },
       "greeting": [
-        "You've got the regulator? Please say you've got the regulator. The old one was older than me. Nobody out here makes them any more."
+        "You've got the regulator? Please say you've got the regulator. The old one was older than me. Nobody out here can make them."
       ],
       "exchanges": [
         {
@@ -98,13 +95,13 @@
         {
           "prompt": "What happened to the old one?",
           "reply": [
-            "Nothing dramatic. It just stopped one morning. Most things out here do, eventually."
+            "Nothing dramatic. It just stopped one morning."
           ]
         },
         {
           "prompt": "Why does nobody make them?",
           "reply": [
-            "Nobody stocks them out here. The last one came in a crate with the reclaimer, years ago."
+            "Nobody out here has the parts. The last one came in a crate with the reclaimer."
           ]
         },
         {
@@ -124,7 +121,7 @@
     "elevenlabs": "r5iFzIytiA1rzjhWFCjW"
   },
   "broadcast": [
-    "You're close? Come and find me, I'll be outside. We've been rationing water for a week. You're the best news we've had."
+    "You're close? Come and find me. We've been rationing water for a week. You're the best news we've had."
   ],
   "_speech": "The same voice on the radio and in person (Noor), as 11a and 19a. Lucy (Friendly, Relaxed, Thoughtful), in two recipes; his ear decides. No names, places, factions or currency in a voiced line; her name is subtitle only."
 }

@@ -37,7 +37,7 @@
       "name": "Sealed Cargo Crate",
       "item": "Signal Amplifier",
       "say": [
-        "That's the part. The satellite's close, so take it straight there."
+        "That's the part."
       ]
     },
     {
@@ -63,7 +63,7 @@
     "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
   },
   "broadcast": [
-    "That's what's left of our freighter. The part was in a sealed crate. If anything in there survived, it's that. Find it, then take it to the satellite."
+    "Our freighter broke up out here. The part was in a sealed crate, and if anything survived, it's that. Find it, then take it to the satellite."
   ],
   "_speech": "The freighter's owners, so the loss is theirs and the joke at the end is a little rueful. Voice: Daniel (Steady Broadcaster), already in four recipes; his ear decides. No names, places, factions or currency."
 }

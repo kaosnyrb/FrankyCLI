@@ -39,7 +39,7 @@
   "prose": {
     "name": "Sabotage: Banned Texts on <Planet>",
     "briefing": "A cache of banned texts has turned up at the <Place>, with an armed crew sitting on it. The posting wants them destroyed, not collected, and doesn't say why.",
-    "card": "Administrative Contract. Destroy the prohibited texts at the <Place> on <Planet>. Do not copy them. Payment on contract completion."
+    "card": "Administrative Contract. Destroy the prohibited texts at the <Place> on <Planet>. An armed crew holds the site. Do not copy them. Payment on contract completion."
   },
   "beats": [
     {
@@ -49,9 +49,9 @@
       "objective": "Destroy the cache of texts at the <Place>",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Cache of Banned Texts",
-      "journal": "The cache at the <Place> went up with every book in it. Somebody thought those books were worth a gunfight. I still don't know what was in them.",
+      "journal": "The cache at the <Place> went up with every book in it. I never opened one, and I still don't know what was in them.",
       "say": [
-        "I can see the smoke from here on the feed. I'll file it as done, and I won't ask what was in them."
+        "I can see the smoke on the feed. I'll file it as done, and I won't ask what was in them."
       ],
       "reward": "easy"
     }

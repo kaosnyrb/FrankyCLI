@@ -29,7 +29,7 @@
   },
   "prose": {
     "name": "Repairs: Gas Leak on <Planet>",
-    "briefing": "The <Place> is leaking from three vents, and nobody will go in to close them while it's occupied.",
+    "briefing": "The <Place> is leaking from three vents, and nobody will go in to close them while it's full of gas.",
     "card": "Local Contract. Close the three open vents at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
@@ -38,6 +38,10 @@
       "at": "LocDungeonCenterMarkerLocRef",
       "group": "vents",
       "objective": "Close the vents",
+      "message": {
+        "title": "Vent Control",
+        "text": "The valve shuts and the readout drops straight away."
+      },
       "journal": "One vent closed. The readout dropped straight away.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Vent Control"
@@ -46,7 +50,11 @@
       "type": "use",
       "at": "LocDungeonItemMarker01LocRef",
       "group": "vents",
-      "journal": "One vent closed. Its control had been set to open and then the dial pulled off, so it couldn't be shut.",
+      "message": {
+        "title": "Vent Control",
+        "text": "Set to open, and somebody has pulled the dial off. You turn the spindle by hand."
+      },
+      "journal": "One vent closed. Its control had been left set to open, and somebody had pulled the dial off.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Vent Control"
     },
@@ -54,6 +62,10 @@
       "type": "use",
       "at": "LocDungeonItemMarker02LocRef",
       "group": "vents",
+      "message": {
+        "title": "Vent Control",
+        "text": "Somebody has written VENT? in marker on the casing, and somebody else has answered YES."
+      },
       "journal": "One vent closed. Somebody had written VENT? in marker on the casing, and somebody else had answered YES.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Vent Control"
@@ -70,6 +82,6 @@
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line.",
   "recap": "The <Place> was venting from three places at once. I closed all three, and the site can be worked again.",
   "recapSay": [
-    "Readings are coming down everywhere. I'll be in tomorrow with a mask to start on the repairs."
+    "Readings are coming down everywhere. I'll be in tomorrow with a mask to find out what started it."
   ]
 }
