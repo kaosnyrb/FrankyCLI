@@ -31,7 +31,7 @@
   },
   "prose": {
     "name": "Hauling: Cool Box on <Planet>",
-    "briefing": "Someone at the <Place> has lost a cool box off a hauler. The posting has three exclamation marks and promises a lolly."
+    "briefing": "Someone at the <Place> has lost a cool box off a hauler. She sounded very cheerful about it, and there's a lolly in it for me."
   },
   "beats": [
     {
@@ -47,9 +47,6 @@
         "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
         "_elevenlabs": "Placeholder again. She wants bright and quick. His ear.",
         "hellos": [
-          [
-            "Oh! A person!"
-          ],
           [
             "Hiya! Are you here for lolly Friday?"
           ]
@@ -74,13 +71,13 @@
         {
           "prompt": "How many of you are there?",
           "reply": [
-            "Seven! One won't eat the orange ones, so really six and a half. And I eat the half. It's a system."
+            "Seven! One won't eat the orange ones, so I eat theirs."
           ]
         },
         {
           "prompt": "What flavours?",
           "reply": [
-            "Orange, lime, and one called Mystery that's just orange again. Don't tell anyone. The mystery is the point."
+            "Orange and lime."
           ]
         },
         {
@@ -101,7 +98,7 @@
       "name": "Cool Box",
       "message": {
         "title": "Cool Box",
-        "text": "Upside down, latch still shut. It sloshes a bit. That's probably the ice. It is not blue."
+        "text": "Upside down, latch still shut, and green. It sloshes a bit. That's probably the ice."
       }
     },
     {
@@ -124,7 +121,7 @@
       "model": "Meshes\\SetDressing\\BeachProps\\BeachBlanket01.nif",
       "name": "Lolly Friday",
       "say": [
-        "You found it! Still cold. Feel, it's still cold! And we've got loads of time. Here. Have a lime one. The lime ones are the best ones."
+        "You found it, and it's still cold, it's actually still cold, and we've got loads of time, and you got the cups, and first pick's yours, have a lime one, the lime ones are the best ones."
       ]
     }
   ],

@@ -46,7 +46,7 @@
         "elevenlabs": "oW8bn5YtBB89X2nJ0DT9",
         "hellos": [
           [
-            "I'm not going back in. Whatever you've heard."
+            "Whatever you've heard."
           ]
         ]
       },
@@ -57,13 +57,13 @@
         {
           "prompt": "I'll get your papers.",
           "reply": [
-            "They're in her office, in a case. She'll be in there with them. She doesn't trust anyone else near paperwork."
+            "They're with her, in a case. She's got hired guns round her now. She doesn't trust anyone else near paperwork."
           ]
         },
         {
           "prompt": "Why did you walk out?",
           "reply": [
-            "Because she would have kept us here until there was nobody left to keep. I'd rather be the one who left than one of the ones who didn't."
+            "Because she would have kept us here until there was nobody left to keep."
           ]
         },
         {
@@ -90,9 +90,9 @@
         "chance": 25
       },
       "objective": "Deal with the officer",
-      "journal": "The officer at the <Place> won't be keeping anyone else here. Her office is open, so I need to find the papers inside.",
+      "journal": "The officer at the <Place> won't be keeping anyone else here. I need to find the papers she kept.",
       "say": [
-        "Is she...? Right. The papers are in her office, so bring them out to me."
+        "Is she...? Right. The papers are with her."
       ]
     },
     {
@@ -100,15 +100,15 @@
       "at": "LocDungeonItemMarker03LocRef",
       "item": "Discharge Papers",
       "objective": "Find the soldier's discharge papers",
-      "journal": "A soldier walked out of the <Place> and wouldn't go back. I dealt with the officer who kept her there and found her discharge papers, under eleven more nobody had signed either.",
+      "journal": "A soldier walked out of the <Place> and wouldn't go back. I dealt with the officer who wouldn't sign them and found her discharge papers, under eleven more nobody had signed either.",
       "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
       "name": "Officer's Case",
       "message": {
         "title": "Discharge Papers",
-        "text": "Hers, on top, with the signature box empty. Under them, eleven more just like it."
+        "text": "Hers, on top, with the signature box empty. Under hers, eleven more just like them."
       },
       "say": [
-        "That's all of them. So I'm not a deserter any more. I'm just someone who left."
+        "You've got them? All twelve? Then I've got some people to go and find."
       ],
       "reward": "med"
     }
@@ -119,7 +119,7 @@
     "elevenlabs": "oW8bn5YtBB89X2nJ0DT9"
   },
   "broadcast": [
-    "You're close? I'm outside, by the door. I'm not going in. Come and talk to me first."
+    "You're close? I'm outside. Come and talk to me first."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

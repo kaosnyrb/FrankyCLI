@@ -59,7 +59,7 @@
       "objective": "Break through to the holdouts",
       "journal": "The ones keeping the holdouts pinned at the <Place> are dead. The way to them is open, and I need to bring them the crate.",
       "say": [
-        "That's the way clear. Go to them, they've been waiting a long time."
+        "That's the way clear. Go to them."
       ]
     },
     {
@@ -80,13 +80,13 @@
         ]
       },
       "greeting": [
-        "A medical crate? Four of us left holding this corner, and we've been out of dressings for three days."
+        "A medical crate? What's left of us holding this corner, and we've been out of dressings for three days."
       ],
       "exchanges": [
         {
           "prompt": "It's yours. Where do you want it?",
           "reply": [
-            "Right here. Right by the lad who keeps saying he's fine. I'll find a way to thank you properly once I've slept."
+            "Right here. One of mine keeps telling me he's fine. I'll find a way to thank you properly once I've slept."
           ]
         },
         {
@@ -112,7 +112,7 @@
     "elevenlabs": "wsHauqjSkdBeAvdbUFmR"
   },
   "broadcast": [
-    "There's a crate by the door. Our people are further in, and they need it more than they'll say."
+    "There's a crate at the entrance. Our people are further in. Get it to them."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }
