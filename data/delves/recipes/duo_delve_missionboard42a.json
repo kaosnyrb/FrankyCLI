@@ -1,0 +1,65 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard42a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 06:14 \"are we making too many 'special' ones? Wondering how we make daily driver ones people wouldnt mind replaying\", then \"lets try some plain first\"",
+  "_note": [
+    "PLAIN 2: THE CLEAR. Something has moved into a natural spot a crew wants to work. Clear it, leave.",
+    "A COMMON, NOT A SPECIAL: written to survive the tenth play. No reveal, no secret, no twist; the issuer has a small",
+    "ordinary stake and says it in one short line. What changes on a replay is the place, the drive and what is there",
+    "(his 09-23 'All the dials are new gameplay'). The register is his 07-31 'pure chill out Truck Simulator Dad Game",
+    "vibes', and his Goods Package (localcargo_qst09a) is the specimen. No pay promised in a voiced line (10-27).",
+    "Letters are the replay lever that exists: a b and c later, same job, other words, live side by side.",
+    "MB48a's shape without residents: the theme excludes quiet sites, so nobody lives where the predators are and the words",
+    "so the words never have to account for people. One species, as a Hunt. Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeOE_NonHostile"
+      ]
+    },
+    "_theme": "Any site the board can place that is not a cave or a quiet (residents) site, so the pool is wide enough to repeat in. Natural landmarks alone were a pool of 3 (lint 10-29)."
+  },
+  "prose": {
+    "name": "Infestation: Nesting Predators at the <Place> on <Planet>",
+    "briefing": "A survey crew wants to work the <Place>, and something has moved in.",
+    "card": "Infestation contract. Predators are nesting at the <Place> on <Planet>, and a survey crew needs the site clear. Clear them out. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "clear",
+      "at": "REMarkerMediumLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_PreditorMegalist_A",
+        "min": 4,
+        "max": 7,
+        "species": "one"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Clear the predators from the <Place>",
+      "journal": "Predators had been nesting at the <Place>. I cleared them out, and the survey crew can get to work.",
+      "say": [
+        "All clear? Then I'll send the crew up in the morning, and they can stop asking me when."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Survey Lead",
+    "voice": "GenericFemale01",
+    "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
+  },
+  "broadcast": [
+    "We've a crew wanting to start work out there, and something's moved in since anyone last looked. Clear it out so they can get on with it."
+  ],
+  "_speech": "A crew lead who would rather be working. Lucy; his ear decides."
+}

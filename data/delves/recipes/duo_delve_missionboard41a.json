@@ -1,0 +1,84 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard41a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 06:14 \"are we making too many 'special' ones? Wondering how we make daily driver ones people wouldnt mind replaying\", then \"lets try some plain first\"",
+  "_note": [
+    "PLAIN 1: THE HAUL. Pick up a crate of parts at one quiet site and take it to another. Nobody shoots.",
+    "A COMMON, NOT A SPECIAL: written to survive the tenth play. No reveal, no secret, no twist; the issuer has a small",
+    "ordinary stake and says it in one short line. What changes on a replay is the place, the drive and what is there",
+    "(his 09-23 'All the dials are new gameplay'). The register is his 07-31 'pure chill out Truck Simulator Dad Game",
+    "vibes', and his Goods Package (localcargo_qst09a) is the specimen. No pay promised in a voiced line (10-27).",
+    "Letters are the replay lever that exists: a b and c later, same job, other words, live side by side.",
+    "MB42a's shape without the guards: a pickup on the site's own storage spot (REContainerLocRef, replace, his",
+    "10-27 'make it a better marker'), a deliver at a second place, which on a board is a request. Pay: easy."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "Quiet sites, residents alive and left alone: nothing in the words touches them.",
+    "second": {
+      "remote": true,
+      "theme": {
+        "require": [
+          "LocTypeOE_NonHostile"
+        ],
+        "exclude": [
+          "LocTypeOE_ThemeCaveKeyword"
+        ]
+      }
+    }
+  },
+  "prose": {
+    "name": "Hauling: Spare Parts on <Planet>",
+    "briefing": "A crate of spare parts is waiting at the <Place>, and the <SecondPlace> has been short of them for a week.",
+    "card": "Local Contract. Collect a crate of spare parts from the <Place> and deliver it to the <SecondPlace>. Payment on delivery."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "REContainerLocRef",
+      "replace": true,
+      "objective": "Collect the spare parts at the <Place>",
+      "journal": "I picked up a crate of spare parts at the <Place>. It's heavier than it looks.",
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "name": "Parts Crate",
+      "item": "Spare Parts Crate",
+      "say": [
+        "That's the one. Take it over whenever you're ready, there's no rush on the road."
+      ]
+    },
+    {
+      "type": "deliver",
+      "at": "REContainerLocRef",
+      "place": "second",
+      "replace": true,
+      "objective": "Deliver the spare parts to the <SecondPlace>",
+      "journal": "I took a crate of spare parts from the <Place> to the <SecondPlace>, where they'd been short for a week.",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Parts Drop",
+      "say": [
+        "They've signed for it. That'll keep them running for another month, and nobody has to call me about it."
+      ],
+      "reward": "easy"
+    }
+  ],
+  "speaker": {
+    "name": "Parts Supplier",
+    "voice": "GenericMale01",
+    "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
+  },
+  "broadcast": [
+    "There's a crate of parts waiting at the pickup. It's nothing special, but the people at the other end have been making do without it for a week."
+  ],
+  "_speech": "A supplier with a small, ordinary stake. Daniel; his ear decides."
+}

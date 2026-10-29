@@ -1,0 +1,67 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard43a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 06:14 \"are we making too many 'special' ones? Wondering how we make daily driver ones people wouldnt mind replaying\", then \"lets try some plain first\"",
+  "_note": [
+    "PLAIN 3: THE DEFENCE. Raiders keep hitting a quiet settlement and are due back. Stand with them until they give up.",
+    "A COMMON, NOT A SPECIAL: written to survive the tenth play. No reveal, no secret, no twist; the issuer has a small",
+    "ordinary stake and says it in one short line. What changes on a replay is the place, the drive and what is there",
+    "(his 09-23 'All the dials are new gameplay'). The register is his 07-31 'pure chill out Truck Simulator Dad Game",
+    "vibes', and his Goods Package (localcargo_qst09a) is the specimen. No pay promised in a voiced line (10-27).",
+    "Letters are the replay lever that exists: a b and c later, same job, other words, live side by side.",
+    "A HOLD ALONE, no machine to start first: four drafts already open on 'start a machine, then hold' (09a, 16a, 19a, 22a)",
+    "and that shape should not be the only way a fight arrives. Unproven: whether a board hold can be beat 1 with nothing",
+    "before it; the lint is the first test. Residents alive, defended. Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "Quiet sites with residents; here they are the people being defended, so the words keep them alive."
+  },
+  "prose": {
+    "name": "Defense: Raiders at the <Place> on <Planet>",
+    "briefing": "Raiders have hit the <Place> twice this month and they're due back. The people there would like someone with a gun to stand with them.",
+    "card": "Defense contract. Raiders are expected to attack the <Place> on <Planet>. Hold the site until they withdraw. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "hold",
+      "at": "RECenterLocRef",
+      "waves": 3,
+      "size": [
+        2,
+        4
+      ],
+      "style": [
+        "squad",
+        "squad",
+        "horde"
+      ],
+      "objective": "Hold the <Place> against the raiders",
+      "journal": "Raiders came at the <Place> three times. I held it with the people who live there until they gave up.",
+      "say": [
+        "That's them off. They'll think twice before they come back, and we might get a proper night's sleep."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Settler",
+    "voice": "GenericMale01",
+    "elevenlabs": "7QTeMqXOsYj1AQaKLcrf"
+  },
+  "broadcast": [
+    "They've hit us twice this month and they'll be back tonight. We'll do what we can, but we need someone who can shoot to stand with us."
+  ],
+  "_speech": "Tired, practical. The technician's voice from 54a; his ear decides."
+}
