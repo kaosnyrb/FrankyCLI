@@ -18,7 +18,7 @@
   },
   "prose": {
     "name": "Hunt: Cave Breach on <Planet>",
-    "briefing": "A survey crew broke through into the cave at the <Place> and something came up out of it. They got out, but their camera is still down there, and it was recording."
+    "briefing": "A survey crew broke into a cave at the <Place> and had to run. Their camera is still down there."
   },
   "speaker": {
     "name": "Survey Crew",
@@ -26,7 +26,7 @@
     "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
   },
   "broadcast": [
-    "We broke into a cave and something came up out of it. We got out, but my camera's still down there, and it was running the whole time. Clear the cave, then bring me the camera, because I want to see what we nearly met."
+    "We broke into a cave and something came up out of it. We got out, but my camera's still down there, and it was running the whole time. Clear the cave, then find the camera and send me what's on it, because I want to see what we nearly met."
   ],
   "beats": [
     {
@@ -43,7 +43,7 @@
         "chance": 25
       },
       "objective": "Clear the creatures out of the <Place>",
-      "journal": "Everything that came up out of the cave at the <Place> is dead. I need to find the survey camera somewhere down here.",
+      "journal": "Everything that came up out of the cave at the <Place> is dead. I need to find the survey camera where the crew broke through.",
       "say": [
         "It's quiet. The camera should be where we dropped it, right by where we broke through."
       ]
@@ -52,7 +52,7 @@
       "type": "pickup",
       "at": "REMarkerMediumLocRef",
       "objective": "Recover the survey camera",
-      "journal": "I recovered the survey crew's camera from the cave at the <Place>. The last thing on it is a long stretch of dark, and then something filling the frame.",
+      "journal": "I recovered the survey crew's camera from the cave at the <Place>. The one who called me in watched what was on it, and asked for a minute.",
       "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
       "name": "Survey Camera Case",
       "item": "Survey Camera",

@@ -29,7 +29,7 @@
   "prose": {
     "name": "Sabotage: Weapons Cache on <Planet>",
     "briefing": "The occupiers of the <Place> are sitting on a weapons cache. A demolition team went in and didn't come out. Their charges are still by the door.",
-    "card": "Local Contract. Destroy the weapons cache at the <Place> on <Planet>. Charges are at the entrance. Payment on contract completion."
+    "card": "Local Contract. Set charges on the weapons cache at the <Place> on <Planet>. Charges are at the entrance. Payment on contract completion."
   },
   "beats": [
     {
@@ -37,12 +37,12 @@
       "at": "LocDungeonOutsideEntranceMarkerLocRef",
       "item": "Demolition Charges",
       "objective": "Collect the demolition charges at the <Place>",
-      "journal": "I found the last team's charges by the way in, still sealed. They never got past the door. Now I need to set them on the cache inside.",
+      "journal": "I found the last team's charges by the way in. Now I need to set them on the cache inside.",
       "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
       "name": "Demolition Case",
       "message": {
         "title": "Demolition Case",
-        "text": "Sealed, full, and a little scorched on one corner. Three charges in foam, and a fourth slot that is empty. Somebody took one in with them."
+        "text": "Shut, and a little scorched on one corner. Three charges in foam, and a fourth slot that is empty."
       }
     },
     {
@@ -66,7 +66,7 @@
       "type": "use",
       "group": "charges",
       "at": "LocDungeonItemMarker02LocRef",
-      "journal": "One charge set on a crate with no markings at all, which is the kind you worry about most.",
+      "journal": "One charge set on a crate with no markings at all, and the lid nailed down twice as hard as the others.",
       "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
       "name": "Unmarked Crate"
     },

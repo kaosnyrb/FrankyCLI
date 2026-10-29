@@ -36,7 +36,7 @@
       "group": "logs",
       "at": "LocDungeonItemMarker01LocRef",
       "objective": "Find out what happened to the unit",
-      "journal": "The unit's field terminal. The last entries are a supply request, sent four times, each one shorter than the one before. The last one is just the word please.",
+      "journal": "The unit's field terminal. The last entries are a supply request, sent four times, each one shorter than the one before.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Unit Field Terminal"
     },
@@ -44,7 +44,7 @@
       "type": "use",
       "group": "logs",
       "at": "LocDungeonItemMarker02LocRef",
-      "journal": "A footlocker with a roster taped inside the lid. Six names, five of them crossed out in the same pen, neatly, by somebody who was taking care to be neat.",
+      "journal": "A footlocker with a roster taped inside the lid. Six names, five of them crossed out in the same pen, neatly.",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Unit Footlocker"
     },
@@ -63,9 +63,9 @@
         "chance": 25
       },
       "objective": "Deal with whoever holds the <Place> now",
-      "journal": "I've cleared the people who took the <Place> from the unit. Now I need to find their tags, which should be close.",
+      "journal": "I've cleared the people who moved into the <Place> after the unit. Now I need to find their tags, which should be close.",
       "say": [
-        "You've found them. Bring the tags home, that's all anyone here is asking for."
+        "You've found them. Bring the tags home."
       ]
     },
     {
@@ -73,12 +73,12 @@
       "at": "LocDungeonItemMarker03LocRef",
       "item": "Unit Tags",
       "objective": "Recover the unit's tags",
-      "journal": "A unit at the <Place> stopped reporting after their supplies never came. I read what they left, cleared the people who took the site, and recovered all six of their tags.",
+      "journal": "A unit at the <Place> stopped reporting after their supplies never came. I read what they left, cleared the people squatting there, and recovered all six of their tags.",
       "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
       "name": "Sealed Case",
       "message": {
         "title": "Unit Tags",
-        "text": "Six sets of tags on one chain, in a case shut with a twist of wire. The sixth set is on the outside of the bundle: the last one added, by whoever closed it."
+        "text": "Six sets of tags on one chain, in a case shut with a twist of wire. The sixth set is on the outside of the bundle."
       },
       "say": [
         "All six. I'll tell the families myself, before anyone else does."
@@ -92,7 +92,7 @@
     "elevenlabs": "nPczCjzI2devNBz1zQrb"
   },
   "broadcast": [
-    "We lost contact with that unit twelve days ago, and nobody's been out since. I don't need a story. I need to know what happened, and I need them home."
+    "We lost contact with that unit twelve days ago, and nobody's been out since. I need to know what happened, and I need them home."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Voice 'Brian, Deep, Resonant and Comforting', unused so far; his ear decides. No names, places, factions or currency."
 }

@@ -18,7 +18,7 @@
   },
   "prose": {
     "name": "Bounty: Ecliptic Commander on <Planet>",
-    "briefing": "Ecliptic mercenaries have dug into the old military post at the <Place> and are raiding everything in range. Their commander carries the contract, and the colony would very much like to know who signed it."
+    "briefing": "Ecliptic mercenaries have dug into the old military post at the <Place> and are raiding everything in range. Their commander carries the contract, and the colony wants to know who signed it."
   },
   "speaker": {
     "name": "Colony Militia",
@@ -26,7 +26,7 @@
     "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
   },
   "broadcast": [
-    "Mercenaries have taken the old military post, and somebody's paying them to raid our supply runs. Their commander carries the contract. End the commander and bring me that contract, because I want to see whose name is on it."
+    "Mercenaries have taken the old military post, and somebody's paying them to raid our supply runs. Their commander carries the contract. Take out the commander and bring me that contract, because I want to see whose name is on it."
   ],
   "beats": [
     {
@@ -44,7 +44,7 @@
         "chance": 25
       },
       "objective": "Defeat the Ecliptic commander at the <Place>",
-      "journal": "The Ecliptic commander at the <Place> is dead. I need to find the contract, which will be close by.",
+      "journal": "The Ecliptic commander at the <Place> is dead. I need to take the contract.",
       "say": [
         "The commander's down. Find that contract, it'll be close by."
       ]
@@ -53,7 +53,7 @@
       "type": "pickup",
       "at": "REWoundedMarkerLocRef",
       "objective": "Take the commander's contract",
-      "journal": "I took the commander's contract from the <Place>. Somebody nearby has been paying for the raids on the colony, and their name is at the bottom.",
+      "journal": "I took the commander's contract from the <Place>. The militia man on the radio knew the name at the bottom. He asked me to leave it with him.",
       "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
       "name": "Commander's Contract Case",
       "item": "Mercenary Contract",
