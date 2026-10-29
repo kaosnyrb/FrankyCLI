@@ -90,12 +90,12 @@ def flat(v):
 
 def load(rev):
     if rev is None:
-        return {p.stem: json.loads(p.read_text(encoding="utf-8-sig")) for p in sorted(RECIPES.glob("duo_delve*.json"))}
+        return {p.stem: json.loads(p.read_text(encoding="utf-8-sig")) for p in sorted(RECIPES.glob("duo_*.json"))}
     names = subprocess.run(["git", "ls-tree", "--name-only", rev, REL + "/"], cwd=ROOT, capture_output=True,
                            text=True, check=True).stdout.split()
     out = {}
     for n in names:
-        if not n.endswith(".json") or "/duo_delve" not in n:
+        if not n.endswith(".json") or "/duo_" not in n:
             continue
         raw = subprocess.run(["git", "show", f"{rev}:{n}"], cwd=ROOT, capture_output=True, check=True).stdout
         out[Path(n).stem] = json.loads(raw.decode("utf-8-sig"))
