@@ -1201,6 +1201,10 @@ namespace FrankyCLI
             var names = new List<(string recipe, string field, string name)>();
             int clashes = 0;
             var loaded = new List<Recipe>();
+            // Each text checker once over every recipe, read off per recipe by Grade (commands/quest/delve_words.cs).
+            DelveWords.Prime(dataDir);
+            var words = DelveWords.Primed!;
+            try {
             foreach (var f in files)
             {
                 var sw = new StringWriter();
@@ -1237,6 +1241,7 @@ namespace FrankyCLI
                         if (!string.IsNullOrWhiteSpace(nm)) names.Add((r.id, field, nm!));
                 }
             }
+            } finally { DelveWords.Unprime(); }
             Console.WriteLine();
             // (A cross-recipe "two missions share a delivery model" warning stood here from his 2026-10-08 ruling.
             // Retired on his 2026-10-11: "two missions sharing a model isnt really an issue... Im aiming for like
@@ -1300,9 +1305,24 @@ namespace FrankyCLI
                 clashes++;
                 Console.WriteLine($"  [FATAL] \"{g.Key}\" is used by {string.Join(", ", g.Select(x => x.recipe + " (" + x.field + ")"))}: two people with one name in a player's world.");
             }
-            Console.WriteLine(failed == 0 && clashes == 0 ? $"  ALL {files.Count} RECIPES LINT CLEAN."
-                              : $"  {failed} of {files.Count} RECIPE(S) FAIL" + (clashes > 0 ? $", and {clashes} name clash(es) ACROSS recipes." : "."));
-            return failed == 0 && clashes == 0 ? 0 : 1;
+            // A fault the checkers name against an id that is no recipe file here would grade nobody: said, and counted.
+            var stems = new HashSet<string>(files.Select(Path.GetFileNameWithoutExtension)!, StringComparer.OrdinalIgnoreCase);
+            int orphans = 0;
+            foreach (var orphan in words.Faults.Keys.Where(k => !stems.Contains(k)))
+            {
+                orphans++;
+                Console.WriteLine($"  [FATAL] words: the text checkers flag '{orphan}', which is no recipe in this folder: {string.Join(" / ", words.Faults[orphan])}");
+            }
+            // The corpus rates: printed once, never a failure (Jessica's shape; the fix is a judgement).
+            Console.WriteLine();
+            Console.WriteLine("  WORDS, the corpus rates (never fail):");
+            foreach (var l in words.Corpus) Console.WriteLine("  " + l);
+            Console.WriteLine();
+            bool clean = failed == 0 && clashes == 0 && orphans == 0;
+            Console.WriteLine(clean ? $"  ALL {files.Count} RECIPES LINT CLEAN."
+                              : $"  {failed} of {files.Count} RECIPE(S) FAIL" + (clashes > 0 ? $", and {clashes} name clash(es) ACROSS recipes" : "")
+                                + (orphans > 0 ? $", and {orphans} word fault(s) on no recipe" : "") + ".");
+            return clean ? 0 : 1;
         }
 
         /// <summary>
@@ -1914,6 +1934,12 @@ namespace FrankyCLI
             // --- report ------------------------------------------------------------------
             bool Report()
             {
+                // Jessica's text checkers, a fault of either FATAL (his 2026-10-29 "yeah wire the lint"): commands/quest/delve_words.cs.
+                // Here rather than above so every early return through Report still grades the words.
+                lap.Mark("words");
+                string? wordsDir = ResolveDataDir();
+                if (wordsDir == null) Fatal("words: CHECKER BROKEN, no data/delves directory to find scripts/delves from");
+                else DelveWords.Grade(wordsDir, r.id, Fatal);
                 lap.Mark("report");
                 Console.WriteLine();
                 foreach (var i in issues) Console.WriteLine((i.Fatal ? "  [FATAL] " : "  [warn ] ") + i.Text);
