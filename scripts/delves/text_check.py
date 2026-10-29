@@ -27,7 +27,7 @@ PER-LINE FAULTS (each fails the run):
            shooters at a site where the build places nobody. Every field the player reads OR hears, because the
            claim is about the world, not the wording. ⚠ `who` has no armed friendly kind (workers are civilians),
            so a count of shooters is never true today: the fix is the words.
-  NAME     two recipes place a person with the same name. The subtitle shows it, so a replaying player meets one
+  NAME     two recipes place people with the same surname. The subtitle shows it, so a replaying player meets one
            person in two jobs that disagree about her (14a and 16a were both "Sergeant Okafor", 2026-10-29).
   SPEAKER  two letter variants of one family share a speaker name. The subtitles show it (his, 2026-10-29), so
            the same name tells a replaying player it is the same person, whatever the lines do. Frances Hale's
@@ -172,10 +172,10 @@ def main():
         for b in d.get("beats") or []:
             n = (b.get("person") or {}).get("name")
             if n:
-                people.setdefault(n, set()).add(rid)
+                people.setdefault(n.split()[-1], set()).add(rid)  # by surname: "Sergeant Brandt" and "Hollis Brandt" collide
     for n, ids in people.items():
         if len(ids) > 1 and (not a.id or a.id in ids):
-            flag(", ".join(sorted(ids)), "NAME", "person", f"two recipes place \"{n}\"")
+            flag(", ".join(sorted(ids)), "NAME", "person", f"two recipes place a \"{n}\"")
     if journals:
         pct = 100 * first / journals
         print(f"\nRATES: journal first person {pct:.0f}% {'WARN, floor 75%' if pct < 75 else 'ok (floor 75%, vanilla 87%)'}")

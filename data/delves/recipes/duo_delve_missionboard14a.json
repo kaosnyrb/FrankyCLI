@@ -68,7 +68,7 @@
       "objective": "Bring the crate to the holdouts",
       "journal": "A few soldiers were still holding part of the <Place>, out of nearly everything. I broke through and brought them a medical crate.",
       "person": {
-        "name": "Sergeant Brandt",
+        "name": "Sergeant Ndiaye",
         "template": "UC_NA_MASTWorkerMale01",
         "outfit": "Outfit_Clothes_UCNavy_ArmoredFatigues_Light01_SY-920",
         "company": {
