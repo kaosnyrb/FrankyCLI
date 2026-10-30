@@ -3023,7 +3023,11 @@ namespace FrankyCLI
             Console.WriteLine();
             if (fail == 0)
             {
-                Console.WriteLine($"  BUILD VERIFIED. Compile the fragment script, then startquest {r.id}:");
+                // A board quest is never started by hand (his correction 2026-10-30, OT-03: "can't call startquest on a
+                // missionboard missin"); this line offered startquest for every template and sent a probe to no board at all.
+                Console.WriteLine(!IsBoard(t) ? $"  BUILD VERIFIED. Compile the fragment script, then startquest {r.id}:"
+                    : r.deal != null ? $"  BUILD VERIFIED. Compile the fragment script, then take it from the board ({r.deal}); a board quest is never started by hand:"
+                    : "  BUILD VERIFIED, AND ON NO BOARD: no deal, so nothing can list it and a board quest is never started by hand. Set deal (a probe: _duo_MB_MissionNode_test). Compile:");
                 Console.WriteLine($"    python papyrus/compile.py C:/modding/DU_Overtime/Data {bm.Script}");
             }
             else Console.WriteLine($"  {fail} CHECK(S) FAILED.");
