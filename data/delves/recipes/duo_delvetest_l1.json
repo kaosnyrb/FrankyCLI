@@ -2,6 +2,8 @@
   "schema": 2,
   "id": "duo_delvetest_l1",
   "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "His 2026-10-30 \"put it on the test node\": a board mission cannot be startquested, and the build clears the node, so MB55a leaves it until it is promoted or rebuilt there.",
   "_note": "OT-03 PROBE, his 2026-10-30: 'mark the second location as optional and fill it when the player reaches the first. That way the first location can be remote and the second is \"in system\" where the player is'. MB42a whole (Crash Site Cargo) with place.second.fill late and system same; the card and briefing do not name the drop-off, because it does not exist when they are read. On the test node. If his play holds, MB42a takes the shape on Jessica's words.",
   "author": "eliza",
   "source": "duo_MB42a_qst (Jessica's), every beat as is",
