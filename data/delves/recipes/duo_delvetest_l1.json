@@ -48,8 +48,8 @@
   "beats": [
     {
       "type": "pickup",
-      "at": "RETravelA1LocRef",
-      "ring": "large-cargo",
+      "at": "REMarkerMediumLocRef",
+      "_at": "His 2026-10-30 play of L1: on the travel ring the crate \"doesn't feel like it was in the ship\"; his pick of the three markers every wreck site carries (RECenter, REMarkerMedium, REMarkerSmall, each keeping the 3-wreck pool).",
       "item": "Freighter Consignment",
       "objective": "Recover the freighter's crate at the <Place>",
       "model": "Meshes\\ccs\\wreckcargocrate01.nif",
