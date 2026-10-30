@@ -422,16 +422,20 @@ namespace FrankyCLI
             if (r.place.second?.residents != null || r.place.third?.residents != null)
                 Fatal("residents is main place only: the arrival hook measures from step one's marker.");
 
-            // --- the site's owner, stamped at the accept (his 2026-10-28; plan OT-01) -------------------------
-            if (r.place.owner != null)
+            // --- the site's faction, swapped at the accept (his 2026-10-28; plan OT-01) ------------------------
+            if (r.place.faction != null)
             {
-                var owner = OwnOrMaster<IFactionGetter>(Allowed(env, t), env, r.place.owner);
-                if (!IsBoard(t)) Fatal("place.owner is stamped at a board's accept, before the site is loaded: it needs the board template.");
-                else if (owner == null) Fatal($"place.owner '{r.place.owner}' is not a Faction in {t.mod} or one of its masters.");
-                else Console.WriteLine($"  place.owner: {owner.EditorID} [{owner.FormKey}], stamped on the main place at the accept (stage {t.entryStage})");
+                var table = LoadFactionTable();
+                var row = table?.factions.FirstOrDefault(f => string.Equals(f.name, r.place.faction, StringComparison.OrdinalIgnoreCase));
+                if (!IsBoard(t)) Fatal("place.faction swaps the site at a board's accept, before it loads: it needs the board template.");
+                else if (table == null) Fatal("place.faction needs data/delves/factions.json, and it would not load.");
+                else if (row == null) Fatal($"place.faction '{r.place.faction}' is not a row of factions.json ({string.Join(", ", table.factions.Select(f => f.name))}).");
+                else if (table.memberGate != null && string.Equals(row.name, table.memberGate.row, StringComparison.OrdinalIgnoreCase))
+                    Fatal($"place.faction '{row.name}' is the joinable faction: a member must never be offered it (his 10-28), and that gate is UNBUILT for a pinned site. Pin another, or build the gate first.");
+                else Console.WriteLine($"  place.faction: {row.name}, the site swapped to {row.keyword} at the accept (stage {t.entryStage}); its waves from {row.gang}");
             }
-            if (r.place.second?.owner != null || r.place.third?.owner != null)
-                Fatal("owner is main place only: the waves and the residents it is for are the main place's.");
+            if (r.place.second?.faction != null || r.place.third?.faction != null)
+                Fatal("faction is main place only: the board's accept swaps the place it created.");
 
             // --- who is there (his dial, 2026-10-11) --------------------------------------------------------
             var whos = WhoOf(r);
@@ -876,6 +880,27 @@ namespace FrankyCLI
             /// <summary>The fragment script's properties (alias -1 = a plain form) and its lines per stage. Set in section 10.</summary>
             internal List<(string type, string pname, FormKey key, int alias)> props = null!;
             internal SortedDictionary<int, List<string>> code = null!;
+
+            /// <summary>
+            /// The Papyrus expression for beat b's gang: its SITE's own faction, read off the one LocEnc keyword the site
+            /// carries (plan OT-01, probed 2026-10-30), through the table gen_delve factions wrote; the template's Gang when
+            /// the site carries none of the table's (another mod's faction). The site is the location alias the beat's
+            /// marker sits inside, so a second or third place reads its own. Registers its properties.
+            /// </summary>
+            internal string SiteGang(int b)
+            {
+                var marker = clone.Aliases!.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)slotOf[b].markerAlias);
+                if (marker.Location?.AliasID is not int site)
+                {
+                    Console.WriteLine($"  gang     : beat {b + 1}'s marker sits in no location alias, so its gang is the template's (no site to read)");
+                    return "Gang";
+                }
+                props.Add(("LocationAlias", $"Alias_Site{site}", clone.FormKey, site));
+                props.Add(("FormList", "EncKeywords", inputs.EncKeywords!.Value, -1));
+                props.Add(("FormList", "EncGangs", inputs.EncGangs!.Value, -1));
+                Console.WriteLine($"  gang     : beat {b + 1} spawns from its site's faction (location alias {site}), the template's Gang when it has none of the table's");
+                return $"duo_delve_lib.SiteGang(Alias_Site{site}, EncKeywords, EncGangs, Gang)";
+            }
 
             /// <summary>
             /// A beat's marker alias. A slotless base's marker alias IS the first fight's marker (on the board, the system
@@ -1789,16 +1814,27 @@ namespace FrankyCLI
                     Console.WriteLine($"  residents: dead, every human within {ResidentsRadius:0} of step one's marker (alias {on}) on stage {killStage}"
                                       + (crew ? ", the main place's crew stage, BEFORE the crew is placed" : ""));
                 }
-                // The site's owner (place.owner): stamped on the main place's LOCATION at the accept, before the site has
-                // loaded or rolled its residents (his 2026-10-28: "if we set the owners when we take the mission no one has
-                // spawned yet"). The lint guarantees a board and a Faction that resolves.
-                if (r.place.owner != null)
+                // The site's faction at the accept, before it loads (plan OT-01; probed 2026-10-30: the site is rolled at the
+                // listing as ONE LocEnc keyword, the residents follow it, and a swap before load changes them). place.faction
+                // swaps it to the recipe's row; otherwise, on a board whose beats read the site, a member of the joinable
+                // faction never meets it (his 10-28): a site rolled as that faction becomes the gate's `instead`.
+                if (inputs.FactionKeep is FormKey keep)
                 {
-                    if (inputs.SiteOwner is not FormKey owner) { Console.WriteLine($"REFUSED: place.owner '{r.place.owner}' was not resolved to a Faction."); return 1; }
-                    props.Add(("LocationAlias", "Alias_SiteLocation", clone.FormKey, t.placeAlias));
-                    props.Add(("Faction", "SiteOwner", owner, -1));
-                    Add(t.entryStage, "Alias_SiteLocation.GetLocation().SetFactionOwner(SiteOwner)");
-                    Console.WriteLine($"  owner: {r.place.owner} [{owner}] stamped on the main place's location (alias {t.placeAlias}) on stage {t.entryStage}");
+                    props.Add(("LocationAlias", $"Alias_Site{t.placeAlias}", clone.FormKey, t.placeAlias));
+                    props.Add(("FormList", "EncKeywords", inputs.EncKeywords!.Value, -1));
+                    props.Add(("Keyword", "SiteFaction", keep, -1));
+                    Add(t.entryStage, $"duo_delve_lib.SwapSite(Alias_Site{t.placeAlias}, EncKeywords, SiteFaction)");
+                    Console.WriteLine($"  faction  : the site (alias {t.placeAlias}) swapped to {r.place.faction} on stage {t.entryStage}");
+                }
+                else if (IsBoard(t) && inputs.GateFaction is FormKey gf)
+                {
+                    props.Add(("LocationAlias", $"Alias_Site{t.placeAlias}", clone.FormKey, t.placeAlias));
+                    props.Add(("FormList", "EncKeywords", inputs.EncKeywords!.Value, -1));
+                    props.Add(("Faction", "GateFaction", gf, -1));
+                    props.Add(("Keyword", "GateKeyword", inputs.GateKeyword!.Value, -1));
+                    props.Add(("Keyword", "GateInstead", inputs.GateInstead!.Value, -1));
+                    Add(t.entryStage, $"duo_delve_lib.MemberSwap(Alias_Site{t.placeAlias}, EncKeywords, GateFaction, GateKeyword, GateInstead)");
+                    Console.WriteLine($"  gate     : a member of the joinable faction meets its site as the gate's instead, on stage {t.entryStage}");
                 }
                 // "replace": the beat's marker is a placed object (a box), so it goes when the quest starts and
                 // the beat's own object stands there instead. His shape: GetRef().Disable(False), never re-enabled.

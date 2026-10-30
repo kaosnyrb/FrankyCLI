@@ -40,8 +40,13 @@ namespace FrankyCLI
             public readonly Dictionary<int, (FormKey bench, List<(FormKey part, int count)> parts)> Crafts = new();
             /// <summary>By beat index, for a use with explosion: the Explosion placed at its object.</summary>
             public readonly Dictionary<int, FormKey> Explosions = new();
-            /// <summary>place.owner's Faction, stamped on the main place's location at the accept (plan OT-01).</summary>
-            public FormKey? SiteOwner;
+            /// <summary>The faction table's two parallel lists (gen_delve factions), when a beat reads the site's faction or
+            /// place.faction swaps it (plan OT-01).</summary>
+            public FormKey? EncKeywords, EncGangs;
+            /// <summary>place.faction's keyword, swapped onto the site at the accept.</summary>
+            public FormKey? FactionKeep;
+            /// <summary>The member gate: the joinable faction, its site keyword, and the keyword a member's site gets instead.</summary>
+            public FormKey? GateFaction, GateKeyword, GateInstead;
         }
 
         /// <summary>A fight beat's forms, resolved own-or-master in ResolveInputs.</summary>
@@ -189,12 +194,36 @@ namespace FrankyCLI
                 if (xp == null) { Console.WriteLine($"REFUSED: beat {i + 1} explosion '{xn}' is not an Explosion in {t.mod} or one of its masters."); fail++; continue; }
                 inputs.Explosions[i] = xp.FormKey;
             }
-            // The site's owner (place.owner), own-or-master as every other form here.
-            if (fail == 0 && r.place.owner is string on)
+            // The site's faction (plan OT-01): a hold or a recover spawns from the site's own faction, read off its one
+            // LocEnc keyword through the table gen_delve factions wrote; place.faction swaps that keyword at the accept.
+            if (fail == 0 && (r.place.faction != null || r.beats.Any(b => b.type == "hold" || b.type == "recover")))
             {
-                var of = OwnOrMaster<IFactionGetter>(myMod, env, on);
-                if (of == null) { Console.WriteLine($"REFUSED: place.owner '{on}' is not a Faction in {t.mod} or one of its masters."); fail++; }
-                else inputs.SiteOwner = of.FormKey;
+                var table = LoadFactionTable();
+                var ek = table == null ? null : OwnOrMaster<IFormListGetter>(myMod, env, table.keywordList);
+                var eg = table == null ? null : OwnOrMaster<IFormListGetter>(myMod, env, table.gangList);
+                if (table == null) fail++;
+                else if (ek == null || eg == null)
+                { Console.WriteLine($"REFUSED: {table.keywordList} or {table.gangList} is not in {t.mod}: run `gen_delve factions` first."); fail++; }
+                else if (ek.Items.Count != table.factions.Count || eg.Items.Count != table.factions.Count)
+                { Console.WriteLine($"REFUSED: the plugin's faction lists hold {ek.Items.Count}/{eg.Items.Count} entries and factions.json {table.factions.Count}: run `gen_delve factions`."); fail++; }
+                else
+                {
+                    inputs.EncKeywords = ek.FormKey; inputs.EncGangs = eg.FormKey;
+                    FormKey? Kw(string row) => OwnOrMaster<IKeywordGetter>(myMod, env,
+                        table.factions.First(f => string.Equals(f.name, row, StringComparison.OrdinalIgnoreCase)).keyword)?.FormKey;
+                    if (r.place.faction is string pf)
+                    {
+                        inputs.FactionKeep = Kw(pf);
+                        if (inputs.FactionKeep == null) { Console.WriteLine($"REFUSED: place.faction '{pf}' does not resolve to a site keyword."); fail++; }
+                    }
+                    else if (table.memberGate is { } g)
+                    {
+                        inputs.GateFaction = OwnOrMaster<IFactionGetter>(myMod, env, g.faction)?.FormKey;
+                        inputs.GateKeyword = Kw(g.row); inputs.GateInstead = Kw(g.instead);
+                        if (inputs.GateFaction == null || inputs.GateKeyword == null || inputs.GateInstead == null)
+                        { Console.WriteLine($"REFUSED: the member gate ({g.faction}, {g.row} -> {g.instead}) does not resolve."); fail++; }
+                    }
+                }
             }
             // A talk exchange's perk (a [Background] / [Skill] / [Trait] choice), own-or-master as every other form here.
             for (int i = 0; i < r.beats.Count && fail == 0; i++)

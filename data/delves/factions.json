@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "_note": [
+    "THE FACTION TABLE (plan OT-01, 2026-10-30). A board site's faction is ONE LocEnc*_Exclusive keyword left on the created location at the listing; the residents follow it, and swapping it before the site loads changes them (manual Inbox, for 32).",
+    "`gen_delve factions` writes the two lists below into the plugin, PARALLEL by index: a site carrying keywordList[i] gets its waves from gangList[i]. A site carrying none of them (another mod's faction) keeps the template's own gang.",
+    "Another mod's faction is a new row here, never code. The gang lists are his own, from the classic missions."
+  ],
+  "keywordList": "duo_delve_EncKeywords",
+  "gangList": "duo_delve_EncGangs",
+  "memberGate": {
+    "faction": "CrimeFactionCrimsonFleet",
+    "row": "CrimsonFleet",
+    "instead": "Spacers",
+    "_note": "His 10-28: \"the player can join the crimson fleet. Generally itd be good to prevent those missions starting\". Vanilla gates with GetInFaction CrimeFactionCrimsonFleet (read 10-30; PlayerJoined_CrimsonFleet is set and never cleared or read, so never this). Vanilla's own board does NOT gate."
+  },
+  "factions": [
+    { "name": "Spacers", "keyword": "LocEncSpacers_Exclusive", "gang": "duo_GangMembersList_Spacer" },
+    { "name": "CrimsonFleet", "keyword": "LocEncCrimsonFleet_Exclusive", "gang": "duo_GangMembersList_Crimson" },
+    { "name": "Ecliptic", "keyword": "LocEncEcliptic_Exclusive", "gang": "duo_GangMembersList_Ecliptic" },
+    { "name": "Varuun", "keyword": "LocEncHouseVaruun_Exclusive", "gang": "duo_GangMembersList_Varuun" }
+  ]
+}

@@ -373,6 +373,41 @@ Function PlaceCrew(ReferenceAlias akCentre, FormList akGang, Int aiMin, Int aiMa
     EndWhile
 EndFunction
 
+; THE SITE'S FACTION (plan OT-01, probed 2026-10-30, manual Inbox for 32): a board site is rolled at the listing as
+; ONE LocEnc*_Exclusive keyword on its created location, and its residents follow that keyword when it loads.
+; akKeywords and akGangs are the faction table gen_delve factions wrote, parallel by index.
+
+; The wave list for the faction the site carries; akDefault when it carries none of the table's (another mod's).
+FormList Function SiteGang(LocationAlias akSite, FormList akKeywords, FormList akGangs, FormList akDefault) Global
+    Location loc = akSite.GetLocation()
+    Int i = 0
+    While i < akKeywords.GetSize()
+        If loc.HasKeyword(akKeywords.GetAt(i) as Keyword)
+            Return akGangs.GetAt(i) as FormList
+        EndIf
+        i += 1
+    EndWhile
+    Return akDefault
+EndFunction
+
+; Every table keyword off the site, akKeep on: before it loads, its residents and its waves become akKeep's faction.
+Function SwapSite(LocationAlias akSite, FormList akKeywords, Keyword akKeep) Global
+    Location loc = akSite.GetLocation()
+    Int i = 0
+    While i < akKeywords.GetSize()
+        loc.RemoveKeyword(akKeywords.GetAt(i) as Keyword)
+        i += 1
+    EndWhile
+    loc.AddKeyword(akKeep)
+EndFunction
+
+; His 10-28: a member of the joinable faction is never sent to fight it. A member's site rolled as akRolled becomes akInstead.
+Function MemberSwap(LocationAlias akSite, FormList akKeywords, Faction akMembers, Keyword akRolled, Keyword akInstead) Global
+    If Game.GetPlayer().IsInFaction(akMembers) && akSite.GetLocation().HasKeyword(akRolled)
+        SwapSite(akSite, akKeywords, akInstead)
+    EndIf
+EndFunction
+
 ; THE RESIDENTS ARE DEAD (his 2026-10-26, on missionboard31a's occupied outpost: "what about we kill the
 ; inhabitants when the first radio message plays"). Every HUMAN within afRadius of akCentre, in the loaded area,
 ; killed silently (no kill event: no bounty, not the player's kill). Never the player, his crew, the dead or an

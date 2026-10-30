@@ -95,9 +95,9 @@ namespace FrankyCLI
                 // Outside: a spot at range now (the objective points there), the holder when the player comes near it
                 // (papyrus/duo_delve_spawnnear.psc, on the holder alias; SpawnNear in the Hooks pass attaches it).
                 if (bt.outside is { } o)
-                    build.Add(stage, $"({hd} as duo_delve_spawnnear).PlaceOutside({mk}, Gang, Item{b + 1}, {build.t.gangMin}, {build.gangMax}, {o[0]}.0, {o[1]}.0)");
+                    build.Add(stage, $"({hd} as duo_delve_spawnnear).PlaceOutside({mk}, {build.SiteGang(b)}, Item{b + 1}, {build.t.gangMin}, {build.gangMax}, {o[0]}.0, {o[1]}.0)");
                 else
-                    build.Add(stage, $"duo_delve_lib.SpawnHolder({mk}, {hd}, Gang, Item{b + 1}, {build.t.gangMin}, {build.gangMax})");
+                    build.Add(stage, $"duo_delve_lib.SpawnHolder({mk}, {hd}, {build.SiteGang(b)}, Item{b + 1}, {build.t.gangMin}, {build.gangMax})");
             }
         }
     }

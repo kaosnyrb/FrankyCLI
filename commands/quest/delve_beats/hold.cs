@@ -285,7 +285,7 @@ namespace FrankyCLI
                 build.props.Add(("FormList", "Gang", build.gangKey!.Value, -1));
                 var sz = r.beats[b].size!;
                 int origins = WaveStyles[r.beats[b].style?[w] ?? "squad"];
-                build.Add(stage, $"duo_delve_lib.SpawnWave({mk}, {wv}, Gang, {sz[0]}, {sz[1]}, {origins})");
+                build.Add(stage, $"duo_delve_lib.SpawnWave({mk}, {wv}, {build.SiteGang(b)}, {sz[0]}, {sz[1]}, {origins})");
                 int stuck = r.beats[b].stuck ?? DefaultStuckSeconds;
                 int rv = r.beats[b].reveal ?? DefaultRevealSeconds;
                 build.Tail(stage, $"; wave {w + 1}: {(rv > 0 ? $"pointed out after {rv} s, " : "")}let go after {stuck} s if it is still up");

@@ -532,14 +532,14 @@ namespace FrankyCLI
             /// </summary>
             public string? residents { get; set; }
             /// <summary>
-            /// OPTIONAL, main place only, board only: a Faction EditorID stamped on the main place's location as its
-            /// OWNER at the accept (Location.SetFactionOwner, vanilla's own call in DefaultGroupSpawnQuestScript). His
-            /// 2026-10-28 design: "if we set the owners when we take the mission no one has spawned yet", so the site
-            /// can roll the faction the mission pinned. ⚠ Whether the site's load-time roll HONOURS the owner is the
-            /// probe this field was built for (office plan OT-01, 2026-10-30); until it reads yes this stamps and
-            /// proves nothing about who stands there.
+            /// OPTIONAL, main place only, board only: a row name in data/delves/factions.json. At the accept the site's
+            /// faction keywords are swapped for that row's, before the site loads, so its residents and the waves are that
+            /// faction (plan OT-01; his 2026-10-28 "the vent mission with three different factions as 3 missions"). Probed
+            /// 2026-10-30 (manual Inbox, for 32): the site is rolled at the listing as ONE LocEnc*_Exclusive keyword, the
+            /// residents follow it, a swap before load changes them. ⛔ Not an owner stamp (place.owner, removed the same
+            /// day): SetFactionOwner landed and the site rolled what it liked.
             /// </summary>
-            public string? owner { get; set; }
+            public string? faction { get; set; }
             /// <summary>
             /// space only, main place only: base aliases this build REMOVES, by name. The alias-set test ladder's knob (his
             /// 2026-10-22, "make a series of tests for remote and space alias sets. Idea being we learn in isolation how to
@@ -811,6 +811,8 @@ namespace FrankyCLI
                 case "name": return Name(args, dataDir, templates, dry);
                 case "testnode": return TestNode(args, templates, dry);
                 case "nodeflag": return NodeFlag(args, templates, dry);
+                // the faction table, the sites' keywords and their wave lists: commands/quest/delve_factions.cs
+                case "factions": return Factions(args, dataDir, templates, dry);
                 // the legacy mission system: commands/quest/delve_legacy.cs
                 case "legacy": return DelveLegacy.Run(args, dataDir, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList(), dry);
                 // the rare tier: commands/quest/delve_rare.cs
@@ -827,6 +829,7 @@ namespace FrankyCLI
                     Console.WriteLine("       gen_delve lint  <recipe.json | recipeId> [--spread]   --spread adds the beat-separation figures (~30 s more)");
                     Console.WriteLine("       gen_delve lint  --all          every recipe, one game-data load, one line each");
                     Console.WriteLine("       gen_delve models [recipe ...]   the final test: every beat model resolves (one ~36 s load-order walk)");
+                    Console.WriteLine("       gen_delve factions [--dry]   write data/delves/factions.json into the plugin: the site faction keywords and their wave lists, parallel");
                     Console.WriteLine("       gen_delve name  <draftId> [--family <NN>] [--dry]   a draft takes its classic name (the next family, or --family's next letter) before its first build");
                     Console.WriteLine("       gen_delve build <recipe.json | recipeId> [--dry]");
                     Console.WriteLine("       gen_delve build <recipe> --dry --emit <dir>   write the would-be plugin and the emitted model to <dir>, never the live plugin");
