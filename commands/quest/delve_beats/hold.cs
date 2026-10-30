@@ -274,6 +274,14 @@ namespace FrankyCLI
             /// end (a tail, after every other line of that stage): the reveal after `reveal` seconds, the stuck guard after
             /// `stuck`, each only while the wave is still up. Utility.Wait is latent, so the script is free for the next
             /// stage while it sleeps; stage 100 already waits on its radio line this way, and he has heard that one finish.
+            ///
+            /// ⛔ EVERY CHECK AFTER A WAIT ALSO ASKS THAT ITS OWN SPAWNING STAGE IS DONE (OT-91, his play 2026-10-30: on a
+            /// re-take of Runaway Plant "the waves started before I got the the console"). A latent wait outlives
+            /// MissionComplete, and a board deals the SAME quest again, so run 1's guard woke inside run 2, found the
+            /// wave's stage not done there, and set it: wave 3 came round him before the console. A fresh run has not
+            /// reached the spawning stage, so the stale thread now does nothing. The hole, named: a re-take that reaches
+            /// the same wave inside the stuck window would still be let go early; a per-run counter would close it and
+            /// is held back until something reaches it.
             /// </summary>
             private static void SpawnWave(BeatsBuild build, int b, int w, int stage)
             {
@@ -288,6 +296,7 @@ namespace FrankyCLI
                 build.Add(stage, $"duo_delve_lib.SpawnWave({mk}, {wv}, {build.SiteGang(b)}, {sz[0]}, {sz[1]}, {origins})");
                 int stuck = r.beats[b].stuck ?? DefaultStuckSeconds;
                 int rv = r.beats[b].reveal ?? DefaultRevealSeconds;
+                string stillUp = StillUp(stage, ws[w]);
                 build.Tail(stage, $"; wave {w + 1}: {(rv > 0 ? $"pointed out after {rv} s, " : "")}let go after {stuck} s if it is still up");
                 if (rv > 0)
                 {
@@ -295,10 +304,10 @@ namespace FrankyCLI
                     int robj = hs.Objective + 1 + w;
                     build.Add(ws[w], $"SetObjectiveDisplayed({robj}, False)   ; wave {w + 1} is down: its marker goes");
                     build.Tail(stage, $"Utility.Wait({rv}.0)");
-                    build.Tail(stage, $"If !GetStageDone({ws[w]})");
+                    build.Tail(stage, $"If {stillUp}");
                     build.Tail(stage, $"    SetObjectiveDisplayed({robj})");
                     build.Tail(stage, $"    Utility.Wait({stuck - rv}.0)");
-                    build.Tail(stage, $"    If !GetStageDone({ws[w]})");
+                    build.Tail(stage, $"    If {stillUp}");
                     build.Tail(stage, $"        SetStage({ws[w]})");
                     build.Tail(stage, "    EndIf");
                     build.Tail(stage, "EndIf");
@@ -307,12 +316,16 @@ namespace FrankyCLI
                 else
                 {
                     build.Tail(stage, $"Utility.Wait({stuck}.0)");
-                    build.Tail(stage, $"If !GetStageDone({ws[w]})");
+                    build.Tail(stage, $"If {stillUp}");
                     build.Tail(stage, $"    SetStage({ws[w]})");
                     build.Tail(stage, "EndIf");
                 }
-                build.bm.StuckWaits.Add(ws[w]);
+                build.bm.StuckWaits.Add((stage, ws[w]));
             }
+
+            /// <summary>The condition every check after a wave's wait asks: this run reached the spawning stage, and the
+            /// wave's own stage is not yet done. One spelling, shared with the verify (OT-91).</summary>
+            internal static string StillUp(int spawnStage, int waveStage) => $"GetStageDone({spawnStage}) && !GetStageDone({waveStage})";
         }
     }
 }

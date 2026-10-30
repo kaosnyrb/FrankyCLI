@@ -687,7 +687,7 @@ namespace FrankyCLI
             public FormKey Speaker;                        // the cloned NPC whose name and voice type the lines carry
             public List<(int stage, uint wem, string text, FormKey scene)> Lines = new();   // each spoken line, by the stage that plays it
             public string WavePackageShape = "";   // its source's begin/end/change topic counts, which the copy must keep
-            public List<int> StuckWaits = new();   // each hold wave's death stage, which its spawning fragment sets after the stuck wait
+            public List<(int spawn, int death)> StuckWaits = new();   // each hold wave's spawning stage, and the death stage that fragment sets after the stuck wait
             public List<(int objective, int alias, int seconds, int stage)> Reveals = new();   // each revealed wave: its objective, collection, wait, death stage
             public (int on, int to)? ApproachTarget;   // the approach hook's alias and the alias it measures to
             public List<(int on, int to)> PersonApproach = new();   // each ending person's hook: its object, measuring to the player
@@ -2903,9 +2903,12 @@ namespace FrankyCLI
                                   vma.Scripts.FirstOrDefault(s => s.Name == t.questScript)?.Properties.OfType<IScriptBoolPropertyGetter>()
                                       .FirstOrDefault(p => p.Name == "ShutdownOnCompletion")?.Data.ToString() ?? "unset (true)", "False");
             }
-            foreach (var ds in bm.StuckWaits)
-                fail += Check($"wave stage {ds}: the stuck guard waits in its spawning fragment and sets it",
-                              (fsrc.Contains($"If !GetStageDone({ds})") && fsrc.Contains($"SetStage({ds})")).ToString(), "True");
+            // OT-91: the guard must also ask that THIS run reached the spawning stage, or a wait left over from the last run
+            // sets a stage in the next one. Not also "no bare !GetStageDone(death) anywhere": the crate-loss line writes that
+            // shape on purpose, and its stage can be a hold's last wave stage.
+            foreach (var (spawn, ds) in bm.StuckWaits)
+                fail += Check($"wave stage {ds}: the stuck guard waits in stage {spawn}'s fragment and sets it only in the run that spawned it",
+                              (fsrc.Contains($"If {HoldBeat.StillUp(spawn, ds)}") && fsrc.Contains($"SetStage({ds})")).ToString(), "True");
             fail += Check("no timer event in the fragment script (a fragment's OnTimer never fires)",
                           fsrc.Contains("Event OnTimer(").ToString(), "False");
             foreach (var (an, alias) in bm.Replaced)
