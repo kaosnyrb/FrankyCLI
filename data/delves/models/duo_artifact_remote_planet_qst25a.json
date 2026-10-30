@@ -1,5 +1,5 @@
 {
-  "FormKey": "003F1A:du_overtime.esm",
+  "FormKey": "00478E:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -144,7 +144,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003F1A:du_overtime.esm",
+              "FirstLink": "00478E:du_overtime.esm",
               "SecondParameter": 900
             }
           ]
@@ -346,7 +346,7 @@
           "Name": "Alias_Beat1Spawn",
           "Flags": 1,
           "Object": {
-            "Form": "003F1A:du_overtime.esm",
+            "Form": "00478E:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -356,7 +356,7 @@
           "Name": "Alias_Beat1Enemies",
           "Flags": 1,
           "Object": {
-            "Form": "003F1A:du_overtime.esm",
+            "Form": "00478E:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -376,7 +376,7 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "003F21:du_overtime.esm",
+            "Form": "004795:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -434,7 +434,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003F1A:du_overtime.esm",
+            "Form": "00478E:du_overtime.esm",
             "Alias": 5,
             "Unused": 0
           }
@@ -462,7 +462,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003F1A:du_overtime.esm",
+            "Form": "00478E:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -508,7 +508,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003F1A:du_overtime.esm",
+            "Form": "00478E:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -523,7 +523,7 @@
                 "Name": "TargetAlias",
                 "Flags": 1,
                 "Object": {
-                  "Form": "003F1A:du_overtime.esm",
+                  "Form": "00478E:du_overtime.esm",
                   "Alias": 32,
                   "Unused": 0
                 }
@@ -555,7 +555,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "003F1E:du_overtime.esm",
+        "FormKey": "004792:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -564,7 +564,7 @@
         },
         "EditorID": "duo_artifact_remote_planet_qst25a_say1_scene",
         "Flags": 129,
-        "Quest": "003F1A:du_overtime.esm",
+        "Quest": "00478E:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -595,12 +595,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003F1C:du_overtime.esm"
+            "Topic": "004790:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "003F21:du_overtime.esm",
+        "FormKey": "004795:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -609,7 +609,7 @@
         },
         "EditorID": "duo_artifact_remote_planet_qst25a_say2_scene",
         "Flags": 128,
-        "Quest": "003F1A:du_overtime.esm",
+        "Quest": "00478E:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -640,14 +640,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003F1F:du_overtime.esm"
+            "Topic": "004793:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "003F1C:du_overtime.esm",
+        "FormKey": "004790:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -656,7 +656,7 @@
         },
         "EditorID": "duo_artifact_remote_planet_qst25a_say1_topic",
         "Priority": 50,
-        "Quest": "003F1A:du_overtime.esm",
+        "Quest": "00478E:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -664,11 +664,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003F1D:du_overtime.esm"
+          "004791:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003F1D:du_overtime.esm",
+            "FormKey": "004791:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -676,14 +676,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_remote_planet_qst25a_say1_info",
-            "Speaker": "003F1B:du_overtime.esm",
+            "Speaker": "00478F:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 16156,
+                "WEMFile": 18320,
                 "EmotionOut": 0,
                 "ResponseText": "Containment failed, and our test subjects got out. They\u0027ve gone to ground nearby. We\u0027ve sealed ourselves in. Nobody opens a door until they\u0027re dead.",
                 "ScriptNotes": "",
@@ -696,7 +696,7 @@
         ]
       },
       {
-        "FormKey": "003F1F:du_overtime.esm",
+        "FormKey": "004793:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -705,7 +705,7 @@
         },
         "EditorID": "duo_artifact_remote_planet_qst25a_say2_topic",
         "Priority": 50,
-        "Quest": "003F1A:du_overtime.esm",
+        "Quest": "00478E:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -713,11 +713,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003F20:du_overtime.esm"
+          "004794:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003F20:du_overtime.esm",
+            "FormKey": "004794:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -725,14 +725,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_remote_planet_qst25a_say2_info",
-            "Speaker": "003F1B:du_overtime.esm",
+            "Speaker": "00478F:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 16159,
+                "WEMFile": 18323,
                 "EmotionOut": 0,
                 "ResponseText": "That\u0027s the last of them. Opening the doors. Somebody check the coffee machine survived.",
                 "ScriptNotes": "",

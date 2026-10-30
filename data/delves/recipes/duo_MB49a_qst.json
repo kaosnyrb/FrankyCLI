@@ -16,6 +16,8 @@
     "Pay: med, capped."
   ],
   "place": {
+    "habitability": true,
+    "_habitability": "His 2026-10-30 rule: habitability is off unless a mission calls for it. This one spawns predators (who: a creature list), so it asks, as MB48a. Plan OT-01 row 1.",
     "theme": {
       "require": [
         "LocTypeDungeon"

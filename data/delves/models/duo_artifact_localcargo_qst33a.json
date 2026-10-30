@@ -1,5 +1,5 @@
 {
-  "FormKey": "0042F9:du_overtime.esm",
+  "FormKey": "00471D:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -486,7 +486,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "0042FD:du_overtime.esm",
+        "Object": "004721:du_overtime.esm",
         "AliasID": 36,
         "Create": 0,
         "Level": 0
@@ -549,7 +549,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "0042FA:du_overtime.esm",
+        "Object": "00471E:du_overtime.esm",
         "AliasID": 40,
         "Create": 0,
         "Level": 0
@@ -603,7 +603,7 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "00431E:du_overtime.esm",
+            "Form": "004742:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -613,7 +613,7 @@
           "Name": "Say3",
           "Flags": 1,
           "Object": {
-            "Form": "004321:du_overtime.esm",
+            "Form": "004745:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -623,7 +623,7 @@
           "Name": "Alias_Beat2Marker",
           "Flags": 1,
           "Object": {
-            "Form": "0042F9:du_overtime.esm",
+            "Form": "00471D:du_overtime.esm",
             "Alias": 38,
             "Unused": 0
           }
@@ -633,7 +633,7 @@
           "Name": "Alias_Beat2Holder",
           "Flags": 1,
           "Object": {
-            "Form": "0042F9:du_overtime.esm",
+            "Form": "00471D:du_overtime.esm",
             "Alias": 39,
             "Unused": 0
           }
@@ -653,7 +653,37 @@
           "Name": "Item2",
           "Flags": 1,
           "Object": {
-            "Form": "0042FB:du_overtime.esm",
+            "Form": "00471F:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Alias_Site10",
+          "Flags": 1,
+          "Object": {
+            "Form": "00471D:du_overtime.esm",
+            "Alias": 10,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "EncKeywords",
+          "Flags": 1,
+          "Object": {
+            "Form": "0043AB:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "EncGangs",
+          "Flags": 1,
+          "Object": {
+            "Form": "0043AC:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -663,7 +693,7 @@
           "Name": "Beat3Message",
           "Flags": 1,
           "Object": {
-            "Form": "0042FC:du_overtime.esm",
+            "Form": "004720:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -731,7 +761,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0042F9:du_overtime.esm",
+            "Form": "00471D:du_overtime.esm",
             "Alias": 5,
             "Unused": 0
           }
@@ -759,7 +789,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0042F9:du_overtime.esm",
+            "Form": "00471D:du_overtime.esm",
             "Alias": 42,
             "Unused": 0
           }
@@ -811,7 +841,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0042F9:du_overtime.esm",
+            "Form": "00471D:du_overtime.esm",
             "Alias": 32,
             "Unused": 0
           }
@@ -838,7 +868,7 @@
                 "Name": "ItemFilter",
                 "Flags": 1,
                 "Object": {
-                  "Form": "0042FB:du_overtime.esm",
+                  "Form": "00471F:du_overtime.esm",
                   "Alias": -1,
                   "Unused": 0
                 }
@@ -855,14 +885,14 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0042F9:du_overtime.esm",
+            "Form": "00471D:du_overtime.esm",
             "Alias": 41,
             "Unused": 0
           }
         },
         "Scripts": [
           {
-            "Name": "DefaultAliasOnActivate",
+            "Name": "duo_delve_use",
             "Flags": 0,
             "Properties": [
               {
@@ -879,7 +909,7 @@
               },
               {
                 "Type": "Bool",
-                "Name": "ShouldHideActivationAfterSuccessfulActivation",
+                "Name": "HideAfterUse",
                 "Flags": 1,
                 "Bool": true
               }
@@ -892,7 +922,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "004301:du_overtime.esm",
+        "FormKey": "004725:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -901,7 +931,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_talk1_greet_scene",
         "Flags": 6196,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -921,7 +951,7 @@
             "Unknown3": -1,
             "UseAliases": false,
             "UsePackageData": false,
-            "FirstLink": "0042FD:du_overtime.esm",
+            "FirstLink": "004721:du_overtime.esm",
             "SecondParameter": 0
           },
           {
@@ -936,7 +966,7 @@
             "Unknown3": -1,
             "UseAliases": false,
             "UsePackageData": false,
-            "FirstLink": "0042F9:du_overtime.esm",
+            "FirstLink": "00471D:du_overtime.esm",
             "SecondParameter": 10
           }
         ],
@@ -968,7 +998,7 @@
             "Index": 1,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "0042FF:du_overtime.esm",
+            "Topic": "004723:du_overtime.esm",
             "HeadTracking": {
               "ForceRotate": false,
               "ForceRotateMustComplete": false
@@ -977,7 +1007,7 @@
         ]
       },
       {
-        "FormKey": "004306:du_overtime.esm",
+        "FormKey": "00472A:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -986,7 +1016,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_talk1_topic1_scene",
         "Flags": 10260,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "Index": 1,
         "VNAM": "0300000003000000030000000300000003000000",
         "SCPI": "6400",
@@ -1008,7 +1038,7 @@
             "Unknown3": -1,
             "UseAliases": false,
             "UsePackageData": false,
-            "FirstLink": "0042FD:du_overtime.esm",
+            "FirstLink": "004721:du_overtime.esm",
             "SecondParameter": 0
           },
           {
@@ -1023,7 +1053,7 @@
             "Unknown3": -1,
             "UseAliases": false,
             "UsePackageData": false,
-            "FirstLink": "0042F9:du_overtime.esm",
+            "FirstLink": "00471D:du_overtime.esm",
             "SecondParameter": 10
           }
         ],
@@ -1061,7 +1091,7 @@
             "Index": 3,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "004302:du_overtime.esm",
+            "Topic": "004726:du_overtime.esm",
             "HeadTracking": {
               "ForceRotate": false,
               "ForceRotateMustComplete": false
@@ -1074,7 +1104,7 @@
             "Index": 4,
             "StartPhase": 1,
             "EndPhase": 1,
-            "Topic": "004304:du_overtime.esm",
+            "Topic": "004728:du_overtime.esm",
             "HeadTracking": {
               "ForceRotate": false,
               "ForceRotateMustComplete": false
@@ -1083,7 +1113,7 @@
         ]
       },
       {
-        "FormKey": "00430B:du_overtime.esm",
+        "FormKey": "00472F:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1092,7 +1122,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_talk1_topic2_scene",
         "Flags": 10260,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "Index": 2,
         "VNAM": "0300000003000000030000000300000003000000",
         "SCPI": "3200",
@@ -1114,7 +1144,7 @@
             "Unknown3": -1,
             "UseAliases": false,
             "UsePackageData": false,
-            "FirstLink": "0042FD:du_overtime.esm",
+            "FirstLink": "004721:du_overtime.esm",
             "SecondParameter": 0
           }
         ],
@@ -1152,7 +1182,7 @@
             "Index": 3,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "004307:du_overtime.esm",
+            "Topic": "00472B:du_overtime.esm",
             "HeadTracking": {
               "ForceRotate": false,
               "ForceRotateMustComplete": false
@@ -1165,7 +1195,7 @@
             "Index": 4,
             "StartPhase": 1,
             "EndPhase": 1,
-            "Topic": "004309:du_overtime.esm",
+            "Topic": "00472D:du_overtime.esm",
             "HeadTracking": {
               "ForceRotate": false,
               "ForceRotateMustComplete": false
@@ -1174,7 +1204,7 @@
         ]
       },
       {
-        "FormKey": "004310:du_overtime.esm",
+        "FormKey": "004734:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1183,7 +1213,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_talk1_topic3_scene",
         "Flags": 10260,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "Index": 3,
         "VNAM": "0300000003000000030000000300000003000000",
         "SCPI": "3100",
@@ -1205,7 +1235,7 @@
             "Unknown3": -1,
             "UseAliases": false,
             "UsePackageData": false,
-            "FirstLink": "0042FD:du_overtime.esm",
+            "FirstLink": "004721:du_overtime.esm",
             "SecondParameter": 0
           }
         ],
@@ -1243,7 +1273,7 @@
             "Index": 3,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "00430C:du_overtime.esm",
+            "Topic": "004730:du_overtime.esm",
             "HeadTracking": {
               "ForceRotate": false,
               "ForceRotateMustComplete": false
@@ -1256,7 +1286,7 @@
             "Index": 4,
             "StartPhase": 1,
             "EndPhase": 1,
-            "Topic": "00430E:du_overtime.esm",
+            "Topic": "004732:du_overtime.esm",
             "HeadTracking": {
               "ForceRotate": false,
               "ForceRotateMustComplete": false
@@ -1265,7 +1295,7 @@
         ]
       },
       {
-        "FormKey": "004315:du_overtime.esm",
+        "FormKey": "004739:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1274,7 +1304,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_talk1_topic4_scene",
         "Flags": 10260,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "Index": 4,
         "VNAM": "0300000003000000030000000300000003000000",
         "SCPI": "3000",
@@ -1296,7 +1326,7 @@
             "Unknown3": -1,
             "UseAliases": false,
             "UsePackageData": false,
-            "FirstLink": "0042FD:du_overtime.esm",
+            "FirstLink": "004721:du_overtime.esm",
             "SecondParameter": 0
           }
         ],
@@ -1334,7 +1364,7 @@
             "Index": 3,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "004311:du_overtime.esm",
+            "Topic": "004735:du_overtime.esm",
             "HeadTracking": {
               "ForceRotate": false,
               "ForceRotateMustComplete": false
@@ -1347,7 +1377,7 @@
             "Index": 4,
             "StartPhase": 1,
             "EndPhase": 1,
-            "Topic": "004313:du_overtime.esm",
+            "Topic": "004737:du_overtime.esm",
             "HeadTracking": {
               "ForceRotate": false,
               "ForceRotateMustComplete": false
@@ -1356,7 +1386,7 @@
         ]
       },
       {
-        "FormKey": "00431B:du_overtime.esm",
+        "FormKey": "00473F:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1365,7 +1395,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_say1_scene",
         "Flags": 129,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1396,12 +1426,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "004319:du_overtime.esm"
+            "Topic": "00473D:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "00431E:du_overtime.esm",
+        "FormKey": "004742:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1410,7 +1440,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_say2_scene",
         "Flags": 128,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1441,12 +1471,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "00431C:du_overtime.esm"
+            "Topic": "004740:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "004321:du_overtime.esm",
+        "FormKey": "004745:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1455,7 +1485,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_say3_scene",
         "Flags": 128,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1486,14 +1516,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "00431F:du_overtime.esm"
+            "Topic": "004743:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "0042FF:du_overtime.esm",
+        "FormKey": "004723:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1502,7 +1532,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_talk1_greet",
         "Priority": 50,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1510,11 +1540,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "004300:du_overtime.esm"
+          "004724:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "004300:du_overtime.esm",
+            "FormKey": "004724:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1522,7 +1552,7 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_localcargo_qst33a_talk1_greet_info",
-            "Speaker": "0042FD:du_overtime.esm",
+            "Speaker": "004721:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
@@ -1530,7 +1560,7 @@
             "Lines": [
               {
                 "Emotion": "None",
-                "WEMFile": 17151,
+                "WEMFile": 18211,
                 "EmotionOut": 7.466667,
                 "ResponseText": "No relay means no supply runs, no weather warnings, no doctor. The new core for it got taken by raiders on the way here. If you\u0027ve got a ship, you\u0027re the most useful person I\u0027ve seen all week.",
                 "ScriptNotes": "",
@@ -1543,7 +1573,7 @@
         ]
       },
       {
-        "FormKey": "004302:du_overtime.esm",
+        "FormKey": "004726:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1552,7 +1582,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_talk1_ask1",
         "Priority": 50,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1560,11 +1590,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "004303:du_overtime.esm"
+          "004727:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "004303:du_overtime.esm",
+            "FormKey": "004727:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1592,7 +1622,7 @@
         ]
       },
       {
-        "FormKey": "004304:du_overtime.esm",
+        "FormKey": "004728:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1601,7 +1631,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_talk1_reply1",
         "Priority": 50,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1609,11 +1639,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "004305:du_overtime.esm"
+          "004729:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "004305:du_overtime.esm",
+            "FormKey": "004729:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1621,7 +1651,7 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_localcargo_qst33a_talk1_reply1_info",
-            "Speaker": "0042FD:du_overtime.esm",
+            "Speaker": "004721:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
@@ -1631,7 +1661,7 @@
             "Lines": [
               {
                 "Emotion": "None",
-                "WEMFile": 17156,
+                "WEMFile": 18216,
                 "EmotionOut": 7.466667,
                 "ResponseText": "It\u0027s a transceiver core, about the size of a toolbox. Fit it in the satellite and we\u0027re back on the network. I\u0027d do it myself if I could fly.",
                 "ScriptNotes": "",
@@ -1644,7 +1674,7 @@
         ]
       },
       {
-        "FormKey": "004307:du_overtime.esm",
+        "FormKey": "00472B:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1653,7 +1683,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_talk1_ask2",
         "Priority": 50,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1661,11 +1691,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "004308:du_overtime.esm"
+          "00472C:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "004308:du_overtime.esm",
+            "FormKey": "00472C:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1693,7 +1723,7 @@
         ]
       },
       {
-        "FormKey": "004309:du_overtime.esm",
+        "FormKey": "00472D:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1702,7 +1732,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_talk1_reply2",
         "Priority": 50,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1710,11 +1740,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "00430A:du_overtime.esm"
+          "00472E:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "00430A:du_overtime.esm",
+            "FormKey": "00472E:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1722,7 +1752,7 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_localcargo_qst33a_talk1_reply2_info",
-            "Speaker": "0042FD:du_overtime.esm",
+            "Speaker": "004721:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
@@ -1730,7 +1760,7 @@
             "Lines": [
               {
                 "Emotion": "None",
-                "WEMFile": 17161,
+                "WEMFile": 18221,
                 "EmotionOut": 7.466667,
                 "ResponseText": "The core burned out. They do, after a few years up there. Everything else on it is fine. Swap the core and it wakes up.",
                 "ScriptNotes": "",
@@ -1743,7 +1773,7 @@
         ]
       },
       {
-        "FormKey": "00430C:du_overtime.esm",
+        "FormKey": "004730:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1752,7 +1782,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_talk1_ask3",
         "Priority": 50,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1760,11 +1790,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "00430D:du_overtime.esm"
+          "004731:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "00430D:du_overtime.esm",
+            "FormKey": "004731:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1792,7 +1822,7 @@
         ]
       },
       {
-        "FormKey": "00430E:du_overtime.esm",
+        "FormKey": "004732:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1801,7 +1831,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_talk1_reply3",
         "Priority": 50,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1809,11 +1839,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "00430F:du_overtime.esm"
+          "004733:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "00430F:du_overtime.esm",
+            "FormKey": "004733:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1821,7 +1851,7 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_localcargo_qst33a_talk1_reply3_info",
-            "Speaker": "0042FD:du_overtime.esm",
+            "Speaker": "004721:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
@@ -1829,7 +1859,7 @@
             "Lines": [
               {
                 "Emotion": "None",
-                "WEMFile": 17166,
+                "WEMFile": 18226,
                 "EmotionOut": 7.466667,
                 "ResponseText": "No relay, no calls. We\u0027ve been shouting at the sky for nine days.",
                 "ScriptNotes": "",
@@ -1842,7 +1872,7 @@
         ]
       },
       {
-        "FormKey": "004311:du_overtime.esm",
+        "FormKey": "004735:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1851,7 +1881,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_talk1_ask4",
         "Priority": 50,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1859,11 +1889,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "004312:du_overtime.esm"
+          "004736:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "004312:du_overtime.esm",
+            "FormKey": "004736:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1892,7 +1922,7 @@
         ]
       },
       {
-        "FormKey": "004313:du_overtime.esm",
+        "FormKey": "004737:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1901,7 +1931,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_talk1_reply4",
         "Priority": 50,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1909,11 +1939,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "004314:du_overtime.esm"
+          "004738:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "004314:du_overtime.esm",
+            "FormKey": "004738:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1921,7 +1951,7 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_localcargo_qst33a_talk1_reply4_info",
-            "Speaker": "0042FD:du_overtime.esm",
+            "Speaker": "004721:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
@@ -1929,7 +1959,7 @@
             "Lines": [
               {
                 "Emotion": "None",
-                "WEMFile": 17171,
+                "WEMFile": 18231,
                 "EmotionOut": 7.466667,
                 "ResponseText": "I tried. Our set down here can hear the satellite fine. It just won\u0027t answer. It\u0027s the core or nothing.",
                 "ScriptNotes": "",
@@ -1942,7 +1972,7 @@
         ]
       },
       {
-        "FormKey": "004316:du_overtime.esm",
+        "FormKey": "00473A:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1951,7 +1981,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_hellos",
         "Priority": 50,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 7,
         "Subtype": 125,
@@ -1959,12 +1989,12 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "004318:du_overtime.esm",
-          "004317:du_overtime.esm"
+          "00473C:du_overtime.esm",
+          "00473B:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "004318:du_overtime.esm",
+            "FormKey": "00473C:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1974,7 +2004,7 @@
             "EditorID": "duo_artifact_localcargo_qst33a_talk1_hello1",
             "FlagsFlags": 1024,
             "FlagsResetHours": 0,
-            "DialogGroup": "004317:du_overtime.esm",
+            "DialogGroup": "00473B:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
@@ -1982,7 +2012,7 @@
             "Lines": [
               {
                 "Emotion": "None",
-                "WEMFile": 17176,
+                "WEMFile": 18236,
                 "EmotionOut": 7.466667,
                 "ResponseText": "You heard us, then. Good.",
                 "ScriptNotes": "",
@@ -1993,7 +2023,7 @@
             ]
           },
           {
-            "FormKey": "004317:du_overtime.esm",
+            "FormKey": "00473B:du_overtime.esm",
             "Header": {
               "MajorFlags": 64,
               "FormVersion": 576,
@@ -2018,7 +2048,7 @@
                 "Unknown3": -1,
                 "UseAliases": false,
                 "UsePackageData": false,
-                "FirstLink": "0042FD:du_overtime.esm",
+                "FirstLink": "004721:du_overtime.esm",
                 "SecondParameter": 0
               }
             ],
@@ -2027,7 +2057,7 @@
         ]
       },
       {
-        "FormKey": "004319:du_overtime.esm",
+        "FormKey": "00473D:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -2036,7 +2066,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_say1_topic",
         "Priority": 50,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -2044,11 +2074,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "00431A:du_overtime.esm"
+          "00473E:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "00431A:du_overtime.esm",
+            "FormKey": "00473E:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -2056,14 +2086,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_localcargo_qst33a_say1_info",
-            "Speaker": "0042FE:du_overtime.esm",
+            "Speaker": "004722:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 17177,
+                "WEMFile": 18237,
                 "EmotionOut": 0,
                 "ResponseText": "Our relay\u0027s dead and we can\u0027t call out, so this is going out on a slate. We need someone with a ship.",
                 "ScriptNotes": "",
@@ -2076,7 +2106,7 @@
         ]
       },
       {
-        "FormKey": "00431C:du_overtime.esm",
+        "FormKey": "004740:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -2085,7 +2115,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_say2_topic",
         "Priority": 50,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -2093,11 +2123,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "00431D:du_overtime.esm"
+          "004741:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "00431D:du_overtime.esm",
+            "FormKey": "004741:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -2105,14 +2135,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_localcargo_qst33a_say2_info",
-            "Speaker": "0042FE:du_overtime.esm",
+            "Speaker": "004722:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 17180,
+                "WEMFile": 18240,
                 "EmotionOut": 0,
                 "ResponseText": "Got it? It goes to the satellite with no lights on, you can\u0027t miss it.",
                 "ScriptNotes": "",
@@ -2125,7 +2155,7 @@
         ]
       },
       {
-        "FormKey": "00431F:du_overtime.esm",
+        "FormKey": "004743:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -2134,7 +2164,7 @@
         },
         "EditorID": "duo_artifact_localcargo_qst33a_say3_topic",
         "Priority": 50,
-        "Quest": "0042F9:du_overtime.esm",
+        "Quest": "00471D:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -2142,11 +2172,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "004320:du_overtime.esm"
+          "004744:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "004320:du_overtime.esm",
+            "FormKey": "004744:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -2154,14 +2184,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_localcargo_qst33a_say3_info",
-            "Speaker": "0042FE:du_overtime.esm",
+            "Speaker": "004722:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 17183,
+                "WEMFile": 18243,
                 "EmotionOut": 0,
                 "ResponseText": "There it is, we can call out again. Thank you.",
                 "ScriptNotes": "",

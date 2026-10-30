@@ -32,6 +32,7 @@
     },
     "_theme": "The OWNER (the soldier's brother). Non-hostile and not infrastructure, disjoint from the buyer's pool, as 06.",
     "second": {
+      "_habitability": "NOT asked, measured 2026-10-30: the dry build refused place.second.habitability, because this find's request carries no habitability condition to keep. So the infested find can land on a lifeless world, as it always could; filtering it is a builder ADD (plan OT-04), not this recipe's line.",
       "theme": {
         "require": [],
         "exclude": []

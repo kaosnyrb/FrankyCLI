@@ -9,6 +9,8 @@
   "source": "Overtime duo_artifact_remote_planet_qst02a (Hunt), its driver dou_artifact_ground_hunt_quest",
   "place": {
     "remote": true,
+    "habitability": true,
+    "_habitability": "His 2026-10-30 rule: habitability is off unless a mission calls for it. The clear spawns predators (enemies: a creature list), so it asks, as MB48a. Plan OT-01 row 1.",
     "theme": {
       "require": [],
       "exclude": [

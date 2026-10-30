@@ -1,5 +1,5 @@
 {
-  "FormKey": "00436A:du_overtime.esm",
+  "FormKey": "004796:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -270,7 +270,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "00436B:du_overtime.esm",
+        "Object": "004797:du_overtime.esm",
         "AliasID": 12,
         "Create": 0,
         "Level": 3
@@ -424,7 +424,7 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "004372:du_overtime.esm",
+            "Form": "00479E:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -459,7 +459,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "00436A:du_overtime.esm",
+            "Form": "004796:du_overtime.esm",
             "Alias": 16,
             "Unused": 0
           }
@@ -487,7 +487,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "00436A:du_overtime.esm",
+            "Form": "004796:du_overtime.esm",
             "Alias": 3,
             "Unused": 0
           }
@@ -524,7 +524,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "00436F:du_overtime.esm",
+        "FormKey": "00479B:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -533,7 +533,7 @@
         },
         "EditorID": "duo_artifact_remote_qst20a_say1_scene",
         "Flags": 129,
-        "Quest": "00436A:du_overtime.esm",
+        "Quest": "004796:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -564,12 +564,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "00436D:du_overtime.esm"
+            "Topic": "004799:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "004372:du_overtime.esm",
+        "FormKey": "00479E:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -578,7 +578,7 @@
         },
         "EditorID": "duo_artifact_remote_qst20a_say2_scene",
         "Flags": 128,
-        "Quest": "00436A:du_overtime.esm",
+        "Quest": "004796:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -609,14 +609,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "004370:du_overtime.esm"
+            "Topic": "00479C:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "00436D:du_overtime.esm",
+        "FormKey": "004799:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -625,7 +625,7 @@
         },
         "EditorID": "duo_artifact_remote_qst20a_say1_topic",
         "Priority": 50,
-        "Quest": "00436A:du_overtime.esm",
+        "Quest": "004796:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -633,11 +633,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "00436E:du_overtime.esm"
+          "00479A:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "00436E:du_overtime.esm",
+            "FormKey": "00479A:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -645,27 +645,27 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_remote_qst20a_say1_info",
-            "Speaker": "00436C:du_overtime.esm",
+            "Speaker": "004798:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 17261,
+                "WEMFile": 18329,
                 "EmotionOut": 0,
-                "ResponseText": "Get close and you\u0027ll pick up a ping. That\u0027s the flight recorder. I lost a full hold out there. The crew got out in the pods, and they swear they did nothing wrong. The recorder\u0027s the only thing that can say so.",
+                "ResponseText": "The flight recorder\u0027s still pinging out there. I lost a full hold with that freighter. The crew got out in the pods, and they swear they did nothing wrong. The recorder\u0027s the only thing that can say so.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "6B89BA30"
+                "TextHash": "F6BAEDB6"
               }
             ]
           }
         ]
       },
       {
-        "FormKey": "004370:du_overtime.esm",
+        "FormKey": "00479C:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -674,7 +674,7 @@
         },
         "EditorID": "duo_artifact_remote_qst20a_say2_topic",
         "Priority": 50,
-        "Quest": "00436A:du_overtime.esm",
+        "Quest": "004796:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -682,11 +682,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "004371:du_overtime.esm"
+          "00479D:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "004371:du_overtime.esm",
+            "FormKey": "00479D:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -694,20 +694,20 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_remote_qst20a_say2_info",
-            "Speaker": "00436C:du_overtime.esm",
+            "Speaker": "004798:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 17264,
+                "WEMFile": 18332,
                 "EmotionOut": 0,
-                "ResponseText": "That\u0027s the recorder. Now we\u0027ll know what happened, and so will the crew.",
+                "ResponseText": "I\u0027ve got the data now. I\u0027ll check it, and we\u0027ll find out what actually happened. You could have saved some careers here.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "2A6FF3FD"
+                "TextHash": "BC250309"
               }
             ]
           }
