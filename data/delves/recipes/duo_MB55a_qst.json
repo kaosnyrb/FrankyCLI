@@ -2,8 +2,8 @@
   "schema": 2,
   "id": "duo_MB55a_qst",
   "template": "board",
-  "deal": "_duo_MB_MissionNode_test",
-  "_deal": "The board's test node, until he plays it.",
+  "deal": "duo_MB_MissionNode_Assault",
+  "_deal": "LIVE, his 2026-10-30 \"can we promote the defense one to assult too\": beside Gas Leak (MB54a), by gen_delve move from no pool (the L1 probe build had cleared it off the test node).",
   "author": "jessica",
   "source": "his 2026-10-23 15:00: \"let's do the next type now\", after the military ten (his plan, 13:10: \"like 10 missionboard missions\" per dungeon type)",
   "_note": [
