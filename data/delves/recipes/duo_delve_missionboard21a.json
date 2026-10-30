@@ -80,6 +80,13 @@
           ]
         },
         {
+          "prompt": "Hiding that long takes skill. Where did you sleep?",
+          "reply": [
+            "In the supply cupboard, behind the mops. Nobody ever looks behind the mops. I've known that for years."
+          ],
+          "perk": "Skill_Stealth"
+        },
+        {
           "prompt": "How did you stay hidden?",
           "reply": [
             "I'm the night shift. Nobody ever sees the night shift. That's been a problem my whole career, and this week it was very useful."

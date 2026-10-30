@@ -88,6 +88,13 @@
           ]
         },
         {
+          "prompt": "Coolant fault? Bypass the secondary loop and you'll fly.",
+          "reply": [
+            "That works? I've sat in that cell for two days thinking about that fault and never once thought of it. I owe you a drink."
+          ],
+          "perk": "Skill_StarshipEngineering"
+        },
+        {
           "prompt": "Did they hurt you?",
           "reply": [
             "Not really. They mostly argued about what I was worth. The number kept going down. That was the worst part."

@@ -61,6 +61,13 @@
           ]
         },
         {
+          "prompt": "Walking out takes more nerve than staying.",
+          "reply": [
+            "Some days I believe that. Today I'm just glad nobody's shouting at me."
+          ],
+          "perk": "BackgroundRonin"
+        },
+        {
           "prompt": "Why did you walk out?",
           "reply": [
             "Because she would have kept us here until there was nobody left to keep."

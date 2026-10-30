@@ -79,6 +79,13 @@
           ]
         },
         {
+          "prompt": "What's in the gas? I can tell you how long it'll hang.",
+          "reply": [
+            "Nobody's told us. If you know, I'd rather hear it from you than from my lungs."
+          ],
+          "perk": "Skill_Decontamination"
+        },
+        {
           "prompt": "Is anyone still in there?",
           "reply": [
             "No. Everyone's out here with me. I counted twice."

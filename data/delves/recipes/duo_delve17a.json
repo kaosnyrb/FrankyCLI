@@ -63,6 +63,13 @@
           ]
         },
         {
+          "prompt": "Can I take one home for my parents?",
+          "reply": [
+            "Take two! Parents love a lolly. They pretend they don't, then they ask for orange."
+          ],
+          "perk": "Trait_KidStuff"
+        },
+        {
           "prompt": "What's the occasion?",
           "reply": [
             "It's Friday! The fourth one, which is lolly Friday. Nobody voted for it. I just started doing it, and now there's a rota. And a song. There's a song."

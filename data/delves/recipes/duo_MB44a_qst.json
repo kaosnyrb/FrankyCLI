@@ -107,6 +107,13 @@
           ]
         },
         {
+          "prompt": "Something that old means more than it is.",
+          "reply": [
+            "It does. It's brass and a needle. And it's the only thing in this family older than the family."
+          ],
+          "perk": "BackgroundPilgrim"
+        },
+        {
           "prompt": "Why this and not the rest?",
           "reply": [
             "The rest is just things. You can buy things again. This came from Earth. My grandmother's grandmother carried it on one of the first ships out, and it's been in somebody's pocket ever since."

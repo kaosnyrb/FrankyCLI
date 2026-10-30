@@ -72,6 +72,13 @@
           ]
         },
         {
+          "prompt": "Raiders sell on fast. Whatever else they took is gone.",
+          "reply": [
+            "They will. And I'll buy some of it back at the next market and smile while I do it. That's trade."
+          ],
+          "perk": "BackgroundLongHauler"
+        },
+        {
           "prompt": "What's in it?",
           "reply": [
             "Two years of receipts. Permit, stall number, the lot. Nobody would steal it on purpose. They took the whole hold, and it was in the hold."

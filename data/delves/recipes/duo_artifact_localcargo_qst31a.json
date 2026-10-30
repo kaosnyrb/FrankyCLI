@@ -82,6 +82,13 @@
           ]
         },
         {
+          "prompt": "Days out here alone sounds about right to me.",
+          "reply": [
+            "You get it, then. Most people ask if I get lonely. I get busy, which is better."
+          ],
+          "perk": "TRAIT_Introvert"
+        },
+        {
           "prompt": "How long have you been out here?",
           "reply": [
             "Eleven years, on and off. Most weeks nobody comes for anything. You're the third this week."

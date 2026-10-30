@@ -103,6 +103,13 @@
           ]
         },
         {
+          "prompt": "Let me look at you before we move.",
+          "reply": [
+            "Oh, you know what you're doing. Pressure there, yes. That's the first thing all day that hasn't hurt more."
+          ],
+          "perk": "BackgroundCombatMedic"
+        },
+        {
           "prompt": "Why survey it at all?",
           "reply": [
             "The listing said it was abandoned. Somebody didn't update the listing."

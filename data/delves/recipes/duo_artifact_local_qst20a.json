@@ -80,6 +80,13 @@
           ]
         },
         {
+          "prompt": "Sorting their mess to stay calm. That's allowed.",
+          "reply": [
+            "Is it that obvious? Yes. If my hands are busy, the rest of me stays put."
+          ],
+          "perk": "TRAIT_Empath"
+        },
+        {
           "prompt": "What else did they take?",
           "reply": [
             "Anything that wasn't bolted down. Stuff comes back."

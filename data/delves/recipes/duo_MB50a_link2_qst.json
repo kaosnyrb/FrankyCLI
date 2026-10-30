@@ -84,6 +84,13 @@
           ]
         },
         {
+          "prompt": "It's worth more than that, and we both know it.",
+          "reply": [
+            "It is. And you know what I'd say if you weren't standing there. Fine. A little more. Don't tell anyone I'm soft."
+          ],
+          "perk": "Skill_Commerce"
+        },
+        {
           "prompt": "Why's it worth anything?",
           "reply": [
             "Nobody can make the parts inside it any more. Somebody always needs one, and I know who."

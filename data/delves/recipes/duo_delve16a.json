@@ -65,6 +65,13 @@
           ]
         },
         {
+          "prompt": "Short-handed, Sergeant?",
+          "reply": [
+            "Always. Cells. Two. But yes. Thanks for asking."
+          ],
+          "perk": "Skill_Leadership"
+        },
+        {
           "prompt": "Buy you a drink when you're off?",
           "reply": [
             "Off at the next drop. Ask me then. Cells first."

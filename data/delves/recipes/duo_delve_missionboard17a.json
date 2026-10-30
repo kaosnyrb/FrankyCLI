@@ -93,6 +93,13 @@
           ]
         },
         {
+          "prompt": "A case full of pay. Plenty would have opened it.",
+          "reply": [
+            "And you didn't. I won't forget that. Neither will the forty people waiting on it."
+          ],
+          "perk": "BackgroundGangster"
+        },
+        {
           "prompt": "Why not just pay them again?",
           "reply": [
             "With what? That case was the money. The owners pay once. They were very clear about that."

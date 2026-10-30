@@ -71,6 +71,13 @@
           ]
         },
         {
+          "prompt": "Walking back out was smart. Laughing crews are the worst.",
+          "reply": [
+            "That's what I thought. You don't laugh like that unless you've already done something."
+          ],
+          "perk": "BackgroundBouncer"
+        },
+        {
           "prompt": "Why are papers worth more than the drill?",
           "reply": [
             "A drill digs anywhere. These say where I'm allowed to."

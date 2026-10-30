@@ -93,6 +93,13 @@
           ]
         },
         {
+          "prompt": "Old kit like that outlasts whoever fitted it.",
+          "reply": [
+            "That one outlasted three crews. I'm hoping to be the first crew it doesn't."
+          ],
+          "perk": "BackgroundHomesteader"
+        },
+        {
           "prompt": "What happened to the old one?",
           "reply": [
             "Nothing dramatic. It just stopped one morning."

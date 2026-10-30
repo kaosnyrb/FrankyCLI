@@ -79,6 +79,13 @@
           ]
         },
         {
+          "prompt": "A wrench that old should be on a wall.",
+          "reply": [
+            "You'd know. Nobody makes steel like that any more. It's for using, though. Walls are for people who've stopped."
+          ],
+          "perk": "BackgroundIndustrialist"
+        },
+        {
           "prompt": "Why retire now?",
           "reply": [
             "Because I'm done. Forty years of fixing other people's mistakes. My knees decided before I did."
@@ -130,6 +137,13 @@
           "reply": [
             "She told me I'd never be ready for this box. I'll call her tonight."
           ]
+        },
+        {
+          "prompt": "First site of your own. Scared?",
+          "reply": [
+            "Every morning. She told me the day I stop being scared is the day I start breaking things."
+          ],
+          "perk": "Skill_Leadership"
         },
         {
           "prompt": "She said you'd pretend you didn't need it.",

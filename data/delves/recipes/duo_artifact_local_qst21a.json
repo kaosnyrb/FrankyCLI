@@ -139,6 +139,13 @@
           ]
         },
         {
+          "prompt": "Boiling kills things. It won't take metals out.",
+          "reply": [
+            "No, I know. That's why we stopped asking what the taste was."
+          ],
+          "perk": "Skill_Chemistry"
+        },
+        {
           "prompt": "How bad has it been?",
           "reply": [
             "The old ones clogged. You can drink what comes out, if you don't look at it."

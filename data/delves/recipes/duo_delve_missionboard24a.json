@@ -60,6 +60,13 @@
           ]
         },
         {
+          "prompt": "Calculators twice. He was trying to tell you something.",
+          "reply": [
+            "Do you think so? I assumed he'd bought a box of them. Now I'll be up all night wondering."
+          ],
+          "perk": "BackgroundProfessor"
+        },
+        {
           "prompt": "What will you do with it?",
           "reply": [
             "Run it, apparently. I've bought a book."

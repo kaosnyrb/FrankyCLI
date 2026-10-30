@@ -74,6 +74,13 @@
           ]
         },
         {
+          "prompt": "Just tell her yourself. Worst she says is thanks.",
+          "reply": [
+            "That's not the worst she could say, and you know it. Take the box. I'll be braver next time."
+          ],
+          "perk": "TRAIT_Extrovert"
+        },
+        {
           "prompt": "Why not take it yourself?",
           "reply": [
             "Because I'd get there, talk about the weather and come home with it still in my hand. I've done that twice."
@@ -133,6 +140,13 @@
           "reply": [
             "Real coffee. I said that once, on a bad day, months ago. Don't tell him anything. I'll go over myself."
           ]
+        },
+        {
+          "prompt": "That smell's coming through the paper.",
+          "reply": [
+            "It's coffee. Real coffee. Oh, that idiot. That lovely idiot."
+          ],
+          "perk": "BackgroundChef"
         },
         {
           "prompt": "Do you know who it's from?",

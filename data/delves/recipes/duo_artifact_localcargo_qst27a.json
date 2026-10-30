@@ -110,6 +110,13 @@
           ]
         },
         {
+          "prompt": "Soldiers who write that often mean to come home.",
+          "reply": [
+            "Is that true? Then he meant to. That's something. That's a lot."
+          ],
+          "perk": "BackgroundSoldier"
+        },
+        {
           "prompt": "What happened to him?",
           "reply": [
             "His unit went quiet near the end of the fighting. They told us that much and nothing else. I stopped asking."

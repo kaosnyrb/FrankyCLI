@@ -71,6 +71,13 @@
           ]
         },
         {
+          "prompt": "A cow in calf. That's two lost, not one.",
+          "reply": [
+            "It is. You've kept stock, then. Most people hear cow and think it's a number."
+          ],
+          "perk": "Skill_Zoology"
+        },
+        {
           "prompt": "How many have you lost?",
           "reply": [
             "Twelve since the thaw."

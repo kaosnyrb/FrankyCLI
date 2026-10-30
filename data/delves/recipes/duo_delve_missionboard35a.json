@@ -102,6 +102,13 @@
           ]
         },
         {
+          "prompt": "The readings in that diary looked good to me.",
+          "reply": [
+            "They were good! Just not rich good. Nobody wants to hear the difference."
+          ],
+          "perk": "Skill_Geology"
+        },
+        {
           "prompt": "I listened to it.",
           "reply": [
             "Then you know I'm not rich. I'll go back for my kit one day. Not soon."

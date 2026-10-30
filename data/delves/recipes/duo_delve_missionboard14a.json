@@ -95,6 +95,13 @@
           ]
         },
         {
+          "prompt": "Three days without dressings. Who's worst off?",
+          "reply": [
+            "The one who keeps saying he's fine. Look at him before you go, if you would. He'll listen to a stranger."
+          ],
+          "perk": "Skill_Medicine"
+        },
+        {
           "prompt": "How long have you been holding?",
           "reply": [
             "Nine days, if the clock on my sleeve is right. Nobody here trusts the clock."

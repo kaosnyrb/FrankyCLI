@@ -76,6 +76,13 @@
           ]
         },
         {
+          "prompt": "Walk the same hills long enough and you try new ones.",
+          "reply": [
+            "She'd never. Actually, she might. She said last week the hills were getting samey."
+          ],
+          "perk": "BackgroundExplorer"
+        },
+        {
           "prompt": "Does she do this often?",
           "reply": [
             "Never. Twenty years of walks, and she's never once been late for lunch."
@@ -116,6 +123,13 @@
           "reply": [
             "Is it? I'd have sworn it was the other way. Right, I'll head back. He'll have made soup. He always makes soup when he's worried."
           ]
+        },
+        {
+          "prompt": "A sunny rock and a view. I'd sit a while too.",
+          "reply": [
+            "Wouldn't you? Ground under you, sun on your back. Don't tell my son I said that."
+          ],
+          "perk": "TRAIT_TerraFirma"
         },
         {
           "prompt": "He says he's not cross.",
