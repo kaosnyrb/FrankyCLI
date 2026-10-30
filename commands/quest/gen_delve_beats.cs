@@ -629,6 +629,9 @@ namespace FrankyCLI
         /// <summary>A fight's spawn hook on its marker: our copy of DefaultAliasOnDistanceLessThan (papyrus/duo_delve_near.psc),
         /// so it never collides with a stock distance hook on the same alias (a board's arrival).</summary>
         private const string NearScript = "duo_delve_near";
+        /// <summary>A use or deliver beat's hook on its object: our copy of DefaultAliasOnActivate (papyrus/duo_delve_use.psc),
+        /// which hides the prompt BEFORE it sets the stage, so a last run's hook cannot reach the next run's object (OT-91).</summary>
+        private const string UseScript = "duo_delve_use";
         /// <summary>Vanilla's map marker alias script, MB01's values on an orbit's map marker (Discovered, type 47, visibility 1).</summary>
         private const string MapMarkerScript = "DefaultAliasMapMarkerScript";
         /// <summary>MapMarkerLinkedRefNameOverride: the keyword a map marker links its target by, so the star map names it.</summary>

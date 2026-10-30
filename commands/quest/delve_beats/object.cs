@@ -10,10 +10,17 @@ namespace FrankyCLI
         /// use, pickup and deliver: an OBJECT beat, the player activating a thing at the beat's marker. One class, three
         /// instances in BeatKinds, because the three differ only in their name and whether the hook hands over an item:
         ///
-        ///   use      DefaultAliasOnActivate          hides its prompt after use
+        ///   use      duo_delve_use                   hides its prompt, then sets the stage
         ///   pickup   DefaultAliasOnActivateGiveItem  gives the beat's item; the fragment disables the object
-        ///   deliver  DefaultAliasOnActivate          the fragment takes every item picked up so far
+        ///   deliver  duo_delve_use                   the fragment takes every item picked up so far
         ///   destroy  DefaultAliasOnDestroyed         shot to pieces, never pressed; the fragment disables the object
+        ///
+        /// ⛔ USE AND DELIVER CARRY OUR OWN HOOK, NOT DefaultAliasOnActivate (2026-10-30, his "yeah make our own activate hook",
+        /// plan OT-91). The stock hook hides the prompt only after SafeSetStage returns, which waits out the stage's fragment
+        /// (a hold's wave can hold it 180 s), and it hides GetReference(): by then a re-dealt board quest's alias can hold the
+        /// NEXT run's object, so Runaway Plant's second run met a console with no prompt. duo_delve_use hides first, then sets.
+        /// ⏳ Not yet moved, same shape and not yet seen to bite: a RETURN's DefaultAliasOnActivateA, the pickup's GiveItem
+        /// (it gives the item after the wait), and the space template's arrival hooks (delve_space.cs).
         ///
         /// DESTROY (2026-10-28, his "yeah build the beat now", off his note that the classic Sabotage "had you destroy the
         /// activator. They have a health system"). His classics do it with ccs_heatleechpoddeath on a per-quest activator
@@ -95,7 +102,7 @@ namespace FrankyCLI
                 else
                 {
                     hookAlias = build.slotOf[b].activatorAlias;
-                    script = Destroys ? "DefaultAliasOnDestroyed" : CarriesItem ? "DefaultAliasOnActivateGiveItem" : "DefaultAliasOnActivate";
+                    script = Destroys ? "DefaultAliasOnDestroyed" : CarriesItem ? "DefaultAliasOnActivateGiveItem" : UseScript;
                 }
                 var sc = StageHook(script, build.beatStage[b], prereq);
                 if (Destroys) { }   // no prompt to hide: the entry stage blocked activation
@@ -111,9 +118,11 @@ namespace FrankyCLI
                 }
                 else
                 {
-                    // An object a later beat comes back to keeps its prompt, or the return could never fire.
+                    // An object a later beat comes back to keeps its prompt, or the return could never fire. A return's own hook
+                    // is still the stock DefaultAliasOnActivateA, whose property this is.
                     bool comesBack = build.r.beats.Any(x => x.returnTo == b + 1);
-                    sc.Properties.Add(new ScriptBoolProperty { Name = "ShouldHideActivationAfterSuccessfulActivation", Data = !comesBack, Flags = ScriptProperty.Flag.Edited });
+                    string hide = script == UseScript ? "HideAfterUse" : "ShouldHideActivationAfterSuccessfulActivation";
+                    sc.Properties.Add(new ScriptBoolProperty { Name = hide, Data = !comesBack, Flags = ScriptProperty.Flag.Edited });
                 }
                 return build.AttachBeatHook(b, hookAlias, script, sc, prereq);
             }
