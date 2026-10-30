@@ -1,0 +1,961 @@
+{
+  "FormKey": "00479F:du_overtime.esm",
+  "Header": {
+    "MajorFlags": 0,
+    "FormVersion": 576,
+    "Version2": 0,
+    "VersionControl": 0
+  },
+  "EditorID": "duo_delvetest_l1",
+  "Name": "TEST L1: Crash Site Cargo on \u003CAlias=TargetPlanetLocation\u003E",
+  "Data": {
+    "Flags": 524288,
+    "Priority": 15,
+    "Type": 0,
+    "Unused": "000000"
+  },
+  "QuestType": "1E2D30:Starfield.esm",
+  "MissionTypeKeyword": "1E2671:Starfield.esm",
+  "MissionBoardDescription": "Shipping Firm Contract. Recover our crate from the wreck at the \u003CAlias=TargetLocation\u003E. Delivery details on recovery. Spacers present. Payment on delivery.",
+  "Timestamp": 0,
+  "Unknown": 0,
+  "Keywords": [
+    "1A6C4A:Starfield.esm",
+    "1E2671:Starfield.esm"
+  ],
+  "TextDisplayGlobals": [],
+  "MissionBoardInfoPanels": [
+    {
+      "Header": "Target Location",
+      "Line1": "\u003CAlias=TargetLocation\u003E"
+    },
+    {
+      "Header": "Target System",
+      "Line1": "\u003CAlias=TargetSystemLocation\u003E"
+    },
+    {
+      "Header": "Target Planet",
+      "Line1": "\u003CAlias=TargetPlanetLocation\u003E"
+    },
+    {
+      "Header": ""
+    },
+    {
+      "Header": ""
+    },
+    {
+      "Header": ""
+    }
+  ],
+  "DialogConditions": [],
+  "Stages": [
+    {
+      "Index": 5,
+      "Flags": 64,
+      "Unknown": 116,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Note": "Ready stage",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 10,
+      "Flags": 8,
+      "Unknown": 0,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Entry": "A freighter came down at the \u003CAlias=TargetLocation\u003E with a consignment still aboard. Spacers got to the wreck first. The shipping firm wants its crate back, and will say where it goes once it is recovered.",
+          "Note": "Mission Accepted",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 16,
+      "Flags": 64,
+      "Unknown": 116,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Note": "Ready stage",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 20,
+      "Flags": 64,
+      "Unknown": 116,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Note": "Ready stage",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 100,
+      "Flags": 0,
+      "Unknown": 116,
+      "LogEntries": [
+        {
+          "Flags": 1,
+          "Entry": "A freighter went down at the \u003CAlias=TargetLocation\u003E and spacers were picking over the wreck. I got the consignment out from under them and delivered it to the \u003CAlias=FinalLocation\u003E, where it was meant to go.",
+          "Note": "Mission Complete",
+          "Conditions": [
+            {
+              "Kind": "float",
+              "Function": "GetStageDone",
+              "CompareOperator": 0,
+              "Flags": 0,
+              "Value": 1,
+              "Unknown1": "5BD913",
+              "Unknown2": 0,
+              "RunOnType": 0,
+              "Unknown3": -1,
+              "UseAliases": false,
+              "UsePackageData": false,
+              "FirstLink": "00479F:du_overtime.esm",
+              "SecondParameter": 10
+            }
+          ],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "01000000",
+              "RewardDatas": [
+                {
+                  "XpAwarded": "00081D:du_overtime.esm",
+                  "BonusCredits": "000831:du_overtime.esm",
+                  "Rewards": [],
+                  "Conditions": []
+                }
+              ]
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        },
+        {
+          "Flags": 0,
+          "Conditions": [
+            {
+              "Kind": "float",
+              "Function": "GetStageDone",
+              "CompareOperator": 0,
+              "Flags": 0,
+              "Value": 0,
+              "Unknown1": "5BD913",
+              "Unknown2": 0,
+              "RunOnType": 0,
+              "Unknown3": -1,
+              "UseAliases": false,
+              "UsePackageData": false,
+              "FirstLink": "00479F:du_overtime.esm",
+              "SecondParameter": 10
+            }
+          ],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 200,
+      "Flags": 0,
+      "Unknown": 171,
+      "LogEntries": [
+        {
+          "Flags": 2,
+          "Note": "Mission Rejected",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "Objectives": [
+    {
+      "Index": 10,
+      "Flags": 0,
+      "DisplayText": "Recover the freighter\u0027s crate at the \u003CAlias=TargetLocation\u003E",
+      "Targets": [
+        {
+          "AliasID": 21,
+          "Flags": 0,
+          "DataTypeState": 0,
+          "Conditions": []
+        }
+      ]
+    },
+    {
+      "Index": 20,
+      "Flags": 0,
+      "DisplayText": "Deliver the crate to the \u003CAlias=FinalLocation\u003E",
+      "Targets": [
+        {
+          "AliasID": 24,
+          "Flags": 0,
+          "DataTypeState": 0,
+          "Conditions": []
+        }
+      ]
+    }
+  ],
+  "Aliases": [
+    {
+      "Kind": "loc",
+      "ID": 0,
+      "Name": "PlayerStarSystemLocation",
+      "Flags": 536870920,
+      "ALFG": 0,
+      "Conditions": [],
+      "LocationTypeKeyword": "00149F:Starfield.esm",
+      "SystemLocationAliasID": -2
+    },
+    {
+      "Kind": "loc",
+      "ID": 5,
+      "Name": "TargetLocation",
+      "Flags": 8388865,
+      "ALFG": 0,
+      "Conditions": [
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "05F478:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "02271F:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "20AFED:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 0,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "27B45C:Starfield.esm",
+          "SecondParameter": 0
+        }
+      ],
+      "LocationTypeKeyword": "070A54:Starfield.esm",
+      "Alps": {
+        "Conditions": []
+      }
+    },
+    {
+      "Kind": "ref",
+      "ID": 3,
+      "Name": "PrimaryRef",
+      "Flags": 264,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 5,
+        "RefType": "02271F:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 11,
+      "Name": "MapMarker",
+      "Flags": 136,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 5,
+        "RefType": "02271F:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "loc",
+      "ID": 8,
+      "Name": "TargetSystemLocation",
+      "Flags": 536871168,
+      "ALFG": 0,
+      "Conditions": [],
+      "LocationTypeKeyword": "00149F:Starfield.esm",
+      "SystemLocationAliasID": 3
+    },
+    {
+      "Kind": "loc",
+      "ID": 2,
+      "Name": "TargetPlanetLocation",
+      "Flags": 1073742080,
+      "ALFG": 0,
+      "Conditions": [],
+      "LocationTypeKeyword": "070A54:Starfield.esm",
+      "ParentSystemLocationAliasID": 3
+    },
+    {
+      "Kind": "ref",
+      "ID": 9,
+      "Name": "PlayerShip",
+      "Flags": 1048578,
+      "ALFG": 0,
+      "Conditions": [],
+      "External": {
+        "Quest": "0174A2:Starfield.esm",
+        "AliasID": 16
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 32,
+      "Name": "MBRIR02Player",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [],
+      "UniqueActor": "000007:Starfield.esm",
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 20,
+      "Name": "BountyTargetMarker",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 5,
+        "RefType": "05F478:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 21,
+      "Name": "PrimaryActivatorTarget",
+      "Flags": 524548,
+      "ALFG": 0,
+      "Conditions": [],
+      "Create": {
+        "Object": "0047A0:du_overtime.esm",
+        "AliasID": 20,
+        "Create": 0,
+        "Level": 0
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "loc",
+      "ID": 22,
+      "Name": "FinalLocation",
+      "Flags": 8388867,
+      "ALFG": 0,
+      "Conditions": [
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "05F198:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "02271F:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 0,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "20AFED:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 0,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "27B45C:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "GetStageDone",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "00479F:du_overtime.esm",
+          "SecondParameter": 20
+        }
+      ],
+      "LocationTypeKeyword": "070A54:Starfield.esm",
+      "Alps": {
+        "Conditions": [
+          {
+            "Kind": "float",
+            "Function": "IsInSameCurrentLocationAsRef",
+            "CompareOperator": 0,
+            "Flags": 0,
+            "Value": 1,
+            "Unknown1": "000000",
+            "Unknown2": 0,
+            "RunOnType": 0,
+            "Unknown3": -1,
+            "UseAliases": false,
+            "UsePackageData": false,
+            "FirstLink": "000014:Starfield.esm",
+            "SecondParameter": 0,
+            "SecondLink": "00149F:Starfield.esm"
+          }
+        ]
+      }
+    },
+    {
+      "Kind": "ref",
+      "ID": 23,
+      "Name": "BountyTargetMarker",
+      "Flags": 2,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 22,
+        "RefType": "05F198:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 24,
+      "Name": "SecondaryActivatorTarget",
+      "Flags": 524550,
+      "ALFG": 0,
+      "Conditions": [],
+      "Create": {
+        "Object": "0047A1:du_overtime.esm",
+        "AliasID": 23,
+        "Create": 0,
+        "Level": 0
+      },
+      "VoiceTypes": "Null"
+    }
+  ],
+  "Vmad": {
+    "Version": 6,
+    "ObjectFormat": 2,
+    "ExtraBindDataVersion": 3,
+    "Versioning": 0,
+    "FragmentScript": {
+      "Name": "duo_qf_delvetest_l1",
+      "Flags": 0,
+      "Properties": [
+        {
+          "Type": "Object",
+          "Name": "Alias_Beat1Target",
+          "Flags": 1,
+          "Object": {
+            "Form": "00479F:du_overtime.esm",
+            "Alias": 21,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Who1",
+          "Flags": 1,
+          "Object": {
+            "Form": "0009ED:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Beat1Message",
+          "Flags": 1,
+          "Object": {
+            "Form": "0047A3:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Alias_LatePlace22",
+          "Flags": 1,
+          "Object": {
+            "Form": "00479F:du_overtime.esm",
+            "Alias": 22,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Alias_Late23",
+          "Flags": 1,
+          "Object": {
+            "Form": "00479F:du_overtime.esm",
+            "Alias": 23,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Alias_Late24",
+          "Flags": 1,
+          "Object": {
+            "Form": "00479F:du_overtime.esm",
+            "Alias": 24,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Item1",
+          "Flags": 1,
+          "Object": {
+            "Form": "0047A2:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        }
+      ]
+    },
+    "Fragments": [
+      {
+        "Stage": 10,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_delvetest_l1",
+        "FragmentName": "Fragment_Stage_0010_Item_00"
+      },
+      {
+        "Stage": 16,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_delvetest_l1",
+        "FragmentName": "Fragment_Stage_0016_Item_00"
+      },
+      {
+        "Stage": 20,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_delvetest_l1",
+        "FragmentName": "Fragment_Stage_0020_Item_00"
+      },
+      {
+        "Stage": 100,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_delvetest_l1",
+        "FragmentName": "Fragment_Stage_0100_Item_00"
+      }
+    ],
+    "Scripts": [
+      {
+        "Name": "MissionQuestScript",
+        "Flags": 0,
+        "Properties": [
+          {
+            "Type": "Object",
+            "Name": "MissionParent",
+            "Flags": 1,
+            "Object": {
+              "Form": "015300:Starfield.esm",
+              "Alias": -1,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "RewardAmountGlobal",
+            "Flags": 1,
+            "Object": {
+              "Form": "000820:du_overtime.esm",
+              "Alias": -1,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "RewardAmountGlobalActual",
+            "Flags": 1,
+            "Object": {
+              "Form": "000820:du_overtime.esm",
+              "Alias": -1,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "PlayerStarSystemLocation",
+            "Flags": 1,
+            "Object": {
+              "Form": "00479F:du_overtime.esm",
+              "Alias": 0,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "TargetSystemLocation",
+            "Flags": 1,
+            "Object": {
+              "Form": "00479F:du_overtime.esm",
+              "Alias": 8,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "TargetPlanetLocation",
+            "Flags": 1,
+            "Object": {
+              "Form": "00479F:du_overtime.esm",
+              "Alias": 2,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "TargetLocation",
+            "Flags": 1,
+            "Object": {
+              "Form": "00479F:du_overtime.esm",
+              "Alias": 5,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "PrimaryRef",
+            "Flags": 1,
+            "Object": {
+              "Form": "00479F:du_overtime.esm",
+              "Alias": 3,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "PlayerShip",
+            "Flags": 1,
+            "Object": {
+              "Form": "00479F:du_overtime.esm",
+              "Alias": 9,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Bool",
+            "Name": "ShutdownOnFailure",
+            "Flags": 1,
+            "Bool": true
+          }
+        ]
+      }
+    ],
+    "Aliases": [
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "00479F:du_overtime.esm",
+            "Alias": 11,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "DefaultAliasMapMarkerScript",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Int",
+                "Name": "MapMarkerCategory",
+                "Flags": 1,
+                "Int": 0
+              },
+              {
+                "Type": "Int",
+                "Name": "UndiscoveredVisibility",
+                "Flags": 1,
+                "Int": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "00479F:du_overtime.esm",
+            "Alias": 21,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "DefaultAliasOnActivateGiveItem",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Int",
+                "Name": "StageToSet",
+                "Flags": 1,
+                "Int": 20
+              },
+              {
+                "Type": "Int",
+                "Name": "PrereqStage",
+                "Flags": 1,
+                "Int": 10
+              },
+              {
+                "Type": "Object",
+                "Name": "ItemToGive",
+                "Flags": 1,
+                "Object": {
+                  "Form": "0047A2:du_overtime.esm",
+                  "Alias": -1,
+                  "Unused": 0
+                }
+              }
+            ]
+          },
+          {
+            "Name": "DefaultAliasOnDistanceLessThan",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Object",
+                "Name": "TargetAlias",
+                "Flags": 1,
+                "Object": {
+                  "Form": "00479F:du_overtime.esm",
+                  "Alias": 32,
+                  "Unused": 0
+                }
+              },
+              {
+                "Type": "Float",
+                "Name": "TargetDistance",
+                "Flags": 1,
+                "Float": 250
+              },
+              {
+                "Type": "Int",
+                "Name": "StageToSet",
+                "Flags": 1,
+                "Int": 16
+              },
+              {
+                "Type": "Int",
+                "Name": "PrereqStage",
+                "Flags": 1,
+                "Int": 10
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "00479F:du_overtime.esm",
+            "Alias": 24,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "duo_delve_use",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Int",
+                "Name": "StageToSet",
+                "Flags": 1,
+                "Int": 100
+              },
+              {
+                "Type": "Int",
+                "Name": "PrereqStage",
+                "Flags": 1,
+                "Int": 20
+              },
+              {
+                "Type": "Bool",
+                "Name": "HideAfterUse",
+                "Flags": 1,
+                "Bool": true
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "Children": {
+    "Scenes": [],
+    "Topics": []
+  }
+}

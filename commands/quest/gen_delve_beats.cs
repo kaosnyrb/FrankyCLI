@@ -649,11 +649,37 @@ namespace FrankyCLI
         private const string SupportPackagePrefix = "_supportpkg_b";
 
         /// <summary>What BuildBeats made, for VerifyBeats to read back off disk.</summary>
+        /// <summary>
+        /// A late place (place.second.fill "late") and everything that fills from it, in the order they must refill: the place,
+        /// then each ref alias filled inside it, then each created at one of those, and so on. Any alias left out would have
+        /// been filled at the start against an empty place, so the list is also the set that must be Optional.
+        /// </summary>
+        private static List<int> LateDependents(Quest clone, int placeAlias)
+        {
+            var order = new List<int> { placeAlias };
+            var have = new HashSet<int> { placeAlias };
+            for (bool grew = true; grew;)
+            {
+                grew = false;
+                foreach (var a in clone.Aliases!.OfType<QuestReferenceAlias>())
+                {
+                    if (have.Contains((int)a.ID)) continue;
+                    bool inside = (a.Location?.AliasID is int li && have.Contains(li))
+                               || (a.CreateReferenceToObject?.AliasID is short ci && have.Contains(ci));
+                    if (!inside) continue;
+                    order.Add((int)a.ID); have.Add((int)a.ID); grew = true;
+                }
+            }
+            return order;
+        }
+
         private sealed class BeatsMade
         {
             public List<int> ClearGroups = new();   // clear beats' collections: empty, Optional, and wearing NO package (they hold the site)
             public (int cell, int at)? CellAt;      // space only, place.cellAt: the cell member moved, and the alias it is now created at
             public int ArriveStage = -1;            // boardspace only: the arrival-in-system stage the beat's objective shows on
+            public int LateFillStage = -1;          // place.second.fill "late": the stage that refills the second place (OT-03)
+            public List<int> LateAliases = new();   // ...and what it refills, in order: the place, then each alias filled from it
             public FormKey? PaidGlobal;             // boardspace only: the reward global written onto the board's script, when a tier is set
             public float ArrivalDistance;           // boardspace only: the arrival hook's distance, when there is a broadcast
             public string? ClosingLine;             // boardspace only: the Say property the completing stage plays before shutting down
@@ -1863,6 +1889,22 @@ namespace FrankyCLI
                 // objective is shown, so it never shows with nothing to point at.
                 void Enter(int k, int stage)
                 {
+                    // A LATE second place (OT-03) is filled here, entering the first step with a beat there, so the request
+                    // sees the player where the step before left him. Before anything the step places or shows.
+                    if (r.place.second?.fill == "late" && bm.LateFillStage < 0 && steps[k].Beats.Any(b => r.beats[b].PlaceIndex == 1))
+                    {
+                        bm.LateFillStage = stage;
+                        bm.LateAliases = LateDependents(clone, t.secondPlaceAlias);
+                        string pa = $"Alias_LatePlace{t.secondPlaceAlias}";
+                        props.Add(("LocationAlias", pa, clone.FormKey, t.secondPlaceAlias));
+                        Add(stage, $"{pa}.ClearAndRefillAlias()");
+                        foreach (int d in bm.LateAliases.Skip(1))
+                        {
+                            props.Add(("ReferenceAlias", $"Alias_Late{d}", clone.FormKey, d));
+                            Add(stage, $"Alias_Late{d}.RefillAlias()");
+                        }
+                        Add(stage, $"Debug.Trace(\"[late] \" + Self + \" stage {stage}: second place \" + {pa}.GetLocation() + \", {bm.LateAliases.Count - 1} dependent(s) refilled\")");
+                    }
                     // The kinds' entry passes, in EnterRank order: 0 a hold's first wave, 1 the fights (defeat and clear
                     // together, in beat order), 2 the recover holders.
                     for (int rank = 0; rank <= 2; rank++)
@@ -2503,6 +2545,26 @@ namespace FrankyCLI
                               sc2 == null ? "missing" : sc2.Any(c => c.Data is IIsInSameCurrentLocationAsAliasConditionDataGetter).ToString(), "False");
                 fail += Check("the second request carries no drive leash to the first (the planet content manager places it, not a drive)",
                               sc2 == null ? "missing" : sc2.Any(c => c.Data is IGetDistanceConditionDataGetter g && g.UseAliases).ToString(), "False");
+            }
+            if (r.place.second?.fill == "late")
+            {
+                // OT-03, read back off disk: the late place cannot fill at the start, everything from it is Optional, and its
+                // fill stage refills them in order.
+                var lp = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.secondPlaceAlias);
+                bool waits = lp?.Conditions.Any(c => c.Data is IGetStageDoneConditionDataGetter g && g.SecondParameter == bm.LateFillStage
+                                                     && g.FirstParameter.Link.FormKey == q.FormKey && c is IConditionFloatGetter f && f.ComparisonValue == 1f) == true;
+                fail += Check($"the late second place (alias {t.secondPlaceAlias}) is Optional and fills only after stage {bm.LateFillStage}",
+                              lp == null ? "missing" : $"{(lp.Flags ?? 0).HasFlag(QuestLocationAlias.Flag.Optional)} {waits}", "True True");
+                var notOpt = q.Aliases.OfType<IQuestReferenceAliasGetter>()
+                              .Where(a => bm.LateAliases.Skip(1).Contains((int)a.ID) && !(a.Flags ?? 0).HasFlag(QuestReferenceAlias.Flag.Optional))
+                              .Select(a => a.ID.ToString()).ToList();
+                fail += Check($"every alias filled from it is Optional ({bm.LateAliases.Count - 1})", notOpt.Count == 0 ? "all" : string.Join(", ", notOpt), "all");
+                string lsrc = File.Exists(bm.PscPath) ? File.ReadAllText(bm.PscPath) : "";
+                var want = new[] { $"Alias_LatePlace{t.secondPlaceAlias}.ClearAndRefillAlias()" }
+                           .Concat(bm.LateAliases.Skip(1).Select(d => $"Alias_Late{d}.RefillAlias()")).ToList();
+                var pos = want.Select(w => lsrc.IndexOf(w, StringComparison.Ordinal)).ToList();
+                fail += Check("the fill stage refills the place, then each dependent, in order",
+                              (pos.All(p => p >= 0) && pos.SequenceEqual(pos.OrderBy(p => p))).ToString(), "True");
             }
             if (r.place.second?.settlement is string city && Settlements.TryGetValue(city, out var cityKey))
             {

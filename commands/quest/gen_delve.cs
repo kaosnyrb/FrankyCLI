@@ -471,6 +471,16 @@ namespace FrankyCLI
             /// </summary>
             public string? system { get; set; }
             /// <summary>
+            /// OPTIONAL, place.second only, a request (remote: true): "late" = the second place is NOT filled when the quest
+            /// starts, but when the player finishes the step before its first beat (his 2026-10-30, OT-03: "mark the second
+            /// location as optional and fill it when the player reaches the first"). With system "same" the request then means
+            /// the system he is standing in, the first place's. Built as vanilla's late fills are: the place alias and every
+            /// alias filled from it are Optional, the place carries GetStageDone(that stage) == 1 so it cannot fill at the
+            /// start, and that stage runs ClearAndRefillAlias on the place, then RefillAlias on each dependent in order
+            /// (MissionCargoQuestScript, MQ_Temple_SubScript's RefillAnomalyOE). Not a guard on another alias: those crashed.
+            /// </summary>
+            public string? fill { get; set; }
+            /// <summary>
             /// OPTIONAL, an ORBIT only (a space template's main place, or place.third with orbit): the orbit altitude (ALFG),
             /// written over the copied one. His settled band is 8 to 32 (2026-08-04 trials; past a ceiling between 32 and 256
             /// the engine discards it and reverts to default), so anything outside it is refused. His 2026-10-22: "32
@@ -1759,6 +1769,28 @@ namespace FrankyCLI
                 foreach (var (where, text) in ProseStrings(r))
                     if (Tokens(text).Contains("SecondPlanet"))
                         Fatal($"{where}: <SecondPlanet> needs place.second.remote; a found second place is on the main place's planet, and a named city's planet is not made, so neither gets a planet alias of its own.");
+            if (r.place.fill != null || r.place.third?.fill != null)
+                Fatal("fill is place.second's only (a late second place).");
+            if (r.place.second?.fill is string fl)
+            {
+                if (fl != "late") Fatal($"place.second.fill is \"{fl}\"; the one value built is \"late\".");
+                if (!secondRemote) Fatal("place.second.fill \"late\" needs place.second.remote: only a request can be refilled into a new site.");
+                if (r.beats.Count == 0 || r.beats[0].PlaceIndex == 1)
+                    Fatal("place.second.fill \"late\": the first beat is at the second place, so there is no step before it to fill on.");
+                if (r.place.second.who != null)
+                    Fatal("place.second.fill \"late\" with place.second.who: the crowd is placed at the start, into an empty place.");
+                for (int b = 0; b < r.beats.Count; b++)
+                    if (r.beats[b].PlaceIndex == 1 && (r.beats[b].person != null || r.beats[b].replace))
+                        Fatal($"place.second.fill \"late\": beat {b + 1} is at the second place and has a person or replace, which "
+                              + "the build places at the start; a late place is empty until the step before it is done.");
+                // Everything the player reads BEFORE the refill: the board card, the briefing and the title. The objectives
+                // show after it, so they may name it.
+                foreach (var (where, text) in ProseStrings(r))
+                    if (where is "prose.card" or "prose.briefing" or "prose.name"
+                        && Tokens(text).Any(k => k is "SecondPlace" or "SecondPlanet"))
+                        Fatal($"{where}: names the second place, and with place.second.fill \"late\" it does not exist yet when this is read (it would print blank).");
+                Console.WriteLine("  second   : LATE: not filled at the start; filled when the step before its first beat is done (OT-03)");
+            }
             if (secondRemote)
                 Console.WriteLine("  second   : a SECOND REQUEST (proven 2026-10-14, two sites on two planets in one play); "
                                   + "no planet guard (two crashed the game; his 2026-10-19 ruling), so it may land on either planet");
@@ -2583,6 +2615,31 @@ namespace FrankyCLI
             // Everything BuildBeats reads off the load order, own-or-master, in one record (gen_delve_inputs.cs).
             fail = ResolveInputs(myMod, env, t, r, parts, fail, out var inputs);
             if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, inputs);
+            if (fail == 0 && r.place.second?.fill == "late")
+            {
+                // OT-03, his 2026-10-30: the second place waits for the player. Everything that fills from it is Optional (so the
+                // quest starts with them empty), and the place itself cannot fill until the refill stage is done, so the start
+                // and the board's accept leave it alone. A condition on THIS quest's stage, never on another alias.
+                int lst = madeBeats.LateFillStage;
+                if (lst < 0 || lst == t.entryStage)
+                {
+                    Console.WriteLine($"REFUSED: place.second.fill \"late\" found no step before the second place's first beat (fill stage {lst}).");
+                    fail++;
+                }
+                else
+                {
+                    var lp = clone.Aliases!.OfType<QuestLocationAlias>().First(a => a.ID == (uint)t.secondPlaceAlias);
+                    lp.Flags = (lp.Flags ?? 0) | QuestLocationAlias.Flag.Optional;
+                    var sd = new GetStageDoneConditionData { RunOnType = Condition.RunOnType.Subject, SecondParameter = (ushort)lst };
+                    sd.FirstParameter = new FormLinkOrIndex<IQuestGetter>(sd, clone.FormKey);
+                    lp.Conditions.Add(new ConditionFloat { Data = sd, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f });
+                    foreach (var a in clone.Aliases!.OfType<QuestReferenceAlias>().Where(a => madeBeats.LateAliases.Skip(1).Contains((int)a.ID)))
+                        a.Flags = (a.Flags ?? 0) | QuestReferenceAlias.Flag.Optional;
+                    Console.WriteLine($"  late     : alias {t.secondPlaceAlias} {lp.Name} Optional, fills only after stage {lst} "
+                                      + $"(GetStageDone == 1); refilled on stage {lst} with {madeBeats.LateAliases.Count - 1} dependent(s), "
+                                      + $"all Optional: {string.Join(", ", madeBeats.LateAliases.Skip(1))}");
+                }
+            }
             if (fail == 0 && secondCity)
             {
                 // A generic city spot is shared with vanilla (AutofillGeneric01 by 67 vanilla aliases), so every marker filled

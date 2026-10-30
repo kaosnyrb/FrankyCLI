@@ -1,0 +1,72 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_l1",
+  "template": "board",
+  "_note": "OT-03 PROBE, his 2026-10-30: 'mark the second location as optional and fill it when the player reaches the first. That way the first location can be remote and the second is \"in system\" where the player is'. MB42a whole (Crash Site Cargo) with place.second.fill late and system same; the card and briefing do not name the drop-off, because it does not exist when they are read. On the test node. If his play holds, MB42a takes the shape on Jessica's words.",
+  "author": "eliza",
+  "source": "duo_MB42a_qst (Jessica's), every beat as is",
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeShipwreckKeyword"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "who": {
+      "kind": "spacers",
+      "list": "duo_GangMembersList_Spacer",
+      "min": 3,
+      "max": 5,
+      "beat": 1
+    },
+    "_who": "Jessica's proposed pickup guard, as the built field (ELIZA 2026-10-15): spacers round the crate when he first comes within 250 m, after the accept. Overtime's Spacer gang list (9 entries).",
+    "second": {
+      "remote": true,
+      "fill": "late",
+      "_fill": "OT-03: filled when the crate is picked up, so 'the player's star system' is the wreck's.",
+      "system": "same",
+      "_remote": "On a board the second place is always a request (ELIZA 2026-10-15). It had a same-planet guard (his 10-15 pick) and that guard CRASHED the game at startquest (his play, 2026-10-19); his ruling: no planet guards, 'it's fine if the mission is on the same planet'. So the drop lands wherever the request puts it.",
+      "theme": {
+        "require": [],
+        "exclude": [
+          "LocTypeOE_ThemeShipwreckKeyword",
+          "LocTypeOE_ThemeCaveKeyword"
+        ]
+      }
+    },
+    "_theme": "A wreck here; the delivery site must never be a wreck itself (two places that could draw one POI warn). ELIZA 2026-10-15, measured: a request can put down 3 wreck sites of 214, so every crash site is one of three; the board places it, so it always starts."
+  },
+  "prose": {
+    "name": "TEST L1: Crash Site Cargo on <Planet>",
+    "briefing": "A freighter came down at the <Place> with a consignment still aboard. Spacers got to the wreck first. The shipping firm wants its crate back, and will say where it goes once it is recovered.",
+    "card": "Shipping Firm Contract. Recover our crate from the wreck at the <Place>. Delivery details on recovery. Spacers present. Payment on delivery."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "RETravelA1LocRef",
+      "ring": "large-cargo",
+      "item": "Freighter Consignment",
+      "objective": "Recover the freighter's crate at the <Place>",
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "name": "Wreck Cargo Crate",
+      "message": {
+        "title": "Wreck Cargo Crate",
+        "text": "The crate's seals are scorched, but they held."
+      }
+    },
+    {
+      "type": "deliver",
+      "at": "RECenterLocRef",
+      "place": "second",
+      "objective": "Deliver the crate to the <SecondPlace>",
+      "journal": "A freighter went down at the <Place> and spacers were picking over the wreck. I got the consignment out from under them and delivered it to the <SecondPlace>, where it was meant to go.",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Consignee Drop",
+      "reward": "med",
+      "_reward": "Jessica's suggestion (a guarded pickup); the tier is his."
+    }
+  ]
+}
