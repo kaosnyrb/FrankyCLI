@@ -82,6 +82,13 @@
           "reply": [
             "Twelve since the thaw."
           ]
+        },
+        {
+          "prompt": "Rustling's my business. I'll see it ends.",
+          "reply": [
+            "Now that's a badge I've been waiting to see out here. Go on, then. Bring my cows some peace."
+          ],
+          "perk": "FactionFreestarCollectivePerk"
         }
       ],
       "_talk": "Exchange 0 closes the talk and starts the defeat. Every prompt asks about something the greeting has already said (the boss, the losses). Voiced lines: no names, no places, no factions, no currency. Pass 2026-10-23, his \"unclear shes talking about cows and doesn't read well spoken\": she says cattle in her first sentence, the stock is driven, not carried, and the long one-breath replies are split at their real pauses."

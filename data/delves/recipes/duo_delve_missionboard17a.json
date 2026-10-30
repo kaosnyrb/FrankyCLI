@@ -110,6 +110,13 @@
           "reply": [
             "Rent, mostly. Food. Somebody's got a wedding. And then we go back to work."
           ]
+        },
+        {
+          "prompt": "Whoever owns this place answers to somebody.",
+          "reply": [
+            "They do. And that somebody has never been out here. If you know them, tell them about the forty."
+          ],
+          "perk": "FactionRyujinIndustriesPerk"
         }
       ],
       "_talk": "Exchange 0 ends the talk, takes the Payroll Case and sets stage 100. Voice 'Charlie', unused so far; the same voice on the radio.",

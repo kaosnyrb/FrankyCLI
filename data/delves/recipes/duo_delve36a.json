@@ -148,6 +148,13 @@
           "reply": [
             "Because it's quiet and nobody needs anything from me. It's the best hour of my day."
           ]
+        },
+        {
+          "prompt": "I've seen a lot of skies. This is a good one.",
+          "reply": [
+            "Have you? You've the look of someone who's been further than most. Sit a minute, then. The rock's big enough for two."
+          ],
+          "perk": "FactionStarbornPerk"
         }
       ],
       "_talk": "Exchange 0 points her home and ends the Delve. 'He says he's not cross' is set up by her son's closing reply; 'son' by his greeting ('my mum'). Hers is Edie Mallow's register: she is fine, and the greeting carries the one thing she likes (this rock, it holds the sun), so a player who takes exchange 0 first still leaves with it. One clock: she went out THIS morning (Frances Hale, 2026-10-29, rework applied).",

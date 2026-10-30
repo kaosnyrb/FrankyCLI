@@ -78,6 +78,13 @@
           "reply": [
             "Nothing good, and nothing fast. So I'll wait here, thanks."
           ]
+        },
+        {
+          "prompt": "Walking out of a bad command isn't the same as running.",
+          "reply": [
+            "You'd know the difference, then. Most people in a uniform don't. Thank you."
+          ],
+          "perk": "FactionUnitedColoniesSysDefPerk"
         }
       ],
       "_talk": "Exchange 0 ends the talk and sets the next stage. Every prompt stands on the greeting. Voice 'Verity', british, unused so far; the same voice on the radio."

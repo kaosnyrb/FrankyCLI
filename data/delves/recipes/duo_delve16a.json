@@ -82,6 +82,13 @@
           "reply": [
             "Cells. Two. Left bay first."
           ]
+        },
+        {
+          "prompt": "Cells. Two. Understood, Sergeant.",
+          "reply": [
+            "Finally. Someone who listens. Go."
+          ],
+          "perk": "FactionUnitedColoniesPerk"
         }
       ],
       "_talk": "PROPOSED fields, as 14a. Exchange 0 ends the conversation and sets the first pickup's stage. Exchange 1 is the flirt his 10-12 ceiling allows, answered in register: with the action it implies."

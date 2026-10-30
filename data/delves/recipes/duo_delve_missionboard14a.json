@@ -112,6 +112,13 @@
           "reply": [
             "Because nobody told us to. And because if we leave this corner, they have all of it."
           ]
+        },
+        {
+          "prompt": "I'll make sure someone hears this corner held.",
+          "reply": [
+            "If you can make someone hear, you're the first. Tell them nine days. Tell them nobody left."
+          ],
+          "perk": "FactionUnitedColoniesVanguardPerk"
         }
       ],
       "_talk": "Exchange 0 ends the talk, takes the Medical Crate and sets stage 100. 'Nine days' is fixed on purpose and not the unit's: it is a sleeve clock nobody trusts. A rank in a person's name is allowed (it is not a token). Voice 'Jon Jebus', unused so far.",
