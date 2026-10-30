@@ -90,7 +90,12 @@ namespace FrankyCLI
         }
 
         // A fault line: the recipe id (or "a, b" for a cross-recipe fault such as SPEAKER), two or more spaces, the fault.
-        private static readonly Regex FaultLine = new(@"^(?<ids>\S+(?:, \S+)*)\s{2,}(?<rest>\S.*)$");
+        // ONE or more spaces after the ids, not two (plan OT-92, 2026-10-30). Both checkers print f"{rid:40} {kind}": a single id
+        // is padded to 40 so two spaces happened to follow it, but a cross-recipe pair ("a, b", a shared NAME or SPEAKER) runs
+        // past 40 and leaves ONE, so every such fault read as "unreadable" and the whole run as CHECKER BROKEN. An id cannot
+        // hold a comma: with \S there, the first try took "a," as the whole id list and "b NAME ..." as the fault, filing it
+        // under a recipe that does not exist (the first version of this fix did exactly that and passed the lint SILENT).
+        private static readonly Regex FaultLine = new(@"^(?<ids>[^\s,]+(?:, [^\s,]+)*)\s+(?<rest>\S.*)$");
         private static readonly Regex Summary = new(@"^(?<n>\d+) flagged\b");
 
         /// <summary>Faults are every line before the first blank one; after it come the corpus rates and the summary.</summary>
