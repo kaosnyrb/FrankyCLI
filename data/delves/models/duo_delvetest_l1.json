@@ -1,5 +1,5 @@
 {
-  "FormKey": "0047A4:du_overtime.esm",
+  "FormKey": "0047A9:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -160,7 +160,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "0047A4:du_overtime.esm",
+              "FirstLink": "0047A9:du_overtime.esm",
               "SecondParameter": 10
             }
           ],
@@ -197,7 +197,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "0047A4:du_overtime.esm",
+              "FirstLink": "0047A9:du_overtime.esm",
               "SecondParameter": 10
             }
           ],
@@ -439,7 +439,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "0047A5:du_overtime.esm",
+        "Object": "0047AA:du_overtime.esm",
         "AliasID": 20,
         "Create": 0,
         "Level": 0
@@ -525,7 +525,7 @@
           "Unknown3": -1,
           "UseAliases": false,
           "UsePackageData": false,
-          "FirstLink": "0047A4:du_overtime.esm",
+          "FirstLink": "0047A9:du_overtime.esm",
           "SecondParameter": 20
         }
       ],
@@ -572,7 +572,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "0047A6:du_overtime.esm",
+        "Object": "0047AB:du_overtime.esm",
         "AliasID": 23,
         "Create": 0,
         "Level": 0
@@ -594,7 +594,7 @@
           "Name": "Alias_Beat1Target",
           "Flags": 1,
           "Object": {
-            "Form": "0047A4:du_overtime.esm",
+            "Form": "0047A9:du_overtime.esm",
             "Alias": 21,
             "Unused": 0
           }
@@ -614,7 +614,7 @@
           "Name": "Beat1Message",
           "Flags": 1,
           "Object": {
-            "Form": "0047A8:du_overtime.esm",
+            "Form": "0047AD:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -624,7 +624,7 @@
           "Name": "Alias_LatePlace22",
           "Flags": 1,
           "Object": {
-            "Form": "0047A4:du_overtime.esm",
+            "Form": "0047A9:du_overtime.esm",
             "Alias": 22,
             "Unused": 0
           }
@@ -634,7 +634,7 @@
           "Name": "Alias_Late23",
           "Flags": 1,
           "Object": {
-            "Form": "0047A4:du_overtime.esm",
+            "Form": "0047A9:du_overtime.esm",
             "Alias": 23,
             "Unused": 0
           }
@@ -644,8 +644,18 @@
           "Name": "Alias_Late24",
           "Flags": 1,
           "Object": {
-            "Form": "0047A4:du_overtime.esm",
+            "Form": "0047A9:du_overtime.esm",
             "Alias": 24,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "LateObject24",
+          "Flags": 1,
+          "Object": {
+            "Form": "0047AB:du_overtime.esm",
+            "Alias": -1,
             "Unused": 0
           }
         },
@@ -654,7 +664,7 @@
           "Name": "Item1",
           "Flags": 1,
           "Object": {
-            "Form": "0047A7:du_overtime.esm",
+            "Form": "0047AC:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -735,7 +745,7 @@
             "Name": "PlayerStarSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "0047A4:du_overtime.esm",
+              "Form": "0047A9:du_overtime.esm",
               "Alias": 0,
               "Unused": 0
             }
@@ -745,7 +755,7 @@
             "Name": "TargetSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "0047A4:du_overtime.esm",
+              "Form": "0047A9:du_overtime.esm",
               "Alias": 8,
               "Unused": 0
             }
@@ -755,7 +765,7 @@
             "Name": "TargetPlanetLocation",
             "Flags": 1,
             "Object": {
-              "Form": "0047A4:du_overtime.esm",
+              "Form": "0047A9:du_overtime.esm",
               "Alias": 2,
               "Unused": 0
             }
@@ -765,7 +775,7 @@
             "Name": "TargetLocation",
             "Flags": 1,
             "Object": {
-              "Form": "0047A4:du_overtime.esm",
+              "Form": "0047A9:du_overtime.esm",
               "Alias": 5,
               "Unused": 0
             }
@@ -775,7 +785,7 @@
             "Name": "PrimaryRef",
             "Flags": 1,
             "Object": {
-              "Form": "0047A4:du_overtime.esm",
+              "Form": "0047A9:du_overtime.esm",
               "Alias": 3,
               "Unused": 0
             }
@@ -785,7 +795,7 @@
             "Name": "PlayerShip",
             "Flags": 1,
             "Object": {
-              "Form": "0047A4:du_overtime.esm",
+              "Form": "0047A9:du_overtime.esm",
               "Alias": 9,
               "Unused": 0
             }
@@ -808,7 +818,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0047A4:du_overtime.esm",
+            "Form": "0047A9:du_overtime.esm",
             "Alias": 11,
             "Unused": 0
           }
@@ -842,7 +852,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0047A4:du_overtime.esm",
+            "Form": "0047A9:du_overtime.esm",
             "Alias": 21,
             "Unused": 0
           }
@@ -869,7 +879,7 @@
                 "Name": "ItemToGive",
                 "Flags": 1,
                 "Object": {
-                  "Form": "0047A7:du_overtime.esm",
+                  "Form": "0047AC:du_overtime.esm",
                   "Alias": -1,
                   "Unused": 0
                 }
@@ -885,7 +895,7 @@
                 "Name": "TargetAlias",
                 "Flags": 1,
                 "Object": {
-                  "Form": "0047A4:du_overtime.esm",
+                  "Form": "0047A9:du_overtime.esm",
                   "Alias": 32,
                   "Unused": 0
                 }
@@ -920,7 +930,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0047A4:du_overtime.esm",
+            "Form": "0047A9:du_overtime.esm",
             "Alias": 24,
             "Unused": 0
           }

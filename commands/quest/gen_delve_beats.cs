@@ -1898,12 +1898,29 @@ namespace FrankyCLI
                         string pa = $"Alias_LatePlace{t.secondPlaceAlias}";
                         props.Add(("LocationAlias", pa, clone.FormKey, t.secondPlaceAlias));
                         Add(stage, $"{pa}.ClearAndRefillAlias()");
+                        // A FOUND dependent refills. A CREATED one cannot: "Can't refill an alias with fill type (4)" (his play
+                        // of duo_delvetest_l1, 2026-10-30, the drop box NONE). So the fragment creates it, as the engine would at
+                        // the start: PlaceAtMe at the alias it is created at, filling it in the same call. The order of
+                        // LateAliases puts that anchor first.
+                        var trace = new List<string>();
                         foreach (int d in bm.LateAliases.Skip(1))
                         {
                             props.Add(("ReferenceAlias", $"Alias_Late{d}", clone.FormKey, d));
-                            Add(stage, $"Alias_Late{d}.RefillAlias()");
+                            var da = clone.Aliases!.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)d);
+                            if (da.CreateReferenceToObject is { } cr)
+                            {
+                                if (cr.Create != CreateReferenceToObject.CreateEnum.At)
+                                    throw new InvalidOperationException($"late alias {d} is created {cr.Create} alias {cr.AliasID}; only AT is built (PlaceAtMe)");
+                                props.Add(("Form", $"LateObject{d}", cr.Object.FormKey, -1));
+                                Add(stage, $"Alias_Late{cr.AliasID}.GetRef().PlaceAtMe(LateObject{d}, 1, False, False, True, None, Alias_Late{d})");
+                            }
+                            else Add(stage, $"Alias_Late{d}.RefillAlias()");
+                            trace.Add($"\" {d}=\" + Alias_Late{d}.GetRef()");
                         }
-                        Add(stage, $"Debug.Trace(\"[late] \" + Self + \" stage {stage}: second place \" + {pa}.GetLocation() + \", {bm.LateAliases.Count - 1} dependent(s) refilled\")");
+                        // Each dependent's ref as it IS, so an empty one prints None (the first version printed "refilled"
+                        // straight after the engine refused one).
+                        Add(stage, $"Debug.Trace(\"[late] \" + Self + \" stage {stage}: second place \" + {pa}.GetLocation()"
+                                   + string.Concat(trace.Select(s => " + " + s)) + ")");
                     }
                     // The kinds' entry passes, in EnterRank order: 0 a hold's first wave, 1 the fights (defeat and clear
                     // together, in beat order), 2 the recover holders.
@@ -2561,7 +2578,10 @@ namespace FrankyCLI
                 fail += Check($"every alias filled from it is Optional ({bm.LateAliases.Count - 1})", notOpt.Count == 0 ? "all" : string.Join(", ", notOpt), "all");
                 string lsrc = File.Exists(bm.PscPath) ? File.ReadAllText(bm.PscPath) : "";
                 var want = new[] { $"Alias_LatePlace{t.secondPlaceAlias}.ClearAndRefillAlias()" }
-                           .Concat(bm.LateAliases.Skip(1).Select(d => $"Alias_Late{d}.RefillAlias()")).ToList();
+                           .Concat(bm.LateAliases.Skip(1).Select(d =>
+                               q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)d)?.CreateReferenceToObject is { } cr
+                                   ? $"PlaceAtMe(LateObject{d}, 1, False, False, True, None, Alias_Late{d})"
+                                   : $"Alias_Late{d}.RefillAlias()")).ToList();
                 var pos = want.Select(w => lsrc.IndexOf(w, StringComparison.Ordinal)).ToList();
                 fail += Check("the fill stage refills the place, then each dependent, in order",
                               (pos.All(p => p >= 0) && pos.SequenceEqual(pos.OrderBy(p => p))).ToString(), "True");
