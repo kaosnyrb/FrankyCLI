@@ -1,0 +1,91 @@
+{
+  "schema": 2,
+  "id": "duo_MB87a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-30 07:49 \"I like the idea of medic missions to, going out to help people\", then 07:51 \"yup\"",
+  "_note": [
+    "THE MEDIC FAMILY, 5: FIELD TRIAGE. Plan: home-office office/projects/delves/medic-family.md.",
+    "Register: the warm common job. You are the one who turns up.",
+    "After a raid, wounded settlers are down round the site. Treat each, in any order. 30a's group with message boxes.",
+    "STAND-INS: place.wounded (three placed, down, alive) and a treat use on each that takes a med pack (the item check",
+    "again). Eliza's. Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet site just raided.",
+    "wounded": {
+      "count": 3,
+      "_wounded": "STAND-IN: three settlers placed down and wounded, one at each marker. Eliza's."
+    }
+  },
+  "prose": {
+    "name": "Rescue: Field Triage at the <Place> on <Planet>",
+    "briefing": "Raiders hit the <Place> and left three of its people wounded. The settlement needs someone with med packs.",
+    "card": "Local Contract. Treat the wounded settlers at the <Place> on <Planet>. Bring med packs. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "group": "wounded",
+      "at": "RECenterLocRef",
+      "model": "WOUNDED SETTLER, UNPICKED",
+      "name": "Wounded Settler",
+      "_use": "STAND-IN: treating takes one Aid_MedPack (the item check). Eliza's.",
+      "objective": "Treat the wounded settlers at the <Place>",
+      "message": {
+        "title": "Wounded Settler",
+        "text": "A cut along the arm, deep but clean. The med pack does its work and the breathing slows."
+      },
+      "journal": "This one had a deep cut along the arm. It's dressed."
+    },
+    {
+      "type": "use",
+      "group": "wounded",
+      "at": "REMarkerMediumLocRef",
+      "model": "WOUNDED SETTLER, UNPICKED",
+      "name": "Wounded Settler",
+      "_use": "STAND-IN: treating takes one Aid_MedPack (the item check). Eliza's.",
+      "message": {
+        "title": "Wounded Settler",
+        "text": "A burn across the hands. They watch you work and say nothing at all."
+      },
+      "journal": "This one had burnt hands, and didn't say a word."
+    },
+    {
+      "type": "use",
+      "group": "wounded",
+      "at": "REContainerLocRef",
+      "model": "WOUNDED SETTLER, UNPICKED",
+      "name": "Wounded Settler",
+      "_use": "STAND-IN: treating takes one Aid_MedPack (the item check). Eliza's.",
+      "message": {
+        "title": "Wounded Settler",
+        "text": "A knock to the head, and a lot of questions about what day it is."
+      },
+      "journal": "This one took a knock to the head and kept asking what day it was."
+    }
+  ],
+  "speaker": {
+    "name": "Settlement Warden",
+    "voice": "GenericMale01",
+    "elevenlabs": "7QTeMqXOsYj1AQaKLcrf"
+  },
+  "broadcast": [
+    "They hit us at first light and they're gone now. Three of ours are down. We've nobody who knows what they're doing. Please."
+  ],
+  "_speech": "Shaken, holding it together. A stand-in voice; his ear decides.",
+  "recap": "Raiders left three people wounded at the <Place>. I treated all three.",
+  "recapSay": [
+    "That's all three. Thank you. We'll manage from here."
+  ]
+}

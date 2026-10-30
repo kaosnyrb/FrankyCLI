@@ -1,0 +1,106 @@
+{
+  "schema": 2,
+  "id": "duo_MB84a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-30 07:49 \"I like the idea of medic missions to, going out to help people\", then 07:51 \"yup\"",
+  "_note": [
+    "THE MEDIC FAMILY, 2: THE CLINIC. Plan: home-office office/projects/delves/medic-family.md.",
+    "Register: the warm common job. You are the one who turns up.",
+    "A medic working on a patient in a field treatment bay; people outside want what's in her cabinet. Talk, then",
+    "hold. MB55a's shape with a person. Buildable today (the bay model is a stand-in). Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet site with a medic working it.",
+    "_bay": "STAND-IN: a medical bed or bay static at RECenterLocRef, so 'the treatment bay' is placed. His or Kim's pick."
+  },
+  "prose": {
+    "name": "Defense: Treatment Bay at the <Place> on <Planet>",
+    "briefing": "A medic at the <Place> is mid-operation in a field treatment bay, and someone outside wants the painkillers in her cabinet.",
+    "card": "Local Contract. Protect the medic's treatment bay at the <Place> on <Planet> until her patient is stable. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Talk to the medic at the <Place>",
+      "person": {
+        "name": "Halima Strand",
+        "template": "UC_NA_MASTWorkerFemale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "XW70ikSsadUbinwLMZ5w",
+        "hellos": [
+          [
+            "Not now. Unless you're the help. Are you the help?"
+          ]
+        ]
+      },
+      "greeting": [
+        "You answered? Good. I've got a patient open on the table and people outside who want what's in my cabinet. Keep them out of this bay until I'm done."
+      ],
+      "exchanges": [
+        {
+          "prompt": "I'll hold them off.",
+          "reply": [
+            "Every minute you give me is one he keeps."
+          ]
+        },
+        {
+          "prompt": "I can assist if you need another pair of hands.",
+          "perk": "Skill_Medicine",
+          "reply": [
+            "I need you on the door more. But come back after, and I'll show you what I did."
+          ]
+        },
+        {
+          "prompt": "What do they want with your cabinet?",
+          "reply": [
+            "Painkillers. They'll sell them on. I'd rather they were in my patient."
+          ]
+        }
+      ],
+      "journal": "Someone is coming for the medic's painkillers at the <Place>. I need to hold the treatment bay until her patient is stable."
+    },
+    {
+      "type": "hold",
+      "at": "RECenterLocRef",
+      "waves": 3,
+      "size": [
+        2,
+        4
+      ],
+      "style": [
+        "squad",
+        "squad",
+        "horde"
+      ],
+      "defend": 1,
+      "objective": "Hold the treatment bay until the patient is stable",
+      "journal": "I held the medic's treatment bay at the <Place> until her patient was stable.",
+      "say": [
+        "He's stable. You can stop shooting now. Please."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Field Medic",
+    "voice": "GenericFemale01",
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w"
+  },
+  "broadcast": [
+    "The treatment bay's in the middle of the site. Come straight in, and don't stop to talk to anyone outside."
+  ],
+  "_speech": "Halima: brisk, warm underneath, no time. A stand-in voice; his ear decides."
+}

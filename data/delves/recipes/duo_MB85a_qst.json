@@ -1,0 +1,95 @@
+{
+  "schema": 2,
+  "id": "duo_MB85a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-30 07:49 \"I like the idea of medic missions to, going out to help people\", then 07:51 \"yup\"",
+  "_note": [
+    "THE MEDIC FAMILY, 3: THE HOUSE CALL. Plan: home-office office/projects/delves/medic-family.md.",
+    "Register: the warm common job. You are the one who turns up.",
+    "One patient: a miner who won't come in. The med pack IS the job: the closing prompt takes one from him.",
+    "STAND-IN: exchanges[0].give (his 10-30 item check, [Give Med Pack]; Aid_MedPack read off Starfield.esm). A player",
+    "with none cannot finish, so the card says to bring one. Fallback: capability E (deliver one Aid_MedPack), as his",
+    "old Overtime's 'Deliver 3 Med Pack' did. Pay: easy."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet worked site."
+  },
+  "prose": {
+    "name": "Rescue: House Call at the <Place> on <Planet>",
+    "briefing": "A miner at the <Place> hurt his hand and won't come in to the clinic. Someone has to take him a med pack.",
+    "card": "Local Contract. Bring a med pack to an injured miner at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Treat the injured miner at the <Place>",
+      "person": {
+        "name": "Bram Kessler",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericMale01",
+        "elevenlabs": "onwK4e9ZLuTAKqWW03F9",
+        "hellos": [
+          [
+            "If you're from the clinic, I'm fine."
+          ],
+          [
+            "It's a scratch. Mostly."
+          ]
+        ]
+      },
+      "greeting": [
+        "Don't fuss. It's a scratch. A big scratch. Did they send you with a med pack?"
+      ],
+      "exchanges": [
+        {
+          "prompt": "Here's a med pack. Hold still.",
+          "give": {
+            "item": "Aid_MedPack",
+            "count": 1
+          },
+          "_give": "STAND-IN: offered only if he carries one, and takes it. Eliza's (mission-parts.md, section F).",
+          "reply": [
+            "Ow. Right. Thank you. I'd have walked in eventually. Probably."
+          ]
+        },
+        {
+          "prompt": "That needs stitches, not just a pack.",
+          "perk": "BackgroundCombatMedic",
+          "reply": [
+            "Then stitch it. Quickly, before I look at it."
+          ]
+        },
+        {
+          "prompt": "How did it happen?",
+          "reply": [
+            "Arguing with a drill. The drill won."
+          ]
+        }
+      ],
+      "journal": "I patched up a miner at the <Place> with a med pack. He'll live, and he'll complain about it.",
+      "reward": "easy"
+    }
+  ],
+  "speaker": {
+    "name": "Clinic Dispatcher",
+    "voice": "GenericFemale01",
+    "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
+  },
+  "broadcast": [
+    "The patient's a miner who won't come in. Bring a med pack and be patient with him. More patient than he is."
+  ],
+  "_speech": "The dispatcher: fond and exasperated. Bram: gruff, embarrassed. Stand-in voices; his ear decides."
+}

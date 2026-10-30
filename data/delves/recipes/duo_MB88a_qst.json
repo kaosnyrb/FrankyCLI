@@ -1,0 +1,95 @@
+{
+  "schema": 2,
+  "id": "duo_MB88a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-30 07:49 \"I like the idea of medic missions to, going out to help people\", then 07:51 \"yup\"",
+  "_note": [
+    "THE MEDIC FAMILY, 6: MEDEVAC. Plan: home-office office/projects/delves/medic-family.md.",
+    "Register: the warm common job. You are the one who turns up.",
+    "An injured worker who can walk, slowly, if someone walks with him. Talk, then escort him to the landing pad.",
+    "STAND-IN: escort (MB82a's ask). Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet worked site."
+  },
+  "prose": {
+    "name": "Rescue: Medevac at the <Place> on <Planet>",
+    "briefing": "A worker at the <Place> broke his leg and needs walking out to a ship. The crew can't spare anyone.",
+    "card": "Local Contract. Escort an injured worker from the <Place> on <Planet> to a waiting ship. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Find the injured worker at the <Place>",
+      "person": {
+        "name": "Tobin Ashgrove",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericMale01",
+        "elevenlabs": "N2lVS1w4EtoT3dr4eOWO",
+        "hellos": [
+          [
+            "Don't laugh. It's a very serious leg."
+          ]
+        ]
+      },
+      "greeting": [
+        "You're my lift? Good. I can walk if somebody's next to me. I just can't walk fast, and I can't walk far."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Lean on me. We'll go slowly.",
+          "reply": [
+            "Slowly I can do. It's the stairs I'm frightened of."
+          ]
+        },
+        {
+          "prompt": "That's set badly. Let me fix the splint first.",
+          "perk": "BackgroundCombatMedic",
+          "reply": [
+            "Oh, that's much better. Whoever did the first one, don't tell them."
+          ]
+        },
+        {
+          "prompt": "How did you break it?",
+          "reply": [
+            "Stepped off a ladder that wasn't there. Long story. Short ladder."
+          ]
+        }
+      ],
+      "journal": "A worker at the <Place> broke his leg. I need to walk him out to the ship."
+    },
+    {
+      "type": "escort",
+      "distance": 300,
+      "_type": "STAND-IN: he follows him; done when they are clear, at the ship. MB82a's ask.",
+      "objective": "Walk the injured worker out to the ship",
+      "journal": "I walked an injured worker from the <Place> to a waiting ship, one step at a time.",
+      "say": [
+        "He's aboard. Thank you for going at his pace. Most people don't."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Crew Lead",
+    "voice": "GenericFemale01",
+    "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
+  },
+  "broadcast": [
+    "He's broken his leg and he won't stop apologising. Walk him out, slowly. We can't spare anyone."
+  ],
+  "_speech": "Fond of him. A stand-in voice; his ear decides."
+}

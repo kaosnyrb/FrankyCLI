@@ -1,0 +1,117 @@
+{
+  "schema": 2,
+  "id": "duo_MB86a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-30 07:49 \"I like the idea of medic missions to, going out to help people\", then 07:51 \"yup\"",
+  "_note": [
+    "THE MEDIC FAMILY, 4: THE ROUNDS, LINK 1. Plan: home-office office/projects/delves/medic-family.md.",
+    "Register: the warm common job. You are the one who turns up.",
+    "The warm chain (home-office office/projects/delves/chains.md): a settlement medic's rounds, one patient per link.",
+    "Link 1: take the medicine case from the clinic to a patient at a second site. Her closing talk asks the next one.",
+    "STAND-IN: next (via talk) to an unwritten link 2 ('Ah, can you look in on the old miner up the ridge?'). The cause",
+    "rule holds: the patient has heard the medic is short-handed because the player is standing there. Pay: easy."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "The medic's own settlement.",
+    "second": {
+      "remote": true,
+      "theme": {
+        "require": [
+          "LocTypeOE_NonHostile"
+        ],
+        "exclude": [
+          "LocTypeOE_ThemeCaveKeyword"
+        ]
+      }
+    }
+  },
+  "prose": {
+    "name": "Hauling: The Rounds on <Planet>",
+    "briefing": "The medic at the <Place> is short-handed and has a patient at the <SecondPlace> who needs her medicine today.",
+    "card": "Local Contract. Take a medicine case from the <Place> to a patient at the <SecondPlace>. Payment on delivery."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "REContainerLocRef",
+      "replace": true,
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "name": "Medicine Case",
+      "item": "Medicine Case",
+      "objective": "Collect the medicine case at the <Place>",
+      "journal": "I've got the medicine case from the <Place>. I need to take it to the patient at the <SecondPlace>.",
+      "say": [
+        "That's the case. She takes two a day, tell her I said so."
+      ]
+    },
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "place": "second",
+      "objective": "Deliver the medicine to the patient at the <SecondPlace>",
+      "person": {
+        "name": "Rosa Feld",
+        "template": "UC_NA_MASTWorkerFemale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "r5iFzIytiA1rzjhWFCjW",
+        "hellos": [
+          [
+            "Is that my medicine? Oh, good."
+          ]
+        ]
+      },
+      "greeting": [
+        "You're not my medic. Is that my medicine? She's short-handed again, isn't she."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Your medicine. Two a day, she says.",
+          "reply": [
+            "Two a day. I know. She tells me every time. Thank you, love."
+          ]
+        },
+        {
+          "prompt": "How long have you been on it?",
+          "perk": "Skill_Medicine",
+          "reply": [
+            "Since the cough came back. You know what this is, then. Don't tell me, I'd rather not."
+          ]
+        },
+        {
+          "prompt": "Is there anything else you need?",
+          "reply": [
+            "Company, mostly. You've done your bit. Sit for a minute if you like."
+          ]
+        }
+      ],
+      "journal": "I took the medic's case from the <Place> to her patient at the <SecondPlace>, and stayed for a minute.",
+      "reward": "easy"
+    }
+  ],
+  "speaker": {
+    "name": "Settlement Medic",
+    "voice": "GenericFemale01",
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w"
+  },
+  "broadcast": [
+    "I'm short-handed and my patient can't wait. The case is ready to go. Mind it, it rattles."
+  ],
+  "_speech": "Overworked and grateful. A stand-in voice; his ear decides.",
+  "next": {
+    "id": "MB86A LINK 2, UNWRITTEN",
+    "via": "talk"
+  },
+  "_next": "STAND-IN: Rosa's closing reply gains the ask ('Ah, can you look in on the old miner up the ridge?') once next is real."
+}

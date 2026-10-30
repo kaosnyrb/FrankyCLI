@@ -1,0 +1,107 @@
+{
+  "schema": 2,
+  "id": "duo_MB89a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-30 07:49 \"I like the idea of medic missions to, going out to help people\", then 07:51 \"yup\"",
+  "_note": [
+    "THE MEDIC FAMILY, 7: THE OUTBREAK. Plan: home-office office/projects/delves/medic-family.md.",
+    "Register: the warm common job. You are the one who turns up.",
+    "An outpost under quarantine, its air contaminated. Collect the medicine at the edge, carry it through to the medic.",
+    "STAND-INS: place.hazards (the gas flood's part, local 30a), the edge marker, and the medic's spot kept clear of the",
+    "hazard. Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet site under quarantine.",
+    "hazards": {
+      "kind": "CONTAMINATION, UNPICKED",
+      "count": 6,
+      "radius": 6,
+      "spread": "site",
+      "clear": "RECenterLocRef"
+    },
+    "_hazards": "STAND-IN: contamination zones across the site, none at the medic's spot. Local 30a's part."
+  },
+  "prose": {
+    "name": "Danger: Quarantine at the <Place> on <Planet>",
+    "briefing": "The <Place> is under quarantine and its medic has run out of medicine. A supply case is waiting at the edge of the site.",
+    "card": "Local Contract. Carry medicine through the quarantine at the <Place> on <Planet> to its medic. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "EDGE MARKER, UNPICKED",
+      "_at": "STAND-IN: local 30a's edge marker.",
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "name": "Medicine Case",
+      "item": "Quarantine Medicine",
+      "objective": "Collect the medicine at the edge of the <Place>",
+      "journal": "I've got the medicine. I need to carry it through the contaminated site to the medic.",
+      "say": [
+        "That's the case. Keep your helmet on until you're with me."
+      ]
+    },
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Bring the medicine to the medic at the <Place>",
+      "person": {
+        "name": "Inge Valberg",
+        "template": "UC_NA_MASTWorkerFemale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "r5iFzIytiA1rzjhWFCjW",
+        "hellos": [
+          [
+            "Stay masked. I mean it."
+          ]
+        ]
+      },
+      "greeting": [
+        "You came through that? Then you've got my medicine. Put it down there. Don't touch anything else."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Your medicine. Where do you need it?",
+          "reply": [
+            "Right there. That's three days of doses, and three days is all I need. Thank you."
+          ]
+        },
+        {
+          "prompt": "What is it? I might know it.",
+          "perk": "BackgroundXenobiologist",
+          "reply": [
+            "Something off the local plants, we think. If you know better, write it down for me before you go."
+          ]
+        },
+        {
+          "prompt": "How many are sick?",
+          "reply": [
+            "Fewer than yesterday. That's the number I'm watching."
+          ]
+        }
+      ],
+      "journal": "I carried medicine through the quarantine at the <Place> to its medic.",
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Quarantine Medic",
+    "voice": "GenericFemale01",
+    "elevenlabs": "r5iFzIytiA1rzjhWFCjW"
+  },
+  "broadcast": [
+    "Don't take your helmet off for anything. The case is at the edge. Bring it to me, and touch nothing on the way."
+  ],
+  "_speech": "Inge: calm because she has to be. A stand-in voice; his ear decides."
+}
