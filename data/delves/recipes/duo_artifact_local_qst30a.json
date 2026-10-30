@@ -1,0 +1,128 @@
+{
+  "schema": 2,
+  "id": "duo_artifact_local_qst30a",
+  "template": "beats",
+  "deal": "_duo_MS_ArtifactMapLocal_TEST",
+  "_deal": "The local test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-30 07:10 \"Ahh our poi has flooded gas, turn of the valves. Talk to npc on traveling, turn off the valve at centre. Loads of hazards placed in POI\"",
+  "_note": [
+    "THE FLOODED SITE. A main valve stuck open in the night and the whole site filled with gas. The crew got out to",
+    "the edge. Talk to the crew lead where you arrive, then cross the site to the valve at its centre and shut it.",
+    "THE GAS IS THE LEVEL: hazard zones spread across the site, so the walk in is the job, not the valve.",
+    "Not MB54a (three vents from terminals, no hazard placed): this is the hazard part's first natural home",
+    "(home-office office/projects/delves/mission-parts.md, section D, place.hazard; his 10-29 \"we can place hazard zones\").",
+    "STAND-INS, Eliza's: (1) place.hazards, many zones across the site from the start; (2) the talk at an EDGE marker,",
+    "where he arrives, not the centre; (3) residents 'evacuated': the site's own people moved out to her, which is",
+    "what person.company does today (they stand round her at the edge). Without (3) the site's residents would be",
+    "standing in the gas, which every line here says they are not. Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet built site people work: theirs, now full of gas.",
+    "residents": "evacuated",
+    "_residents": "STAND-IN: the site's own people are not in the gas; the crew are her company at the edge. Eliza's.",
+    "hazards": {
+      "kind": "TOXIC GAS, UNPICKED",
+      "count": 8,
+      "radius": 6,
+      "spread": "site",
+      "until": 2
+    },
+    "_hazards": "STAND-IN: gas hazard zones scattered across the site from the start, cleared (or left to thin) when the valve shuts. Whether they clear on stage 2 is his call on play."
+  },
+  "prose": {
+    "name": "Danger: Gas Flood on <Planet>",
+    "briefing": "A valve at the <Place> stuck open in the night and flooded the whole site with gas. The crew got out to the edge. Somebody has to walk in and shut it."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "EDGE MARKER, UNPICKED",
+      "_at": "STAND-IN: a marker at the site's edge, where he arrives. Eliza's to pick.",
+      "objective": "Talk to the crew lead at the edge of the <Place>",
+      "journal": "The whole <Place> is full of gas from a valve that stuck open. I need to cross the site and shut the main valve at the centre.",
+      "person": {
+        "name": "Dagny Halloran",
+        "template": "UC_NA_MASTWorkerFemale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "XW70ikSsadUbinwLMZ5w",
+        "hellos": [
+          [
+            "Don't go in there without your helmet. I mean it."
+          ]
+        ],
+        "company": {
+          "list": "CIV WORKERS, UNPICKED",
+          "min": 2,
+          "max": 4,
+          "_list": "STAND-IN: the site's crew, unarmed, standing round her. A civilian worker list, Eliza's."
+        }
+      },
+      "greeting": [
+        "You're here about the gas? The main valve stuck open in the night and filled the whole site. We got out. The valve's in the middle, of course."
+      ],
+      "exchanges": [
+        {
+          "prompt": "I'll shut it off.",
+          "reply": [
+            "It's a big red wheel, you can't miss it. Breathe through your suit, and don't stop to look around."
+          ]
+        },
+        {
+          "prompt": "Is anyone still in there?",
+          "reply": [
+            "No. Everyone's out here with me. I counted twice."
+          ]
+        },
+        {
+          "prompt": "What happened?",
+          "reply": [
+            "A seal went. Then the alarm went. Then the alarm went quiet, which was worse."
+          ]
+        },
+        {
+          "prompt": "Can't you shut it yourselves?",
+          "reply": [
+            "Not in these suits. Nobody here is going back in without a better one."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "model": "VALVE WHEEL, UNPICKED",
+      "_model": "A large valve or wheel static at the centre, his or Kim's pick; MB54a's terminal is the fallback.",
+      "name": "Main Valve",
+      "objective": "Shut the main valve at the centre of the <Place>",
+      "message": {
+        "title": "Main Valve",
+        "text": "The wheel fights for half a turn, then gives. The hissing stops."
+      },
+      "journal": "I crossed the <Place> through the gas and shut the main valve. It will take a while to clear, but it has stopped coming.",
+      "say": [
+        "It's gone quiet. You did it. We'll give it an hour before anyone goes back in."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Crew Lead",
+    "voice": "GenericFemale01",
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w"
+  },
+  "broadcast": [
+    "If you're near the site, don't go straight in. It's full of gas. We're at the edge, come and find us first."
+  ],
+  "_speech": "Dagny, on the radio and in person: practical, shaken, counting heads. MB52a's voice as a stand-in; his ear decides."
+}
