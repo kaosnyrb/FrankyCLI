@@ -34,7 +34,6 @@
     "second": {
       "remote": true,
       "parsecs": 1,
-      "habitability": false,
       "_remote": "His 2026-10-22 10:12, after the found dungeon would not start on any map: \"Change the dungeon to be a created POI on the same planet\", then off Overtime's remote request in xEdit: \"remove the PCM_CND_BlockCreation_Habitability02_Medium check and make the Parsec distance like 1. That should be same system at least\". No planet guard: two crashed (10a, 12a), his \"Stop doing it\". Was a found site within duo_longdrivedistance, then 20,000 for the bisect.",
       "theme": {
         "require": [],

@@ -447,12 +447,22 @@ namespace FrankyCLI
             /// </summary>
             public double? parsecs { get; set; }
             /// <summary>
-            /// OPTIONAL, a REQUESTED place only: false = the request's own planet condition (its ALPS conditions; on Overtime's
-            /// remote base, IsTrueForConditionForm PCM_CND_BlockCreation_Habitability02_Medium) is dropped, so the request is
-            /// not limited to medium-habitability planets. His 2026-10-22, 19a: "remove the
-            /// PCM_CND_BlockCreation_Habitability02_Medium check". true is refused: leave it out to keep the condition.
+            /// OPTIONAL, any place that is a PCM request (a board's site, a borrowed second place, a remote request): true =
+            /// KEEP the request's planet condition IsTrueForConditionForm PCM_CND_BlockCreation_Habitability02_Medium. Left
+            /// out, it is DROPPED. His 2026-10-30 ruling, after it and `level` starved MB55a's re-deal (OT-91): "habitability
+            /// generally should be off and only turned on when the mission calls explictly for it". So a Delve that needs a
+            /// living world (creatures, his OT-04 "no animals on a lifeless moon") says true; nothing infers it, because no
+            /// recipe field marks a creature list as one (`species` is a gang's too). false is refused: off is the default.
+            /// (Was the other way round from 10-22, 19a: false dropped it, absent kept it.)
             /// </summary>
             public bool? habitability { get; set; }
+            /// <summary>
+            /// OPTIONAL, any place that is a PCM request: true = KEEP the request's planet condition IsTrueForConditionForm
+            /// MB_IsPlayerLevelAppropriate, which holds the site to planets of the player's level band. Left out, it is
+            /// DROPPED (his 2026-10-30 "drop both": each completed run levels him, the band moves, and MB55a's narrow site
+            /// found no planet after one run). false is refused: off is the default.
+            /// </summary>
+            public bool? level { get; set; }
             /// <summary>
             /// OPTIONAL, a REQUESTED place only: "same" = the request may only use a planet in the player's current star
             /// system, written the way vanilla's one same-system request is (MB_Bounty02Local): IsInSameCurrentLocationAsRef(the
@@ -1704,8 +1714,8 @@ namespace FrankyCLI
                 // On a board (2026-10-23, missionboard05a, after city01a played): the borrowed second place (the slate base's
                 // FinalLocation, the same alias city01a pinned) is pinned instead of requested. Nothing holds a city near the
                 // first site, and nothing needs to: it is where it is.
-                if (s.remote != null || s.orbit != null || s.parsecs != null || s.habitability != null || s.system != null || s.altitude != null)
-                    Fatal("place.second.settlement is a PINNED city: remote, orbit, parsecs, habitability, system and altitude do not apply to it.");
+                if (s.remote != null || s.orbit != null || s.parsecs != null || s.habitability != null || s.level != null || s.system != null || s.altitude != null)
+                    Fatal("place.second.settlement is a PINNED city: remote, orbit, parsecs, habitability, level, system and altitude do not apply to it.");
                 if (s.theme.require.Count > 0 || s.theme.exclude.Count > 0)
                     Fatal("place.second.settlement has a theme; a pinned city is not drawn, so a theme would test nothing.");
                 if (s.who != null) Fatal("place.second.settlement has a who; the city has its own people.");
@@ -1725,14 +1735,15 @@ namespace FrankyCLI
             {
                 if (p == null) continue;
                 bool nearOrbit = label == "place.third" && p.orbit == "near";
-                if (p.habitability != null && p.remote != true)
-                    Fatal($"{label}.habitability shapes a REQUEST, and {label}.remote is not set.");
                 if (p.parsecs != null && p.remote != true && !nearOrbit)
-                    Fatal($"{label}.parsecs / {label}.habitability shape a REQUEST, and {label}.remote is not set.");
+                    Fatal($"{label}.parsecs shapes a REQUEST, and {label}.remote is not set.");
                 if (p.parsecs is double ps && !(ps > 0))
                     Fatal($"{label}.parsecs must be above 0 (got {ps}).");
-                if (p.habitability == true)
-                    Fatal($"{label}.habitability is true; leave it out to keep the request's planet condition, false to drop it.");
+                // Off is the default (his 2026-10-30); the build refuses a true whose request carries no such condition.
+                if (p.habitability == false)
+                    Fatal($"{label}.habitability is false; the habitability planet condition is off unless a recipe asks, so leave it out (true keeps it).");
+                if (p.level == false)
+                    Fatal($"{label}.level is false; the player-level planet condition is off unless a recipe asks, so leave it out (true keeps it).");
                 if (p.system != null && p.remote != true)
                     Fatal($"{label}.system shapes a REQUEST, and {label}.remote is not set.");
                 if (p.system != null && p.system != "same")
@@ -1976,8 +1987,10 @@ namespace FrankyCLI
         private static List<int> PlacesUsed(Recipe r)
             => new[] { 0 }.Concat(r.beats.Select(b => b.PlaceIndex).Where(i => i > 0)).Distinct().OrderBy(i => i).ToList();
 
-        private static Theme ThemeOf(Recipe r, int place)
-            => place == 0 ? r.place.theme : (place == 1 ? r.place.second : r.place.third)?.theme ?? new Theme();
+        private static Theme ThemeOf(Recipe r, int place) => PlaceAt(r, place)?.theme ?? new Theme();
+
+        /// <summary>The recipe's own Place for a place index: 0 the main, 1 the second, 2 the third (null when unwritten).</summary>
+        private static Place? PlaceAt(Recipe r, int place) => place == 0 ? r.place : place == 1 ? r.place.second : r.place.third;
 
         private static string PlaceLabel(int place) => place == 0 ? "MAIN" : place == 1 ? "SECOND" : "THIRD";
 
@@ -2541,6 +2554,9 @@ namespace FrankyCLI
                 fail += WritePlaceConditions(clone, PlaceAliasOf(t, pi, made4.ThirdPlaceAlias), MarkersAt(r, markers, pi),
                                              ResolveKeywords(env, theme.require, _ => { }),
                                              ResolveKeywords(env, theme.exclude, _ => { }));
+                if (fail == 0)
+                    fail += ShapePlanet(clone, PlaceAliasOf(t, pi, made4.ThirdPlaceAlias), PlaceAt(r, pi),
+                                        pi == 0 ? "place" : pi == 1 ? "place.second" : "place.third");
             }
             // ⛔ EVERY PLACE HE IS SENT TO RESERVES ITS LOCATION (his 2026-10-28, "can we add it to the linter", after the board
             // base's TargetLocation did not and vanilla's POI encounters took 53a's site). An OE_Location fills without
@@ -2981,11 +2997,12 @@ namespace FrankyCLI
         }
 
         /// <summary>
-        /// A request's two recipe dials, applied to the copied alias (his 2026-10-22, 19a). parsecs: the
+        /// A remote request's two recipe dials, applied to the copied alias (his 2026-10-22, 19a). parsecs: the
         /// GetDistanceGalacticParsec condition keeps its function and subject and compares to a number instead of the
-        /// copied Global. habitability false: the ALPS conditions (the request's planet condition) are cleared. system
-        /// "same": vanilla's same-system planet test is ADDED to the ALPS conditions, after any clearing.
+        /// copied Global. system "same": vanilla's same-system planet test is ADDED to the ALPS conditions.
         /// Each refuses when the copied request has nothing to change, so a dial can never be silently a no-op.
+        /// (habitability lived here until 2026-10-30 as "clear every ALPS condition"; it is ShapePlanet's now, exact, and
+        /// applied to EVERY place's request, not only a remote copy's.)
         /// </summary>
         private static int ShapeRequest(QuestLocationAlias copy, Place shape)
         {
@@ -2996,13 +3013,6 @@ namespace FrankyCLI
                 var old = copy.Conditions[i];
                 copy.Conditions[i] = new ConditionFloat { CompareOperator = old.CompareOperator, Flags = old.Flags, Data = old.Data, ComparisonValue = (float)ps };
                 Console.WriteLine($"  request  : {copy.Name} GetDistanceGalacticParsec {old.CompareOperator} {ps} (was a Global)");
-            }
-            if (shape.habitability == false)
-            {
-                int n = copy.ALPS!.Conditions.Count;
-                if (n == 0) { Console.WriteLine($"REFUSED: habitability is false and request {copy.Name} has no planet condition to drop."); return 1; }
-                copy.ALPS.Conditions.Clear();
-                Console.WriteLine($"  request  : {copy.Name} planet condition dropped ({n} ALPS condition(s))");
             }
             if (shape.system == "same")
             {
@@ -3150,6 +3160,47 @@ namespace FrankyCLI
 
             Console.WriteLine($"  place {placeAlias,-2} : {markers.Count} marker + {require.Count} require + {exclude.Count} exclude, "
                               + $"{kept.Count} preserved (dropped {dropped} authored by the base)");
+            return 0;
+        }
+
+        /// <summary>The planet conditions a PCM request may carry that are OFF unless a recipe asks (his 2026-10-30, OT-91),
+        /// keyed on the condition form each IsTrueForConditionForm names: (form, its recipe field's name).</summary>
+        private static readonly (FormKey form, string field)[] PlanetConditionsOff =
+        {
+            (FormKey.Factory("2EDF22:Starfield.esm"), "habitability"),   // PCM_CND_BlockCreation_Habitability02_Medium
+            (FormKey.Factory("028FBB:Starfield.esm"), "level"),          // MB_IsPlayerLevelAppropriate
+        };
+
+        /// <summary>Whether a recipe place asks to keep one of PlanetConditionsOff, by its field name.</summary>
+        private static bool KeepsPlanetCondition(Place? p, string field) => field == "habitability" ? p?.habitability == true : p?.level == true;
+
+        /// <summary>Whether a condition is IsTrueForConditionForm naming this condition form.</summary>
+        private static bool NamesConditionForm(IConditionGetter c, FormKey form)
+            => c.Data is IIsTrueForConditionFormConditionDataGetter d && d.FirstParameter.Link.FormKey == form;
+
+        /// <summary>
+        /// A place's PCM request (its ALPS) loses each of PlanetConditionsOff unless the recipe's place asks for it with
+        /// true. His 2026-10-30, after the board base's two starved MB55a's re-deal: "habitability generally should be off
+        /// and only turned on when the mission calls explictly for it", and of the level band, "drop both". A place with no
+        /// request (a pinned city, an orbit, a placed site) has nothing to shape, unless the recipe asked, which is refused:
+        /// a dial must never be silently a no-op.
+        /// </summary>
+        private static int ShapePlanet(Quest clone, int placeAlias, Place? shape, string label)
+        {
+            var loc = clone.Aliases?.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)placeAlias);
+            foreach (var (form, field) in PlanetConditionsOff)
+            {
+                int has = loc?.ALPS?.Conditions.Count(c => NamesConditionForm(c, form)) ?? 0;
+                if (KeepsPlanetCondition(shape, field))
+                {
+                    if (has == 0) { Console.WriteLine($"REFUSED: {label}.{field} is true and place alias {placeAlias}'s request carries no {field} planet condition ({form}) to keep."); return 1; }
+                    Console.WriteLine($"  planet   : place alias {placeAlias} {loc!.Name} keeps its {field} condition ({label}.{field})");
+                    continue;
+                }
+                if (has == 0) continue;
+                loc!.ALPS!.Conditions.RemoveAll(c => NamesConditionForm(c, form));
+                Console.WriteLine($"  planet   : place alias {placeAlias} {loc.Name} drops its {field} condition ({form}); off unless the recipe asks");
+            }
             return 0;
         }
 

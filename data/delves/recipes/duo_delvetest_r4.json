@@ -19,8 +19,7 @@
       ]
     },
     "remote": true,
-    "parsecs": 1,
-    "habitability": false
+    "parsecs": 1
   },
   "prose": {
     "name": "Survey: Test Beacon R4 on <Planet>",

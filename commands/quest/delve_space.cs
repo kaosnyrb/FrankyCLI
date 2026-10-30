@@ -39,8 +39,8 @@ namespace FrankyCLI
         private static void GradeSpace(Recipe r, Template t, Action<string> Fatal)
         {
             var p = r.place;
-            if (p.remote != null || p.habitability != null)
-                Fatal("place.remote or place.habitability is set; a space Delve's one place is the orbit its shell carries, never a request.");
+            if (p.remote != null || p.habitability != null || p.level != null)
+                Fatal("place.remote, place.habitability or place.level is set; a space Delve's one place is the orbit its shell carries, never a request.");
             if (p.system != null && p.system != "same")
                 Fatal($"place.system is \"{p.system}\"; the one value built is \"same\" (the orbit in the player's star system, vanilla's way).");
             if (p.system != null && p.parsecs != null)

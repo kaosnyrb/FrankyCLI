@@ -2463,6 +2463,18 @@ namespace FrankyCLI
                 fail += Check($"place alias {label}'s request keeps to the player's star system (IsInSameCurrentLocationAsRef player LocTypeStarSystem == 1)",
                               HoldsToSystem(pl?.ALPS?.Conditions).ToString(), "True");
             }
+            // OT-91, his 2026-10-30: a request carries habitability and the level band only when the recipe asked (ShapePlanet).
+            foreach (var (shape, label) in new[] { (r.place, t.placeAlias), (r.place.second, t.secondPlaceAlias) })
+            {
+                var alps = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)label)?.ALPS;
+                if (alps == null) continue;
+                foreach (var (form, field) in PlanetConditionsOff)
+                {
+                    bool want = KeepsPlanetCondition(shape, field);
+                    fail += Check($"place alias {label}'s request carries the {field} condition only if the recipe asks ({(want ? "asked" : "not asked")})",
+                                  alps.Conditions.Any(c => NamesConditionForm(c, form)).ToString(), want.ToString());
+                }
+            }
             fail += AliasGraphChecks(q);
             // Every pickup this build wrote weighs 0 (his, 2026-10-20), read back off disk.
             var items = m.MiscItems.Where(x => x.EditorID != null && x.EditorID.StartsWith(r.id + "_item", StringComparison.Ordinal)).ToList();

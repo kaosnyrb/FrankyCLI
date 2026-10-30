@@ -18,8 +18,7 @@
         "LocTypeTest"
       ]
     },
-    "remote": true,
-    "habitability": false
+    "remote": true
   },
   "prose": {
     "name": "Survey: Test Beacon R3 on <Planet>",
