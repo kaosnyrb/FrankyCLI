@@ -10,6 +10,12 @@ unprompted. It's a fine line just nothing sets it up", 11b the same about the dr
 offered has to be about something the person has already said. gen_delve lint cannot see this: it is about
 meaning, not structure. So this is a MANUAL step with a mechanical helper.
 
+NO PERK, a WARNING (his 2026-10-30: "generally conversations should have at least 1 skill/perk/background check.
+Its cheap for us and cool for RP"): a talk menu with no exchange carrying "perk". Listed, never failed: "generally"
+is his word, and a rule for the next conversation is not a verdict on the 27 written before it. Never on
+exchanges[0] (the lint refuses it: a perk-less player could not finish). The real IDs: home-office
+office/projects/bethesda/perks.md, once Eliza's dump lands.
+
 WHAT COUNTS AS HEARD. Only what is sure to have played before the menu opens:
   - the greeting (it always plays);
   - for a second or third talk, an earlier talk's CLOSING reply (exchange 0, the one that ends that talk),
@@ -160,9 +166,13 @@ def main():
     recipes = load(a.rev)
     ids = a.ids or [k for k in recipes if "delvetest" not in k]
     menus = total = 0
+    noperk = []
     for rid in ids:
         if rid not in recipes:
             raise SystemExit(f"no recipe {rid}")
+        for i, b in enumerate(recipes[rid].get("beats") or []):
+            if b.get("type") == "talk" and b.get("exchanges") and not any(x.get("perk") for x in b["exchanges"]):
+                noperk.append(f"{rid} beat {i + 1}")
         for _, lines, flags in sheet(rid, recipes[rid]):
             menus += 1
             total += flags
@@ -170,6 +180,12 @@ def main():
                 continue
             print("\n".join(lines))
             print()
+    if noperk:
+        print(f"NO PERK (warning, his 2026-10-30: \"generally conversations should have at least 1 skill/perk/background "
+              f"check. Its cheap for us and cool for RP\"): {len(noperk)} menu(s) with no perk-gated exchange")
+        for n in noperk:
+            print(f"   {n}")
+        print()
     print(f"{menus} talk menu(s), {total} flagged prompt(s), {STARS[0]} of them *. Read the * first: the person "
           "names the thing in their own lines but not before the menu, which is how every fault he has caught looked. "
           "A ? is the player's own idea as often as not. Read each against HEARD, then decide.")
