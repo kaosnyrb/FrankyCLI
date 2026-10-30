@@ -7,12 +7,12 @@ Scriptname duo_factionprobe
 Function Narrow(Int aiUnused) Global
     Location loc = Site()
     If loc == None
-        Debug.MessageBox("factionprobe: no site. Take Runaway Plant F2 first.")
+        Debug.MessageBox("factionprobe: no site. Take Runaway Plant F3 first.")
         Return
     EndIf
     Keyword ecliptic = Game.GetFormFromFile(0x283581, "Starfield.esm") as Keyword
     If !loc.HasKeyword(ecliptic)
-        Debug.MessageBox("factionprobe: " + loc + " does not list Ecliptic. Nothing changed; take another.")
+        Debug.MessageBox("factionprobe: site " + loc.GetFormID() + " does not list Ecliptic. Nothing changed; take another.")
         Return
     EndIf
     Int mask = 0
@@ -27,7 +27,8 @@ Function Narrow(Int aiUnused) Global
         bit *= 2
         i += 1
     EndWhile
-    Debug.MessageBox("factionprobe: " + loc + " narrowed to Ecliptic. Restore later with: cgf \"duo_factionprobe.Restore\" " + mask)
+    Debug.Trace("factionprobe: site " + loc.GetFormID() + " narrowed, restore mask " + mask)
+    Debug.MessageBox("factionprobe: site " + loc.GetFormID() + " narrowed to Ecliptic. Restore mask " + mask)
 EndFunction
 
 ; cgf "duo_factionprobe.Restore" <mask>
@@ -46,11 +47,30 @@ Function Restore(Int aiMask) Global
         bit *= 2
         i += 1
     EndWhile
-    Debug.MessageBox("factionprobe: " + loc + " restored, mask " + aiMask)
+    Debug.MessageBox("factionprobe: site " + loc.GetFormID() + " restored, mask " + aiMask)
+EndFunction
+
+; cgf "duo_factionprobe.Report" 0
+; The site's FormID and which of the four faction keywords it carries right now (1 = yes): CF, Spacers, Varuun, Ecliptic.
+Function Report(Int aiUnused) Global
+    Location loc = Site()
+    If loc == None
+        Debug.MessageBox("factionprobe: no site.")
+        Return
+    EndIf
+    String has = ""
+    Int i = 0
+    While i < 3
+        has += (loc.HasKeyword(Other(i)) as Int) + " "
+        i += 1
+    EndWhile
+    has += loc.HasKeyword(Game.GetFormFromFile(0x283581, "Starfield.esm") as Keyword) as Int
+    Debug.Trace("factionprobe: site " + loc.GetFormID() + " has CF Spacers Varuun Ecliptic: " + has)
+    Debug.MessageBox("factionprobe: site " + loc.GetFormID() + " has CF Spacers Varuun Ecliptic: " + has)
 EndFunction
 
 Location Function Site() Global
-    Quest q = Game.GetFormFromFile(0x00438F, "du_overtime.esm") as Quest
+    Quest q = Game.GetFormFromFile(0x00439D, "du_overtime.esm") as Quest
     If q == None
         Return None
     EndIf
