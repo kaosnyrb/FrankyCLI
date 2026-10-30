@@ -3,7 +3,7 @@
   "_note": [
     "THE FACTION TABLE (plan OT-01, 2026-10-30). A board site's faction is ONE LocEnc*_Exclusive keyword left on the created location at the listing; the residents follow it, and swapping it before the site loads changes them (manual Inbox, for 32).",
     "`gen_delve factions` writes the two lists below into the plugin, PARALLEL by index: a site carrying keywordList[i] gets its waves from gangList[i]. A site carrying none of them (another mod's faction) keeps the template's own gang.",
-    "Another mod's faction is a new row here, never code. The gang lists are his own, from the classic missions."
+    "Another mod's faction is a new row here, never code, ONLY when that mod can be a master of ours. One that cannot (a free mod must not require it; Faction Expansion Project, 2026-10-30, manual Inbox for 32) needs a runtime soft lookup, which is code. The gang lists are his own, from the classic missions."
   ],
   "keywordList": "duo_delve_EncKeywords",
   "gangList": "duo_delve_EncGangs",
