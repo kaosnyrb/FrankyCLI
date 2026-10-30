@@ -40,6 +40,8 @@ namespace FrankyCLI
             public readonly Dictionary<int, (FormKey bench, List<(FormKey part, int count)> parts)> Crafts = new();
             /// <summary>By beat index, for a use with explosion: the Explosion placed at its object.</summary>
             public readonly Dictionary<int, FormKey> Explosions = new();
+            /// <summary>place.owner's Faction, stamped on the main place's location at the accept (plan OT-01).</summary>
+            public FormKey? SiteOwner;
         }
 
         /// <summary>A fight beat's forms, resolved own-or-master in ResolveInputs.</summary>
@@ -186,6 +188,13 @@ namespace FrankyCLI
                 var xp = OwnOrMaster<IExplosionGetter>(myMod, env, xn);
                 if (xp == null) { Console.WriteLine($"REFUSED: beat {i + 1} explosion '{xn}' is not an Explosion in {t.mod} or one of its masters."); fail++; continue; }
                 inputs.Explosions[i] = xp.FormKey;
+            }
+            // The site's owner (place.owner), own-or-master as every other form here.
+            if (fail == 0 && r.place.owner is string on)
+            {
+                var of = OwnOrMaster<IFactionGetter>(myMod, env, on);
+                if (of == null) { Console.WriteLine($"REFUSED: place.owner '{on}' is not a Faction in {t.mod} or one of its masters."); fail++; }
+                else inputs.SiteOwner = of.FormKey;
             }
             // A talk exchange's perk (a [Background] / [Skill] / [Trait] choice), own-or-master as every other form here.
             for (int i = 0; i < r.beats.Count && fail == 0; i++)

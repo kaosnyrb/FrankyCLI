@@ -422,6 +422,17 @@ namespace FrankyCLI
             if (r.place.second?.residents != null || r.place.third?.residents != null)
                 Fatal("residents is main place only: the arrival hook measures from step one's marker.");
 
+            // --- the site's owner, stamped at the accept (his 2026-10-28; plan OT-01) -------------------------
+            if (r.place.owner != null)
+            {
+                var owner = OwnOrMaster<IFactionGetter>(Allowed(env, t), env, r.place.owner);
+                if (!IsBoard(t)) Fatal("place.owner is stamped at a board's accept, before the site is loaded: it needs the board template.");
+                else if (owner == null) Fatal($"place.owner '{r.place.owner}' is not a Faction in {t.mod} or one of its masters.");
+                else Console.WriteLine($"  place.owner: {owner.EditorID} [{owner.FormKey}], stamped on the main place at the accept (stage {t.entryStage})");
+            }
+            if (r.place.second?.owner != null || r.place.third?.owner != null)
+                Fatal("owner is main place only: the waves and the residents it is for are the main place's.");
+
             // --- who is there (his dial, 2026-10-11) --------------------------------------------------------
             var whos = WhoOf(r);
             foreach (var (p, w, a) in whos)
@@ -1777,6 +1788,17 @@ namespace FrankyCLI
                     Add(killStage, $"duo_delve_lib.KillResidents(Alias_ArrivalMarker, {ResidentsRadius:0.0})");
                     Console.WriteLine($"  residents: dead, every human within {ResidentsRadius:0} of step one's marker (alias {on}) on stage {killStage}"
                                       + (crew ? ", the main place's crew stage, BEFORE the crew is placed" : ""));
+                }
+                // The site's owner (place.owner): stamped on the main place's LOCATION at the accept, before the site has
+                // loaded or rolled its residents (his 2026-10-28: "if we set the owners when we take the mission no one has
+                // spawned yet"). The lint guarantees a board and a Faction that resolves.
+                if (r.place.owner != null)
+                {
+                    if (inputs.SiteOwner is not FormKey owner) { Console.WriteLine($"REFUSED: place.owner '{r.place.owner}' was not resolved to a Faction."); return 1; }
+                    props.Add(("LocationAlias", "Alias_SiteLocation", clone.FormKey, t.placeAlias));
+                    props.Add(("Faction", "SiteOwner", owner, -1));
+                    Add(t.entryStage, "Alias_SiteLocation.GetLocation().SetFactionOwner(SiteOwner)");
+                    Console.WriteLine($"  owner: {r.place.owner} [{owner}] stamped on the main place's location (alias {t.placeAlias}) on stage {t.entryStage}");
                 }
                 // "replace": the beat's marker is a placed object (a box), so it goes when the quest starts and
                 // the beat's own object stands there instead. His shape: GetRef().Disable(False), never re-enabled.

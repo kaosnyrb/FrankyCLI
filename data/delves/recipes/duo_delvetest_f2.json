@@ -1,0 +1,75 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_f2",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "eliza",
+  "source": "plan OT-01 (2026-10-30), his 2026-10-28 design: \"if we set the owners when we take the mission no one has spawned yet\"",
+  "_note": [
+    "THE SITE-OWNER PROBE, ARM B: Ecliptic, a faction the sites list. Two or three takes: Ecliptic every time means the owner at least narrows the roll. ⚠ Unread whether vanilla stamps GroupFactionEcliptic or EclipticFaction (SQ_Group_Faction_Ecliptic's FactionForLocationOwnership); a negative here reads that first.",
+    "A copy of duo_MB55a_qst (Runaway Plant) with place.owner set: the accept stamps the faction on the site's location before it loads. Take it, travel, look who is standing in the site BEFORE the terminal (the waves still come from the template's gang list).",
+    "Test node only; comes out when the probe answers (plan OT-01)."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeDungeon_ThemeIndustrial"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Industrial dungeons; the delve marker set.",
+    "owner": "GroupFactionEcliptic",
+    "_owner": "The probe's one variable."
+  },
+  "prose": {
+    "name": "Repairs: Runaway Plant F2 on <Planet>",
+    "briefing": "The <Place> has been running since its crew fled and somebody else moved in, and its owners say it won't last much longer.",
+    "card": "Local Contract. Shut down the runaway plant at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "objective": "Start the shutdown at the <Place>",
+      "journal": "The shutdown is running, and the plant has announced it over the speakers, politely, to everyone, including the people with guns. I need to keep the terminal safe until it finishes.",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Plant Control Terminal",
+      "say": [
+        "Shutdown authorised. Estimated time to completion is several minutes. All occupants have been informed of the change, which was not my decision."
+      ]
+    },
+    {
+      "type": "hold",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "objective": "Defend the terminal during the shutdown",
+      "journal": "I held the terminal until the shutdown finished. The <Place> is cold.",
+      "waves": 3,
+      "size": [
+        3,
+        5
+      ],
+      "style": [
+        "squad",
+        "squad",
+        "horde"
+      ],
+      "say": [
+        "Shutdown complete. All systems are cold, and the facility is safe."
+      ],
+      "reward": "med",
+      "defend": 1
+    }
+  ],
+  "speaker": {
+    "name": "Plant Control",
+    "voice": "GenericMale01",
+    "elevenlabs": "N2lVS1w4EtoT3dr4eOWO"
+  },
+  "broadcast": [
+    "Visitor detected. This facility has been operating outside safe limits for thirty-one days, and a shutdown can be authorised from the control terminal. Please be aware that the facility is also occupied."
+  ],
+  "_speech": "The plant's own control system on the site speakers (10-28). Wants a calm synthetic voice; the voice id is the old owners' until his ear picks one. No names, places, factions or currency."
+}

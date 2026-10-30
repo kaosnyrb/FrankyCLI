@@ -532,6 +532,15 @@ namespace FrankyCLI
             /// </summary>
             public string? residents { get; set; }
             /// <summary>
+            /// OPTIONAL, main place only, board only: a Faction EditorID stamped on the main place's location as its
+            /// OWNER at the accept (Location.SetFactionOwner, vanilla's own call in DefaultGroupSpawnQuestScript). His
+            /// 2026-10-28 design: "if we set the owners when we take the mission no one has spawned yet", so the site
+            /// can roll the faction the mission pinned. ⚠ Whether the site's load-time roll HONOURS the owner is the
+            /// probe this field was built for (office plan OT-01, 2026-10-30); until it reads yes this stamps and
+            /// proves nothing about who stands there.
+            /// </summary>
+            public string? owner { get; set; }
+            /// <summary>
             /// space only, main place only: base aliases this build REMOVES, by name. The alias-set test ladder's knob (his
             /// 2026-10-22, "make a series of tests for remote and space alias sets. Idea being we learn in isolation how to
             /// build these sets"): rung 1 is the shipped set whole, each later rung takes pieces away. Refused if anything
