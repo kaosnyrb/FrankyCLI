@@ -27,7 +27,7 @@
   "prose": {
     "name": "Infestation: Unsigned Survey on <Planet>",
     "briefing": "The owners of the <Place> can't borrow against it until an assessor signs it off, and she won't while there's anything wild in it.",
-    "card": "Local Contract. Clear the creatures from our site at the <Place> on <Planet>. Payment on contract completion."
+    "card": "Private Contract. Clear the creatures from our site at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

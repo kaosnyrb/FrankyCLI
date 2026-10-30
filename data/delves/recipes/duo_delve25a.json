@@ -27,7 +27,7 @@
   "prose": {
     "name": "Strike: Pirate Store on <Planet>",
     "briefing": "Crimson Fleet raids on <Planet> picked up the moment they had somewhere to keep what they took. That somewhere is the <Place>.",
-    "card": "Local Contract. Spoil the pirate store at the <Place> on <Planet>. Payment on contract completion."
+    "card": "Private Contract. Spoil the pirate store at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

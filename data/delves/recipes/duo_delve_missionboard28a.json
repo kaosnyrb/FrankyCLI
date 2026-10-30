@@ -25,7 +25,7 @@
   "prose": {
     "name": "Recovery: Stolen Part over <Planet>",
     "briefing": "A ship hit the supply run to the communications satellite over <Planet> and kept the replacement part. It hasn't left orbit.",
-    "card": "Local Contract. Recover the stolen satellite part over <Planet> and fit it. Payment on contract completion."
+    "card": "Private Contract. Recover the stolen satellite part over <Planet> and fit it. Payment on contract completion."
   },
   "beats": [
     {

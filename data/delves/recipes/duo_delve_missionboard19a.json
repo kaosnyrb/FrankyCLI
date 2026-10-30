@@ -28,7 +28,7 @@
   "prose": {
     "name": "Repairs: Coolant Pumps on <Planet>",
     "briefing": "The <Place> can't restart until its coolant pumps are fixed. The engineer has sent me her toolbox.",
-    "card": "Local Contract. Repair the two coolant pumps at the <Place> on <Planet>. Payment on contract completion."
+    "card": "Private Contract. Repair the two coolant pumps at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

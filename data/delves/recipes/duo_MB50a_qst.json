@@ -36,7 +36,7 @@
   "prose": {
     "name": "Fabrication: Pressure Regulator for the <Place> on <Planet>",
     "briefing": "The water reclaimer at the <Place> lost its pressure regulator. Nobody out there can make another, and they've been rationing water since.",
-    "card": "Local Contract. Build a pressure regulator for the <Place> on <Planet> and deliver it by hand. Payment on delivery."
+    "card": "Private Contract. Build a pressure regulator for the <Place> on <Planet> and deliver it by hand. Payment on delivery."
   },
   "beats": [
     {

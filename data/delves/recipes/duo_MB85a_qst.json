@@ -28,7 +28,7 @@
   "prose": {
     "name": "Rescue: House Call at the <Place> on <Planet>",
     "briefing": "A miner at the <Place> hurt his hand and won't come in to the clinic. Someone has to take him a med pack.",
-    "card": "Local Contract. Bring a med pack to an injured miner at the <Place> on <Planet>. Payment on contract completion."
+    "card": "Settlement Contract. Bring a med pack to an injured miner at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

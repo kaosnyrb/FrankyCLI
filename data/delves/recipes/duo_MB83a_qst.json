@@ -18,7 +18,7 @@
   "prose": {
     "name": "Rescue: Sick Crew over <Planet>",
     "briefing": "A ship in orbit over <Planet> has half its crew down sick and nothing left in its medical locker. There's a supply drop nearby.",
-    "card": "Local Contract. Deliver a medical supply drop to a ship in orbit over <Planet>. Payment on delivery."
+    "card": "Settlement Contract. Deliver a medical supply drop to a ship in orbit over <Planet>. Payment on delivery."
   },
   "beats": [
     {

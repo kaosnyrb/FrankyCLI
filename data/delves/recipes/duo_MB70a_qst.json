@@ -31,7 +31,7 @@
   "prose": {
     "name": "Hauling: Extractor Output on <Planet>",
     "briefing": "An extractor at the <Place> kept running after its crew left, and nobody has emptied it since. A shipping agent wants the output brought up to orbit.",
-    "card": "Local Contract. Recover the output from the abandoned extractor at the <Place> on <Planet> and deliver it to orbit. Payment on delivery."
+    "card": "Private Contract. Recover the output from the abandoned extractor at the <Place> on <Planet> and deliver it to orbit. Payment on delivery."
   },
   "beats": [
     {

@@ -23,7 +23,7 @@
   "prose": {
     "name": "Hauling: Sealed Container over <Planet>",
     "briefing": "A sealed container is waiting in orbit over <Planet> for a courier who won't ask what's in it. The receiving end is a station.",
-    "card": "Local Contract. Deliver a sealed container over <Planet> to the receiving station unopened. Payment on contract completion."
+    "card": "Private Contract. Deliver a sealed container over <Planet> to the receiving station unopened. Payment on contract completion."
   },
   "beats": [
     {

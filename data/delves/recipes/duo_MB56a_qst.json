@@ -37,7 +37,7 @@
   "prose": {
     "name": "Requisition: Tungsten for the <Place> on <Planet>",
     "briefing": "The crew at the <Place> are builders, not miners, and they've run out of tungsten. There's tungsten on <Planet>, and they don't mind if I dig it or buy it.",
-    "card": "Local Contract. Deliver ten units of tungsten to the <Place> on <Planet>. Payment on delivery."
+    "card": "Private Contract. Deliver ten units of tungsten to the <Place> on <Planet>. Payment on delivery."
   },
   "beats": [
     {

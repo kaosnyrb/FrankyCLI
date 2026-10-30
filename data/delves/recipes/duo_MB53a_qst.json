@@ -43,7 +43,7 @@
   "prose": {
     "name": "Sabotage: Ecliptic Scanners on <Planet>",
     "briefing": "The Ecliptic have a scanner array at the <Place> watching the settlers' haulers, and somebody has parked a crew on it. The settlers who posted the job want every scanner destroyed.",
-    "card": "Local Contract. Destroy the Ecliptic scanner array at the <Place> on <Planet>. Payment on completion."
+    "card": "Private Contract. Destroy the Ecliptic scanner array at the <Place> on <Planet>. Payment on completion."
   },
   "recap": "The Ecliptic scanners at the <Place> are wrecked, all three. The settlers can move their haulers without being counted.",
   "recapSay": [

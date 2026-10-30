@@ -36,7 +36,7 @@
   "prose": {
     "name": "Defense: Ashta at the <Place> on <Planet>",
     "briefing": "The <Place> sits out past Akila City's walls, in Ashta country. A pack has been testing it for a week, and the Rangers have their hands full.",
-    "card": "Local Contract. Help the outpost at the <Place> on <Planet> hold against the Ashta. Payment on contract completion."
+    "card": "Settlement Contract. Help the outpost at the <Place> on <Planet> hold against the Ashta. Payment on contract completion."
   },
   "beats": [
     {

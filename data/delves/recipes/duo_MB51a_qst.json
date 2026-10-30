@@ -24,7 +24,7 @@
   "prose": {
     "name": "Recovery: Satellite Part over <Planet>",
     "briefing": "The freighter bringing a replacement part for the navigation satellite over <Planet> broke up in orbit. The part is still somewhere in the wreckage.",
-    "card": "Local Contract. Recover the satellite part from the freighter wreckage over <Planet> and fit it. Payment on contract completion."
+    "card": "Private Contract. Recover the satellite part from the freighter wreckage over <Planet> and fit it. Payment on contract completion."
   },
   "beats": [
     {

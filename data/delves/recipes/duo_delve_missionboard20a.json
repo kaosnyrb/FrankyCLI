@@ -28,7 +28,7 @@
   "prose": {
     "name": "Sabotage: Condemned Batch on <Planet>",
     "briefing": "A batch of faulty parts is sitting in the <Place> waiting for a buyer who knows exactly what's wrong with them.",
-    "card": "Local Contract. Condemn the three crates of faulty parts at the <Place> on <Planet>. Payment on contract completion."
+    "card": "Private Contract. Condemn the three crates of faulty parts at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

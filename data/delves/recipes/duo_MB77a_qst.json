@@ -32,7 +32,7 @@
   "prose": {
     "name": "Strike: Feud at the <Place> on <Planet>",
     "briefing": "Two crews are fighting over the <Place>. The settlement nearby doesn't care who wins, as long as it ends.",
-    "card": "Local Contract. Two crews are fighting over the <Place> on <Planet>. End it. Payment on contract completion."
+    "card": "Private Contract. Two crews are fighting over the <Place> on <Planet>. End it. Payment on contract completion."
   },
   "beats": [
     {

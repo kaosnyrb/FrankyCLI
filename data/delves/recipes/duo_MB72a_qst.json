@@ -38,7 +38,7 @@
   "prose": {
     "name": "Hauling: Bulk Load on <Planet>",
     "briefing": "A bulk load at the <Place> is too big for most holds. The dispatcher wants it at the <SecondPlace> and doesn't mind waiting while I refit.",
-    "card": "Local Contract. Haul a bulk load from the <Place> to the <SecondPlace>. Large cargo hold required. Payment on delivery."
+    "card": "Private Contract. Haul a bulk load from the <Place> to the <SecondPlace>. Large cargo hold required. Payment on delivery."
   },
   "beats": [
     {

@@ -29,7 +29,7 @@
   "prose": {
     "name": "Recovery: Workers' Payroll on <Planet>",
     "briefing": "When the occupiers took the <Place>, they took the workers' payroll with it. The foreman is waiting outside.",
-    "card": "Local Contract. Recover the workers' payroll from the <Place> on <Planet>. Payment on contract completion."
+    "card": "Private Contract. Recover the workers' payroll from the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

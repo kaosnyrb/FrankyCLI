@@ -28,7 +28,7 @@
   "prose": {
     "name": "Fabrication: Drill Bits for the <Place> on <Planet>",
     "briefing": "The dig at the <Place> has worn through its last drill bits. They need a new set made with tungsten, and there's tungsten on <Planet>.",
-    "card": "Local Contract. Make a set of tungsten drill bits and deliver them to the <Place> on <Planet>. Payment on contract completion."
+    "card": "Private Contract. Make a set of tungsten drill bits and deliver them to the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

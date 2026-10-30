@@ -26,7 +26,7 @@
   "prose": {
     "name": "Defense: Drill Run at the <Place> on <Planet>",
     "briefing": "A survey drill is set up at the <Place> and needs someone to start it and keep things off it while it runs.",
-    "card": "Local Contract. Run the survey drill at the <Place> on <Planet> and protect it until it finishes. Payment on contract completion."
+    "card": "Settlement Contract. Run the survey drill at the <Place> on <Planet> and protect it until it finishes. Payment on contract completion."
   },
   "beats": [
     {

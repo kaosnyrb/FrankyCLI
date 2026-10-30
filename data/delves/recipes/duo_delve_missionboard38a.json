@@ -20,7 +20,7 @@
   "prose": {
     "name": "Strike: Toll Ship over <Planet>",
     "briefing": "A crew in orbit over <Planet> has been stopping haulers and taking one container from each as a toll. They keep everything they've taken in their own hold.",
-    "card": "Local Contract. Destroy the toll ship over <Planet> and recover the cargo it took. Payment on contract completion."
+    "card": "Private Contract. Destroy the toll ship over <Planet> and recover the cargo it took. Payment on contract completion."
   },
   "beats": [
     {

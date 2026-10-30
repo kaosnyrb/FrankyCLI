@@ -30,7 +30,7 @@
   "prose": {
     "name": "Repairs: Gas Leak on <Planet>",
     "briefing": "The <Place> is leaking from three vents, and nobody will go in to close them while it's full of gas.",
-    "card": "Local Contract. Close the three open vents at the <Place> on <Planet>. Payment on contract completion."
+    "card": "Private Contract. Close the three open vents at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

@@ -12,7 +12,10 @@ PER-LINE FAULTS (each fails the run):
   TYPE     the title's word before the colon is not on the closed list below. His board vocabulary
            (home-office office/projects/overtime/board-names.md) plus the Delve words he has kept. A new type
            is a ruling of his, added here in the same commit, never a word a recipe invents.
-  PAYER    a board card does not open on who is paying ("Local Contract."), as all 51 vanilla postings do.
+  PAYER    a board card does not open on who is paying ("Private Contract."), as all 51 vanilla postings do.
+  LOCAL    a board card opens "Local Contract.". His playtest 2026-10-30: "The missionboard description has like
+           'Local Contract' in it, but that doesn't really make sense as it's sending you to a distant planet."
+           Name the payer: Private, Settlement, Tracker's Alliance, Insurance, or the faction once dungeons carry one.
   CLOSER   a board card does not end on a stock closer ("Payment on contract completion.").
   CARD     a board card body is over 25 words. Vanilla's median is 9 and its longest 47; ours were 26 before.
   OBJ      an objective that does not open on a verb, ends in punctuation, or runs past 12 words (vanilla's max).
@@ -113,6 +116,8 @@ def main():
         if card:
             if not PAYER.match(card):
                 flag(rid, "PAYER", "card", card)
+            if card.startswith("Local Contract.") and d.get("template") in ("board", "boardspace"):
+                flag(rid, "LOCAL", "card", card)
             if not card.rstrip().endswith(CLOSERS):
                 flag(rid, "CLOSER", "card", card)
             body = card.split(".", 1)[1] if "." in card else card
@@ -180,7 +185,7 @@ def main():
     if journals:
         pct = 100 * first / journals
         print(f"\nRATES: journal first person {pct:.0f}% {'WARN, floor 75%' if pct < 75 else 'ok (floor 75%, vanilla 87%)'}")
-    print(f"\n{hits} flagged. TYPE, PAYER, CLOSER, CARD, OBJ, NEXT, DASH, PEOPLE, NAME and SPEAKER (see the header).")
+    print(f"\n{hits} flagged. TYPE, PAYER, CLOSER, CARD, OBJ, NEXT, DASH, PEOPLE, NAME, SPEAKER and LOCAL (see the header).")
     return 1 if hits else 0
 
 

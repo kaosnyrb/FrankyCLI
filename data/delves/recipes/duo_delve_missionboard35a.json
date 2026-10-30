@@ -44,7 +44,7 @@
   "prose": {
     "name": "Recovery: Prospector's Diary on <Planet>",
     "briefing": "A prospector ran from her claim at the <Place> when strangers turned up, and left her diary behind. She's at the <SecondPlace> now, and she'd like it back.",
-    "card": "Local Contract. Recover a prospector's diary from the <Place> and bring it to the <SecondPlace>. Payment on delivery."
+    "card": "Private Contract. Recover a prospector's diary from the <Place> and bring it to the <SecondPlace>. Payment on delivery."
   },
   "beats": [
     {

@@ -35,7 +35,7 @@
   "prose": {
     "name": "Hauling: Raw Ore on <Planet>",
     "briefing": "A crate of raw ore is waiting at the <Place>, and the refinery at the <SecondPlace> has been idle without it.",
-    "card": "Local Contract. Collect a crate of raw ore from the <Place> and deliver it to the <SecondPlace>. Payment on delivery."
+    "card": "Private Contract. Collect a crate of raw ore from the <Place> and deliver it to the <SecondPlace>. Payment on delivery."
   },
   "beats": [
     {

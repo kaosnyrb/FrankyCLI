@@ -9,8 +9,7 @@
   "_note": [
     "THE MEDIC FAMILY, 6: MEDEVAC. Plan: home-office office/projects/delves/medic-family.md.",
     "Register: the warm common job. You are the one who turns up.",
-    "An injured worker who can walk, slowly, if someone walks with him. Talk, then escort him to the landing pad.",
-    "STAND-IN: escort (MB82a's ask). Pay: med."
+    "REWORKED 2026-10-30, his ruling: no escort. He is splinted where he lies and the ship comes to him. Plan OT-70."
   ],
   "place": {
     "theme": {
@@ -25,8 +24,8 @@
   },
   "prose": {
     "name": "Rescue: Medevac at the <Place> on <Planet>",
-    "briefing": "A worker at the <Place> broke his leg and needs walking out to a ship. The crew can't spare anyone.",
-    "card": "Local Contract. Escort an injured worker from the <Place> on <Planet> to a waiting ship. Payment on contract completion."
+    "briefing": "A worker at the <Place> broke his leg and needs a medevac. The crew can't spare anyone.",
+    "card": "Settlement Contract. Treat an injured worker at the <Place> on <Planet> and call in a medevac. Payment on contract completion."
   },
   "beats": [
     {
@@ -46,17 +45,17 @@
         ]
       },
       "greeting": [
-        "You're my lift? Good. I can walk if somebody's next to me. I just can't walk fast, and I can't walk far."
+        "You're the help? Good. Fair warning, I'm not walking anywhere. The leg's very clear on that."
       ],
       "exchanges": [
         {
-          "prompt": "Lean on me. We'll go slowly.",
+          "prompt": "Let's get you seen to.",
           "reply": [
-            "Slowly I can do. It's the stairs I'm frightened of."
+            "Gently, please. It's the leg that's broken, but my pride's close behind."
           ]
         },
         {
-          "prompt": "That's set badly. Let me fix the splint first.",
+          "prompt": "I can set that properly before the ship comes.",
           "perk": "BackgroundCombatMedic",
           "reply": [
             "Oh, that's much better. Whoever did the first one, don't tell them."
@@ -69,16 +68,22 @@
           ]
         }
       ],
-      "journal": "A worker at the <Place> broke his leg. I need to walk him out to the ship."
+      "journal": "A worker at the <Place> broke his leg. I need to set off a medevac beacon for him."
     },
     {
-      "type": "escort",
-      "distance": 300,
-      "_type": "STAND-IN: he follows him; done when they are clear, at the ship. MB82a's ask.",
-      "objective": "Walk the injured worker out to the ship",
-      "journal": "I walked an injured worker from the <Place> to a waiting ship, one step at a time.",
+      "type": "use",
+      "at": "REMarkerMediumLocRef",
+      "model": "BEACON, UNPICKED",
+      "_model": "A distress or medevac beacon static, his or Kim's pick.",
+      "name": "Medevac Beacon",
+      "objective": "Set off the medevac beacon at the <Place>",
+      "message": {
+        "title": "Medevac Beacon",
+        "text": "The beacon starts its call. Somewhere above, a ship turns towards it."
+      },
+      "journal": "I splinted a worker's broken leg at the <Place> and called a ship down for him.",
       "say": [
-        "He's aboard. Thank you for going at his pace. Most people don't."
+        "They've got your beacon. The ship's on its way to him. Thank you for staying."
       ],
       "reward": "med"
     }
@@ -89,7 +94,7 @@
     "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
   },
   "broadcast": [
-    "He's broken his leg and he won't stop apologising. Walk him out, slowly. We can't spare anyone."
+    "He's broken his leg and he won't stop apologising. Get him splinted and call the ship in. We can't spare anyone."
   ],
   "_speech": "Fond of him. A stand-in voice; his ear decides."
 }

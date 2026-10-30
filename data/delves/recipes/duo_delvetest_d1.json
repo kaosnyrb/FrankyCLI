@@ -21,7 +21,7 @@
   "prose": {
     "name": "Sabotage: Ecliptic Scanners on <Planet>",
     "briefing": "The Ecliptic have a scanner array at the <Place> watching everything that moves on <Planet>. The settlers who posted the job don't want it broken. They want it lying.",
-    "card": "Local Contract. The Ecliptic are watching <Planet> through a scanner array at the <Place>, and we need them watching the wrong thing. Do not smash it. Feed each scanner a false reading and leave it running. Payment on completion."
+    "card": "Private Contract. The Ecliptic are watching <Planet> through a scanner array at the <Place>, and we need them watching the wrong thing. Do not smash it. Feed each scanner a false reading and leave it running. Payment on completion."
   },
   "recap": "The Ecliptic scanners at the <Place> are all still running, and all three are wrong. Whatever the mercenaries think is happening on <Planet>, it isn't.",
   "recapSay": [

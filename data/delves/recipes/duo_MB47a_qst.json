@@ -30,7 +30,7 @@
   "prose": {
     "name": "Repairs: Navigation Satellite over <Planet>",
     "briefing": "A navigation satellite over <Planet> has stopped broadcasting, and ships passing through have been flying blind.",
-    "card": "Local Contract. Restore the navigation satellite over <Planet>. Payment on contract completion."
+    "card": "Private Contract. Restore the navigation satellite over <Planet>. Payment on contract completion."
   },
   "beats": [
     {

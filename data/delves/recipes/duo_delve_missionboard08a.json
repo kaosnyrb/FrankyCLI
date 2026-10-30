@@ -28,7 +28,7 @@
   "prose": {
     "name": "Recovery: Last Report on <Planet>",
     "briefing": "A unit was holding the <Place> and stopped reporting twelve days ago. Their records office wants to know what happened, and wants their tags back.",
-    "card": "Local Contract. Find out what happened to the unit at the <Place> on <Planet> and recover their tags. Payment on contract completion."
+    "card": "Private Contract. Find out what happened to the unit at the <Place> on <Planet> and recover their tags. Payment on contract completion."
   },
   "beats": [
     {

@@ -35,7 +35,7 @@
   "prose": {
     "name": "Danger: Quarantine at the <Place> on <Planet>",
     "briefing": "The <Place> is under quarantine and its medic has run out of medicine. A supply case is waiting at the edge of the site.",
-    "card": "Local Contract. Carry medicine through the quarantine at the <Place> on <Planet> to its medic. Payment on contract completion."
+    "card": "Private Contract. Carry medicine through the quarantine at the <Place> on <Planet> to its medic. Payment on contract completion."
   },
   "beats": [
     {

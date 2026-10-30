@@ -27,7 +27,7 @@
   "prose": {
     "name": "Requisition: Helium-3 for the <Place> on <Planet>",
     "briefing": "The <Place> is running its reactor on its last cells. There's helium-3 on <Planet>, and they don't mind if I extract it or buy it.",
-    "card": "Local Contract. Deliver ten units of helium-3 to the <Place> on <Planet>. Payment on delivery."
+    "card": "Private Contract. Deliver ten units of helium-3 to the <Place> on <Planet>. Payment on delivery."
   },
   "beats": [
     {

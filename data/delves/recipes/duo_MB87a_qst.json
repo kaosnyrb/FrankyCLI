@@ -31,7 +31,7 @@
   "prose": {
     "name": "Rescue: Field Triage at the <Place> on <Planet>",
     "briefing": "Raiders hit the <Place> and left three of its people wounded. The settlement needs someone with med packs.",
-    "card": "Local Contract. Treat the wounded settlers at the <Place> on <Planet>. Bring med packs. Payment on contract completion."
+    "card": "Settlement Contract. Treat the wounded settlers at the <Place> on <Planet>. Bring med packs. Payment on contract completion."
   },
   "beats": [
     {

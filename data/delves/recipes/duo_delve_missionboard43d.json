@@ -24,7 +24,7 @@
   "prose": {
     "name": "Defense: Raiders at the <Place> on <Planet>",
     "briefing": "Raiders keep hitting the <Place> and taking whatever's cooking. The woman who runs its canteen wants someone on the door tonight.",
-    "card": "Local Contract. Hold the <Place> on <Planet> against raiders. Payment on contract completion."
+    "card": "Settlement Contract. Hold the <Place> on <Planet> against raiders. Payment on contract completion."
   },
   "beats": [
     {

@@ -35,7 +35,7 @@
   "prose": {
     "name": "Recovery: Weather Satellite Part on <Planet>",
     "briefing": "A crew took the replacement core for the weather satellite over <Planet> off its courier. Their leader at the <Place> has it.",
-    "card": "Local Contract. Recover the weather satellite's core from the <Place> and fit it. Payment on contract completion."
+    "card": "Private Contract. Recover the weather satellite's core from the <Place> and fit it. Payment on contract completion."
   },
   "beats": [
     {

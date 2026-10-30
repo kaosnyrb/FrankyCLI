@@ -37,7 +37,7 @@
   "prose": {
     "name": "Infestation: Creatures in the <Place> on <Planet>",
     "briefing": "Something settled in the middle of the <Place> and the crew pulled back. The air scrubbers have been off since.",
-    "card": "Local Contract. Restart the air scrubbers at the <Place> on <Planet>. Creatures have settled round the controls. Payment on contract completion."
+    "card": "Private Contract. Restart the air scrubbers at the <Place> on <Planet>. Creatures have settled round the controls. Payment on contract completion."
   },
   "beats": [
     {

@@ -29,7 +29,7 @@
   "prose": {
     "name": "Recovery: Survey Data on <Planet>",
     "briefing": "A survey crew pulled out of the <Place> in a hurry and left a season's data locked on their site terminal. The lead wrote the code down somewhere.",
-    "card": "Local Contract. Recover the survey data from the evacuated <Place> on <Planet>. Payment on contract completion."
+    "card": "Private Contract. Recover the survey data from the evacuated <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

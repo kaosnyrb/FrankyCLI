@@ -24,7 +24,7 @@
   "prose": {
     "name": "Defense: Raiders at the <Place> on <Planet>",
     "briefing": "The <Place> has been raided twice this month, each time by more people than the last. A third is due.",
-    "card": "Local Contract. Hold the <Place> on <Planet> against raiders. Payment on contract completion."
+    "card": "Settlement Contract. Hold the <Place> on <Planet> against raiders. Payment on contract completion."
   },
   "beats": [
     {

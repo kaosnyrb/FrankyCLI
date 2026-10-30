@@ -41,7 +41,7 @@
   "prose": {
     "name": "Hauling: Spare Parts on <Planet>",
     "briefing": "A crate of spare parts is waiting at the <Place>, and the <SecondPlace> has been short of them for a week.",
-    "card": "Local Contract. Collect a crate of spare parts from the <Place> and deliver it to the <SecondPlace>. Payment on delivery."
+    "card": "Private Contract. Collect a crate of spare parts from the <Place> and deliver it to the <SecondPlace>. Payment on delivery."
   },
   "beats": [
     {

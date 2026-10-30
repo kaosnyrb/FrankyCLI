@@ -39,7 +39,7 @@
   "prose": {
     "name": "Hauling: The Rounds on <Planet>",
     "briefing": "The medic at the <Place> is short-handed and has a patient at the <SecondPlace> who needs her medicine today.",
-    "card": "Local Contract. Take a medicine case from the <Place> to a patient at the <SecondPlace>. Payment on delivery."
+    "card": "Private Contract. Take a medicine case from the <Place> to a patient at the <SecondPlace>. Payment on delivery."
   },
   "beats": [
     {

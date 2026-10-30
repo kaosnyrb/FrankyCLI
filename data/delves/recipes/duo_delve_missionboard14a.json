@@ -30,7 +30,7 @@
   "prose": {
     "name": "Hauling: Holdouts on <Planet>",
     "briefing": "A handful of soldiers are still holding part of the <Place>. They are out of almost everything.",
-    "card": "Local Contract. Take the medical crate to the holdouts inside the <Place> on <Planet>. Payment on contract completion."
+    "card": "Private Contract. Take the medical crate to the holdouts inside the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

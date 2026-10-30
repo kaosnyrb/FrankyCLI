@@ -27,7 +27,7 @@
   "prose": {
     "name": "Defense: Treatment Bay at the <Place> on <Planet>",
     "briefing": "A medic at the <Place> is mid-operation in a field treatment bay, and someone outside wants the painkillers in her cabinet.",
-    "card": "Local Contract. Protect the medic's treatment bay at the <Place> on <Planet> until her patient is stable. Payment on contract completion."
+    "card": "Settlement Contract. Protect the medic's treatment bay at the <Place> on <Planet> until her patient is stable. Payment on contract completion."
   },
   "beats": [
     {

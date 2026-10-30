@@ -29,7 +29,7 @@
   "prose": {
     "name": "Bounty: The Quartermaster on <Planet>",
     "briefing": "The quartermaster at the <Place> has been selling stolen stock back to the people it was taken from. Her ledger proves it.",
-    "card": "Local Contract. The quartermaster at the <Place> on <Planet> is wanted. Bring her ledger. Payment on contract completion."
+    "card": "Tracker's Alliance Contract. The quartermaster at the <Place> on <Planet> is wanted. Bring her ledger. Payment on contract completion."
   },
   "beats": [
     {

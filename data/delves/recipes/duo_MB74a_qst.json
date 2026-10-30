@@ -26,7 +26,7 @@
   "prose": {
     "name": "Danger: Failing Reactor at the <Place> on <Planet>",
     "briefing": "The reactor at the <Place> is failing, and the crew holding the site won't let anyone near the controls.",
-    "card": "Local Contract. Clear the <Place> on <Planet> and shut down its reactor before it fails. Time-critical. Payment on contract completion."
+    "card": "Private Contract. Clear the <Place> on <Planet> and shut down its reactor before it fails. Time-critical. Payment on contract completion."
   },
   "beats": [
     {

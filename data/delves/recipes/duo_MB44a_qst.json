@@ -39,7 +39,7 @@
   "prose": {
     "name": "Recovery: Family Compass on <Planet>",
     "briefing": "Raiders hit a freighter carrying a family's belongings to <SecondPlace> and took the hold to the <Place>. The family only wants one thing back: a brass compass that came from Earth.",
-    "card": "Local Contract. Raiders at the <Place> on <Planet> hold our belongings. Recover a brass compass and return it to <SecondPlace>. Payment on contract completion."
+    "card": "Private Contract. Raiders at the <Place> on <Planet> hold our belongings. Recover a brass compass and return it to <SecondPlace>. Payment on contract completion."
   },
   "beats": [
     {

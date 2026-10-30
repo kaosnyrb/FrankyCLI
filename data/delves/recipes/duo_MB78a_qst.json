@@ -25,7 +25,7 @@
   "prose": {
     "name": "Strike: Dug-In Gang at the <Place> on <Planet>",
     "briefing": "A gang has dug in at the <Place>. The watch wants them cleared out.",
-    "card": "Local Contract. Clear the gang dug in at the <Place> on <Planet>. Payment on contract completion."
+    "card": "Private Contract. Clear the gang dug in at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

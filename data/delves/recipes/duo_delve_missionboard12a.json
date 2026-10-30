@@ -29,7 +29,7 @@
   "prose": {
     "name": "Sabotage: Beacon Network on <Planet>",
     "briefing": "Three beacons at the <Place> are guiding the occupiers' supply runs in. Without them, the runs miss.",
-    "card": "Local Contract. Shut down the three beacons at the <Place> on <Planet>. Payment on contract completion."
+    "card": "Private Contract. Shut down the three beacons at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

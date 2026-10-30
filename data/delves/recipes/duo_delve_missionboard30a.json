@@ -36,7 +36,7 @@
   "prose": {
     "name": "Strike: Contraband Stockpile over <Planet>",
     "briefing": "An armed crew is sitting on a stockpile of contraband in cargo containers beside their base over <Planet>. Station security doesn't want it sold.",
-    "card": "Local Contract. Destroy the contraband containers in orbit over <Planet>. Payment on contract completion."
+    "card": "Private Contract. Destroy the contraband containers in orbit over <Planet>. Payment on contract completion."
   },
   "beats": [
     {

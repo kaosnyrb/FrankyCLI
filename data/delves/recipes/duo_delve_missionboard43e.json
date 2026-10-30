@@ -24,7 +24,7 @@
   "prose": {
     "name": "Defense: Raiders at the <Place> on <Planet>",
     "briefing": "Raiders are due back at the <Place> tonight, and the volunteer who posted the job is thrilled anyone answered.",
-    "card": "Local Contract. Hold the <Place> on <Planet> against raiders. Payment on contract completion."
+    "card": "Settlement Contract. Hold the <Place> on <Planet> against raiders. Payment on contract completion."
   },
   "beats": [
     {

@@ -28,7 +28,7 @@
   "prose": {
     "name": "Recovery: Ore Core at the <Place> on <Planet>",
     "briefing": "A mine surveyor thinks the good ore at the <Place> is behind the rock face, not on it, and wants a core brought out.",
-    "card": "Local Contract. Blast open the rock face at the <Place> on <Planet> and recover the ore core. Payment on contract completion."
+    "card": "Private Contract. Blast open the rock face at the <Place> on <Planet> and recover the ore core. Payment on contract completion."
   },
   "beats": [
     {

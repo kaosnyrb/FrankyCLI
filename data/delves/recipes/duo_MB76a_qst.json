@@ -25,7 +25,7 @@
   "prose": {
     "name": "Strike: Gang at the <Place> on <Planet>",
     "briefing": "A gang at the <Place> has been raiding the haulers. The watch wants them gone.",
-    "card": "Local Contract. Clear the gang from the <Place> on <Planet>. Payment on contract completion."
+    "card": "Private Contract. Clear the gang from the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

@@ -29,7 +29,7 @@
   "prose": {
     "name": "Bounty: Courier's Orders on <Planet>",
     "briefing": "A courier is carrying orders through the <Place>. Stop the courier and read them.",
-    "card": "Local Contract. Intercept the courier at the <Place> on <Planet> and read her orders. Payment on contract completion."
+    "card": "Tracker's Alliance Contract. Intercept the courier at the <Place> on <Planet> and read her orders. Payment on contract completion."
   },
   "beats": [
     {

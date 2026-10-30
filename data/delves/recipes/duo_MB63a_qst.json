@@ -33,7 +33,7 @@
   "prose": {
     "name": "Danger: Toxic Seam at the <Place> on <Planet>",
     "briefing": "The richest seam at the <Place> sits in a pocket of something toxic. An assayer wants a sample from it anyway.",
-    "card": "Local Contract. Recover a sample from the toxic seam at the <Place> on <Planet>. Suit up. Payment on contract completion."
+    "card": "Private Contract. Recover a sample from the toxic seam at the <Place> on <Planet>. Suit up. Payment on contract completion."
   },
   "beats": [
     {

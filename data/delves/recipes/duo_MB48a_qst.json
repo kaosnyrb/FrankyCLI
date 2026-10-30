@@ -31,7 +31,7 @@
   "prose": {
     "name": "Infestation: Predators at the <Place> on <Planet>",
     "briefing": "The <Place> went quiet three days ago. Its neighbours have heard animals there at night since.",
-    "card": "Local Contract. Clear the predators from the <Place> on <Planet>. Payment on contract completion."
+    "card": "Private Contract. Clear the predators from the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

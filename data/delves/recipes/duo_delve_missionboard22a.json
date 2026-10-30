@@ -29,7 +29,7 @@
   "prose": {
     "name": "Strike: Purifier Shipment on <Planet>",
     "briefing": "The <Place> built a run of water purifiers for the settlements nearby before the occupiers took it. Now the whole run is staged for a buyer.",
-    "card": "Local Contract. Stop the purifier shipment leaving the <Place> on <Planet>. Payment on contract completion."
+    "card": "Private Contract. Stop the purifier shipment leaving the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

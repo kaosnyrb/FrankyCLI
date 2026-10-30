@@ -26,7 +26,7 @@
   "prose": {
     "name": "Repairs: Runaway Plant F3 on <Planet>",
     "briefing": "The <Place> has been running since its crew fled and somebody else moved in, and its owners say it won't last much longer.",
-    "card": "Local Contract. Shut down the runaway plant at the <Place> on <Planet>. Payment on contract completion."
+    "card": "Private Contract. Shut down the runaway plant at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

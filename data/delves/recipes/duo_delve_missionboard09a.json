@@ -30,7 +30,7 @@
   "prose": {
     "name": "Defense: Unsent Letters on <Planet>",
     "briefing": "The <Place> fell with its outbound mail still queued on the site terminal. The terminal can still send it, slowly, if someone holds the site.",
-    "card": "Local Contract. Hold the <Place> on <Planet> while its terminal sends the unsent mail. Payment on contract completion."
+    "card": "Settlement Contract. Hold the <Place> on <Planet> while its terminal sends the unsent mail. Payment on contract completion."
   },
   "beats": [
     {

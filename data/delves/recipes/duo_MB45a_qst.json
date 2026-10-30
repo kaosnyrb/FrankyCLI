@@ -33,7 +33,7 @@
   "prose": {
     "name": "Rescue: Pinned Surveyor on <Planet>",
     "briefing": "A survey detail walked into the <Place> thinking it was empty. It wasn't. Two of them got out; one is still in there, wounded.",
-    "card": "Local Contract. A survey detail is pinned down at the <Place> on <Planet>, one wounded. Reach them. Payment on contract completion."
+    "card": "Settlement Contract. A survey detail is pinned down at the <Place> on <Planet>, one wounded. Reach them. Payment on contract completion."
   },
   "beats": [
     {

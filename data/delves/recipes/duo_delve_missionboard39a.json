@@ -21,7 +21,7 @@
   "prose": {
     "name": "Recovery: Ghost Freighter over <Planet>",
     "briefing": "A freighter has been drifting dark in orbit over <Planet> for months. Nobody ever came back for her, and the colony below would like to know why.",
-    "card": "Local Contract. Recover the cargo from the derelict freighter over <Planet> for the colony below. Payment on contract completion."
+    "card": "Private Contract. Recover the cargo from the derelict freighter over <Planet> for the colony below. Payment on contract completion."
   },
   "beats": [
     {

@@ -9,8 +9,9 @@
   "_note": [
     "THE COMBAT FAMILY, 10: THE HOSTAGES. Plan: home-office office/projects/delves/combat-family.md.",
     "EVE's rescue missions. Free the captives, walk them out.",
-    "STAND-INS: place.captives (three placed, held at the site) and beat type 'escort' (they follow him; done when",
-    "they are clear). Eliza's. Pay: hard."
+    "they are clear). Eliza's. Pay: hard.",
+    "REWORKED 2026-10-30, his ruling: no escort (\"yeah escort missions are meh, don't want them\", confirming 10-24",
+    "\"missions should not rely on NPCs doing stuff correctly\"). The captives stay put; he holds the cell. Plan OT-70."
   ],
   "place": {
     "theme": {
@@ -30,7 +31,7 @@
   "prose": {
     "name": "Rescue: Captives at the <Place> on <Planet>",
     "briefing": "A crew at the <Place> is holding three people from a nearby settlement. Their families want them home.",
-    "card": "Local Contract. Free the captives held at the <Place> on <Planet> and escort them out. Payment on contract completion."
+    "card": "Settlement Contract. Free the captives held at the <Place> on <Planet> and protect them until help arrives. Payment on contract completion."
   },
   "beats": [
     {
@@ -40,19 +41,27 @@
       "_model": "A cell lock or door panel if one fits.",
       "name": "Cell Lock",
       "objective": "Free the captives at the <Place>",
-      "journal": "The captives are free. I need to get them clear of the <Place>.",
+      "journal": "The captives are free. I need to hold the cell until help arrives.",
       "say": [
-        "That's them out. Bring them home slowly."
+        "That's them out. Now keep them that way."
       ]
     },
     {
-      "type": "escort",
-      "distance": 300,
-      "_type": "STAND-IN: not a beat yet. The captives follow him; done when they are clear.",
-      "objective": "Escort the captives clear of the <Place>",
-      "journal": "I freed three captives at the <Place> and walked them out.",
+      "type": "hold",
+      "at": "RECenterLocRef",
+      "waves": 2,
+      "size": [
+        2,
+        4
+      ],
+      "style": [
+        "squad",
+        "horde"
+      ],
+      "objective": "Protect the captives until help arrives",
+      "journal": "I freed three captives at the <Place> and held the cell until their captors gave up.",
       "say": [
-        "All three. Thank you. I mean it."
+        "That's the last of them. Stay with them. Our people are nearly there."
       ],
       "reward": "hard"
     }
@@ -63,7 +72,7 @@
     "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
-    "They've got three of ours at that site. Get them out and walk them clear. They'll follow you, they just won't be quick."
+    "They've got three of ours at that site. Get them out of that cell and keep them alive. We're sending people, but not fast."
   ],
   "_speech": "Steady for their sake. A stand-in voice; his ear decides."
 }

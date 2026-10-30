@@ -23,7 +23,7 @@
   "prose": {
     "name": "Bounty: Crew Boss at the <Place> on <Planet>",
     "briefing": "A crew boss at the <Place> has a price on their head, and their crew will call for help the moment the boss goes down.",
-    "card": "Local Contract. Eliminate the crew boss at the <Place> on <Planet>. Expect reinforcements. Payment on contract completion."
+    "card": "Tracker's Alliance Contract. Eliminate the crew boss at the <Place> on <Planet>. Expect reinforcements. Payment on contract completion."
   },
   "beats": [
     {

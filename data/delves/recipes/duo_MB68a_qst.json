@@ -27,7 +27,7 @@
   "prose": {
     "name": "Requisition: Magnets for the <Place> on <Planet>",
     "briefing": "The <Place> has been stopped for a week for want of five isocentered magnets, and doesn't care where they come from.",
-    "card": "Local Contract. Deliver five isocentered magnets to the <Place> on <Planet>. Payment on delivery."
+    "card": "Private Contract. Deliver five isocentered magnets to the <Place> on <Planet>. Payment on delivery."
   },
   "beats": [
     {

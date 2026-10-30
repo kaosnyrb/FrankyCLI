@@ -25,7 +25,7 @@
   "prose": {
     "name": "Strike: Gun Emplacements at the <Place> on <Planet>",
     "briefing": "The crew at the <Place> has put up automated turrets. The watch wants the guns down and the crew cleared.",
-    "card": "Local Contract. Destroy the turrets at the <Place> on <Planet> and clear the crew. Payment on contract completion."
+    "card": "Private Contract. Destroy the turrets at the <Place> on <Planet> and clear the crew. Payment on contract completion."
   },
   "beats": [
     {

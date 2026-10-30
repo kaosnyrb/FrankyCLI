@@ -29,7 +29,7 @@
   "prose": {
     "name": "Rescue: Night Shift on <Planet>",
     "briefing": "One worker on the night shift hid when the <Place> was taken. She's still in there.",
-    "card": "Local Contract. See the night-shift worker out of the <Place> on <Planet>. Payment on contract completion."
+    "card": "Settlement Contract. See the night-shift worker out of the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

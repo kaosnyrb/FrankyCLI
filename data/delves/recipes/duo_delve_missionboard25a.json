@@ -29,7 +29,7 @@
   "prose": {
     "name": "Recovery: Plant Regulator on <Planet>",
     "briefing": "The regulator at the <Place> is worth more than everything else in it, and everyone knows it.",
-    "card": "Local Contract. Recover the plant regulator from the <Place> on <Planet>. Payment on contract completion."
+    "card": "Private Contract. Recover the plant regulator from the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {

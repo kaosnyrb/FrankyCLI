@@ -29,7 +29,7 @@
   "prose": {
     "name": "Rescue: Captured Pilot on <Planet>",
     "briefing": "A pilot set down near the <Place> to wait out a fault, and whoever holds it took her inside. She is still alive.",
-    "card": "Local Contract. One of our pilots is held at the <Place> on <Planet>. Recover her alive. Payment on contract completion."
+    "card": "Settlement Contract. One of our pilots is held at the <Place> on <Planet>. Recover her alive. Payment on contract completion."
   },
   "beats": [
     {
