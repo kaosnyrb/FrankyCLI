@@ -1,0 +1,108 @@
+{
+  "schema": 2,
+  "id": "duo_artifact_local_qst20d",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalNode",
+  "_deal": "The Local pool: it sends you to a dungeon, so you go in knowing there is a fight (his ruling, 2026-10-20; moved by gen_delve move, no rebuild).",
+  "author": "jessica, as Edie Mallow",
+  "source": "his 2026-10-31 07:33: \"another family is the local one where the womans bag was stolen. Lets make some faction ones for it\", then \"yeah\" to pinning with Eliza extending the swap to locals",
+  "_note": [
+    "THE DUNGEON RETURN, letter d: 20a's structure exactly (recover at the boss, hand-back talk at a quiet second place), pinned to one faction (Spacers, the scavengers) and written in one pen name.",
+    "WHY IT MATTERS VARIES, per 20b's rule: COMFORT: the one comfortable thing out here, taken for the metal in its legs.",
+    "PEN NAME: home-office office/pennames/edie-mallow.json. Her heat checks do not apply; her voice does.",
+    "WILL NOT BUILD YET: place.faction is board-only (gen_delve_beats.cs 430). Asked of Eliza 2026-10-31 to extend the swap to local quests. The recover's holder already spawns from the site's gang (OT-01).",
+    "Own opener, speaker and close, not 20a's (card 20261031-071709). Voiced lines: no names, places, factions or currency; the occupiers by role.",
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-local-qst20d.md): rework, findings 2-8 taken. Finding 2: the hauls aphorism cut, but every talk keeps a perk prompt (his 10-30), so the Long Hauler prompt now starts from what he said (the ground, the hour). Forced pick answered NO: 'scavengers' describes them, the faction is Spacers, so the word stands."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": []
+    },
+    "second": {
+      "theme": {
+        "require": [
+          "LocTypeOE_NonHostile"
+        ],
+        "exclude": [
+          "LocTypeOE_ThemeCaveKeyword"
+        ]
+      }
+    },
+    "_theme": "A dungeon there; a quiet non-hostile site here for her to be waiting at (she is placed, rule 2). One peopled end only, so the pool cost of rule 4 does not apply.",
+    "faction": "Spacers"
+  },
+  "prose": {
+    "name": "Recovery: Stolen Folding Chair on <Planet>",
+    "briefing": "Scavengers stripped a settler's place of anything that came loose and carried it to the <Place>. He won't miss most of it. He'd like his folding chair back."
+  },
+  "beats": [
+    {
+      "type": "recover",
+      "at": "LocDungeonBossLocRef",
+      "item": "Settler's Folding Chair",
+      "objective": "Recover the settler's folding chair from the <Place>",
+      "journal": "I took the settler's folding chair back from the scavengers' leader at the <Place>. I need to return it to him at the <SecondPlace>."
+    },
+    {
+      "type": "talk",
+      "place": "second",
+      "at": "RECenterLocRef",
+      "objective": "Return the chair to the settler at the <SecondPlace>",
+      "journal": "Scavengers took a settler's things to the <Place>. I went in after his folding chair and brought it back to him.",
+      "person": {
+        "name": "Ned Lisle",
+        "template": "UC_NA_MASTWorkerMale02",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericMale01",
+        "elevenlabs": "onwK4e9ZLuTAKqWW03F9",
+        "hellos": [
+          [
+            "Oh, hello there."
+          ]
+        ]
+      },
+      "greeting": [
+        "Since they took my chair I've been sitting on the ground, which is fine for about an hour and then it isn't, and there's no other seat out here worth the name. Is that my chair you've got?"
+      ],
+      "exchanges": [
+        {
+          "prompt": "I've got your chair.",
+          "reply": [
+            "That's my chair. I'll put it back where it goes and sit in it, and nobody's going to ask me to do anything else."
+          ]
+        },
+        {
+          "prompt": "I've done long hauls on worse than the ground.",
+          "reply": [
+            "Then you know exactly what I mean, and I won't have to explain the hour."
+          ],
+          "perk": "BackgroundLongHauler"
+        },
+        {
+          "prompt": "Why a chair?",
+          "reply": [
+            "It folds, and it's light, and there's good metal in the legs, so I suppose it looked like parts to them. It looked like a chair to me."
+          ]
+        },
+        {
+          "prompt": "Did they get much else?",
+          "reply": [
+            "A lamp, some wire and a pan I never liked. They're welcome to the pan."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 is the hand-back: it ends the conversation, takes the Settler's Folding Chair and sets stage 100, which pays 'reward'. Every prompt asks about something the radio call or greeting has said. Voiced lines: no names, no places. The same voice as the radio speaker.",
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Settler",
+    "voice": "GenericMale01",
+    "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
+  },
+  "broadcast": [
+    "Scavengers came through and took whatever came loose, and most of it I won't miss, but they took my chair. If anyone's going in after them, I'd like it back."
+  ],
+  "_speech": "His own voice on the radio and in person, written as Edie Mallow. Voice id borrowed until his ear casts one. No names, places, factions or currency."
+}
