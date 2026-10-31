@@ -1,0 +1,75 @@
+{
+  "schema": 2,
+  "id": "duo_MB55e_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica, as Vic Tarrant",
+  "source": "his 2026-10-31 07:25: \"Overheard on like a data purge, so computer has stuff you need to clear\", after my list of variants for the same gameplay (07:18 \"so what other variants could we do with the same gameplay family\")",
+  "_note": [
+    "THE OVERHEARD VARIANT OF THE RUNAWAY PLANT'S GAMEPLAY: same beats (use a terminal, hold it while it runs), a different job and a different voice. The terminal purges the owners' records, which the site's occupiers are copying off to sell; the only voice is one of the occupiers on their own open channel, which the player overhears. The first Delve where the enemy has the voice.",
+    "PEN NAME: home-office office/pennames/vic-tarrant.json. Her heat checks do not apply; her voice does: level, dry, faintly amused, unimpressed, a shift being run. Natural English with contractions (card 20261024-103920), no telegraphese.",
+    "Faction unpinned on purpose: every word holds for whoever the site rolled. Nothing names a faction, a person or a currency; 'sell' and 'our week' hold for any crew.",
+    "Not MB55a's plant: own speaker, own opener, own close (card 20261031-071709).",
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB55e.md): rework, all five findings taken. Forced pick answered NO: a hostile site's residents shoot on sight, so the call owns the fight it is heard over and the purge line escalates it into a sequence (a couple, then keep sending), so each wave is them deciding again. The close collects the week."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeDungeon_ThemeIndustrial"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Industrial dungeons; the delve marker set."
+  },
+  "prose": {
+    "name": "Sabotage: Data Purge on <Planet>",
+    "briefing": "The <Place>'s owners left their records on its data core when the crew fled, and whoever has the site now is copying them off to sell. The owners want the core purged before the copy finishes.",
+    "card": "Private Contract. Purge the owners' records from the data core at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "objective": "Start the data purge at the <Place>",
+      "journal": "I started the purge, and I can hear the people holding the site on their own open channel. They know, and they're coming for the terminal. I need to hold it until the purge finishes.",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Data Core Terminal",
+      "say": [
+        "They've started a purge on the core and the copy isn't finished. If the purge gets there first, that's our whole week gone, so send a couple up to the terminal, please, and if that doesn't do it, keep sending until it stops."
+      ]
+    },
+    {
+      "type": "hold",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "objective": "Defend the terminal during the purge",
+      "journal": "I held the terminal until the purge finished. The owners' records are gone from the <Place>.",
+      "waves": 3,
+      "size": [
+        3,
+        5
+      ],
+      "style": [
+        "squad",
+        "squad",
+        "horde"
+      ],
+      "say": [
+        "That's the core wiped, and the copy with it. That's the week gone, then."
+      ],
+      "reward": "med",
+      "defend": 1
+    }
+  ],
+  "speaker": {
+    "name": "Overheard Comms",
+    "voice": "GenericFemale01",
+    "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
+  },
+  "broadcast": [
+    "Somebody's coming up on the site, and they don't look like much. Deal with them, and nobody touches the core until the copy's finished."
+  ],
+  "_speech": "One of the occupiers on their own open channel, written as Vic Tarrant; the player overhears. Voice id borrowed from 43b until his ear casts one. No names, places, factions or currency."
+}
