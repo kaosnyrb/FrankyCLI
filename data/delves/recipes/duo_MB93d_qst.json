@@ -121,9 +121,9 @@
           "perk": "TRAIT_Empath"
         },
         {
-          "prompt": "Ten years without a word?",
+          "prompt": "He doesn't call?",
           "reply": [
-            "Not one. I've heard him on the general channel now and then, complaining about the weather."
+            "Not in ten years. I've heard him on the general channel now and then, complaining about the weather."
           ]
         }
       ],
