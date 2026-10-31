@@ -1,0 +1,58 @@
+{
+  "schema": 2,
+  "id": "duo_MB93b_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-31 12:48: \"general idea for missioms, meeting up with someone\", then \"yup write em\" 12:51",
+  "_note": [
+    "THE MEET-UP: a new board family, his idea. The job is turning up; the story is who is there and what they want. Talks at a placed person are built, so most letters need nothing new.",
+    "Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
+    "LETTER b: THE NO-SHOW: nobody is there. Her kit is, with a note: her sister's having a baby and she has the only ship. Nothing hostile, nothing explained further.",
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93b.md): ship, findings 1-3 taken (the initial dropped, so a repeat draw is not the same person twice); 4 holds because the objective marker is the kit itself. Forced pick answered NO: the broker learns of the absence as the player did."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Any built site where two people could arrange to meet: no caves, no natural landmarks."
+  },
+  "prose": {
+    "name": "Recovery: The Contact's Kit",
+    "briefing": "A broker has arranged a meeting with a contact at the <Place>, who is bringing a kit for the client.",
+    "card": "Private Contract. Meet a contact at the <Place> on <Planet> and collect the kit she is bringing. Payment on completion."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "REMarkerMediumLocRef",
+      "objective": "Meet the contact at the <Place>",
+      "journal": "My contact wasn't there. She'd left the kit with a note: her sister was having a baby, and she was the only one with a ship. I took the kit.",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Contact's Kit",
+      "item": "Contact's Kit",
+      "message": {
+        "title": "A Note on the Kit",
+        "text": "Couldn't wait. My sister's having her baby and I'm the only one with a ship. Everything you came for is in here. Sorry."
+      },
+      "say": [
+        "The kit's on your manifest. If she didn't stay to hand it over, she had a reason. I won't ask."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Contact Broker",
+    "voice": "GenericMale01",
+    "elevenlabs": "CsbTapRVtZdcBs3vBbQe"
+  },
+  "broadcast": [
+    "Your contact's meeting you on site. She'll know you when she sees you."
+  ]
+}

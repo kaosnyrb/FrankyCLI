@@ -1,0 +1,135 @@
+{
+  "schema": 2,
+  "id": "duo_MB93d_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-31 12:48: \"general idea for missioms, meeting up with someone\", then \"yup write em\" 12:51",
+  "_note": [
+    "THE MEET-UP: a new board family, his idea. The job is turning up; the story is who is there and what they want. Talks at a placed person are built, so most letters need nothing new.",
+    "Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
+    "LETTER d: THE GO-BETWEEN: two old partners who have not spoken in ten years. He sends: the ship is hers, and he was wrong about the engine. She answers that she'll fetch it herself. The player never goes back; the answer is the end.",
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93d.md): rework, findings 1-6 taken, 7 kept. Forced pick answered YES: he put the ship first on purpose so the apology arrived second, and she notices ('he puts it second'). Her close is a decision, not an errand: no 'tell him'."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Any built site where two people could arrange to meet: no caves, no natural landmarks.",
+    "second": {
+      "remote": true,
+      "fill": "late",
+      "system": "same",
+      "_fill": "OT-03's late same-system fill, as MB90a.",
+      "theme": {
+        "require": [],
+        "exclude": [
+          "LocTypeOE_ThemeNaturalKeyword",
+          "LocTypeOE_ThemeCaveKeyword",
+          "LocTypeTest"
+        ]
+      }
+    }
+  },
+  "prose": {
+    "name": "Hauling: A Message Ten Years Late",
+    "briefing": "An old salvager at the <Place> has a message for his former partner in the same system, and needs someone to carry it because they haven't spoken in ten years.",
+    "card": "Private Contract. Take a message from the <Place> on <Planet> to someone in the same system. Payment on completion."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Talk to the old salvager at the <Place>",
+      "journal": "The salvager gave me a message for his old partner: the ship is hers, and he was wrong about the engine. I need to take it to her.",
+      "person": {
+        "name": "Emeric Shaw",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Miner_Jumpsuit_OpenJacket",
+        "voice": "GenericMale01",
+        "elevenlabs": "omRordDZNt4Gy45cetUa",
+        "hellos": [
+          [
+            "Courier? Good. Sit, if you like."
+          ]
+        ]
+      },
+      "greeting": [
+        "I've a message for my old partner, and it has to go by somebody, because we haven't spoken in ten years."
+      ],
+      "exchanges": [
+        {
+          "prompt": "What's the message?",
+          "reply": [
+            "The ship's hers. I've no use for it now. And tell her I was wrong about the engine."
+          ]
+        },
+        {
+          "prompt": "Ten years of keeping out of each other's way.",
+          "reply": [
+            "It's easy, out here. You just don't land where they are."
+          ],
+          "perk": "TRAIT_Introvert"
+        },
+        {
+          "prompt": "Why not say it yourself?",
+          "reply": [
+            "Because the last time I tried, I said the wrong thing first. This way you'll say it in the right order."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 closes the talk and gives the message every player carries."
+    },
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Give the message to his old partner at the <SecondPlace>",
+      "journal": "I gave his old partner the message. She's going to fetch the ship herself.",
+      "person": {
+        "name": "Lena Ashdown",
+        "template": "UC_NA_MASTWorkerFemale02",
+        "outfit": "Outfit_Clothes_Mechanic_Brown",
+        "voice": "GenericFemale01",
+        "elevenlabs": "l4Coq6695JDX9xtLqXDE",
+        "hellos": [
+          [
+            "If you're selling something, I'm not buying."
+          ]
+        ]
+      },
+      "greeting": [
+        "Not selling? Then you're carrying something, and there's only one man who'd send me a courier instead of calling. Go on, then. What did he say?"
+      ],
+      "exchanges": [
+        {
+          "prompt": "The ship's yours, and he was wrong about the engine.",
+          "reply": [
+            "Wrong about the engine. Ten years, and he puts it second. I'll come and get the ship myself. He can have the coffee on."
+          ]
+        },
+        {
+          "prompt": "He sounded like he meant it.",
+          "reply": [
+            "He always does. That was never the problem."
+          ],
+          "perk": "TRAIT_Empath"
+        },
+        {
+          "prompt": "Ten years without a word?",
+          "reply": [
+            "Not one. I've heard him on the general channel now and then, complaining about the weather."
+          ]
+        }
+      ],
+      "place": "second",
+      "reward": "med",
+      "_talk": "The HAND-BACK: her answer ends the job. The player never carries it back; the answer is the ending."
+    }
+  ]
+}

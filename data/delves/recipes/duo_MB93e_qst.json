@@ -1,0 +1,83 @@
+{
+  "schema": 2,
+  "id": "duo_MB93e_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-31 12:48: \"general idea for missioms, meeting up with someone\", then \"yup write em\" 12:51",
+  "_note": [
+    "THE MEET-UP: a new board family, his idea. The job is turning up; the story is who is there and what they want. Talks at a placed person are built, so most letters need nothing new.",
+    "Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
+    "LETTER e: THE INTERVIEW: a crew lead who hires only people she has met. The player's prompts are the questions; her answers tell him more about her than his tell her. The ending is a promise of work on the board (EVE's breadcrumb, unbuilt, so it stays a promise).",
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93e.md): rework, findings 1-5 taken, 6 kept. Forced pick answered YES: it is the same named crew lead every draw, so she says she meets people more than once, and the close is her verdict and her reason."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Any built site where two people could arrange to meet: no caves, no natural landmarks."
+  },
+  "prose": {
+    "name": "Requisition: A Crew Lead Wants to Meet",
+    "briefing": "A crew lead at the <Place> hires contractors she has met in person, and has paid for a meeting.",
+    "card": "Private Contract. A crew lead at the <Place> on <Planet> wants to meet a contractor before hiring. Payment on completion."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Meet the crew lead at the <Place>",
+      "journal": "The crew lead met me, answered my questions, and said she'd put work on the board with my name on it.",
+      "person": {
+        "name": "Saskia Vell",
+        "template": "UC_NA_MASTWorkerFemale03",
+        "outfit": "Outfit_Clothes_UCNavy_Fatigues_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "E393dkE75hqtz1LO2aEJ",
+        "hellos": [
+          [
+            "Come closer. I don't bite."
+          ]
+        ]
+      },
+      "greeting": [
+        "You came. I hire for a crew that doesn't advertise, so I meet people first, and I meet them more than once. Ask me anything, and then I'll decide."
+      ],
+      "exchanges": [
+        {
+          "prompt": "I've heard enough. When do I start?",
+          "reply": [
+            "When something goes on the board with your name on it. You never asked about the money. I noticed."
+          ]
+        },
+        {
+          "prompt": "Crews that don't advertise usually have a reason.",
+          "reply": [
+            "We do. Mostly that we're good, and the good ones don't need to."
+          ],
+          "perk": "BackgroundBountyHunter"
+        },
+        {
+          "prompt": "What kind of work?",
+          "reply": [
+            "Fetching. Things people need from places they can't go. I did it alone for six years before I had a crew, and I'd rather not again."
+          ]
+        },
+        {
+          "prompt": "Why meet first?",
+          "reply": [
+            "Because a name on a board tells me nothing, and five minutes at a table tells me most of it."
+          ]
+        }
+      ],
+      "reward": "easy",
+      "_talk": "Exchange 0 ends it and pays. The promise of board work is a promise only: the breadcrumb is unbuilt."
+    }
+  ]
+}

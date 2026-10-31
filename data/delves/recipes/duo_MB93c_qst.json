@@ -1,0 +1,85 @@
+{
+  "schema": 2,
+  "id": "duo_MB93c_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-31 12:48: \"general idea for missioms, meeting up with someone\", then \"yup write em\" 12:51",
+  "_note": [
+    "THE MEET-UP: a new board family, his idea. The job is turning up; the story is who is there and what they want. Talks at a placed person are built, so most letters need nothing new.",
+    "Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
+    "LETTER c: THE WRONG PERSON: her brother is there instead. She got the job she wanted for six years and shipped out this morning, and sent him because she had promised.",
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93c.md): ship, findings 1-4 and 6 taken, 5 kept. Forced pick answered YES: the letter can be drawn again, so the brother no longer dates her leaving ('this morning' is gone)."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Any built site where two people could arrange to meet: no caves, no natural landmarks."
+  },
+  "prose": {
+    "name": "Recovery: Rhona's Parcel",
+    "briefing": "A contact called Rhona arranged to meet at the <Place> and hand over a parcel.",
+    "card": "Private Contract. Meet a contact at the <Place> on <Planet> and collect a parcel from her. Payment on completion."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Meet the contact at the <Place>",
+      "journal": "Rhona wasn't there. Her brother came instead: she'd left for a job she'd wanted for six years. I need to collect the parcel.",
+      "person": {
+        "name": "Teo Halden",
+        "template": "UC_NA_MASTWorkerMale02",
+        "outfit": "Outfit_Clothes_Mechanic_Gray",
+        "voice": "GenericMale01",
+        "elevenlabs": "wsHauqjSkdBeAvdbUFmR",
+        "hellos": [
+          [
+            "I'm not who you're waiting for. Hang on."
+          ]
+        ]
+      },
+      "greeting": [
+        "You're here for my sister? She's not coming. She got the job she's been after for six years, and she's gone, and she made me promise somebody would be here."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Then I'll take what she left.",
+          "reply": [
+            "It's just there. She packed it twice."
+          ]
+        },
+        {
+          "prompt": "Six years for one job. She must have wanted it.",
+          "reply": [
+            "Since she was a kid. I'm meant to be pleased, and I am."
+          ],
+          "perk": "TRAIT_Empath"
+        },
+        {
+          "prompt": "Why send you?",
+          "reply": [
+            "Because she said she'd be here, and she's never once not been where she said."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "pickup",
+      "at": "REMarkerMediumLocRef",
+      "objective": "Collect Rhona's parcel",
+      "journal": "I collected the parcel Rhona left. Her brother came in her place, because she'd made him promise.",
+      "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
+      "name": "Rhona's Parcel",
+      "item": "Rhona's Parcel",
+      "reward": "med"
+    }
+  ]
+}

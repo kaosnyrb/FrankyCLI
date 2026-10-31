@@ -1,0 +1,121 @@
+{
+  "schema": 2,
+  "id": "duo_MB93a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-31 12:48: \"general idea for missioms, meeting up with someone\", then \"yup write em\" 12:51",
+  "_note": [
+    "THE MEET-UP: a new board family, his idea. The job is turning up; the story is who is there and what they want. Talks at a placed person are built, so most letters need nothing new.",
+    "Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
+    "LETTER a: THE HANDOVER: the contact hands over a sealed case with a condition the client was never told; the client's one line on delivery is that it is lighter than promised. TIE Fighter's second briefing, done through a person.",
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93a.md): rework, findings 1-4 taken, 5 and 6 kept. Forced pick answered NO: the client learns it is short, never why; the contact refuses to send word, so the player makes no promise the job cannot keep."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Any built site where two people could arrange to meet: no caves, no natural landmarks.",
+    "second": {
+      "remote": true,
+      "fill": "late",
+      "system": "same",
+      "_fill": "OT-03's late same-system fill, as MB90a.",
+      "theme": {
+        "require": [],
+        "exclude": [
+          "LocTypeOE_ThemeNaturalKeyword",
+          "LocTypeOE_ThemeCaveKeyword",
+          "LocTypeTest"
+        ]
+      }
+    }
+  },
+  "prose": {
+    "name": "Hauling: Sealed Case to the Client",
+    "briefing": "A client wants something collected from a contact at the <Place> and left at a drop in the same system.",
+    "card": "Private Contract. Meet a contact at the <Place> on <Planet> and take what they hand over to a drop in the same system. Payment on delivery."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Meet the contact at the <Place>",
+      "journal": "The contact has a sealed case for the client, and a condition the client hasn't been told. I need to pick up the case.",
+      "person": {
+        "name": "Rafe Calloway",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericMale01",
+        "elevenlabs": "bIHbv24MWmeRgasZH58o",
+        "hellos": [
+          [
+            "You'll be the one they sent."
+          ]
+        ]
+      },
+      "greeting": [
+        "Here it is, sealed, the way they asked. Don't tell them anything. They'll find out when they weigh it. They'll get the rest when they've paid back what they owe my sister."
+      ],
+      "exchanges": [
+        {
+          "prompt": "I'll take it.",
+          "reply": [
+            "They'll know what it means when it comes up short. So will she."
+          ]
+        },
+        {
+          "prompt": "Splitting a delivery is how you make sure of a debt.",
+          "reply": [
+            "It's the only way I've found that works on people like them."
+          ],
+          "perk": "Skill_Commerce"
+        },
+        {
+          "prompt": "What do they owe your sister?",
+          "reply": [
+            "An apology, mostly. The money's the part they'll understand."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 closes the talk; the rest loop, each askable off the greeting."
+    },
+    {
+      "type": "pickup",
+      "at": "REMarkerMediumLocRef",
+      "objective": "Collect the sealed case",
+      "journal": "I have the sealed case. Now I need to take it to the client's drop.",
+      "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
+      "name": "Sealed Case",
+      "item": "Sealed Case"
+    },
+    {
+      "type": "deliver",
+      "place": "second",
+      "at": "REContainerLocRef",
+      "replace": true,
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Client's Drop",
+      "objective": "Leave the case at the client's drop at the <SecondPlace>",
+      "journal": "I left the sealed case at the client's drop. The client says it's lighter than promised. The contact said it would be.",
+      "say": [
+        "Case logged. It's lighter than I was promised."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Client",
+    "voice": "GenericFemale01",
+    "elevenlabs": "r5iFzIytiA1rzjhWFCjW"
+  },
+  "broadcast": [
+    "My contact's waiting at the site. Take what they give you and bring it to the drop, and don't open it."
+  ]
+}
