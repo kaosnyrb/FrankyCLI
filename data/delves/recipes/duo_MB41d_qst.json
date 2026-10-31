@@ -1,0 +1,150 @@
+{
+  "schema": 2,
+  "id": "duo_MB41d_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "_note": [
+    "CARGO RUN, INDUSTRIAL, letter d: MB41a's shape exactly (talk, pickup, talk on another planet; the hand-back takes the cargo). The two ends know each other and the player is the only thing travelling between them.",
+    "WHY IT MATTERS VARIES from the toolbox's mentor-to-apprentice: TRADITION: a thirty-year crew kettle passed from a finished build to the next crew to break ground, whose foreman once made his tea.",
+    "Sites: industrial OE themes (manual 32: Mining 7 POI types, Power 8, UnderConstruction 8 in vanilla). The pools are small; the lint's pool count decides whether they deal often enough.",
+    "Own people, voices, opener and close, not 41a's (card 20261031-071709). Voices borrowed until his ear casts them. No names or places in any voiced line.",
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB41d.md): rework, findings 1-5 taken, 6 kept as she allowed. Forced pick answered YES: the kettle reaches her only because her crew is next; the coincidence is hers to notice ('I never once thought it would come to me'), never a destination, or it is the toolbox again."
+  ],
+  "author": "jessica",
+  "source": "his 2026-10-31 07:51: \"the cargo run family, where you delover the toolbox, can we add a few industrial ones\"",
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "second": {
+      "remote": true,
+      "_remote": "A second REQUEST on another planet (Eliza, 2026-10-14, on his go): proven by duo_delve_twosite01a, two POIs on two planets; the build also guards it off the first site's planet.",
+      "theme": {
+        "require": [
+          "LocTypeOE_ThemeUnderConstructionKeyword"
+        ],
+        "exclude": [
+          "LocTypeOE_ThemeNaturalKeyword",
+          "LocTypeOE_ThemeCaveKeyword",
+          "LocTypeTest"
+        ]
+      }
+    },
+    "_theme": "Both ends are working industrial sites with a person at them, so no natural landmarks and no caves."
+  },
+  "prose": {
+    "name": "Hauling: Crew Kettle to <SecondPlanet>",
+    "briefing": "A construction crew at the <Place> has finished its build, and by tradition its kettle goes to whichever crew breaks ground next, at the <SecondPlace>.",
+    "card": "Delivery Contract. Deliver a kettle from the <Place>, <Planet> to the <SecondPlace>, <SecondPlanet>. Payment on delivery."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Talk to the site foreman at the <Place>",
+      "journal": "The build here is finished, and by tradition the crew's kettle goes to the next crew to break ground. I need to collect it and take it to them.",
+      "person": {
+        "name": "Gus Pendry",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericMale01",
+        "elevenlabs": "cjVigY5qzO86Huf0OWal",
+        "hellos": [
+          [
+            "Site's closed, unless you're the hauler."
+          ]
+        ]
+      },
+      "greeting": [
+        "You're here for the kettle. The build's finished, so it goes to the next crew to break ground, same as it came to us. It's made the tea on every site this company has built for thirty years."
+      ],
+      "exchanges": [
+        {
+          "prompt": "I'll take the kettle over.",
+          "reply": [
+            "Tell them it takes a while to boil and it's worth the wait. That's the whole speech. It's always been the whole speech."
+          ]
+        },
+        {
+          "prompt": "A crew can't work without its tea.",
+          "reply": [
+            "Every crew I've run, yes. Get the kettle on first and the rest of the day sorts itself out."
+          ],
+          "perk": "Skill_Leadership"
+        },
+        {
+          "prompt": "Thirty years on the same kettle?",
+          "reply": [
+            "Somebody tried once. The new one was quicker, and nobody would use it."
+          ]
+        },
+        {
+          "prompt": "Who's breaking ground next?",
+          "reply": [
+            "A young crew off-world. Their foreman made the tea on my first site."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 closes the talk and sets this beat's stage; the rest loop back in any order. Every prompt is askable cold off the greeting."
+    },
+    {
+      "type": "pickup",
+      "at": "REMarkerMediumLocRef",
+      "objective": "Collect the kettle",
+      "journal": "The kettle is dented, with thirty years of scale inside it. Now I need to take it to the crew at the <SecondPlace>.",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Crew Locker",
+      "item": "Crew Kettle"
+    },
+    {
+      "type": "talk",
+      "place": "second",
+      "at": "RECenterLocRef",
+      "objective": "Deliver the kettle to the crew at the <SecondPlace>",
+      "journal": "I delivered the kettle to the new crew at the <SecondPlace>. The foreman is putting it on before the build starts.",
+      "reward": "med",
+      "person": {
+        "name": "Sal Okoro",
+        "template": "UC_NA_MASTWorkerFemale03",
+        "outfit": "Outfit_Clothes_Miner_UtilitySuit_NoHardhat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "54Cze5LrTSyLgbO6Fhlc",
+        "hellos": [
+          [
+            "Mind where you step, we're only just starting."
+          ]
+        ]
+      },
+      "greeting": [
+        "Is that the kettle? It's actually the kettle. I made the tea on his first site, and I never once thought it would come to me."
+      ],
+      "exchanges": [
+        {
+          "prompt": "He said it takes a while to boil.",
+          "reply": [
+            "It always did. I'll put it on now, and the build can start when it's ready."
+          ]
+        },
+        {
+          "prompt": "You made his tea?",
+          "reply": [
+            "On his first site, every morning, badly. He drank every cup and never said a word about it."
+          ]
+        },
+        {
+          "prompt": "It's only a kettle.",
+          "reply": [
+            "It's thirty years of crews. It's a kettle as well, I'll give you that."
+          ]
+        }
+      ],
+      "_talk": "The HAND-BACK: the whole last step, so its stage is 100 and it takes the cargo. Prompts answer the greeting, or echo the first end's closing reply, which every player hears."
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+{
+  "schema": 2,
+  "id": "duo_MB41c_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "_note": [
+    "CARGO RUN, INDUSTRIAL, letter c: MB41a's shape exactly (talk, pickup, talk on another planet; the hand-back takes the cargo). The two ends know each other and the player is the only thing travelling between them.",
+    "WHY IT MATTERS VARIES from the toolbox's mentor-to-apprentice: CARE, UNSAID: two night-shift operators who have talked every night for six years and never met; she has heard him running on a cracked cell, and neither will mention it.",
+    "Sites: industrial OE themes (manual 32: Mining 7 POI types, Power 8, UnderConstruction 8 in vanilla). The pools are small; the lint's pool count decides whether they deal often enough.",
+    "Own people, voices, opener and close, not 41a's (card 20261031-071709). Voices borrowed until his ear casts them. No names or places in any voiced line.",
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB41c.md): rework, findings 1-7 taken; 8 stands because both ends require the Power theme, so the journal's power station holds. Forced pick answered NO: the hauler does not tell him it was spare, the marker label lies for her and he reads it off the cell, so 'Don't tell him' stays hers."
+  ],
+  "author": "jessica",
+  "source": "his 2026-10-31 07:51: \"the cargo run family, where you delover the toolbox, can we add a few industrial ones\"",
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemePowerKeyword"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "second": {
+      "remote": true,
+      "_remote": "A second REQUEST on another planet (Eliza, 2026-10-14, on his go): proven by duo_delve_twosite01a, two POIs on two planets; the build also guards it off the first site's planet.",
+      "theme": {
+        "require": [
+          "LocTypeOE_ThemePowerKeyword"
+        ],
+        "exclude": [
+          "LocTypeOE_ThemeNaturalKeyword",
+          "LocTypeOE_ThemeCaveKeyword",
+          "LocTypeTest"
+        ]
+      }
+    },
+    "_theme": "Both ends are working industrial sites with a person at them, so no natural landmarks and no caves."
+  },
+  "prose": {
+    "name": "Hauling: Spare Power Cell to <SecondPlanet>",
+    "briefing": "A power station operator at the <Place> is sending a spare cell to the operator at the <SecondPlace>, who she has talked to every night shift for six years and never met.",
+    "card": "Delivery Contract. Deliver a power cell from the <Place>, <Planet> to the <SecondPlace>, <SecondPlanet>. Payment on delivery."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Talk to the station operator at the <Place>",
+      "journal": "The operator is sending a spare power cell to the man at the other end of her night shift, who has been running on a cracked one for a month. I need to collect it and take it to him.",
+      "person": {
+        "name": "Mina Faulk",
+        "template": "UC_NA_MASTWorkerFemale01",
+        "outfit": "Outfit_Clothes_Mechanic_Brown",
+        "voice": "GenericFemale01",
+        "elevenlabs": "GZ4PpFJV8ikEGUtBrjK7",
+        "hellos": [
+          [
+            "Careful by the cabling. It bites."
+          ]
+        ]
+      },
+      "greeting": [
+        "You'll be the hauler. The cell's for the operator at the other end of my night shift. We've talked every night for six years and never met, and he's been running on a cracked cell for a month because he thinks I haven't noticed."
+      ],
+      "exchanges": [
+        {
+          "prompt": "I'll get the cell to him.",
+          "reply": [
+            "Don't tell him it was spare. It wasn't, but don't tell him that either."
+          ]
+        },
+        {
+          "prompt": "Six years of talking and you've never met?",
+          "reply": [
+            "Never needed to. I know what he sounds like at four in the morning."
+          ],
+          "perk": "TRAIT_Introvert"
+        },
+        {
+          "prompt": "How do you know about the crack?",
+          "reply": [
+            "His voice changes when the load comes up. He goes very cheerful. It's the worst thing he does."
+          ]
+        },
+        {
+          "prompt": "What do you talk about?",
+          "reply": [
+            "Load, mostly. The weather at both ends. Lately a lot about his tomatoes, which are not going well."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 closes the talk and sets this beat's stage; the rest loop back in any order. Every prompt is askable cold off the greeting."
+    },
+    {
+      "type": "pickup",
+      "at": "REMarkerMediumLocRef",
+      "objective": "Collect the power cell",
+      "journal": "I've got the power cell. It has SPARE written on it in marker, and the writing is newer than the cell. Now I need to take it to the operator at the <SecondPlace>.",
+      "model": "Meshes\\setdressing\\powercell\\powercell01.nif",
+      "name": "Spare Power Cell",
+      "item": "Spare Power Cell"
+    },
+    {
+      "type": "talk",
+      "place": "second",
+      "at": "RECenterLocRef",
+      "objective": "Deliver the power cell to the operator at the <SecondPlace>",
+      "journal": "I delivered the power cell to the operator at the <SecondPlace>. He's going to fit it tonight and say nothing about it.",
+      "reward": "med",
+      "person": {
+        "name": "Teodor Lusk",
+        "template": "UC_NA_MASTWorkerMale02",
+        "outfit": "Outfit_Clothes_Mechanic_Gray",
+        "voice": "GenericMale01",
+        "elevenlabs": "nPczCjzI2devNBz1zQrb",
+        "hellos": [
+          [
+            "Oh, a visitor. I don't get many."
+          ]
+        ]
+      },
+      "greeting": [
+        "That's a power cell. That's a new power cell. Did she send that? I told her the old one was fine."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Here's your cell.",
+          "reply": [
+            "It's got SPARE written on it. It wasn't, was it. I'll fit it tonight and not mention it."
+          ]
+        },
+        {
+          "prompt": "Running on a crack takes nerve or luck.",
+          "reply": [
+            "Both, and a lot of tape. Don't tell her about the tape."
+          ],
+          "perk": "Skill_StarshipEngineering"
+        },
+        {
+          "prompt": "You told her it was fine?",
+          "reply": [
+            "Every night for a month. I went very cheerful about it. I do that."
+          ]
+        },
+        {
+          "prompt": "You don't sound pleased.",
+          "reply": [
+            "I'm delighted. I'm just going to have to think of something to send back, and she's very hard to buy for."
+          ]
+        }
+      ],
+      "_talk": "The HAND-BACK: the whole last step, so its stage is 100 and it takes the cargo. Prompts answer the greeting, or echo the first end's closing reply, which every player hears."
+    }
+  ]
+}
