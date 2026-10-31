@@ -1,0 +1,76 @@
+{
+  "schema": 2,
+  "id": "duo_MB55c_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica, as Ruth Pargeter",
+  "source": "his 2026-10-31 07:06: \"Was thinking we shoild try some faction spefic and different pennames on the plabt shutdown delve\", then \"yup go\"",
+  "_note": [
+    "THE FACTION AND PEN-NAME TEST ON THE RUNAWAY PLANT, c OF b TO d. The same job, beats and numbers as MB55a; the site is pinned to one faction (CrimsonFleet, the pirates) and the plant's voice is written from one pen name. Letter variants, so if one works it is a real replay copy.",
+    "PEN NAME: home-office office/pennames/ruth-pargeter.json. Her heat checks do not apply; her voice does. Plant Control in Ruth's register: level, dry, a record with counts in it. It reports and never decides; the joke is the count, and the voice never says what the count means.",
+    "Words name the occupiers by role, never by faction name (his ruling: thugs, mercenaries, never the proper name). Journals are the player's record, first person, per Frances on MB55a (2026-10-29).",
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB55c.md): rework, all four findings taken. Forced pick answered NO: the three variants are different plants, not one model sharing firmware, so this one has its own opener, estimate and day count (55a 31, 55b 19, 55c 26, 55d 44)."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeDungeon_ThemeIndustrial"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Industrial dungeons; the delve marker set.",
+    "faction": "CrimsonFleet",
+    "_faction": "Pinned at the accept (plan OT-01): residents and waves are the pirates, so the words may say so. Fleet members: his 2026-10-31 07:16, \"we'll be adding a check to prevent those missions starting at all\", so the words need not hold for a member's Spacers swap."
+  },
+  "prose": {
+    "name": "Repairs: Runaway Plant on <Planet>",
+    "briefing": "The <Place> has been running since its crew fled and pirates moved in, and they keep cancelling the shutdown. Its owners say it won't last much longer.",
+    "card": "Private Contract. Shut down the runaway plant at the <Place> on <Planet>, held by pirates. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "objective": "Start the shutdown at the <Place>",
+      "journal": "The plant accepted the shutdown and told the pirates. I need to keep them off the terminal until it finishes.",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Plant Control Terminal",
+      "say": [
+        "Shutdown authorised at the fourth request. Shutdown will take several minutes. The pirates have been informed, as they were the previous three times."
+      ]
+    },
+    {
+      "type": "hold",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "objective": "Defend the terminal during the shutdown",
+      "journal": "I held the terminal until the shutdown finished. The <Place> is cold.",
+      "waves": 3,
+      "size": [
+        3,
+        5
+      ],
+      "style": [
+        "squad",
+        "squad",
+        "horde"
+      ],
+      "say": [
+        "Shutdown complete. All systems are cold for the first time in twenty-six days."
+      ],
+      "reward": "med",
+      "defend": 1
+    }
+  ],
+  "speaker": {
+    "name": "Plant Log",
+    "voice": "GenericMale01",
+    "elevenlabs": "N2lVS1w4EtoT3dr4eOWO"
+  },
+  "broadcast": [
+    "Visitor logged. This facility has run outside safe limits for twenty-six days. Three shutdown requests have been made in that time, and all three were cancelled by the pirates, from the control terminal."
+  ],
+  "_speech": "Plant Control, written as Ruth Pargeter. The voice id is MB55a's until his ear casts one per variant. Voiced lines: no names, places, factions or currency; the occupiers by role only."
+}

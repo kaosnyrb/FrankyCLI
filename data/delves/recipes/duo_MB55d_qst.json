@@ -1,0 +1,76 @@
+{
+  "schema": 2,
+  "id": "duo_MB55d_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica, as Momo Hazuki",
+  "source": "his 2026-10-31 07:06: \"Was thinking we shoild try some faction spefic and different pennames on the plabt shutdown delve\", then \"yup go\"",
+  "_note": [
+    "THE FACTION AND PEN-NAME TEST ON THE RUNAWAY PLANT, d OF b TO d. The same job, beats and numbers as MB55a; the site is pinned to one faction (Spacers, the scavengers) and the plant's voice is written from one pen name. Letter variants, so if one works it is a real replay copy.",
+    "PEN NAME: home-office office/pennames/momo-hazuki.json. Her heat checks do not apply; her voice does. Plant Control in Momo's register: delighted, direct, exclamations, one list that gets away from it. It tells everyone everything. Nothing melancholy, and it never ends quieter than it started.",
+    "Words name the occupiers by role, never by faction name (his ruling: thugs, mercenaries, never the proper name). Journals are the player's record, first person, per Frances on MB55a (2026-10-29).",
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB55d.md): rework, all six findings taken. Forced pick answered NO (residents at arrival are not proven for every draw), so the scavengers pick the place over rather than live in it, and the close no longer calls the facility safe."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeDungeon_ThemeIndustrial"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Industrial dungeons; the delve marker set.",
+    "faction": "Spacers",
+    "_faction": "Pinned at the accept (plan OT-01): residents and waves are the scavengers, so the words may say so."
+  },
+  "prose": {
+    "name": "Repairs: Runaway Plant on <Planet>",
+    "briefing": "The <Place> has been running since its crew fled and scavengers have been stripping it, and its owners say it won't last much longer.",
+    "card": "Private Contract. Shut down the runaway plant at the <Place> on <Planet>, picked over by scavengers. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "objective": "Start the shutdown at the <Place>",
+      "journal": "The plant told everyone about the shutdown, scavengers included, and they're coming for the terminal. I need to hold it until it finishes.",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Plant Control Terminal",
+      "say": [
+        "Shutdown authorised! That's the coolant, the cores, the pumps, the fans, the other fans, the spare fans, all of it, in several minutes! I've told the scavengers, and they are very upset about it!"
+      ]
+    },
+    {
+      "type": "hold",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "objective": "Defend the terminal during the shutdown",
+      "journal": "I held the terminal until the shutdown finished. The <Place> is cold.",
+      "waves": 3,
+      "size": [
+        3,
+        5
+      ],
+      "style": [
+        "squad",
+        "squad",
+        "horde"
+      ],
+      "say": [
+        "Shutdown complete! Every system is cold, and I've announced it everywhere, twice!"
+      ],
+      "reward": "med",
+      "defend": 1
+    }
+  ],
+  "speaker": {
+    "name": "Plant Assistant",
+    "voice": "GenericMale01",
+    "elevenlabs": "N2lVS1w4EtoT3dr4eOWO"
+  },
+  "broadcast": [
+    "Hello, visitor! This facility has been running outside safe limits for forty-four days, which is a record, and you can shut the whole thing down from the control terminal! The scavengers who pick this place over haven't asked about the shutdown, so I haven't mentioned it to them yet."
+  ],
+  "_speech": "Plant Control, written as Momo Hazuki. The voice id is MB55a's until his ear casts one per variant. Voiced lines: no names, places, factions or currency; the occupiers by role only."
+}
