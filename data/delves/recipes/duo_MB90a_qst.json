@@ -1,0 +1,216 @@
+{
+  "schema": 2,
+  "id": "duo_MB90a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-31 07:59: \"Missionboard. We've have this part at a remote ground POI that needs delivered and installed in a different remote poi in the same system. Talk to person at site A, Talk to person at Site B, install then return to Site B person\"",
+  "_note": [
+    "PART RUN, SAME SYSTEM: a new board family, his shape. Talk at A, collect the part at A, talk at B, fit it at B, return to the same person at B for the pay.",
+    "The story: a relay station at A is being shut down for parts; its keeper has heard a man at a small site in the same system try to raise someone every night for weeks and get nothing. She sends him her last good amplifier. He fits nothing himself; the player does, and comes back to find he has already called his sister.",
+    "PARTS IT USES: place.second remote + fill late + system same (Eliza's OT-03, proven on duo_delvetest_l1), so the card and first journal never name the second site. Fitting is a deliver with replace and a placed model, MB65a's shape.",
+    "⛔ PART IT NEEDS, NOT BUILT: the SAME person talking twice (beats 3 and 5 are Ivo). No recipe does it today. Written here as the same person object on both talks; how it is spelled is Eliza's. Letter 2026-10-31.",
+    "Voices borrowed until his ear casts them. No names or places in any voiced line. Pay: med on the return talk.",
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB90a.md): rework, findings 1-5 and 7 taken (the mast is half dead: it sends, it cannot hear, which is what an amplifier fixes; the light became a hum because the model's light is unverified); 6 kept as she allowed. Forced pick answered YES: the player tells him the relay heard him, so his return line 'I'll tell her myself, now I can' pays her nights of listening."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeInfrastructureKeyword"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A: a working-built site that can read as a relay station (Infrastructure, 50 POI types in vanilla).",
+    "second": {
+      "remote": true,
+      "fill": "late",
+      "_fill": "Filled when the part is collected, so the same system is A's (OT-03).",
+      "system": "same",
+      "theme": {
+        "require": [],
+        "exclude": [
+          "LocTypeOE_ThemeNaturalKeyword",
+          "LocTypeOE_ThemeCaveKeyword",
+          "LocTypeTest",
+          "LocTypeOE_ThemeInfrastructureKeyword"
+        ]
+      },
+      "_theme": "B: a small working site, never another relay."
+    }
+  },
+  "prose": {
+    "name": "Repairs: Signal Amplifier on <Planet>",
+    "briefing": "A relay station at the <Place> is being stripped for parts, and its keeper wants her last good signal amplifier fitted at a site in this system whose comms have been failing for weeks.",
+    "card": "Private Contract. Take a signal amplifier from the <Place> on <Planet> and fit it at a site in the same system. Payment on completion."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Talk to the relay keeper at the <Place>",
+      "journal": "The relay keeper is sending her last good amplifier to a man in this system whose comms have been failing for weeks. I need to collect it.",
+      "person": {
+        "name": "Bea Ransome",
+        "template": "UC_NA_MASTWorkerFemale01",
+        "outfit": "Outfit_Clothes_Mechanic_Brown",
+        "voice": "GenericFemale01",
+        "elevenlabs": "SAz9YHcvj6GT2YYXdXww",
+        "hellos": [
+          [
+            "Come in, mind the boxes. Everything's going."
+          ]
+        ]
+      },
+      "greeting": [
+        "You're the hauler. This station's being stripped and sold for parts, but there's a signal amplifier here that still works, and someone in this system has been without comms for weeks. I'd rather it went to him than into a crate."
+      ],
+      "exchanges": [
+        {
+          "prompt": "I'll take it to him.",
+          "reply": [
+            "Good. It's just there. I'll send his site to your scanner once it's in your hands."
+          ]
+        },
+        {
+          "prompt": "An amplifier that still works is worth more sold than given.",
+          "reply": [
+            "It is. I've sold everything else in here. This one I'm not selling."
+          ],
+          "perk": "Skill_Commerce"
+        },
+        {
+          "prompt": "Why is the station being stripped?",
+          "reply": [
+            "Nobody calls through it any more. Everyone's on the big networks now, and a relay nobody uses is just a building that hums."
+          ]
+        },
+        {
+          "prompt": "Who's been without comms?",
+          "reply": [
+            "A man running a small site out here. Every night for weeks this relay has heard him try to raise someone and get nothing back."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 closes the talk and sets this beat's stage; the rest loop in any order, each askable off the greeting."
+    },
+    {
+      "type": "pickup",
+      "at": "REMarkerMediumLocRef",
+      "objective": "Collect the signal amplifier",
+      "journal": "I have the signal amplifier. Now I need to take it to the man at the <SecondPlace>.",
+      "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
+      "name": "Amplifier Case",
+      "item": "Signal Amplifier"
+    },
+    {
+      "type": "talk",
+      "place": "second",
+      "at": "RECenterLocRef",
+      "objective": "Talk to the site owner at the <SecondPlace>",
+      "journal": "The site's comms mast has been half dead for five weeks: he can send, but he can't hear anything back. I need to fit the amplifier to it.",
+      "person": {
+        "name": "Ivo Petrak",
+        "template": "UC_NA_MASTWorkerMale02",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericMale01",
+        "elevenlabs": "IKne3meq5aSn9XLyUdCD",
+        "hellos": [
+          [
+            "Hello? You're the first face in weeks."
+          ]
+        ]
+      },
+      "greeting": [
+        "You're here about the comms? Somebody actually came. The mast's been half dead for five weeks. I can talk out, but nothing comes back, and I've been talking into it every night anyway, out of habit."
+      ],
+      "exchanges": [
+        {
+          "prompt": "The relay keeper sent it. Her station's heard you every night.",
+          "reply": [
+            "Has it. Then it goes in the housing at the foot of the mast, and I'll stay by the radio."
+          ]
+        },
+        {
+          "prompt": "Five weeks with nobody to talk to would finish me.",
+          "reply": [
+            "It nearly did me. I've started reading the instructions on things out loud."
+          ],
+          "perk": "TRAIT_Extrovert"
+        },
+        {
+          "prompt": "Who do you talk to every night?",
+          "reply": [
+            "My sister, when it works. When it doesn't, the mast. The mast is a worse listener."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 closes the talk and sends the player to the mast. ⛔ Ivo again on beat 5: the same-person part is unbuilt."
+    },
+    {
+      "type": "deliver",
+      "place": "second",
+      "at": "REContainerLocRef",
+      "replace": true,
+      "model": "Meshes\\ccs\\commsmast01.nif",
+      "_model": "The mast is PLACED, so 'the mast' in Ivo's lines points at something there. Overtime's own comms mast model, used on 9 recipes.",
+      "name": "Comms Mast",
+      "objective": "Fit the signal amplifier to the comms mast",
+      "message": {
+        "title": "Comms Mast",
+        "text": "The amplifier slots into the housing at the foot of the mast, and somewhere inside it something starts to hum."
+      },
+      "journal": "I fitted the signal amplifier to the comms mast at the <SecondPlace>. I should tell the man who runs the site."
+    },
+    {
+      "type": "talk",
+      "place": "second",
+      "at": "RECenterLocRef",
+      "objective": "Return to the site owner at the <SecondPlace>",
+      "journal": "I fitted the amplifier and the site's comms are back. He'd called his sister before I got back to him.",
+      "reward": "med",
+      "person": {
+        "name": "Ivo Petrak",
+        "template": "UC_NA_MASTWorkerMale02",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericMale01",
+        "elevenlabs": "IKne3meq5aSn9XLyUdCD",
+        "hellos": [
+          [
+            "There you are. Listen to that."
+          ]
+        ]
+      },
+      "greeting": [
+        "I heard it come on. I've already called my sister. She said hello to you, which is ridiculous, because she's never heard of you."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Glad it works.",
+          "reply": [
+            "So am I. If you see the woman at the relay, tell her it got here. I'll tell her myself, now I can."
+          ]
+        },
+        {
+          "prompt": "Your sister sounds like good company.",
+          "reply": [
+            "She is. She talks the whole time. I've let her."
+          ],
+          "perk": "TRAIT_Empath"
+        },
+        {
+          "prompt": "What will you do now?",
+          "reply": [
+            "Call everyone I know, once each, and then probably do some work."
+          ]
+        }
+      ],
+      "_talk": "The HAND-BACK: the whole last step, stage 100, pays 'reward'. Same person as beat 3 (unbuilt part)."
+    }
+  ],
+  "_speech": "Two people, two voices, both borrowed until his ear casts them. No names, places or currency in any voiced line."
+}
