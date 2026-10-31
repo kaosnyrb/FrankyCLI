@@ -1,0 +1,125 @@
+{
+  "schema": 2,
+  "id": "duo_MB91a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-31 08:06: \"Remote POI, they have a sample that needs loading into there space cargo dropbox but there regular ship went missing. Get the sample from noc on site, take ot to space POI in same system. Chance that pirates attack on deposit\"",
+  "_note": [
+    "SAMPLE RUN TO ORBIT: a new board family, his shape. Talk to the researcher at a remote ground site, collect the sample, load it into the site's cargo dropbox in orbit; a chance that pirates jump the player at the deposit.",
+    "The hook pays off: their regular ship went missing, so the pirates, when they come, are the answer to where it went, and nobody says so. When they do not come, the player never finds out.",
+    "PARTS: talk and pickup on a board site, built. A deliver in orbit, built for localcargo 33a with orbit 'player' (the orbit over the planet he takes the job on). ⚠ 'planet' (over the SITE's planet, which his 'same system' wants) and 'system' are written but never started; 'planet' is asked here, Eliza's call.",
+    "⛔ PART IT NEEDS, NOT BUILT: a CHANCE that the deposit springs a pirate ambush. Prior art on the parts list: the trapped space object (Investigation_ActivatorSpace_Trapped.cs, duout_activator_spacetrap), written and never used by a template. What is missing is the roll and its odds; the odds are his. Spelled here as 'ambush' on the deliver beat, a placeholder for Eliza. Letter 2026-10-31.",
+    "Voices borrowed until his ear casts them. No names, places or currency in any voiced line. Pay: med (it leaves the ground, README rule 3).",
+    "The closing radio is about the box and stops: it cannot forecast the pirates, because on the loud run that says it for them and on the quiet run it is a threat the game never pays. 'Until somebody comes for it' is answered by the pirates when they come and by nobody when they do not.",
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB91a.md): rework, findings 1-5 taken, 6 and 7 kept as she allowed. Forced pick answered NO: no voiced line says or implies the ship came to harm; she believes it late and silent, and the pirates are the first to say what happened to it."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeScienceKeyword"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A research site (Science, 12 POI types in vanilla).",
+    "third": {
+      "orbit": "planet",
+      "_orbit": "The orbit over the site's planet, so the dropbox is in the same system. Scope 'planet' never started (only 'player' has, on 33a); Eliza's call."
+    }
+  },
+  "prose": {
+    "name": "Hauling: Research Sample to Orbit",
+    "briefing": "A research site at the <Place> has a sample that has to go up to its cargo dropbox in orbit, and the ship that collects from them every ten days didn't come.",
+    "card": "Research Contract. Take a sample from the <Place> on <Planet> up to the site's cargo dropbox in orbit. Payment on delivery."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Talk to the researcher at the <Place>",
+      "journal": "The researcher needs a sample loaded into the site's dropbox in orbit. Their regular ship didn't come, and nobody answers on its channel. I need to collect the sample.",
+      "person": {
+        "name": "Maren Oduya",
+        "template": "UC_NA_MASTWorkerFemale03",
+        "outfit": "Outfit_Clothes_Formal_ShirtSlacks_Vest",
+        "voice": "GenericFemale01",
+        "elevenlabs": "oW8bn5YtBB89X2nJ0DT9",
+        "hellos": [
+          [
+            "Don't touch the bench. Anything else is fine."
+          ]
+        ]
+      },
+      "greeting": [
+        "You're the hauler? The sample has to go up to our dropbox in orbit today. Our ship comes every ten days, and this time it didn't, and nobody answers on its channel."
+      ],
+      "exchanges": [
+        {
+          "prompt": "I'll take the sample up.",
+          "reply": [
+            "It's just there. Load it into the dropbox and it'll keep. Don't open the case, whatever it does."
+          ]
+        },
+        {
+          "prompt": "A sample that can't wait usually means something's alive in it.",
+          "reply": [
+            "Or about to stop being. Either way it wants to be cold, not sitting on my bench."
+          ],
+          "perk": "BackgroundProfessor"
+        },
+        {
+          "prompt": "Nobody answers on its channel?",
+          "reply": [
+            "Not for two days. It's come every ten days for two years, and it's never once been late."
+          ]
+        },
+        {
+          "prompt": "Why not wait for another ship?",
+          "reply": [
+            "Because the sample won't wait. In the dropbox it'll keep until a ship does come."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 closes the talk and sets this beat's stage; the rest loop in any order, each askable off the greeting."
+    },
+    {
+      "type": "pickup",
+      "at": "REMarkerMediumLocRef",
+      "objective": "Collect the sample",
+      "journal": "I have the sample case. Now I need to load it into the dropbox in orbit.",
+      "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
+      "name": "Sample Case",
+      "item": "Sealed Research Sample",
+      "say": [
+        "That's it. Get it up there before it warms up."
+      ]
+    },
+    {
+      "type": "deliver",
+      "place": "third",
+      "at": "se_TravelMarkerLocRefB02",
+      "model": "CARGO DROPBOX, UNPICKED",
+      "_model": "A cargo pod in orbit; Kim's pick. 33a's Satellite_Beacon is the fallback if nothing fits.",
+      "name": "Cargo Dropbox",
+      "objective": "Load the sample into the cargo dropbox in orbit",
+      "ambush": "pirates",
+      "_ambush": "PLACEHOLDER for the unbuilt part: a chance roll at the deposit that springs pirate ships on the player (the trapped space object, duout_activator_spacetrap). Odds his.",
+      "journal": "I loaded the research sample into the dropbox in orbit. It'll keep there until a ship comes for it.",
+      "say": [
+        "Box reads sealed, and the sample's logged. It'll keep until somebody comes for it."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Researcher",
+    "voice": "GenericFemale01",
+    "elevenlabs": "oW8bn5YtBB89X2nJ0DT9"
+  },
+  "_speech": "Her own voice in person and on the radio. Borrowed until his ear casts it. No names, places or currency."
+}
