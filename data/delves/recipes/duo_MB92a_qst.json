@@ -1,0 +1,100 @@
+{
+  "schema": 2,
+  "id": "duo_MB92a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his Trello \"Discover Faint signal\", proposed 2026-10-31 08:11 as a family; his \"yeah Faint signal sounds good\" 08:15",
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Any built site that is not a cave or a natural landmark: somewhere a beacon could be."
+  },
+  "prose": {
+    "name": "Survey: Faint Signal on <Planet>",
+    "briefing": "The comms office has picked up a faint signal from the <Place> and wants someone to go and find out what's sending it.",
+    "card": "Comms Office Contract. A faint signal is coming from the <Place> on <Planet>. Find its source. Payment on completion."
+  },
+  "_note": [
+    "FAINT SIGNAL: a new board family, his Trello card. Every letter has the SAME card, title and first journal, so the board never says which one he has drawn; what changes is what is at the source. The broadcast is the signal itself, heard on arrival.",
+    "⛔ FAMILY RULE: no letter's broadcast may hint at what the source is (card 20261031-080934): the survivor, the loop, the coffee and the bait must all sound like someone who wants to be found.",
+    "The source is a placed beacon (outpost beacon01, Overtime's own, on 7 recipes; Satellite_Beacon is ruled out on land). Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
+    "LETTER a: A SURVIVOR: someone kept a beacon on for nine days after the others left to find help.",
+    "FAMILY RULE, REFINED 2026-10-31 on the four verdicts: a broadcast may say what KIND of message it is (c's 'supply request', b's all-clear) but not what the source is; and a repeat player may recognise a letter by its call, which is answered by adding letters, not by blanking calls.",
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB92a.md): rework, findings 1-4 and 6 taken, 5 kept as allowed. Forced pick answered YES: the broadcast is a message she recorded once and left looping, nine days old when he hears it; 'I've listened to it long enough' is her own voice on repeat."
+  ],
+  "beats": [
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "objective": "Find the source of the signal at the <Place>",
+      "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
+      "name": "Signal Beacon",
+      "message": {
+        "title": "Signal Beacon",
+        "text": "The beacon's battery light is nearly out. Someone is waiting beside it."
+      },
+      "journal": "The signal comes from a beacon at the <Place>, and someone is sitting beside it. I should talk to them."
+    },
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Talk to the survivor at the <Place>",
+      "journal": "I found the source of the signal: a survivor who kept a beacon running for nine days. I've called in help for her.",
+      "reward": "med",
+      "person": {
+        "name": "Noa Brennick",
+        "template": "UC_NA_MASTWorkerFemale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "EXAVITQu4vr4xnSDxMaL",
+        "hellos": [
+          [
+            "You're real. Good."
+          ]
+        ]
+      },
+      "greeting": [
+        "You heard it. I'd stopped believing anyone would. The others took the ship to find help on the first morning, and I've been sitting by that beacon for nine days."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Help's coming. I'll call it in.",
+          "reply": [
+            "Then I'm turning that beacon off. I've listened to it long enough."
+          ]
+        },
+        {
+          "prompt": "Nine days is a long time to sit and wait.",
+          "reply": [
+            "It takes counting. I counted everything I could see, twice, and then I started again."
+          ],
+          "perk": "BackgroundExplorer"
+        },
+        {
+          "prompt": "Why didn't you go with them?",
+          "reply": [
+            "Someone had to keep the beacon on. And I'm a terrible pilot."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 is the hand-back: it ends the conversation and pays 'reward'. Every prompt rests on the greeting."
+    }
+  ],
+  "broadcast": [
+    "If anyone can hear this, I'm still here."
+  ],
+  "speaker": {
+    "name": "Faint Signal",
+    "voice": "GenericFemale01",
+    "elevenlabs": "EXAVITQu4vr4xnSDxMaL"
+  },
+  "_speech": "The signal itself, heard on arrival. Its subtitle name differs per letter (SPEAKER rule) without saying what the source is."
+}

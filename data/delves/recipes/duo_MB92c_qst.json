@@ -1,0 +1,57 @@
+{
+  "schema": 2,
+  "id": "duo_MB92c_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his Trello \"Discover Faint signal\", proposed 2026-10-31 08:11 as a family; his \"yeah Faint signal sounds good\" 08:15",
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Any built site that is not a cave or a natural landmark: somewhere a beacon could be."
+  },
+  "prose": {
+    "name": "Survey: Faint Signal on <Planet>",
+    "briefing": "The comms office has picked up a faint signal from the <Place> and wants someone to go and find out what's sending it.",
+    "card": "Comms Office Contract. A faint signal is coming from the <Place> on <Planet>. Find its source. Payment on completion."
+  },
+  "_note": [
+    "FAINT SIGNAL: a new board family, his Trello card. Every letter has the SAME card, title and first journal, so the board never says which one he has drawn; what changes is what is at the source. The broadcast is the signal itself, heard on arrival.",
+    "⛔ FAMILY RULE: no letter's broadcast may hint at what the source is (card 20261031-080934): the survivor, the loop, the coffee and the bait must all sound like someone who wants to be found.",
+    "The source is a placed beacon (outpost beacon01, Overtime's own, on 7 recipes; Satellite_Beacon is ruled out on land). Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
+    "LETTER c: COMEDY: a supply beacon that has asked for coffee, priority urgent, for years.",
+    "FAMILY RULE, REFINED 2026-10-31 on the four verdicts: a broadcast may say what KIND of message it is (c's 'supply request', b's all-clear) but not what the source is; and a repeat player may recognise a letter by its call, which is answered by adding letters, not by blanking calls.",
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB92c.md): ship, findings 2-4 taken. Forced pick answered YES: a broadcast may say what kind of message it is, so 'Supply request' stands and the player imagines a hungry crew."
+  ],
+  "beats": [
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "objective": "Find the source of the signal at the <Place>",
+      "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
+      "name": "Supply Beacon",
+      "message": {
+        "title": "Supply Beacon",
+        "text": "The beacon's one open request, marked priority urgent, is for coffee. It has sent it more than eleven thousand times. You close the request."
+      },
+      "journal": "The signal was a supply beacon at the <Place>, asking for coffee. I closed the request.",
+      "reward": "med"
+    }
+  ],
+  "broadcast": [
+    "Supply request. Priority urgent. Please respond. Supply request. Priority urgent. Please respond."
+  ],
+  "speaker": {
+    "name": "Repeating Signal",
+    "voice": "GenericMale01",
+    "elevenlabs": "N2lVS1w4EtoT3dr4eOWO"
+  },
+  "_speech": "The signal itself, heard on arrival. Its subtitle name differs per letter (SPEAKER rule) without saying what the source is."
+}
