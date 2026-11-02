@@ -182,6 +182,31 @@ namespace FrankyCLI
             => steps.Count > 0 && !steps[^1].IsGroup && !steps[^1].IsChoose && r.beats[steps[^1].Beats[0]].type == "talk"
                ? steps[^1].Beats[0] : -1;
 
+        /// <summary>
+        /// The pickups that give NO item (plan OT-08, his 2026-11-02 "yeah don't give at all"): a pickup in the LAST step whose
+        /// item nothing takes (no deliver after it, no hand-back talk, no choose ending). Its item would arrive in the same
+        /// moment the job pays and stay in his inventory for good (the Survey Data Drive on MB43a), so it is never made: the
+        /// object goes, the stage sets, nothing is given. Walks the beats as the lint's carried count does. A recover is never
+        /// here (its item comes from the world, not our hook). Pure, so the lint and the build agree by construction.
+        /// </summary>
+        private static HashSet<int> ItemlessPickups(Recipe r, List<Step> steps)
+        {
+            var carried = new List<int>();
+            int handBack = HandBackTalk(r, steps);
+            for (int i = 0; i < r.beats.Count; i++)
+            {
+                if (i == handBack) carried.Clear();
+                else if (Carries(r.beats[i])) carried.Add(i);
+                else if (r.beats[i].type == "deliver")
+                {
+                    if (r.beats[i].choose != null) return new HashSet<int>();   // an ending takes them
+                    carried.Clear();
+                }
+            }
+            var last = steps.Count > 0 ? steps[^1].Beats : new List<int>();
+            return carried.Where(i => r.beats[i].type == "pickup" && last.Contains(i)).ToHashSet();
+        }
+
         /// <summary>The lint's beats-only half. Called from Grade; Fatal/Warn are Grade's.</summary>
         private static void GradeBeats(Recipe r, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env,
                                        Action<string> Fatal, Action<string> Warn)
@@ -489,7 +514,11 @@ namespace FrankyCLI
                     else endsOnChoice = true;
                 }
             }
-            if (carried > 0 && !endsOnChoice) Warn($"{carried} picked-up item(s) are never delivered, so they stay in the player's inventory after the quest.");
+            // OT-08: the last step's undelivered pickups give nothing, so only an EARLIER one is still left in his inventory.
+            var itemless = ItemlessPickups(r, steps);
+            foreach (int i in itemless)
+                Console.WriteLine($"  beat {i + 1} (pickup) is in the last step and nothing takes its item, so \"{r.beats[i].item}\" is NOT given: the object goes and the job pays (OT-08)");
+            if (carried - itemless.Count > 0 && !endsOnChoice) Warn($"{carried - itemless.Count} picked-up item(s) are never delivered, so they stay in the player's inventory after the quest.");
 
             var beatStage = StagesOf(steps, t.completeStage, t.entryStage + 10);
             int highest = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Concat(steps.SelectMany(s => s.WaveStages))
@@ -1428,9 +1457,11 @@ namespace FrankyCLI
             {
                 RemovePrevious(myMod.MiscItems, e => e.StartsWith(r.id + "_item"));
                 itemOf = new Dictionary<int, FormKey>();
+                var itemless = ItemlessPickups(r, steps);
                 for (int i = 0; i < r.beats.Count; i++)
                 {
                     if (!Carries(r.beats[i])) continue;
+                    if (itemless.Contains(i)) { Console.WriteLine($"  item     : none for beat {i + 1}, the last step's pickup that nothing takes (OT-08)"); continue; }
                     if (itemSrc == null) { Console.WriteLine($"REFUSED: the removed driver's CargoObject is not a MiscItem in {t.mod} to clone."); return 1; }
                     var mi = myMod.MiscItems.DuplicateInAsNewRecord(itemSrc);
                     mi.EditorID = $"{r.id}_item{i + 1}";

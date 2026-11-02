@@ -103,10 +103,14 @@ namespace FrankyCLI
                 else
                 {
                     hookAlias = build.slotOf[b].activatorAlias;
-                    script = Destroys ? "DefaultAliasOnDestroyed" : CarriesItem ? PickupScript : UseScript;
+                    script = Destroys ? "DefaultAliasOnDestroyed" : CarriesItem && build.itemOf.ContainsKey(b) ? PickupScript : UseScript;
                 }
                 var sc = StageHook(script, build.beatStage[b], prereq);
                 if (Destroys) { }   // no prompt to hide: the entry stage blocked activation
+                else if (CarriesItem && !build.itemOf.ContainsKey(b))
+                    // OT-08: the last step's pickup that nothing takes gives nothing (Items made none). The plain use hook
+                    // hides and sets; the stage's first line still disables the object, as any pickup's does (StageLines).
+                    sc.Properties.Add(new ScriptBoolProperty { Name = "HideAfterUse", Data = true, Flags = ScriptProperty.Flag.Edited });
                 else if (CarriesItem)
                 {
                     var ip = new ScriptObjectProperty { Name = "ItemToGive", Flags = ScriptProperty.Flag.Edited };
