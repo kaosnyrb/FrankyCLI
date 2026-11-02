@@ -4,12 +4,14 @@
   "template": "board",
   "deal": "_duo_MB_MissionNode_test",
   "_deal": "The board's test node, until he plays it.",
-  "author": "eliza",
+  "author": "eliza (build); words jessica",
   "source": "his 2026-11-02 13:44: \"yeah lets make an elite Ashta to hunt at a natural site\", after my read of his May PredatorHuntTarget and vanilla's Ashta -> Alpha Ashta",
   "_note": [
     "HANDED TO JESSICA 2026-11-02 on his \"played e2, works great\" and \"eh let's just go with the elite creature is at any site. give e2 to Jessica to write\". The words below are placeholders; hers replace them, the elite's name included. Letter: home-office office/correspondence/2026-11-02-eliza-jessica-the-elder-ashta-is-yours-to-write.md.",
     "ELITE TEST E2: E1's elite at ANY quiet site on Akila (MB98a's shape), the control for E1. E1 requires a natural landmark, and the board's request tree can place only 3 (OEJM011, OESD014, OESF001, gen_delve keywords --request); whether any can land on Akila is unknown, so E1 may never list. E2 tests the elite either way.",
-    "Mine, not his ask: named to him in the same turn (2026-11-02). Same elite, same words; only the theme differs. Unbuilt with E1."
+    "Mine, not his ask: named to him in the same turn (2026-11-02). Same elite, same words; only the theme differs. Unbuilt with E1.",
+    "WORDS, Jessica 2026-11-02 on Eliza's hand-off: the name 'Elder Ashta' kept (it reads as a rank among Ashta, and stays clear of vanilla's Alpha). The build makes it ONE size step up (small to normal), so the words say bigger and older than the rest, never giant.",
+    "NARROW, as MB98a: pinned to Akila, so Ashta and the Rangers are said aloud (his exemption, 2026-10-26)."
   ],
   "place": {
     "theme": {
@@ -25,8 +27,8 @@
   },
   "prose": {
     "name": "Hunt: Elder Ashta at the <Place> on <Planet>",
-    "briefing": "An Elder Ashta has made the <Place> its ground. Put it down.",
-    "card": "Hunting Contract. An Elder Ashta at the <Place> on <Planet>. Payment on contract completion."
+    "briefing": "An Ashta bigger and older than the rest has made the <Place> its ground, and it doesn't run from anyone. The Rangers want it put down.",
+    "card": "Settlement Contract. Hunt the Elder Ashta at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {
@@ -39,8 +41,20 @@
       },
       "_elite": "The ordinary Ashta MB98a's waves proved renders when spawned bare. 'Elder Ashta' is a probe name, not vanilla's 'Alpha Ashta', so the two cannot be confused at the glass.",
       "objective": "Hunt the Elder Ashta at the <Place>",
-      "journal": "I put down the Elder Ashta at the <Place>.",
-      "reward": "med"
+      "journal": "I hunted down the Elder Ashta that had made the <Place> its ground.",
+      "reward": "med",
+      "say": [
+        "That's the old one down. We'll all sleep easier out here tonight."
+      ]
     }
-  ]
+  ],
+  "speaker": {
+    "name": "Ranger",
+    "voice": "GenericMale01",
+    "elevenlabs": "JBFqnCBsd6RMkjVDRZzb"
+  },
+  "broadcast": [
+    "Rangers here. This one isn't like the young ones. They circle and wait for dark. This one walks in at midday, takes what it likes, and doesn't care who's watching. Don't let it get close."
+  ],
+  "_speech": "An Akila Ranger, steady, has seen a few. Narrow, so Ashta and Rangers are said aloud (his exemption, 2026-10-26). The lore (fandom): Ashta grow bolder at night, so the old one coming at midday is what marks it. Voice borrowed until his ear casts it."
 }
