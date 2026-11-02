@@ -2532,6 +2532,15 @@ namespace FrankyCLI
                 fail += Check($"place alias {label}'s request keeps to the player's star system (IsInSameCurrentLocationAsRef player LocTypeStarSystem == 1)",
                               HoldsToSystem(pl?.ALPS?.Conditions).ToString(), "True");
             }
+            // place.planet (2026-11-02): a request pins the planet the recipe named, and no request pins one it did not.
+            foreach (var (shape, label) in new[] { (r.place, t.placeAlias), (r.place.second, t.secondPlaceAlias) })
+            {
+                var alps = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)label)?.ALPS;
+                if (alps == null && shape?.planet == null) continue;
+                string want = shape?.planet is string pn ? Planets[pn].ToString() : "none";
+                fail += Check($"place alias {label}'s request pins {(shape?.planet ?? "no planet")} (GetIsCurrentLocationExact == 1)",
+                              PinsPlanet(alps?.Conditions)?.ToString() ?? "none", want);
+            }
             // OT-91, his 2026-10-30: a request carries habitability and the level band only when the recipe asked (ShapePlanet).
             foreach (var (shape, label) in new[] { (r.place, t.placeAlias), (r.place.second, t.secondPlaceAlias) })
             {

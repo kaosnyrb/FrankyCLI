@@ -471,6 +471,15 @@ namespace FrankyCLI
             /// </summary>
             public string? system { get; set; }
             /// <summary>
+            /// OPTIONAL, a REQUESTED place only (a board's own place, or remote: true): the ONE planet the request may put its
+            /// site on, by name from Planets, a closed table. Written vanilla's way, on the REQUEST's own conditions, which test
+            /// the planet: GetIsCurrentLocationExact(that planet's location) == 1, FFCydoniaZ07's (SSol_PMars, a PCM_QuestGeneral
+            /// request; MS01 and City_GG_Mark pin theirs the same way). His 2026-11-02 "yup build", for missionboard33a, the
+            /// Ashta on Akila. ⛔ NOT the planet guard that crashed 10a and 12a (see the note below): that tested one of our
+            /// places against ANOTHER of our aliases; this names a fixed form and depends on no alias.
+            /// </summary>
+            public string? planet { get; set; }
+            /// <summary>
             /// OPTIONAL, place.second only, a request (remote: true): "late" = the second place is NOT filled when the quest
             /// starts, but when the player finishes the step before its first beat (his 2026-10-30, OT-03: "mark the second
             /// location as optional and fill it when the player reaches the first"). With system "same" the request then means
@@ -534,10 +543,11 @@ namespace FrankyCLI
             /// a pinned city is not drawn. The name is looked up in Settlements, a closed table; any other is refused.
             /// </summary>
             public string? settlement { get; set; }
-            // ⛔ There is no "planet" key, and an unknown key is refused. A second request lands where the planet content
-            // manager puts it, the first site's planet or another. Two planet guards on a place (10a 2026-10-14, 12a
-            // 2026-10-19) each CRASHED the game on start, and his ruling 2026-10-19 is "Stop doing it", "it's fine if the
-            // mission is on the same planet". So no place carries one.
+            // ⛔ There is no RELATIVE planet guard, ever. A second request lands where the planet content manager puts it, the
+            // first site's planet or another. Two planet guards on a place (10a 2026-10-14, 12a 2026-10-19), each a test of one
+            // place against another alias, CRASHED the game on start, and his ruling 2026-10-19 is "Stop doing it", "it's fine
+            // if the mission is on the same planet". So no place carries one. `planet` above is a different shape: a FIXED
+            // planet on a request, which names a form and no alias (2026-11-02, read off vanilla before it was built).
             /// <summary>
             /// OPTIONAL: who is at THIS place (his dial, 2026-10-11, office/projects/delves/backlog.md "Who's there").
             /// Absent = empty, the default. infested, workers and spacers are built; any other kind is refused by
@@ -1674,6 +1684,9 @@ namespace FrankyCLI
             }
 
             // A space Delve's one place is an orbit, drawn by its own conditions: none of the POI grading below applies.
+            // place.planet is graded below, so it is refused here rather than skipped (nobody has pinned an orbit's planet).
+            if (IsSpace(t) && new[] { r.place, r.place.second, r.place.third }.Any(p => p?.planet != null))
+                Fatal($"place.planet on a {t.kind} Delve: it pins a ground request's planet, and an orbit is not one.");
             if (IsSpace(t)) return Report();
 
             lap.Mark("which-place");
@@ -1740,8 +1753,8 @@ namespace FrankyCLI
                 // On a board (2026-10-23, missionboard05a, after city01a played): the borrowed second place (the slate base's
                 // FinalLocation, the same alias city01a pinned) is pinned instead of requested. Nothing holds a city near the
                 // first site, and nothing needs to: it is where it is.
-                if (s.remote != null || s.orbit != null || s.parsecs != null || s.habitability != null || s.level != null || s.system != null || s.altitude != null)
-                    Fatal("place.second.settlement is a PINNED city: remote, orbit, parsecs, habitability, level, system and altitude do not apply to it.");
+                if (s.remote != null || s.orbit != null || s.parsecs != null || s.habitability != null || s.level != null || s.system != null || s.altitude != null || s.planet != null)
+                    Fatal("place.second.settlement is a PINNED city: remote, orbit, parsecs, habitability, level, system, altitude and planet do not apply to it.");
                 if (s.theme.require.Count > 0 || s.theme.exclude.Count > 0)
                     Fatal("place.second.settlement has a theme; a pinned city is not drawn, so a theme would test nothing.");
                 if (s.who != null) Fatal("place.second.settlement has a who; the city has its own people.");
@@ -1774,6 +1787,19 @@ namespace FrankyCLI
                     Fatal($"{label}.system shapes a REQUEST, and {label}.remote is not set.");
                 if (p.system != null && p.system != "same")
                     Fatal($"{label}.system is \"{p.system}\"; the one value built is \"same\" (vanilla's far shape, == 0, is not).");
+                // place.planet (2026-11-02): a fixed planet, on a REQUEST's own conditions. A board's own place is a request.
+                if (p.planet != null)
+                {
+                    bool isRequest = p.remote == true || (label == "place" && IsBoard(t));
+                    if (!isRequest)
+                        Fatal($"{label}.planet pins a REQUEST's planet, and {label} is not one (a board's own place, or remote: true). A found place is drawn near the player, so a planet would test nothing he can reach.");
+                    if (!Planets.ContainsKey(p.planet))
+                        Fatal($"{label}.planet is '{p.planet}'; the planets built are {string.Join(", ", Planets.Keys.Select(k => $"\"{k}\""))}.");
+                    if (p.system != null)
+                        Fatal($"{label}.planet and {label}.system: a pinned planet already fixes its system, and the two could only disagree.");
+                    Console.WriteLine($"  planet   : {label} only on {p.planet} (GetIsCurrentLocationExact on the request, FFCydoniaZ07's shape). "
+                                      + "⚠ The pool below is the WHOLE request corpus: nothing here reads which sites the planet content manager can place on one planet, so a planet that cannot take these markers shows as a full pool and never lists.");
+                }
                 if (p.altitude != null && !(label == "place.third" && p.orbit != null))
                     Fatal($"{label}.altitude is an orbit's; only place.third with orbit (or a space template's place) has one.");
                 if (p.altitude is double alt && !(alt >= OrbitAltitudeBand.min && alt <= OrbitAltitudeBand.max))
@@ -3117,6 +3143,33 @@ namespace FrankyCLI
         }
 
         /// <summary>
+        /// Place.planet's CLOSED table: the name a recipe writes, to the planet's LOCATION in Starfield.esm (the form vanilla's
+        /// pinned requests name: SSol_PMars on FFCydoniaZ07). A planet is added here when a recipe needs one, never searched
+        /// for by name. Akila read 2026-11-02 (gen_inspect location): LocTypePlanet, LocTypeSettledPlanet, LocTypeMajorOrbital.
+        /// </summary>
+        private static readonly Dictionary<string, FormKey> Planets = new(StringComparer.Ordinal)
+        {
+            ["Akila"] = FormKey.Factory("01ABE3:Starfield.esm"),   // SCheyenne_PAkila
+        };
+
+        /// <summary>
+        /// "Only on this planet", vanilla's way: GetIsCurrentLocationExact(the planet's location) == 1 on a REQUEST's own
+        /// conditions, run on the subject, which is the planet (FFCydoniaZ07). ONE spelling, constructed; PinsPlanet reads it.
+        /// </summary>
+        private static ConditionFloat PinnedPlanetCondition(FormKey planet)
+        {
+            var d = new GetIsCurrentLocationExactConditionData { Unknown3 = -1 };
+            d.FirstParameter.Link.SetTo(planet);
+            return new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f };
+        }
+
+        /// <summary>The planet a condition list pins with PinnedPlanetCondition, read back off disk; null = none.</summary>
+        private static FormKey? PinsPlanet(IEnumerable<IConditionGetter>? conditions)
+            => conditions?.Where(c => c is IConditionFloatGetter f && f.ComparisonValue == 1f && f.CompareOperator == CompareOperator.EqualTo)
+                          .Select(c => c.Data).OfType<IGetIsCurrentLocationExactConditionDataGetter>()
+                          .Select(d => (FormKey?)d.FirstParameter.Link.FormKey).FirstOrDefault();
+
+        /// <summary>
         /// place.second.settlement's CLOSED table: the name a recipe writes, to the city's location in Starfield.esm.
         /// Measured 2026-10-23 (gen_inspect qalias ":"): vanilla pins CityNewAtlantisLocation 72 times and
         /// CityAkilaCityLocation 28. A city is added here when a recipe needs one, never searched for by name.
@@ -3273,6 +3326,14 @@ namespace FrankyCLI
                 if (has == 0) continue;
                 loc!.ALPS!.Conditions.RemoveAll(c => NamesConditionForm(c, form));
                 Console.WriteLine($"  planet   : place alias {placeAlias} {loc.Name} drops its {field} condition ({form}); off unless the recipe asks");
+            }
+            // place.planet (2026-11-02): the request may only use that one planet. The lint already holds it to a request.
+            if (shape?.planet is string pn)
+            {
+                if (loc?.ALPS == null) { Console.WriteLine($"REFUSED: {label}.planet is set and place alias {placeAlias} is not a PCM request, so there is no planet test to write it on."); return 1; }
+                if (PinsPlanet(loc.ALPS.Conditions) != null) { Console.WriteLine($"REFUSED: place alias {placeAlias}'s request already pins a planet; the shell carried one."); return 1; }
+                loc.ALPS.Conditions.Add(PinnedPlanetCondition(Planets[pn]));
+                Console.WriteLine($"  planet   : place alias {placeAlias} {loc.Name} only on {pn} (GetIsCurrentLocationExact {Planets[pn]} == 1, FFCydoniaZ07's)");
             }
             return 0;
         }
