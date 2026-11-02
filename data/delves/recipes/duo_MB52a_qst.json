@@ -47,7 +47,8 @@
       "at": "RECenterLocRef",
       "explosion": "IncendiaryGrenadeExplosion",
       "objective": "Destroy the cache of texts at the <Place>",
-      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "model": "Meshes\\ccs\\textcache01.nif",
+      "_model": "2026-11-02, Eliza: Kim's banned-texts cache (textcache.json: the same AK_FootLocker01 with two book stacks on its lid, 0.46 m), his \"yup next\" for 21a. Her textcache_burnt (a fire pit) was for a second burn beat this Delve no longer has; the incendiary burns this one where it stands.",
       "name": "Cache of Banned Texts",
       "journal": "The cache at the <Place> went up with every book in it. I never opened one, and I still don't know what was in them.",
       "say": [

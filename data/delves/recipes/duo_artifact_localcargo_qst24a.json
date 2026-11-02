@@ -72,9 +72,9 @@
       "at": "RECenterLocRef",
       "objective": "Deliver the Dish to the <Place>",
       "journal": "The transmitter's crate at the <Place> was open and empty when I got there. Without it the dish is just a dish. I need to find who took it.",
-      "model": "Meshes\\ccs\\relaydish01.nif",
+      "model": "Meshes\\ccs\\relayconsole01.nif",
       "name": "Comms Relay",
-      "_model": "2026-10-08, his kitbash: a comms console with an antenna mast, Overtime's own asset (packed in du_overtime - Main.ba2 and Main_ps.ba2). Replaced two vanilla dishes the same morning: TripodFloor01 HANGS below its origin (OBND z -2.14 to +0.06) and sat 2.1 m underground; A_01 stands on its origin but is a dish lying on the ground (his: 'the dish is good but just sitting on the ground'). Before using a mesh as a placed activator, read its lowest z.",
+      "_model": "2026-11-02, Eliza, plan OT-6D: Kim's relay console v2 (relay_console.json: vanilla MobileTerminal_01 with a 4.5 m dish on a tripod behind it, 5.4 x 4.5 x 6.1 m), on his \"thinking less box more console with dish\". His relaydish01.nif stays on disk and in the archive, unworn. Was: 2026-10-08, his kitbash: a comms console with an antenna mast, Overtime's own asset (packed in du_overtime - Main.ba2 and Main_ps.ba2). Replaced two vanilla dishes the same morning: TripodFloor01 HANGS below its origin (OBND z -2.14 to +0.06) and sat 2.1 m underground; A_01 stands on its origin but is a dish lying on the ground (his: 'the dish is good but just sitting on the ground'). Before using a mesh as a placed activator, read its lowest z.",
       "_relaydish": "2026-10-08 09:3x, his go: the FIRST kitbash the office built without NifSkope (spike office/spikes/2026-10-08-kitbash-without-nifskope.md): his machinebase console with a quarter-scale vanilla SatelliteDish_A_01 pasted at 2.2 m, turned 90. Tree bounds z 0.00..3.19, STANDS. Loose in Steam Data for the test; NOT yet in either archive, so it must be packed before a release.",
       "_name": "PLACEHOLDER, Jessica's pick 2026-10-02 off `gen_inspect static Satellite`: a free-standing tripod dish (RadarDish01 and the CommRadarDish stack were the alternatives). Never seen in game as an activator; his eye decides whether it reads and sits right.",
       "say": [

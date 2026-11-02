@@ -46,7 +46,8 @@
         "text": "The intake filter is clogged. Somebody has rinsed the old one and put it back more than once."
       },
       "journal": "A few of the crew were standing round this one when I got there. Its intake filter was clogged, and somebody had rinsed the old one and put it back more than once. I've swapped in a clean one and it's drawing water again.",
-      "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
+      "model": "Meshes\\ccs\\reclaimer01.nif",
+      "_model": "2026-11-02, Eliza: Kim's v7 reclaimer (reclaimer_manifold.json: the AQUA tank with two crank risers on its face, 1.42 x 1.19 x 1.41 m), on his \"shrink the footprint to one tile and get rid of the base stuff\". Was the vanilla WaterFiltrationCart01.",
       "name": "Clogged Water Reclaimer"
     },
     {
@@ -59,7 +60,8 @@
         "text": "The hose clamps are loose. Someone has wrapped the hose in tape to get another week out of it."
       },
       "journal": "The leaking reclaimer only needed its hose clamps tightened. Someone had wrapped the hose in tape to get another week out of it. It's holding pressure now.",
-      "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
+      "model": "Meshes\\ccs\\reclaimer01.nif",
+      "_model": "2026-11-02, Eliza: Kim's v7 reclaimer (reclaimer_manifold.json: the AQUA tank with two crank risers on its face, 1.42 x 1.19 x 1.41 m), on his \"shrink the footprint to one tile and get rid of the base stuff\". Was the vanilla WaterFiltrationCart01.",
       "name": "Leaking Water Reclaimer"
     },
     {
@@ -72,7 +74,8 @@
         "text": "The pump has seized. The breaker label has worn off from being flipped so often."
       },
       "journal": "The stalled reclaimer had a seized pump, and the breaker label had worn off from being flipped so often. I've freed it, reset the breaker, and it's running.",
-      "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
+      "model": "Meshes\\ccs\\reclaimer01.nif",
+      "_model": "2026-11-02, Eliza: Kim's v7 reclaimer (reclaimer_manifold.json: the AQUA tank with two crank risers on its face, 1.42 x 1.19 x 1.41 m), on his \"shrink the footprint to one tile and get rid of the base stuff\". Was the vanilla WaterFiltrationCart01.",
       "name": "Stalled Water Reclaimer"
     }
   ],
