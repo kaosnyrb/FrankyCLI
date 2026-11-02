@@ -1,5 +1,5 @@
 {
-  "FormKey": "0047C3:du_overtime.esm",
+  "FormKey": "004822:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -270,7 +270,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "0047C4:du_overtime.esm",
+        "Object": "004823:du_overtime.esm",
         "AliasID": 12,
         "Create": 0,
         "Level": 3
@@ -447,7 +447,7 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "0047CC:du_overtime.esm",
+            "Form": "00482A:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -482,7 +482,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0047C3:du_overtime.esm",
+            "Form": "004822:du_overtime.esm",
             "Alias": 16,
             "Unused": 0
           }
@@ -510,14 +510,14 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0047C3:du_overtime.esm",
+            "Form": "004822:du_overtime.esm",
             "Alias": 3,
             "Unused": 0
           }
         },
         "Scripts": [
           {
-            "Name": "DefaultAliasOnActivate",
+            "Name": "duo_delve_use",
             "Flags": 0,
             "Properties": [
               {
@@ -534,7 +534,7 @@
               },
               {
                 "Type": "Bool",
-                "Name": "ShouldHideActivationAfterSuccessfulActivation",
+                "Name": "HideAfterUse",
                 "Flags": 1,
                 "Bool": true
               }
@@ -547,7 +547,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "0047C9:du_overtime.esm",
+        "FormKey": "004827:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -556,7 +556,7 @@
         },
         "EditorID": "duo_artifact_remote_qst20a_say1_scene",
         "Flags": 129,
-        "Quest": "0047C3:du_overtime.esm",
+        "Quest": "004822:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -587,12 +587,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "0047C7:du_overtime.esm"
+            "Topic": "004825:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "0047CC:du_overtime.esm",
+        "FormKey": "00482A:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -601,7 +601,7 @@
         },
         "EditorID": "duo_artifact_remote_qst20a_say2_scene",
         "Flags": 128,
-        "Quest": "0047C3:du_overtime.esm",
+        "Quest": "004822:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -632,14 +632,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "0047CA:du_overtime.esm"
+            "Topic": "004828:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "0047C7:du_overtime.esm",
+        "FormKey": "004825:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -648,7 +648,7 @@
         },
         "EditorID": "duo_artifact_remote_qst20a_say1_topic",
         "Priority": 50,
-        "Quest": "0047C3:du_overtime.esm",
+        "Quest": "004822:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -656,11 +656,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "0047C8:du_overtime.esm"
+          "004826:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "0047C8:du_overtime.esm",
+            "FormKey": "004826:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -668,14 +668,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_remote_qst20a_say1_info",
-            "Speaker": "0047C6:du_overtime.esm",
+            "Speaker": "004824:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 18375,
+                "WEMFile": 18469,
                 "EmotionOut": 0,
                 "ResponseText": "The flight recorder\u0027s still pinging out there. I lost a full hold with that freighter. The crew got out in the pods, and they swear they did nothing wrong. The recorder\u0027s the only thing that can say so.",
                 "ScriptNotes": "",
@@ -688,7 +688,7 @@
         ]
       },
       {
-        "FormKey": "0047CA:du_overtime.esm",
+        "FormKey": "004828:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -697,7 +697,7 @@
         },
         "EditorID": "duo_artifact_remote_qst20a_say2_topic",
         "Priority": 50,
-        "Quest": "0047C3:du_overtime.esm",
+        "Quest": "004822:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -705,11 +705,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "0047CB:du_overtime.esm"
+          "004829:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "0047CB:du_overtime.esm",
+            "FormKey": "004829:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -717,14 +717,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_remote_qst20a_say2_info",
-            "Speaker": "0047C6:du_overtime.esm",
+            "Speaker": "004824:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 18378,
+                "WEMFile": 18472,
                 "EmotionOut": 0,
                 "ResponseText": "I\u0027ve got the data now. I\u0027ll check it, and we\u0027ll find out what actually happened. You could have saved some careers here.",
                 "ScriptNotes": "",

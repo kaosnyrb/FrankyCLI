@@ -11,16 +11,17 @@ namespace FrankyCLI
         /// instances in BeatKinds, because the three differ only in their name and whether the hook hands over an item:
         ///
         ///   use      duo_delve_use                   hides its prompt, then sets the stage
-        ///   pickup   DefaultAliasOnActivateGiveItem  gives the beat's item; the fragment disables the object
+        ///   pickup   duo_delve_pickup                hides, gives the beat's item, then sets; the fragment disables the object
         ///   deliver  duo_delve_use                   the fragment takes every item picked up so far
+        ///   return   duo_delve_useb                  a use visited again: duo_delve_use under a second name, on the same alias
         ///   destroy  DefaultAliasOnDestroyed         shot to pieces, never pressed; the fragment disables the object
         ///
-        /// ⛔ USE AND DELIVER CARRY OUR OWN HOOK, NOT DefaultAliasOnActivate (2026-10-30, his "yeah make our own activate hook",
-        /// plan OT-91). The stock hook hides the prompt only after SafeSetStage returns, which waits out the stage's fragment
-        /// (a hold's wave can hold it 180 s), and it hides GetReference(): by then a re-dealt board quest's alias can hold the
-        /// NEXT run's object, so Runaway Plant's second run met a console with no prompt. duo_delve_use hides first, then sets.
-        /// ⏳ Not yet moved, same shape and not yet seen to bite: a RETURN's DefaultAliasOnActivateA, the pickup's GiveItem
-        /// (it gives the item after the wait), and the space template's arrival hooks (delve_space.cs).
+        /// ⛔ EVERY ACTIVATE HOOK HERE IS OUR OWN, NOT VANILLA'S DefaultAliasOnActivate FAMILY (2026-10-30, his "yeah make our own
+        /// activate hook", plan OT-91; the rest moved 2026-11-02 on his "make a ticket to move the other three over", OT-93).
+        /// The stock hooks act only after SafeSetStage returns, which waits out the stage's fragment (a hold's wave can hold it
+        /// 180 s), and act on GetReference(): by then a re-dealt board quest's alias can hold the NEXT run's object, so Runaway
+        /// Plant's second run met a console with no prompt. Ours hide (and give) first, then set. The space template's hooks
+        /// moved in the same change (delve_space.cs).
         ///
         /// DESTROY (2026-10-28, his "yeah build the beat now", off his note that the classic Sabotage "had you destroy the
         /// activator. They have a health system"). His classics do it with ccs_heatleechpoddeath on a per-quest activator
@@ -95,14 +96,14 @@ namespace FrankyCLI
                 int hookAlias; string script;
                 if (beat.returnTo != null)
                 {
-                    // The same object a second time: the stock hook's one duplicate, on the same alias.
+                    // The same object a second time: our hook under its second name, on the same alias.
                     hookAlias = build.slotOf[b].activatorAlias;
-                    script = "DefaultAliasOnActivateA";
+                    script = UseScriptB;
                 }
                 else
                 {
                     hookAlias = build.slotOf[b].activatorAlias;
-                    script = Destroys ? "DefaultAliasOnDestroyed" : CarriesItem ? "DefaultAliasOnActivateGiveItem" : UseScript;
+                    script = Destroys ? "DefaultAliasOnDestroyed" : CarriesItem ? PickupScript : UseScript;
                 }
                 var sc = StageHook(script, build.beatStage[b], prereq);
                 if (Destroys) { }   // no prompt to hide: the entry stage blocked activation
@@ -111,18 +112,15 @@ namespace FrankyCLI
                     var ip = new ScriptObjectProperty { Name = "ItemToGive", Flags = ScriptProperty.Flag.Edited };
                     ip.Object.SetTo(build.itemOf[b]);
                     sc.Properties.Add(ip);
-                    // No ShouldDisableAfterSuccessfulActivation: the stock hook disables only after SafeSetStage returns,
-                    // which waits out the stage's fragment, and a hold's wave fragment waits up to 180 s. The canister on
-                    // remote_planet_qst21a stood through the fight and the late Disable() hit an alias Stop() had cleared
-                    // (Papyrus.1.log 2026-10-26 16:50:52, "Cannot call Disable() on a None object"). StageLines disables it.
+                    // The hook hides the object and gives the item BEFORE it sets the stage (duo_delve_pickup); the object is
+                    // disabled by the stage's first line (StageLines), never by a hook after the set: the stock hook's late
+                    // Disable() once hit an alias Stop() had cleared (remote_planet_qst21a, Papyrus.1.log 2026-10-26 16:50:52).
                 }
                 else
                 {
-                    // An object a later beat comes back to keeps its prompt, or the return could never fire. A return's own hook
-                    // is still the stock DefaultAliasOnActivateA, whose property this is.
+                    // An object a later beat comes back to keeps its prompt, or the return could never fire.
                     bool comesBack = build.r.beats.Any(x => x.returnTo == b + 1);
-                    string hide = script == UseScript ? "HideAfterUse" : "ShouldHideActivationAfterSuccessfulActivation";
-                    sc.Properties.Add(new ScriptBoolProperty { Name = hide, Data = !comesBack, Flags = ScriptProperty.Flag.Edited });
+                    sc.Properties.Add(new ScriptBoolProperty { Name = "HideAfterUse", Data = !comesBack, Flags = ScriptProperty.Flag.Edited });
                 }
                 return build.AttachBeatHook(b, hookAlias, script, sc, prereq);
             }

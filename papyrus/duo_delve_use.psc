@@ -46,6 +46,12 @@ Event OnActivate(ObjectReference akActionRef)
     if HideAfterUse && me
         me.BlockActivation(true, true)
     endif
+    BeforeStage(akActionRef)
     q.SetStage(StageToSet)
     Debug.Trace(Self + " [use] " + me + " set stage " + StageToSet)
 EndEvent
+
+; What a child does between hiding the object and setting the stage, before anything waits (plan OT-93): duo_delve_pickup
+; gives its item here. Empty on a plain use or deliver, so they behave exactly as before.
+Function BeforeStage(ObjectReference akActionRef)
+EndFunction

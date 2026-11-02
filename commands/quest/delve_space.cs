@@ -428,27 +428,30 @@ namespace FrankyCLI
 
             if (two)
             {
-                // THE HOOKS: the stock activate hook on each object, the deliver gated on the pickup's stage, so it cannot
-                // complete empty-handed (the gate is stage order, as on the ground: object.cs).
+                // THE HOOKS: our activate hook on each object (duo_delve_use: hides first, then sets; plan OT-93), the deliver
+                // gated on the pickup's stage, so it cannot complete empty-handed (the gate is stage order, as on the ground:
+                // object.cs). The pickup's item goes to the ship from the fragment, so this pickup is a plain use, not
+                // duo_delve_pickup.
                 foreach (var (alias, set, after) in new[] { ((int)target.ID, PickupStage, t.entryStage), ((int)target2!.ID, t.completeStage, PickupStage) })
                 {
-                    var h = StageHook("DefaultAliasOnActivate", set, after,
-                                      new ScriptBoolProperty { Name = "ShouldHideActivationAfterSuccessfulActivation", Data = true, Flags = ScriptProperty.Flag.Edited });
+                    var h = StageHook(UseScript, set, after,
+                                      new ScriptBoolProperty { Name = "HideAfterUse", Data = true, Flags = ScriptProperty.Flag.Edited });
                     if (AttachHook(vma, clone.FormKey, alias, h, HookEntry.FindOrCreate, true, bm, set, after) == Hooked.AlreadyCarries)
-                    { Console.WriteLine($"REFUSED: alias {alias} already carries DefaultAliasOnActivate."); return 1; }
-                    Console.WriteLine($"  +hook    : alias {alias} DefaultAliasOnActivate sets {set} after {after}");
+                    { Console.WriteLine($"REFUSED: alias {alias} already carries {UseScript}."); return 1; }
+                    Console.WriteLine($"  +hook    : alias {alias} {UseScript} sets {set} after {after}");
                 }
             }
 
-            // THE HOOK: activating the object completes it (his MB01's is used from the ship; this is the stock one). Not on a
-            // board: there the activator's own script completes the mission, and his MB01's alias scripts stay as shipped.
+            // THE HOOK: activating the object completes it (his MB01's is used from the ship; this is ours, duo_delve_use, plan
+            // OT-93). Not on a board: there the activator's own script completes the mission, and his MB01's alias scripts stay
+            // as shipped.
             if (!IsBoardSpace(t))
             {
-                var hook = StageHook("DefaultAliasOnActivate", t.completeStage, 0,
-                                     new ScriptBoolProperty { Name = "ShouldHideActivationAfterSuccessfulActivation", Data = true, Flags = ScriptProperty.Flag.Edited });
+                var hook = StageHook(UseScript, t.completeStage, 0,
+                                     new ScriptBoolProperty { Name = "HideAfterUse", Data = true, Flags = ScriptProperty.Flag.Edited });
                 if (AttachHook(vma, clone.FormKey, (int)target.ID, hook, HookEntry.FindOrCreate, true, bm, t.completeStage, 0) == Hooked.AlreadyCarries)
-                { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnActivate."); return 1; }
-                Console.WriteLine($"  +hook    : alias {target.ID} DefaultAliasOnActivate sets {t.completeStage} after 0");
+                { Console.WriteLine($"REFUSED: alias {target.ID} already carries {UseScript}."); return 1; }
+                Console.WriteLine($"  +hook    : alias {target.ID} {UseScript} sets {t.completeStage} after 0");
             }
 
             string name = FragmentScriptName(r);
@@ -481,8 +484,8 @@ namespace FrankyCLI
                 if (two)
                 {
                     // THE ITEM goes to THE SHIP HE IS FLYING, as vanilla space loot does (his: "think it goes to the hold").
-                    // Given from the fragment, not the stock GiveItem hook, whose source adds nothing unless a ...ToAddTo alias
-                    // is set (DefaultAliasOnActivateGiveItem.psc), a question this build does not need to answer.
+                    // Given from the fragment to the ship, so this pickup's hook is a plain duo_delve_use, not duo_delve_pickup
+                    // (which gives to whoever activated it, and in space that is not the hold).
                     RemovePrevious(myMod.MiscItems, e => e.StartsWith(r.id + "_item"));
                     var itemSrc = myMod.MiscItems.FirstOrDefault(m => m.EditorID == t.itemSource);
                     if (itemSrc == null) { Console.WriteLine($"REFUSED: itemSource '{t.itemSource}' is not a MiscItem in {t.mod}."); return 1; }

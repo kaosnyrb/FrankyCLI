@@ -209,7 +209,7 @@ namespace FrankyCLI
                         if (!string.Equals(tgt.at, b.at, StringComparison.OrdinalIgnoreCase) || tgt.PlaceIndex != b.PlaceIndex)
                             Fatal($"beat {i + 1} returns to beat {back} and must name its marker and place ('{tgt.at}', {tgt.place ?? "main"}).");
                         if (r.beats.Take(i).Count(x => x.returnTo == back) > 0)
-                            Fatal($"beat {back} is returned to twice; the stock hook has ONE duplicate (DefaultAliasOnActivateA), so once.");
+                            Fatal($"beat {back} is returned to twice; the hook has ONE second name ({UseScriptB}), so once.");
                     }
                     if (b.type != "use" && b.type != "deliver")
                         Fatal($"beat {i + 1} is a {b.type} return; a return activates an object already there, so it is a use or a deliver.");
@@ -632,6 +632,12 @@ namespace FrankyCLI
         /// <summary>A use or deliver beat's hook on its object: our copy of DefaultAliasOnActivate (papyrus/duo_delve_use.psc),
         /// which hides the prompt BEFORE it sets the stage, so a last run's hook cannot reach the next run's object (OT-91).</summary>
         private const string UseScript = "duo_delve_use";
+        /// <summary>A RETURN beat's hook: duo_delve_use under a second name (papyrus/duo_delve_useb.psc), since one alias cannot
+        /// carry a script twice; our copy of DefaultAliasOnActivateA (OT-93).</summary>
+        private const string UseScriptB = "duo_delve_useb";
+        /// <summary>A pickup beat's hook: duo_delve_use that gives ItemToGive before it sets the stage (papyrus/duo_delve_pickup.psc);
+        /// our copy of DefaultAliasOnActivateGiveItem, which gave only after the stage's fragment returned (OT-93).</summary>
+        private const string PickupScript = "duo_delve_pickup";
         /// <summary>Vanilla's map marker alias script, MB01's values on an orbit's map marker (Discovered, type 47, visibility 1).</summary>
         private const string MapMarkerScript = "DefaultAliasMapMarkerScript";
         /// <summary>MapMarkerLinkedRefNameOverride: the keyword a map marker links its target by, so the star map names it.</summary>
