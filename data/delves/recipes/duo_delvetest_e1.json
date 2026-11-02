@@ -13,7 +13,8 @@
     "Silent on purpose: no speaker, broadcast or say, so no voice spend. The words are placeholders for a probe, not Jessica's; if it graduates, a real recipe gets hers. Unbuilt once it has told us.",
     "WORDS, Jessica 2026-11-02 on his ruling that BOTH are hers to write, as options. E1's angle is the den: he goes to its ground, where E2 has it come to ours. No line names the kind of place (Covered Crater, Crystal Crater or Natural Archways, Eliza's census), only that it is out in the wild. Bigger and older, never giant (one size step).",
     "NARROW, as MB98a: pinned to Akila, so Ashta and the Rangers are said aloud (his exemption, 2026-10-26).",
-    "THE RANGER IN PERSON, his 14:37: she stands on the outskirts (RETravelA1) and briefs him in a talk; the broadcast went, since she says it to his face. Named persons are Essential since 11-02 (bc14c45), so the hunt cannot kill her."
+    "THE RANGER IN PERSON, his 14:37: she stands on the outskirts (RETravelA1) and briefs him in a talk; the broadcast went, since she says it to his face. Named persons are Essential since 11-02 (bc14c45), so the hunt cannot kill her.",
+    "NARROWER, his 14:39: 'Tamar Quill knows this is an Ashta den. She knows what planet shes on.' So she names the den, Akila, Akila City and the crangon it hunts (Elk Crangon, Akila's prey in fauna.md). The lore (fandom): Ashta hunt at night, and a miner once came back to Akila City swearing a house-sized one killed his crew; she tells it as a city rumour, so nothing promises this one is that big (the build makes it one size step up). Five prompts, so her count is not the four his ear caught as formulaic."
   ],
   "place": {
     "theme": {
@@ -30,7 +31,7 @@
   },
   "prose": {
     "name": "Hunt: Elder Ashta at the <Place> on <Planet>",
-    "briefing": "An Ashta bigger and older than the rest has taken the <Place> for its den, well away from anyone's walls. The Rangers want it put down before it starts coming in.",
+    "briefing": "An Ashta bigger and older than the rest has taken the <Place> for its den, out past Akila City's walls. The Rangers want it put down before it starts coming in.",
     "card": "Settlement Contract. Hunt the Elder Ashta at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
@@ -39,7 +40,7 @@
       "at": "RETravelA1LocRef",
       "_at": "The edge of the site: she stands on the outskirts, not at the den.",
       "objective": "Meet the Ranger on the edge of the <Place>",
-      "journal": "I met the Ranger on the edge of the <Place>. The Elder Ashta lies up in there, and I need to go in quiet and put it down.",
+      "journal": "I met the Ranger on the edge of the <Place>. It's an Ashta den, and the old one in there has been taking stock. I need to go in quiet and put it down.",
       "person": {
         "name": "Tamar Quill",
         "template": "UC_NA_MASTWorkerFemale03",
@@ -48,12 +49,12 @@
         "elevenlabs": "pFZP5JQG7iQjIQuC4Bku",
         "hellos": [
           [
-            "Keep your voice down. It's close."
+            "Keep your voice down. That's an Ashta den in there."
           ]
         ]
       },
       "greeting": [
-        "You came out. Good. The old one's in there, and it doesn't come to us yet. It lies up out here and takes whatever wanders past. Ask what you need, then go in quiet."
+        "You came out. That's an Ashta den, and the old one's had it longer than I've been a Ranger. Every Ashta on Akila hunts at night. This one hunts when it likes. Ask what you need, then go in quiet."
       ],
       "exchanges": [
         {
@@ -63,15 +64,27 @@
           ]
         },
         {
+          "prompt": "What's it been taking?",
+          "reply": [
+            "Crangon off the plains, mostly. Then a homestead's stock last week. Once they learn stock doesn't run, they don't go back to crangon."
+          ]
+        },
+        {
+          "prompt": "Do they all get this big?",
+          "reply": [
+            "No. Most of them die young out here. Every few years one doesn't, and somebody in Akila City swears they saw one the size of a house."
+          ]
+        },
+        {
           "prompt": "Why not go in yourself?",
           "reply": [
-            "Because there's one of me and a lot of ground to watch. And the last old one I went after alone, I nearly didn't walk back from."
+            "Because there's one of me and a lot of Akila to watch. And the last old one I went after alone, I nearly didn't walk back from."
           ]
         },
         {
           "prompt": "How do you know it's old?",
           "reply": [
-            "The size, and the scars. And it's patient. The young ones never are."
+            "The size, and the scars. An Ashta that lives this long has stopped being afraid of anything on Akila, us included."
           ],
           "perk": "Skill_Zoology"
         }
