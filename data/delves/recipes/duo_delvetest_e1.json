@@ -4,13 +4,15 @@
   "template": "board",
   "deal": "_duo_MB_MissionNode_test",
   "_deal": "The board's test node, until he plays it.",
-  "author": "eliza",
+  "author": "eliza (build); words jessica",
   "source": "his 2026-11-02 13:44: \"yeah lets make an elite Ashta to hunt at a natural site\", after my read of his May PredatorHuntTarget and vanilla's Ashta -> Alpha Ashta",
   "_note": [
     "HANDED TO JESSICA 2026-11-02 beside E2, his \"we'll have both missions as options\", after his play of E1 rebuilt alone: \"yeah E1 worked fine, took me to a covered crater\". A natural board site works; only three kinds exist (Covered Crater, Crystal Crater, Natural Archways). Placeholder words; hers replace them. NOT unbuilt: it stays.",
     "ELITE TEST E1: the first `elite` on a defeat. The build clones PCM_Cheyenne_Akila_Ashta as duo_delvetest_e1_b1elite with vanilla's alpha swaps (challenge VeryHard, + Special_Boss, size up one) and its own name, and does NOT retarget the template chain as his May PredatorHuntTarget did.",
     "What his play answers: (1) does a plain clone render, at all and as an Ashta (if not, the May retarget goes back in, and we know why it existed); (2) does it read as an elite: bigger, harder, the name on its health bar; (3) does the board place a NATURAL site on Akila (no Delve has pinned a planet AND required a theme).",
-    "Silent on purpose: no speaker, broadcast or say, so no voice spend. The words are placeholders for a probe, not Jessica's; if it graduates, a real recipe gets hers. Unbuilt once it has told us."
+    "Silent on purpose: no speaker, broadcast or say, so no voice spend. The words are placeholders for a probe, not Jessica's; if it graduates, a real recipe gets hers. Unbuilt once it has told us.",
+    "WORDS, Jessica 2026-11-02 on his ruling that BOTH are hers to write, as options. E1's angle is the den: he goes to its ground, where E2 has it come to ours. No line names the kind of place (Covered Crater, Crystal Crater or Natural Archways, Eliza's census), only that it is out in the wild. Bigger and older, never giant (one size step).",
+    "NARROW, as MB98a: pinned to Akila, so Ashta and the Rangers are said aloud (his exemption, 2026-10-26)."
   ],
   "place": {
     "theme": {
@@ -27,8 +29,8 @@
   },
   "prose": {
     "name": "Hunt: Elder Ashta at the <Place> on <Planet>",
-    "briefing": "An Elder Ashta has made the <Place> its ground. Put it down.",
-    "card": "Hunting Contract. An Elder Ashta at the <Place> on <Planet>. Payment on contract completion."
+    "briefing": "An Ashta bigger and older than the rest has taken the <Place> for its den, well away from anyone's walls. The Rangers want it put down before it starts coming in.",
+    "card": "Settlement Contract. Hunt the Elder Ashta at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
     {
@@ -41,8 +43,20 @@
       },
       "_elite": "The ordinary Ashta MB98a's waves proved renders when spawned bare. 'Elder Ashta' is a probe name, not vanilla's 'Alpha Ashta', so the two cannot be confused at the glass.",
       "objective": "Hunt the Elder Ashta at the <Place>",
-      "journal": "I put down the Elder Ashta at the <Place>.",
-      "reward": "med"
+      "journal": "I tracked the Elder Ashta to its den at the <Place> and put it down.",
+      "reward": "med",
+      "say": [
+        "That's the old one down. I'll tell the homesteads they can let their stock out again."
+      ]
     }
-  ]
+  ],
+  "speaker": {
+    "name": "Ranger",
+    "voice": "GenericFemale01",
+    "elevenlabs": "pFZP5JQG7iQjIQuC4Bku"
+  },
+  "broadcast": [
+    "Rangers here. The old one doesn't come to us yet. It lies up out there and takes whatever wanders past. Go in quiet, because it'll know you're there before you see it."
+  ],
+  "_speech": "An Akila Ranger, a woman this time so the two options sound apart. Narrow, so Ashta and Rangers are said aloud. E2 is the old one walking into settled ground at midday; E1 is the player walking into its ground. Voice borrowed until his ear casts it."
 }
