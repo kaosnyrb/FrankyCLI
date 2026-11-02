@@ -12,7 +12,8 @@
     "What his play answers: (1) does a plain clone render, at all and as an Ashta (if not, the May retarget goes back in, and we know why it existed); (2) does it read as an elite: bigger, harder, the name on its health bar; (3) does the board place a NATURAL site on Akila (no Delve has pinned a planet AND required a theme).",
     "Silent on purpose: no speaker, broadcast or say, so no voice spend. The words are placeholders for a probe, not Jessica's; if it graduates, a real recipe gets hers. Unbuilt once it has told us.",
     "WORDS, Jessica 2026-11-02 on his ruling that BOTH are hers to write, as options. E1's angle is the den: he goes to its ground, where E2 has it come to ours. No line names the kind of place (Covered Crater, Crystal Crater or Natural Archways, Eliza's census), only that it is out in the wild. Bigger and older, never giant (one size step).",
-    "NARROW, as MB98a: pinned to Akila, so Ashta and the Rangers are said aloud (his exemption, 2026-10-26)."
+    "NARROW, as MB98a: pinned to Akila, so Ashta and the Rangers are said aloud (his exemption, 2026-10-26).",
+    "THE RANGER IN PERSON, his 14:37: she stands on the outskirts (RETravelA1) and briefs him in a talk; the broadcast went, since she says it to his face. Named persons are Essential since 11-02 (bc14c45), so the hunt cannot kill her."
   ],
   "place": {
     "theme": {
@@ -33,6 +34,49 @@
     "card": "Settlement Contract. Hunt the Elder Ashta at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
+    {
+      "type": "talk",
+      "at": "RETravelA1LocRef",
+      "_at": "The edge of the site: she stands on the outskirts, not at the den.",
+      "objective": "Meet the Ranger on the edge of the <Place>",
+      "journal": "I met the Ranger on the edge of the <Place>. The Elder Ashta lies up in there, and I need to go in quiet and put it down.",
+      "person": {
+        "name": "Tamar Ostrow",
+        "template": "UC_NA_MASTWorkerFemale03",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "pFZP5JQG7iQjIQuC4Bku",
+        "hellos": [
+          [
+            "Keep your voice down. It's close."
+          ]
+        ]
+      },
+      "greeting": [
+        "You came out. Good. The old one's in there, and it doesn't come to us yet. It lies up out here and takes whatever wanders past. Ask what you need, then go in quiet."
+      ],
+      "exchanges": [
+        {
+          "prompt": "I'll go in quiet.",
+          "reply": [
+            "Good. It'll know you're there before you see it, so don't stop moving."
+          ]
+        },
+        {
+          "prompt": "Why not go in yourself?",
+          "reply": [
+            "Because there's one of me and a lot of ground to watch. And the last old one I went after alone, I nearly didn't walk back from."
+          ]
+        },
+        {
+          "prompt": "How do you know it's old?",
+          "reply": [
+            "The size, and the scars. And it's patient. The young ones never are."
+          ],
+          "perk": "Skill_Zoology"
+        }
+      ]
+    },
     {
       "type": "defeat",
       "at": "REWoundedMarkerLocRef",
@@ -55,8 +99,5 @@
     "voice": "GenericFemale01",
     "elevenlabs": "pFZP5JQG7iQjIQuC4Bku"
   },
-  "broadcast": [
-    "Rangers here. The old one doesn't come to us yet. It lies up out there and takes whatever wanders past. Go in quiet, because it'll know you're there before you see it."
-  ],
-  "_speech": "An Akila Ranger, a woman this time so the two options sound apart. Narrow, so Ashta and Rangers are said aloud. E2 is the old one walking into settled ground at midday; E1 is the player walking into its ground. Voice borrowed until his ear casts it."
+  "_speech": "An Akila Ranger, a woman, standing on the edge of the site (his 14:37: 'for E1 can we have the npc on the outskirts of the base standing there'), so the brief is a talk and only the close is radio, in her voice. Narrow, so Ashta and Rangers are said aloud. Voice borrowed until his ear casts it."
 }
