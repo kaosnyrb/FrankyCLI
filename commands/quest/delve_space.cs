@@ -957,6 +957,7 @@ namespace FrankyCLI
             fail += Check(IsBoardSpace(t) || IsSlateSpace(t) ? "no story-manager start event (its node deals it, as every board and slate Delve)"
                                           : "no story-manager start event (started with startquest, as every Delve)", q.Event?.ToString() ?? "none", "none");
             fail += AliasGraphChecks(q);
+            if (IsBoardSpace(t)) fail += CheckBoardLabel(q, r);
             if (IsBoardSpace(t))
                 // Pinned off his MB01a's census (gen_inspect qall duo_MB01a_qst, Defiant, 2026-10-26), never re-read from the shell.
                 fail += Check("quest-level scripts (the board's, kept)", string.Join(",", vma.Scripts.Select(s => s.Name.ToLowerInvariant()).OrderBy(x => x)),

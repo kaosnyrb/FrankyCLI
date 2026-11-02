@@ -41,7 +41,7 @@
     "_theme": "A wreck here; the delivery site must never be a wreck itself (two places that could draw one POI warn). ELIZA 2026-10-15, measured: a request can put down 3 wreck sites of 214, so every crash site is one of three; the board places it, so it always starts."
   },
   "prose": {
-    "name": "TEST L1: Crash Site Cargo on <Planet>",
+    "name": "Recovery: TEST L1 Crash Site Cargo on <Planet>",
     "briefing": "A freighter came down at the <Place> with a consignment still aboard. Spacers got to the wreck first. The shipping firm wants its crate back, and will say where it goes once it is recovered.",
     "card": "Shipping Firm Contract. Recover our crate from the wreck at the <Place>. Delivery details on recovery. Spacers present. Payment on delivery."
   },

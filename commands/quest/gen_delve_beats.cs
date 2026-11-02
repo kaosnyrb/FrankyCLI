@@ -2652,6 +2652,7 @@ namespace FrankyCLI
                 foreach (int da in bm.DroppedDriverAliases)
                     fail += Check($"driver alias {da} is gone", q.Aliases.OfType<IQuestReferenceAliasGetter>().Any(a => a.ID == (uint)da) ? "PRESENT" : "gone", "gone");
                 fail += Check("the board's card is the recipe's", q.MissionBoardDescription?.String ?? "none", Expand(r.prose.card!, t));
+                fail += CheckBoardLabel(q, r);
                 // The pay and the shutdown are in the generated SOURCE: a fragment the compiler has not seen yet.
                 string src = File.ReadAllText(bm.PscPath);
                 fail += Check($"stage {t.completeStage} pays through {t.questScript}.MissionComplete()",

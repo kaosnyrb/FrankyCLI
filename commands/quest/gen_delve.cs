@@ -1489,6 +1489,8 @@ namespace FrankyCLI
                     Fatal($"place.remote is set; a board mission's place is ALWAYS a request (template '{t.id}'s base carries one), so leave it out.");
                 if (string.IsNullOrWhiteSpace(r.prose.card))
                     Fatal("prose.card is required on a board mission: it is the board's description, the card he reads before taking the job.");
+                if (!BoardTypes.ContainsKey(TitleType(r) ?? ""))
+                    Fatal($"prose.name's type is '{TitleType(r) ?? "(none: no colon)"}'; a board mission's label is derived from it (OT-05), and the types mapped are {string.Join(", ", BoardTypes.Keys)}.");
                 // The board's second place is borrowed bare: nothing on it holds it near the first, so a FOUND second place
                 // could be anywhere in the galaxy. A requested one is its own new site (proven 2026-10-14), so that is the shape,
                 // or a named city, which is pinned rather than found (2026-10-23, missionboard05a).
@@ -1499,6 +1501,8 @@ namespace FrankyCLI
             {
                 if (string.IsNullOrWhiteSpace(r.prose.card))
                     Fatal("prose.card is required on a board mission: it is the board's description, the card he reads before taking the job.");
+                if (!BoardTypes.ContainsKey(TitleType(r) ?? ""))
+                    Fatal($"prose.name's type is '{TitleType(r) ?? "(none: no colon)"}'; a board mission's label is derived from it (OT-05), and the types mapped are {string.Join(", ", BoardTypes.Keys)}.");
             }
             else if (r.prose.card != null)
                 Fatal($"prose.card is set and template '{t.id}' is not a board mission, so it would be silently ignored.");
@@ -3151,6 +3155,46 @@ namespace FrankyCLI
         }
 
         /// <summary>
+        /// The BOARD LABEL (plan OT-05, his 2026-11-02 "let's do A, it's a single label"): a board Delve's mission type, which
+        /// the board shows as its label, is the type keyword's own Name (MissionBoardTypeBounty reads "Bounty"). Every board
+        /// Delve inherited the board base's Bounty, so Runaway Plant read "BOUNTY". DERIVED, never authored: the type is the
+        /// title's prefix (Jessica's 14 types, the 10-29 style pass), mapped here onto vanilla's labels, so the title and the
+        /// label cannot disagree. A title whose type is not here is refused at lint. The mapping is a judgement, his to change.
+        /// </summary>
+        private static readonly Dictionary<string, (FormKey key, string label)> BoardTypes = new(StringComparer.Ordinal)
+        {
+            ["Hauling"]     = (FormKey.Factory("1E2670:Starfield.esm"), "Cargo"),     // MissionBoardTypeCargo
+            ["Recovery"]    = (FormKey.Factory("1E266F:Starfield.esm"), "Supply"),    // MissionBoardTypeSupply
+            ["Requisition"] = (FormKey.Factory("1E266F:Starfield.esm"), "Supply"),
+            ["Fabrication"] = (FormKey.Factory("1E266F:Starfield.esm"), "Supply"),
+            ["Rescue"]      = (FormKey.Factory("14C1B3:Starfield.esm"), "Rescue"),    // MissionBoardTypeRescue
+            ["Repairs"]     = (FormKey.Factory("3514C2:Starfield.esm"), "Local"),     // MissionBoardTypeLocal
+            ["Defense"]     = (FormKey.Factory("3514C2:Starfield.esm"), "Local"),
+            ["Danger"]      = (FormKey.Factory("3514C2:Starfield.esm"), "Local"),
+            ["Survey"]      = (FormKey.Factory("1E266E:Starfield.esm"), "Explore"),   // MissionBoardTypeSurvey
+            ["Bounty"]      = (FormKey.Factory("1E2671:Starfield.esm"), "Bounty"),    // MissionBoardTypeBounty
+            ["Strike"]      = (FormKey.Factory("1E2671:Starfield.esm"), "Bounty"),
+            ["Sabotage"]    = (FormKey.Factory("196523:Starfield.esm"), "Raid"),      // MissionBoardTypeSteal
+            ["Infestation"] = (FormKey.Factory("3514C4:Starfield.esm"), "Hunt"),      // MissionBoardTypeHunt
+            ["Hunt"]        = (FormKey.Factory("3514C4:Starfield.esm"), "Hunt"),
+        };
+
+        /// <summary>The verify's OT-05 check, both board kinds: the label is the title's type, on the type field, and the only
+        /// type keyword in the list, read back off disk.</summary>
+        private static int CheckBoardLabel(IQuestGetter q, Recipe r)
+        {
+            var (bt, label) = BoardTypes[TitleType(r)!];
+            var types = BoardTypes.Values.Select(v => v.key).ToHashSet();
+            var inList = q.Keywords?.Where(k => types.Contains(k.FormKey)).Select(k => k.FormKey.ToString()) ?? Enumerable.Empty<string>();
+            return Check($"the board label is the title's type \"{TitleType(r)}\" ({label})",
+                         $"{q.MissionTypeKeyword.FormKey}; list {string.Join(",", inList)}", $"{bt}; list {bt}");
+        }
+
+        /// <summary>A board title's type: the text before its first colon ("Repairs: Runaway Plant on ..."), or null.</summary>
+        private static string? TitleType(Recipe r)
+            => r.prose.name is string n && n.IndexOf(':') is int c && c > 0 ? n[..c] : null;
+
+        /// <summary>
         /// Place.planet's CLOSED table: the name a recipe writes, to the planet's LOCATION in Starfield.esm (the form vanilla's
         /// pinned requests name: SSol_PMars on FFCydoniaZ07). A planet is added here when a recipe needs one, never searched
         /// for by name. Akila read 2026-11-02 (gen_inspect location): LocTypePlanet, LocTypeSettledPlanet, LocTypeMajorOrbital.
@@ -3633,6 +3677,15 @@ namespace FrankyCLI
             {
                 clone.MissionBoardDescription = Expand(r.prose.card!, t);
                 Console.WriteLine("  card     : the board's description");
+                // The label (OT-05): the title's type onto vanilla's, on the record's type field AND its keyword list, where
+                // the shell carries the base's Bounty too. Every type keyword in the table leaves the list first.
+                var (kw, label) = BoardTypes[TitleType(r)!];
+                clone.MissionTypeKeyword.SetTo(kw);
+                var all = BoardTypes.Values.Select(v => v.key).ToHashSet();
+                clone.Keywords ??= new();
+                clone.Keywords.RemoveAll(k => all.Contains(k.FormKey));
+                clone.Keywords.Add(kw);
+                Console.WriteLine($"  label    : \"{label}\" on the board ({kw}), from the title's type \"{TitleType(r)}\"");
             }
             return 0;
         }
