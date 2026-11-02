@@ -2,8 +2,8 @@
   "schema": 2,
   "id": "duo_MB98a_qst",
   "template": "board",
-  "deal": "_duo_MB_MissionNode_test",
-  "_deal": "The board's test node, until he plays it.",
+  "deal": "duo_MB_MissionNode_Infestation",
+  "_deal": "His 2026-11-02 pick after his first play (\"duo_MB_MissionNode_Infestation probly\"), moved with gen_delve move, no rebuild.",
   "author": "jessica",
   "source": "his 2026-10-26 11:24: \"right a Jaeger like quest idea. Missonboard. Our outpost is being attack by Ashta. Only spawns on a outpost on Cheyenne\", then 11:33: \"ah worth saying we can be more specific. We know what planet this is, we know this is on the Freestar Collective homeworld etc. Idea is we make narrow quests which give you writing more bones\"",
   "_note": [
