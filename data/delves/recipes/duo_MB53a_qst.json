@@ -16,7 +16,7 @@
     "(style guide 33 s4: we, payer on line one, flat, stock closer).",
     "Three scanners in ANY ORDER behind one counted objective (remote03a's shape), so no journal line says first or last.",
     "Ends on a group, so the closing radio is recapSay (his 2026-10-17: the close is a radio).",
-    "MODEL IS A STAND-IN: SeismicSensor01 (vanilla, used by 01a). Kim's F9 'Scanner array' is unbuilt; her eye owed.",
+    "MODEL IS A STAND-IN: SeismicSensor01 (vanilla, used by 01a). Kim's F9 'Scanner array' is unbuilt; her eye owed. (Superseded 2026-11-02, Eliza: her F9 set is in, see each beat's _model.)",
     "Pay: med, placeholder (a three-part job); the tier is his."
   ],
   "place": {
@@ -56,7 +56,8 @@
       "at": "RECenterLocRef",
       "objective": "Destroy the Ecliptic scanners at the <Place>",
       "journal": "This scanner was tracking movement on the ground. It isn't tracking anything now.",
-      "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
+      "model": "Meshes\\ccs\\scannermotion01.nif",
+      "_model": "2026-11-02, Eliza, plan OT-6A: Kim's F9 motion scanner (orange tripod floodlamp, two camera domes on the crossbar, a junction box at a foot; 1.68 m). His 11-02: \"thin and hard to shoot was the vanilla ones\".",
       "name": "Ecliptic Motion Scanner"
     },
     {
@@ -65,7 +66,8 @@
       "at": "RETravelA1LocRef",
       "ring": "infrastructure",
       "journal": "This scanner counted ships landing and taking off.",
-      "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
+      "model": "Meshes\\ccs\\scannerlanding01.nif",
+      "_model": "2026-11-02, Eliza, plan OT-6A: Kim's F9 landing scanner (vanilla antennatech04 on a cross foot, a junction box at its base; 5.5 m).",
       "name": "Ecliptic Landing Scanner"
     },
     {
@@ -74,7 +76,8 @@
       "at": "RETravelB1LocRef",
       "ring": "infrastructure",
       "journal": "This scanner logged heat signatures. It's in pieces now.",
-      "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
+      "model": "Meshes\\ccs\\scannerthermal01.nif",
+      "_model": "2026-11-02, Eliza, plan OT-6A: Kim's F9 thermal scanner (two posts on a cross foot, two wall cameras back to back on top, a junction box at the foot; 1.25 m).",
       "name": "Ecliptic Thermal Scanner"
     }
   ],

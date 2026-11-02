@@ -1,5 +1,5 @@
 {
-  "FormKey": "0044FE:du_overtime.esm",
+  "FormKey": "0047F6:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -24,7 +24,7 @@
     "1E2671:Starfield.esm"
   ],
   "TextDisplayGlobals": [
-    "004502:du_overtime.esm"
+    "0047FA:du_overtime.esm"
   ],
   "MissionBoardInfoPanels": [
     {
@@ -231,7 +231,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "0044FE:du_overtime.esm",
+              "FirstLink": "0047F6:du_overtime.esm",
               "SecondParameter": 10
             }
           ],
@@ -268,7 +268,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "0044FE:du_overtime.esm",
+              "FirstLink": "0047F6:du_overtime.esm",
               "SecondParameter": 10
             }
           ],
@@ -331,7 +331,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "0044FE:du_overtime.esm",
+              "FirstLink": "0047F6:du_overtime.esm",
               "SecondParameter": 20
             }
           ]
@@ -353,7 +353,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "0044FE:du_overtime.esm",
+              "FirstLink": "0047F6:du_overtime.esm",
               "SecondParameter": 30
             }
           ]
@@ -375,7 +375,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "0044FE:du_overtime.esm",
+              "FirstLink": "0047F6:du_overtime.esm",
               "SecondParameter": 40
             }
           ]
@@ -587,7 +587,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "0044FF:du_overtime.esm",
+        "Object": "0047F7:du_overtime.esm",
         "AliasID": 20,
         "Create": 0,
         "Level": 0
@@ -615,7 +615,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "004500:du_overtime.esm",
+        "Object": "0047F8:du_overtime.esm",
         "AliasID": 23,
         "Create": 0,
         "Level": 0
@@ -643,7 +643,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "004501:du_overtime.esm",
+        "Object": "0047F9:du_overtime.esm",
         "AliasID": 33,
         "Create": 0,
         "Level": 0
@@ -665,7 +665,7 @@
           "Name": "Counter1",
           "Flags": 1,
           "Object": {
-            "Form": "004502:du_overtime.esm",
+            "Form": "0047FA:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -675,7 +675,7 @@
           "Name": "Alias_ArrivalMarker",
           "Flags": 1,
           "Object": {
-            "Form": "0044FE:du_overtime.esm",
+            "Form": "0047F6:du_overtime.esm",
             "Alias": 20,
             "Unused": 0
           }
@@ -685,7 +685,7 @@
           "Name": "Alias_Beat1Target",
           "Flags": 1,
           "Object": {
-            "Form": "0044FE:du_overtime.esm",
+            "Form": "0047F6:du_overtime.esm",
             "Alias": 21,
             "Unused": 0
           }
@@ -695,7 +695,7 @@
           "Name": "Alias_Beat2Target",
           "Flags": 1,
           "Object": {
-            "Form": "0044FE:du_overtime.esm",
+            "Form": "0047F6:du_overtime.esm",
             "Alias": 24,
             "Unused": 0
           }
@@ -705,7 +705,7 @@
           "Name": "Alias_Beat3Target",
           "Flags": 1,
           "Object": {
-            "Form": "0044FE:du_overtime.esm",
+            "Form": "0047F6:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -725,7 +725,7 @@
           "Name": "Say1",
           "Flags": 1,
           "Object": {
-            "Form": "004506:du_overtime.esm",
+            "Form": "0047FE:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -735,7 +735,7 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "004509:du_overtime.esm",
+            "Form": "004801:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -840,7 +840,7 @@
             "Name": "PlayerStarSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "0044FE:du_overtime.esm",
+              "Form": "0047F6:du_overtime.esm",
               "Alias": 0,
               "Unused": 0
             }
@@ -850,7 +850,7 @@
             "Name": "TargetSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "0044FE:du_overtime.esm",
+              "Form": "0047F6:du_overtime.esm",
               "Alias": 8,
               "Unused": 0
             }
@@ -860,7 +860,7 @@
             "Name": "TargetPlanetLocation",
             "Flags": 1,
             "Object": {
-              "Form": "0044FE:du_overtime.esm",
+              "Form": "0047F6:du_overtime.esm",
               "Alias": 2,
               "Unused": 0
             }
@@ -870,7 +870,7 @@
             "Name": "TargetLocation",
             "Flags": 1,
             "Object": {
-              "Form": "0044FE:du_overtime.esm",
+              "Form": "0047F6:du_overtime.esm",
               "Alias": 5,
               "Unused": 0
             }
@@ -880,7 +880,7 @@
             "Name": "PrimaryRef",
             "Flags": 1,
             "Object": {
-              "Form": "0044FE:du_overtime.esm",
+              "Form": "0047F6:du_overtime.esm",
               "Alias": 3,
               "Unused": 0
             }
@@ -890,7 +890,7 @@
             "Name": "PlayerShip",
             "Flags": 1,
             "Object": {
-              "Form": "0044FE:du_overtime.esm",
+              "Form": "0047F6:du_overtime.esm",
               "Alias": 9,
               "Unused": 0
             }
@@ -913,7 +913,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0044FE:du_overtime.esm",
+            "Form": "0047F6:du_overtime.esm",
             "Alias": 11,
             "Unused": 0
           }
@@ -947,7 +947,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0044FE:du_overtime.esm",
+            "Form": "0047F6:du_overtime.esm",
             "Alias": 21,
             "Unused": 0
           }
@@ -980,7 +980,7 @@
                 "Name": "TargetAlias",
                 "Flags": 1,
                 "Object": {
-                  "Form": "0044FE:du_overtime.esm",
+                  "Form": "0047F6:du_overtime.esm",
                   "Alias": 32,
                   "Unused": 0
                 }
@@ -1015,7 +1015,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0044FE:du_overtime.esm",
+            "Form": "0047F6:du_overtime.esm",
             "Alias": 24,
             "Unused": 0
           }
@@ -1049,7 +1049,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0044FE:du_overtime.esm",
+            "Form": "0047F6:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -1083,7 +1083,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0044FE:du_overtime.esm",
+            "Form": "0047F6:du_overtime.esm",
             "Alias": 20,
             "Unused": 0
           }
@@ -1098,7 +1098,7 @@
                 "Name": "TargetAlias",
                 "Flags": 1,
                 "Object": {
-                  "Form": "0044FE:du_overtime.esm",
+                  "Form": "0047F6:du_overtime.esm",
                   "Alias": 32,
                   "Unused": 0
                 }
@@ -1130,7 +1130,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "004506:du_overtime.esm",
+        "FormKey": "0047FE:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1139,7 +1139,7 @@
         },
         "EditorID": "duo_MB53a_qst_say1_scene",
         "Flags": 128,
-        "Quest": "0044FE:du_overtime.esm",
+        "Quest": "0047F6:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1170,12 +1170,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "004504:du_overtime.esm"
+            "Topic": "0047FC:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "004509:du_overtime.esm",
+        "FormKey": "004801:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1184,7 +1184,7 @@
         },
         "EditorID": "duo_MB53a_qst_say2_scene",
         "Flags": 128,
-        "Quest": "0044FE:du_overtime.esm",
+        "Quest": "0047F6:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1215,14 +1215,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "004507:du_overtime.esm"
+            "Topic": "0047FF:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "004504:du_overtime.esm",
+        "FormKey": "0047FC:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1231,7 +1231,7 @@
         },
         "EditorID": "duo_MB53a_qst_say1_topic",
         "Priority": 50,
-        "Quest": "0044FE:du_overtime.esm",
+        "Quest": "0047F6:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1239,11 +1239,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "004505:du_overtime.esm"
+          "0047FD:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "004505:du_overtime.esm",
+            "FormKey": "0047FD:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1251,14 +1251,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_MB53a_qst_say1_info",
-            "Speaker": "004503:du_overtime.esm",
+            "Speaker": "0047FB:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 17668,
+                "WEMFile": 18428,
                 "EmotionOut": 0,
                 "ResponseText": "That array\u0027s been watching every hauler we load for a month, and now they\u0027ve parked a crew beside it. Take the scanners down, all of them, because the one you miss is the one that sees us leave.",
                 "ScriptNotes": "",
@@ -1271,7 +1271,7 @@
         ]
       },
       {
-        "FormKey": "004507:du_overtime.esm",
+        "FormKey": "0047FF:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1280,7 +1280,7 @@
         },
         "EditorID": "duo_MB53a_qst_say2_topic",
         "Priority": 50,
-        "Quest": "0044FE:du_overtime.esm",
+        "Quest": "0047F6:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1288,11 +1288,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "004508:du_overtime.esm"
+          "004800:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "004508:du_overtime.esm",
+            "FormKey": "004800:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1300,14 +1300,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_MB53a_qst_say2_info",
-            "Speaker": "004503:du_overtime.esm",
+            "Speaker": "0047FB:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 17671,
+                "WEMFile": 18431,
                 "EmotionOut": 0,
                 "ResponseText": "That\u0027s the last of them. We\u0027re loading the haulers now, and we\u0027ll be gone before they get another one up.",
                 "ScriptNotes": "",
