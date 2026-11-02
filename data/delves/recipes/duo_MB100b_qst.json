@@ -2,8 +2,8 @@
   "schema": 2,
   "id": "duo_MB100b_qst",
   "template": "board",
-  "deal": "_duo_MB_MissionNode_test",
-  "_deal": "The board's test node, until he plays it.",
+  "deal": "duo_MB_MissionNode_Infestation_Hunt",
+  "_deal": "Promoted 2026-11-02 on his \"yup promote it\", after his play (\"all worked great\"): plan OT-26's pool, a Hunt alpha (one named animal). Moved by gen_delve move, no rebuild.",
   "author": "eliza (build); words jessica",
   "source": "his 2026-11-02 13:44: \"yeah lets make an elite Ashta to hunt at a natural site\", after my read of his May PredatorHuntTarget and vanilla's Ashta -> Alpha Ashta",
   "_note": [
