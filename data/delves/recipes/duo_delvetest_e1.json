@@ -41,7 +41,7 @@
       "objective": "Meet the Ranger on the edge of the <Place>",
       "journal": "I met the Ranger on the edge of the <Place>. The Elder Ashta lies up in there, and I need to go in quiet and put it down.",
       "person": {
-        "name": "Tamar Ostrow",
+        "name": "Tamar Quill",
         "template": "UC_NA_MASTWorkerFemale03",
         "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
         "voice": "GenericFemale01",
