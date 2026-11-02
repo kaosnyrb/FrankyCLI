@@ -30,7 +30,7 @@
   },
   "prose": {
     "name": "Recovery: Deserter's Papers on <Planet>",
-    "briefing": "A soldier walked out of the <Place> and won't go back in. Her discharge papers are still inside.",
+    "briefing": "A soldier walked out of the <Place> and won't go back in. Her discharge papers are still in there.",
     "card": "Private Contract. Recover a soldier's discharge papers from the <Place> on <Planet>. Discretion appreciated. Payment on contract completion."
   },
   "beats": [
@@ -38,7 +38,7 @@
       "type": "talk",
       "at": "LocDungeonOutsideEntranceMarkerLocRef",
       "objective": "Talk to the soldier outside the <Place>",
-      "journal": "The soldier outside the <Place> walked out and won't go back. Her discharge papers are inside with the officer who kept them, and I need to get them.",
+      "journal": "The soldier outside the <Place> walked out and won't go back. Her discharge papers are in there with the officer who kept them, and I need to get them.",
       "person": {
         "name": "Corporal Mabry",
         "template": "UC_NA_MASTWorkerFemale03",

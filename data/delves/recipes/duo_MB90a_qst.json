@@ -67,7 +67,7 @@
         ]
       },
       "greeting": [
-        "You're the hauler. This station's being stripped and sold for parts, but there's a signal amplifier here that still works, and someone in this system has been without comms for weeks. I'd rather it went to him than into a crate."
+        "You're the hauler. This station's being stripped for parts, but this signal amplifier still works, and someone in this system has had no comms for weeks. I'd rather it went to him than into a crate."
       ],
       "exchanges": [
         {
@@ -130,7 +130,7 @@
       ],
       "exchanges": [
         {
-          "prompt": "The relay keeper sent it. Her station's heard you every night.",
+          "prompt": "The relay keeper sent it. She's heard you every night.",
           "reply": [
             "Has it. Then it goes in the housing at the foot of the mast, and I'll stay by the radio."
           ]
