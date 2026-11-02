@@ -267,6 +267,13 @@ namespace FrankyCLI
         }
         /// <summary>His BOARD test node (the slate test nodes are `testnode`'s, a different shape). A build dealt into it empties it first, so it holds only the quest under test.</summary>
         private const string BoardTestNode = "_duo_MB_MissionNode_test";
+
+        /// <summary>
+        /// A recipe's id, the ONE spelling of the naming rule (his 2026-10-26): duo_MB&lt;NN&gt;&lt;x&gt;_qst on a board, duo_artifact_&lt;scope&gt;_qst&lt;NN&gt;&lt;x&gt;
+        /// on a slate, or a draft duo_delve.... The loader refuses anything else and the selftest checks this object. ⚠ THREE DIGITS since 2026-11-02 (plan OT-9C, his "Jessica has run out of numbers"): MB99a took the last two-digit board family; NextName already spelled 100 as MB100a, and only this rule refused it.
+        /// </summary>
+        internal static readonly System.Text.RegularExpressions.Regex RecipeIdRule = new(
+            "^(duo_MB[0-9]{2,3}[a-z]_qst|duo_artifact_(local|localcargo|remote|remote_planet)_qst[0-9]{2,3}[a-z]|duo_delve[0-9a-z_]+)$");
         /// <summary>The vanilla quest a hold's and a clear's wave collections are copied from, and how its alias is found.</summary>
         private const uint WaveQuestId = 0x03E832;
         private const string WaveMemberName = "ActiveHostiles";
@@ -1253,8 +1260,8 @@ namespace FrankyCLI
             // THE NAMING (his, 2026-10-26): a built Delve carries the classic grammar, a family number and a letter, board
             // families from 40 and slate families from 20, so the old missions sit below a clear gap. A recipe not yet
             // built still carries its draft name (duo_delve...), which is the name it is written under, not a family.
-            if (!System.Text.RegularExpressions.Regex.IsMatch(recipe.id, "^(duo_MB[0-9]{2}[a-z]_qst|duo_artifact_(local|localcargo|remote|remote_planet)_qst[0-9]{2}[a-z]|duo_delve[0-9a-z_]+)$"))
-            { Console.WriteLine($"REFUSED: id '{recipe.id}' must be duo_MB<NN><x>_qst, duo_artifact_<local|localcargo|remote|remote_planet>_qst<NN><x>, or a draft duo_delve...: it becomes an EditorID and every clone's prefix."); return null; }
+            if (!RecipeIdRule.IsMatch(recipe.id))
+            { Console.WriteLine($"REFUSED: id '{recipe.id}' must be duo_MB<NN><x>_qst, duo_artifact_<local|localcargo|remote|remote_planet>_qst<NN><x> (NN two or three digits), or a draft duo_delve...: it becomes an EditorID and every clone's prefix."); return null; }
             Console.WriteLine("  recipe: " + file);
 
             t = templates.FirstOrDefault(x => string.Equals(x.id, recipe.template, StringComparison.OrdinalIgnoreCase));

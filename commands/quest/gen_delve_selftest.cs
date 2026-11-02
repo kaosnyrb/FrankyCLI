@@ -89,6 +89,16 @@ namespace FrankyCLI
             Check("a draft is a draft", IsDraftId("duo_delve_missionboard28a") && IsDraftId("duo_delve36a"), "duo_delve...");
             Check("a test rung is not a draft", !IsDraftId("duo_delvetest_bs1"), "duo_delvetest_bs1");
             Check("a named Delve is not a draft", !IsDraftId("duo_MB51a_qst"), "duo_MB51a_qst");
+            // Three-digit families (plan OT-9C, 2026-11-02): past 99 the next family is 100, ordered as a NUMBER, and the
+            // loader's id rule must take it, on a board and on a slate; four digits and one digit stay refused.
+            var full = have.Append("duo_MB99a_qst");
+            Check("after MB99 the next family is MB100", N(full) == "duo_MB100a_qst", N(full) ?? "null");
+            Check("MB100 outranks MB99 (a number, not a string)", N(full.Append("duo_MB100a_qst")) == "duo_MB101a_qst", N(full.Append("duo_MB100a_qst")) ?? "null");
+            Check("a three-digit family's next letter", N(full.Append("duo_MB100a_qst"), 100) == "duo_MB100b_qst", N(full.Append("duo_MB100a_qst"), 100) ?? "null");
+            Check("the id rule takes a three-digit board family", RecipeIdRule.IsMatch("duo_MB100a_qst"), "duo_MB100a_qst");
+            Check("the id rule takes a three-digit slate family", RecipeIdRule.IsMatch("duo_artifact_localcargo_qst100a"), "duo_artifact_localcargo_qst100a");
+            Check("the id rule still takes a two-digit family", RecipeIdRule.IsMatch("duo_MB51a_qst") && RecipeIdRule.IsMatch("duo_artifact_local_qst20a"), "duo_MB51a_qst");
+            Check("the id rule refuses four digits and one", !RecipeIdRule.IsMatch("duo_MB1000a_qst") && !RecipeIdRule.IsMatch("duo_MB5a_qst"), "duo_MB1000a_qst, duo_MB5a_qst");
 
             Console.WriteLine(fail == 0 ? "selftest: all passed" : $"selftest: {fail} FAILED");
             return fail == 0 ? 0 : 1;
