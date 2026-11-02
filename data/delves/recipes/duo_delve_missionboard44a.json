@@ -10,7 +10,8 @@
     "THE RED MILE MAULERS: a pack of three, as the lore has them (\"often encountered in groups of three\"). Three defeats as a group, any order, so no line says first or last. NARROW, as MB98a: pinned to the creature's own planet, so the words name the creature and the planet aloud (his exemption, 2026-10-26).",
     "STAND-INS, two: (1) the target. Searched 11-02 (gen_inspect Npc 'Mauler', 'RedMile', 'Porrima'): only tankgirlsxenologyexpanded.esm's TG_OutpostClone_RedMileMauler, a third-party mod we must not depend on. The vanilla Mauler's EditorID does not carry its name; Eliza's or his. (2) place.planet 'Porrima III' is not in the closed table yet.",
     "A DRAFT ID: MB ids stop at two digits (MB99a was the last free one, 11-02), so this waits for gen_delve name, as missionboard33a became MB98a. The numbering cap is Eliza's to raise.",
-    "SEQUENTIAL, 11-02: the lint refuses a defeat in an any-order group, so the three are hunted in a fixed order (edge, far edge, centre) and the lines count up."
+    "SEQUENTIAL, 11-02: the lint refuses a defeat in an any-order group, so the three are hunted in a fixed order (edge, far edge, centre) and the lines count up.",
+    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-board44a.md): ship, findings 1-3 taken, 4-5 kept. Forced pick answered NO: the Maulers do not come to him when one dies (each defeat spawns at its own marker), so the call says they settle close and the objectives carry the walk: edge, far edge, centre (RETravelA1, RETravelB1, RECenter)."
   ],
   "place": {
     "theme": {
@@ -37,34 +38,34 @@
     "elevenlabs": "IKne3meq5aSn9XLyUdCD"
   },
   "broadcast": [
-    "They always come in threes, and they never stray far from each other. Find one and the other two won't be long behind. Take them one at a time if they let you."
+    "They always come in threes, and they settle close. Find one and you've found where the other two are. Take them one at a time if they let you."
   ],
   "beats": [
     {
       "type": "defeat",
       "at": "RETravelA1LocRef",
       "target": "RED MILE MAULER, UNFOUND",
-      "objective": "Hunt the first Red Mile Mauler at the <Place>",
+      "objective": "Hunt the first Red Mile Mauler on the edge of the <Place>",
       "journal": "I put down the first Red Mile Mauler at the edge of the <Place>. Now I need to find the second.",
       "say": [
-        "One down. The other two will have heard that."
+        "One down. The other two won't have moved."
       ]
     },
     {
       "type": "defeat",
       "at": "RETravelB1LocRef",
       "target": "RED MILE MAULER, UNFOUND",
-      "objective": "Hunt the second Red Mile Mauler at the <Place>",
-      "journal": "I put down the second Red Mile Mauler at the <Place>. Now I need to find the last one.",
+      "objective": "Hunt the next Red Mile Mauler at the far edge",
+      "journal": "I put down the second Red Mile Mauler at the far edge of the <Place>. Now I need to find the last one at the centre.",
       "say": [
-        "Two down. The last one won't run, they never do."
+        "Two down. The last one won't run."
       ]
     },
     {
       "type": "defeat",
       "at": "RECenterLocRef",
       "target": "RED MILE MAULER, UNFOUND",
-      "objective": "Hunt the last Red Mile Mauler at the <Place>",
+      "objective": "Hunt the last Red Mile Mauler at the <Place>'s centre",
       "journal": "I put down all three Red Mile Maulers at the <Place>.",
       "say": [
         "That's all three. We can stop sleeping in shifts."

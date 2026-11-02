@@ -10,7 +10,8 @@
     "THE KREET STALKERS: MB98a's shape on Kreet (sound the alarm, hold three waves), his 'Kreet Stalker defense'. NARROW, as MB98a: pinned to the creature's own planet, so the words name the creature and the planet aloud (his exemption, 2026-10-26).",
     "Creatures: PCM_Narion_Kreet_StalkerPredatorA (Starfield.esm), found 11-02 by gen_inspect. Lore (fandom): crab-like, wait for prey, burrow; tested by the UC Xenowarfare Division in 2306. Kept out of the words: the burrowing is the useful fact.",
     "STAND-IN: place.planet 'Kreet' is not in the closed planet table yet, and Kreet has few sites; the pool is the first question.",
-    "A DRAFT ID: MB ids stop at two digits (MB99a was the last free one, 11-02), so this waits for gen_delve name, as missionboard33a became MB98a. The numbering cap is Eliza's to raise."
+    "A DRAFT ID: MB ids stop at two digits (MB99a was the last free one, 11-02), so this waits for gen_delve name, as missionboard33a became MB98a. The numbering cap is Eliza's to raise.",
+    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-board46a.md): ship, findings 1-3 taken, 4 kept (always three waves), 5 kept. Forced pick answered NO: the alarm does not move the residents, so nobody is reported safe. Finding 3: SpawnCreatureWave is not known to bring them up out of the ground, so the advice is their stillness, not the ground."
   ],
   "place": {
     "theme": {
@@ -27,7 +28,7 @@
   },
   "prose": {
     "name": "Defense: Kreet Stalkers at the <Place> on <Planet>",
-    "briefing": "Kreet stalkers have started coming up out of the ground around the <Place>. They wait, and then they don't. The crew want someone on the alarm and someone who can shoot.",
+    "briefing": "Kreet stalkers have been testing the <Place>. They wait, and then they don't. The crew want someone on the alarm and someone who can shoot.",
     "card": "Settlement Contract. Help the <Place> on <Planet> hold against Kreet stalkers. Payment on contract completion."
   },
   "speaker": {
@@ -36,7 +37,7 @@
     "elevenlabs": "wsHauqjSkdBeAvdbUFmR"
   },
   "broadcast": [
-    "Get the alarm on so the crew gets inside. Stalkers come up out of the ground, so watch your feet as much as the horizon."
+    "Get the alarm on so the crew gets inside. Stalkers sit still until they're close, so check anything that isn't moving."
   ],
   "beats": [
     {
@@ -45,9 +46,9 @@
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Site Alarm",
       "objective": "Sound the alarm at the <Place>",
-      "journal": "Kreet stalkers have been coming up around the <Place>. I sounded the alarm and the crew got inside, and now I need to hold the site.",
+      "journal": "I sounded the alarm at the <Place>, and now I need to hold the site.",
       "say": [
-        "Alarm's on and everyone's in. Now watch the ground."
+        "Alarm's on. Now check anything that isn't moving."
       ]
     },
     {
@@ -71,7 +72,7 @@
       "revealObjective": "Kill the Kreet stalkers",
       "defend": 1,
       "say": [
-        "That's them gone back under. We'll leave the alarm where it is."
+        "That's the last of them. We'll leave the alarm where it is."
       ],
       "reward": "med"
     }
