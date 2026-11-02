@@ -22,13 +22,14 @@ namespace FrankyCLI
     /// leashes measure from it. An orbit has none of that: its markers are the space cell's own, filled FROM the cell's
     /// collection. So this build starts from the template's shell WHOLE (a shipped remote-space quest, the set every one of
     /// his 62 `duo_artifact_remote_qst*` carries) and changes only what a test needs: the event, the driver, the object, the
-    /// hook, the objective and the fragment. The first rung of the ladder is therefore the shipped set exactly, and every
-    /// later rung takes pieces away with `place.drop`. It shares the plumbing (shell, self-links, prose, ordering, the
-    /// model, the write, the alias-graph checks) and none of the beats.
+    /// hook, the objective and the fragment. It shares the plumbing (shell, self-links, prose, ordering, the model, the
+    /// write, the alias-graph checks) and none of the beats.
     ///
-    /// ⚠ WHAT IT DOES NOT CLAIM. That an orbit-only Delve is a product: it is the ladder's harness first. Whether it
-    /// graduates into a real template or comes out is the ladder's exit condition, in
-    /// office/spikes/2026-10-22-alias-set-ladders.md (home-office). One beat, `use` only, no speech, until then.
+    /// ⭐ GRADUATED 2026-11-02 (his "yeah retire all in one pass. boardspace and slatespace are what we use"). It was born as
+    /// the 2026-10-22 alias-set ladder's harness: a hand-started "space" kind whose rungs took pieces away with
+    /// `place.drop`. The ladder's answer became the two product kinds, "boardspace" and "slatespace", and the harness kind
+    /// and its knob came out (home-office office/spikes/2026-10-22-alias-set-ladders.md). The other rung keys (over,
+    /// player, playerShip, cellAt, system, parsecs) stay: either product kind may still set them.
     /// </summary>
     public static partial class gen_delve
     {
@@ -67,13 +68,7 @@ namespace FrankyCLI
             if (p.theme.require.Count > 0 || p.theme.exclude.Count > 0)
                 Fatal("place.theme is set; an orbit is not a drawn POI, so a theme would test nothing and is never written.");
             if (p.parsecs is double ps && ps <= 0) Fatal($"place.parsecs is {ps}; it is the orbit's distance limit from the player, above 0.");
-            if (p.drop != null)
-                foreach (var d in p.drop.GroupBy(x => x, StringComparer.OrdinalIgnoreCase).Where(g => g.Count() > 1))
-                    Fatal($"place.drop names {d.Key} twice.");
-            bool speaks = IsBoardSpace(t) || IsSlateSpace(t);   // the two orbit kinds that are products, not the ladder's harness
-            if (!speaks && (r.speaker != null || r.broadcast != null || r.recapSay != null))
-                Fatal("speech is set; the space kind builds none yet (its harness is one silent beat).");
-            if (speaks && r.recapSay != null)
+            if (r.recapSay != null)
                 Fatal($"recapSay is set; a {t.id} Delve has one beat, so its closing line is that beat's say.");
             if (IsBoardSpace(t) && r.broadcast != null && (t.arrivalStage < 0 || t.arrivalDistance <= 0))
                 Fatal($"broadcast is set and template '{t.id}' names no arrivalStage or arrivalDistance for the hook that plays it.");
@@ -111,13 +106,9 @@ namespace FrankyCLI
                         Fatal($"beat {i + 1}'s scenery.bounds is [{string.Join(", ", sc.bounds)}]; it is kitbash.py's WHOLE line, six numbers, each min below its max.");
                 }
                 // A two-beat board shows its own boxes: no repair script is there to show one.
-                if ((b.say != null && !speaks) || (b.message != null && !two) || b.group != null || b.returnTo != null)
-                    Fatal($"beat {i + 1} carries a {(b.message != null ? "message" : b.say != null ? "say" : b.group != null ? "group" : "returnTo")}; the {t.id} kind builds none"
+                if ((b.message != null && !two) || b.group != null || b.returnTo != null)
+                    Fatal($"beat {i + 1} carries a {(b.message != null && !two ? "message" : b.group != null ? "group" : "returnTo")}; the {t.id} kind builds none"
                           + (IsBoardSpace(t) && b.message != null ? " (its object's script shows its own start, success and fail messages)." : "."));
-                // A board pays through the board's reward globals (BuildSpace); a startquest test has nobody to pay it, so a
-                // tier there would be written nowhere.
-                if (b.reward != null && !speaks)
-                    Fatal($"beat {i + 1} carries a reward; template '{t.id}' is started by hand and pays nothing, so it would be silently ignored.");
             }
         }
 
@@ -235,9 +226,6 @@ namespace FrankyCLI
             var target = refs.FirstOrDefault(a => a.ID == (uint)slot.activatorAlias);
             if (marker?.ReferenceCollectionAliasID is not int cellId || target?.CreateReferenceToObject == null)
             { Console.WriteLine($"REFUSED: alias {slot.markerAlias} does not fill from a collection, or alias {slot.activatorAlias} creates nothing."); return 1; }
-            var keep = new HashSet<uint> { (uint)t.placeAlias, (uint)cellId, marker.ID, target.ID };
-
-            if (DropAliases(clone, vma, r.place.drop ?? new List<string>(), keep, target) != 0) return 1;
 
             // THE ORBIT'S PARSECS (rung 6): the orbit's GetDistanceGalacticParsec limit becomes a number, as a request's does.
             var orbit = clone.Aliases!.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)t.placeAlias);
@@ -741,75 +729,6 @@ namespace FrankyCLI
             return 0;
         }
 
-        /// <summary>
-        /// THE LADDER'S KNOB: remove the named base aliases, then refuse if anything left still names one. A user is any
-        /// alias filling from, created at, measured from, tested against, parented to, closest to or linked to a removed id;
-        /// an objective target; a script property or alias script entry; or an &lt;Alias=Name&gt; token in the quest's text.
-        /// The four aliases the beat itself stands on (the orbit, its cell, the marker, the object) cannot be dropped.
-        /// ⭐ ONE USER IS REMOVED RATHER THAN REFUSED, and it is named: the object's own link to a dropped alias. The shipped
-        /// object is a ship and links to PatrolMarker01 (found by this check's first run, 2026-10-22: S4 refused on it), and
-        /// this build replaces the ship, so the ship's link goes with the piece it pointed at. Printed, never silent.
-        /// ⚠ Wider than SlotUsers on purpose: a slot pair is only ever named by fills and objectives, while a dropped piece
-        /// of a space set can be named by a condition or a system alias. Two readers of "who names this", for two shapes.
-        /// </summary>
-        private static int DropAliases(Quest clone, QuestAdapter vma, List<string> drop, HashSet<uint> keep, QuestReferenceAlias obj)
-        {
-            if (drop.Count == 0) return 0;
-            var names = AliasNames(clone.Aliases!).ToDictionary(x => x.id, x => x.name);
-            var gone = new HashSet<uint>();
-            foreach (var n in drop)
-            {
-                var hit = names.Where(kv => string.Equals(kv.Value, n, StringComparison.OrdinalIgnoreCase)).Select(kv => kv.Key).ToList();
-                if (hit.Count != 1) { Console.WriteLine($"REFUSED: place.drop names '{n}', and {hit.Count} alias(es) of the shell carry that name."); return 1; }
-                if (keep.Contains(hit[0])) { Console.WriteLine($"REFUSED: place.drop names {n} (alias {hit[0]}); the beat stands on it."); return 1; }
-                gone.Add(hit[0]);
-            }
-            foreach (var a in clone.Aliases!.Where(a => AliasGraph.IdsOf(a).Any(gone.Contains)).ToList())
-            {
-                if (AliasGraph.IdsOf(a).Any(id => !gone.Contains(id))) { Console.WriteLine("REFUSED: a collection holds a dropped alias beside a kept one."); return 1; }
-                clone.Aliases!.Remove(a);
-            }
-            foreach (var e in vma.Aliases.Where(e => gone.Contains((uint)e.Property.Alias)).ToList()) vma.Aliases.Remove(e);
-
-            var users = new List<string>();
-            bool G(int? id) => id is int v && v >= 0 && gone.Contains((uint)v);
-            if (obj.LinkedAliases != null)
-                foreach (var l in obj.LinkedAliases.Where(l => G(l.AliasID)).ToList())
-                {
-                    obj.LinkedAliases.Remove(l);
-                    Console.WriteLine($"  -link    : {obj.Name} (alias {obj.ID}) no longer links to {l.AliasID}: the shipped ship's link, and this build replaced the ship");
-                }
-            void Ref(IQuestReferenceAliasGetter a)
-            {
-                foreach (var (dep, how) in AliasGraph.DepsOf(a)) if (gone.Contains(dep)) users.Add($"alias {a.ID} {a.Name} ({how} {dep})");
-                if (a.LinkedAliases != null)
-                    foreach (var l in a.LinkedAliases) if (G(l.AliasID)) users.Add($"alias {a.ID} {a.Name} (links to {l.AliasID})");
-            }
-            foreach (var a in clone.Aliases!)
-            {
-                if (a is QuestReferenceAlias ra) Ref(ra);
-                else if (a is QuestCollectionAlias ca) foreach (var m in ca.Collection.Where(m => m.ReferenceAlias != null)) Ref(m.ReferenceAlias!);
-                else if (a is QuestLocationAlias la)
-                {
-                    foreach (var dep in AliasGraph.LeashDepsOf(la).Concat(AliasGraph.SameLocationDepsOf(la)))
-                        if (gone.Contains(dep)) users.Add($"location alias {la.ID} {la.Name} (a condition on {dep})");
-                    if (G(la.SystemLocationAliasID)) users.Add($"location alias {la.ID} {la.Name} (system alias {la.SystemLocationAliasID})");
-                    if (G(la.ParentSystemLocationAliasID)) users.Add($"location alias {la.ID} {la.Name} (parent {la.ParentSystemLocationAliasID})");
-                }
-            }
-            foreach (var o in clone.Objectives!)
-                if (o.Targets.Any(x => G(x.AliasID))) users.Add($"objective {o.Index}");
-            foreach (var p in vma.Scripts.SelectMany(s => s.Properties).Concat(vma.Aliases.SelectMany(e => e.Scripts).SelectMany(s => s.Properties)).OfType<ScriptObjectProperty>())
-                if (p.Object.FormKey == clone.FormKey && G(p.Alias)) users.Add($"script property {p.Name}");
-            var text = new[] { clone.Name?.String }.Concat(clone.Objectives!.Select(o => o.DisplayText?.String))
-                .Concat(clone.Stages!.SelectMany(s => s.LogEntries).Select(e => e.Entry?.String)).Where(s => s != null).ToList();
-            foreach (var id in gone)
-                if (text.Any(s => s!.Contains($"<Alias={names[id]}>", StringComparison.OrdinalIgnoreCase))) users.Add($"the quest's text (<Alias={names[id]}>)");
-            if (users.Count > 0) { Console.WriteLine($"REFUSED: dropped alias(es) are still named by {string.Join(", ", users.Distinct())}."); return 1; }
-            foreach (var id in gone.OrderBy(x => x)) Console.WriteLine($"  -drop    : {names[id]} (alias {id})");
-            return 0;
-        }
-
         /// <summary>The flag bit every vanilla location alias with a parent link carries (125 of 125 orbit aliases, 2026-10-22).</summary>
         private const QuestLocationAlias.Flag ParentLinkFlag = (QuestLocationAlias.Flag)0x40000000;
 
@@ -1052,9 +971,6 @@ namespace FrankyCLI
                 fail += Check($"no script on beat {beat}'s scenery", vma.Aliases.Any(x => x.Property.Alias == sa) ? "scripted" : "none", "none");
             }
             fail += Check($"objective {slot.objective}", q.Objectives.FirstOrDefault(o => o.Index == slot.objective)?.DisplayText?.String ?? "missing", Expand(r.beats[0].objective!, t));
-            var left = AliasNames(q.Aliases).Select(x => x.name).ToHashSet(StringComparer.OrdinalIgnoreCase);
-            foreach (var d in r.place.drop ?? new List<string>())
-                fail += Check($"{d} is gone", left.Contains(d) ? "PRESENT" : "gone", "gone");
 
             fail += Check("fragment script", vma.Script?.Name ?? "none", bm.Script);
             fail += Check("fragment stages", string.Join(",", vma.Fragments.Select(f => f.Stage).OrderBy(x => x)), string.Join(",", bm.FragStages));

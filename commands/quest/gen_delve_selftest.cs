@@ -73,7 +73,7 @@ namespace FrankyCLI
             Check("a Local test node is local", S("beats", "_duo_MS_ArtifactMapLocal_TEST") == "local", S("beats", "_duo_MS_ArtifactMapLocal_TEST"));
             Check("RemotePlanet is remote_planet", S("beats", "duo_MS_ArtifactMap_RemotePlanetNode") == "remote_planet", S("beats", "duo_MS_ArtifactMap_RemotePlanetNode"));
             Check("a beats recipe with no deal has no scope", S("beats", null) == "none", S("beats", null));
-            Check("the test ladder has no scope", S("space", null) == "none", S("space", null));
+            Check("an unknown kind has no scope (the retired \"space\")", S("space", null) == "none", S("space", null));
             var mb = ScopeOf("board", "x", out _)!;
             string? N(IEnumerable<string> ids, int? fam = null) => NextName(mb, ids, fam, out _);
             var have = new[] { "duo_MB01a_qst", "duo_MB31a_qst", "duo_MB40a_qst", "duo_MB47a_qst", "duo_MB50a_qst", "duo_delve_missionboard28a" };

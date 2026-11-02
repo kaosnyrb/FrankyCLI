@@ -46,7 +46,6 @@ namespace FrankyCLI
             why = "";
             if (kind is "board" or "boardspace") return Board();
             if (kind == "slatespace") return Slate("remote");
-            if (kind == "space") { why = "a space test rung (the ladder's harness), never a dealt Delve"; return null; }
             if (kind != "beats") { why = $"template kind '{kind}' has no Delve scope"; return null; }
             if (string.IsNullOrWhiteSpace(deal)) { why = "no deal: the node it is dealt from decides its scope"; return null; }
             if (deal.Contains("LocalCargo", StringComparison.OrdinalIgnoreCase)) return Slate("localcargo");

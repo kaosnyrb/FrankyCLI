@@ -65,9 +65,9 @@ namespace FrankyCLI
         {
             public string id { get; set; } = "";
             /// <summary>
-            /// "beats" or "board": both remove the base's driver and have none. "space" and "boardspace": the orbit build
+            /// "beats" or "board": both remove the base's driver and have none. "boardspace" and "slatespace": the orbit build
             /// (delve_space.cs); boardspace KEEPS its base's quest scripts, because the board talks to them. Anything else
-            /// is refused when the registry loads, never defaulted.
+            /// is refused when the registry loads, never defaulted (so the retired "space" kind is refused by name).
             /// </summary>
             public string kind { get; set; } = "";
             public string @base { get; set; } = "";
@@ -188,12 +188,15 @@ namespace FrankyCLI
             public string verifiedFrom { get; set; } = "";
         }
         /// <summary>The kinds: a slate Delve ("beats") and a mission-board one ("board") on the same machinery, and two
-        /// orbit-only ones (delve_space.cs), whose one place is an orbit and which share only the plumbing: "space", started
-        /// by hand, and "boardspace", taken from the board (his 2026-10-26 "I want a missionboard that is only space").</summary>
-        private static readonly string[] Kinds = { "beats", "board", "space", "boardspace", "slatespace" };
+        /// orbit-only ones (delve_space.cs), whose one place is an orbit and which share only the plumbing: "boardspace",
+        /// taken from the board (his 2026-10-26 "I want a missionboard that is only space"), and "slatespace", dealt by a
+        /// slate. ⛔ "space", the hand-started kind the 2026-10-22 alias-set ladder was run on, RETIRED 2026-11-02 with the
+        /// ladder (his "yeah retire all in one pass. boardspace and slatespace are what we use"; home-office
+        /// office/spikes/2026-10-22-alias-set-ladders.md), and place.drop, its knob, with it.</summary>
+        private static readonly string[] Kinds = { "beats", "board", "boardspace", "slatespace" };
         private static bool IsBoard(Template t) => t.kind == "board";
         /// <summary>Every orbit kind: all take the space build, grade and verify.</summary>
-        private static bool IsSpace(Template t) => t.kind is "space" or "boardspace" or "slatespace";
+        private static bool IsSpace(Template t) => t.kind is "boardspace" or "slatespace";
         private static bool IsBoardSpace(Template t) => t.kind == "boardspace";
         /// <summary>A remote-space SLATE Delve (his 2026-10-26 "go", duo_delve34a): the space build, dealt by a slate node,
         /// with the call on quest start, the closing line on completion and the tier on the completing stage's pay.</summary>
@@ -577,13 +580,6 @@ namespace FrankyCLI
             /// day): SetFactionOwner landed and the site rolled what it liked.
             /// </summary>
             public string? faction { get; set; }
-            /// <summary>
-            /// space only, main place only: base aliases this build REMOVES, by name. The alias-set test ladder's knob (his
-            /// 2026-10-22, "make a series of tests for remote and space alias sets. Idea being we learn in isolation how to
-            /// build these sets"): rung 1 is the shipped set whole, each later rung takes pieces away. Refused if anything
-            /// left still names a removed alias. Retires with the ladder (office/spikes/2026-10-22-alias-set-ladders.md).
-            /// </summary>
-            public List<string>? drop { get; set; }
         }
         /// <summary>
         /// Who is at a place, placed round one object there when the player comes within 250 m of it.
@@ -1529,8 +1525,6 @@ namespace FrankyCLI
             if (IsSpace(t)) GradeSpace(r, t, Fatal);
             else
             {
-                if (r.place.drop != null)
-                    Fatal($"place.drop is set and template '{t.id}' is not a space template; it is the space ladder's knob.");
                 // place.over shipped 2026-10-22 with no refusal here, so on a beats recipe it was silently ignored; closed with
                 // the two keys that joined it.
                 foreach (var (p, label) in new[] { (r.place, "place"), (r.place.second, "place.second"), (r.place.third, "place.third") })
