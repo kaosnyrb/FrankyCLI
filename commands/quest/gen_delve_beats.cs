@@ -1745,6 +1745,11 @@ namespace FrankyCLI
                     npc.Factions.Clear();
                     npc.CrimeFaction.Clear();
                     if (pr.outfit is FormKey ofk) npc.DefaultOutfit.SetTo(ofk);
+                    // ESSENTIAL (his 2026-11-02, off MB95a's pods landing round Pip Arden: "important npcs should be marked as
+                    // quest/essitinal so they don't die"). A named person is someone the Delve still needs; a wave, a pod crew
+                    // or a stray shot must not end the mission. On the record, which is this Delve's own clone and placed
+                    // nowhere else. Their nameless company is not.
+                    npc.Flags |= Npc.Flag.Essential;
                     myMod.Npcs.Add(npc);
                     npcOf[b] = npc.FormKey;
                     bm.People[b] = (npc.FormKey, pp.name!);
@@ -2863,7 +2868,9 @@ namespace FrankyCLI
             }
             foreach (var (b, (npc, nm)) in bm.People)
             {
-                fail += Check($"beat {b + 1}'s person", m.Npcs.FirstOrDefault(n => n.FormKey == npc)?.Name?.String ?? "missing", nm);
+                var pn = m.Npcs.FirstOrDefault(n => n.FormKey == npc);
+                fail += Check($"beat {b + 1}'s person", pn?.Name?.String ?? "missing", nm);
+                fail += Check($"beat {b + 1}'s person {nm} is essential (his 2026-11-02 ruling)", (pn?.Flags.HasFlag(Npc.Flag.Essential) ?? false).ToString(), "True");
             }
             if (bm.OfferJournal is (int ost, string otx))
                 fail += Check($"offer journal on stage {ost}", q.Stages.FirstOrDefault(x => x.Index == ost)?.LogEntries.FirstOrDefault()?.Entry?.String ?? "missing", otx);
