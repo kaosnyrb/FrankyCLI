@@ -1,0 +1,120 @@
+{
+  "schema": 2,
+  "id": "duo_MB100c_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-11-02 15:35: \"thinking we need a 100c where we meet another ranger and it's a pack of ashta at a base\"",
+  "_note": [
+    "THE ELDER ASHTA, LETTER C: another Ranger on the edge of a built site the pack has taken, then the pack (a hold on PCM_Cheyenne_Akila_Ashta, MB98a's waves), then the Elder itself (Eliza's elite). The Elder comes last because the hunter is at the centre when the pack is down.",
+    "NARROW, as MB98a: pinned to Akila, so Ashta, Akila and the Rangers are said aloud (his exemption, 2026-10-26).",
+    "JAEGER: the words use Akila's lore (planets/akila.md and planets.json): never enough Rangers for the ground; the crew got out. No interiority for the animals (the July Jaeger fix): nobody says what the Elder wants, only what it does.",
+    "Named persons are Essential since 11-02, so the Ranger cannot die. A different Ranger from 100b's Tamar Hesketh, and no line refers to her: Overtime is single-encounter."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A built site on Akila, a base the pack has taken since its crew pulled out.",
+    "planet": "Akila",
+    "_planet": "Akila, as its heading in data/delves/fauna.md."
+  },
+  "prose": {
+    "name": "Hunt: Elder Ashta and Its Pack at the <Place> on <Planet>",
+    "briefing": "An Elder Ashta and its pack have taken over the <Place> since its crew pulled out. A Ranger is waiting on the edge of the site for whoever answers.",
+    "card": "Settlement Contract. Clear the Ashta pack and its Elder from the <Place> on <Planet>. Payment on contract completion."
+  },
+  "speaker": {
+    "name": "Silas Brannock",
+    "voice": "GenericMale01",
+    "elevenlabs": "CsbTapRVtZdcBs3vBbQe"
+  },
+  "_speech": "A Ranger, dry and practical, who has run out of other people to ask. The brief is face to face; only the close is radio, in his voice. Voice borrowed until his ear casts it.",
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RETravelA1LocRef",
+      "_at": "The edge of the site: he waits on the outskirts, not in the base.",
+      "objective": "Meet the Ranger on the edge of the <Place>",
+      "journal": "I met a Ranger on the edge of the <Place>. An Elder Ashta and its pack have taken the place, and I need to clear the pack first.",
+      "person": {
+        "name": "Silas Brannock",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericMale01",
+        "elevenlabs": "CsbTapRVtZdcBs3vBbQe",
+        "hellos": [
+          [
+            "Get down. They watch the way in."
+          ]
+        ]
+      },
+      "greeting": [
+        "You're the hunter? Good, I'm the only Ranger out this way. The pack took this place when the crew pulled out, and the old one leads it. Kill the pack and it'll come out to you."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Let's draw them out.",
+          "reply": [
+            "Stay off the open ground till the pack's down. Then stand still and wait. The old one always comes once the rest are dead."
+          ]
+        },
+        {
+          "prompt": "What happened to the crew?",
+          "reply": [
+            "Got out alive, the lot of them. They left the doors open on the way, and the Ashta walked in like they'd been invited."
+          ]
+        },
+        {
+          "prompt": "Why are you out here alone?",
+          "reply": [
+            "There are never enough Rangers for how much ground there is. Today, you're the rest of us."
+          ],
+          "perk": "BackgroundSoldier"
+        }
+      ]
+    },
+    {
+      "type": "hold",
+      "at": "RECenterLocRef",
+      "objective": "Kill the Ashta pack at the <Place>",
+      "journal": "I killed the Ashta pack at the <Place>. Now I need to hold my ground and wait for the Elder Ashta to come out.",
+      "waves": 2,
+      "size": [
+        2,
+        4
+      ],
+      "style": [
+        "squad",
+        "horde"
+      ],
+      "creatures": [
+        "PCM_Cheyenne_Akila_Ashta"
+      ],
+      "revealObjective": "Kill the Ashta",
+      "say": [
+        "That's the pack. Stay where you are, the old one's coming."
+      ]
+    },
+    {
+      "type": "defeat",
+      "at": "RECenterLocRef",
+      "elite": {
+        "from": "PCM_Cheyenne_Akila_Ashta",
+        "name": "Elder Ashta"
+      },
+      "objective": "Kill the Elder Ashta at the <Place>",
+      "journal": "I killed the Elder Ashta that led the pack at the <Place>.",
+      "say": [
+        "The old one's down, and the pack with it. I'll get word to the crew they can come home."
+      ],
+      "reward": "med"
+    }
+  ]
+}
