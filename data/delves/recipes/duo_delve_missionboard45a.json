@@ -24,7 +24,7 @@
     },
     "_theme": "A built site on Niira.",
     "planet": "Niira",
-    "_planet": "STAND-IN: not in the closed planet table (only Akila). Eliza's to add."
+    "_planet": "Niira, as its heading in data/delves/fauna.md (place.planet takes any heading since Eliza's ce5aee0)."
   },
   "prose": {
     "name": "Hunt: Siren Pack on <Planet>",

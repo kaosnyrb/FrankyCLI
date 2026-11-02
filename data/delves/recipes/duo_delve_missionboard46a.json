@@ -24,7 +24,7 @@
     },
     "_theme": "A built site on Kreet.",
     "planet": "Kreet",
-    "_planet": "STAND-IN: not in the closed planet table (only Akila). Eliza's to add."
+    "_planet": "Kreet, as its heading in data/delves/fauna.md (place.planet takes any heading since Eliza's ce5aee0)."
   },
   "prose": {
     "name": "Defense: Kreet Stalkers at the <Place> on <Planet>",
