@@ -1,0 +1,75 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard44a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-11-02 10:36, after proving out the Ashta defense (MB98a) and reading the fauna list: \"let's start with these on there planets: A Mossgnath thats trampling crops, put it down. Red Mile Mauler pack. Siren pack. Kreet Stalker defense\"",
+  "_note": [
+    "THE RED MILE MAULERS: a pack of three, as the lore has them (\"often encountered in groups of three\"). Three defeats as a group, any order, so no line says first or last. NARROW, as MB98a: pinned to the creature's own planet, so the words name the creature and the planet aloud (his exemption, 2026-10-26).",
+    "STAND-INS, two: (1) the target. Searched 11-02 (gen_inspect Npc 'Mauler', 'RedMile', 'Porrima'): only tankgirlsxenologyexpanded.esm's TG_OutpostClone_RedMileMauler, a third-party mod we must not depend on. The vanilla Mauler's EditorID does not carry its name; Eliza's or his. (2) place.planet 'Porrima III' is not in the closed table yet.",
+    "A DRAFT ID: MB ids stop at two digits (MB99a was the last free one, 11-02), so this waits for gen_delve name, as missionboard33a became MB98a. The numbering cap is Eliza's to raise.",
+    "SEQUENTIAL, 11-02: the lint refuses a defeat in an any-order group, so the three are hunted in a fixed order (edge, far edge, centre) and the lines count up."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A quiet site on Porrima III, home of the Red Mile.",
+    "planet": "Porrima III",
+    "_planet": "STAND-IN: not in the closed planet table (only Akila). Eliza's to add."
+  },
+  "prose": {
+    "name": "Hunt: Red Mile Maulers on <Planet>",
+    "briefing": "Three Red Mile Maulers have settled in around the <Place>, and Maulers don't move on once they've settled. The site wants all three put down.",
+    "card": "Settlement Contract. Hunt the three Red Mile Maulers at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "speaker": {
+    "name": "Site Boss",
+    "voice": "GenericMale01",
+    "elevenlabs": "IKne3meq5aSn9XLyUdCD"
+  },
+  "broadcast": [
+    "They always come in threes, and they never stray far from each other. Find one and the other two won't be long behind. Take them one at a time if they let you."
+  ],
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "RETravelA1LocRef",
+      "target": "RED MILE MAULER, UNFOUND",
+      "objective": "Hunt the first Red Mile Mauler at the <Place>",
+      "journal": "I put down the first Red Mile Mauler at the edge of the <Place>. Now I need to find the second.",
+      "say": [
+        "One down. The other two will have heard that."
+      ]
+    },
+    {
+      "type": "defeat",
+      "at": "RETravelB1LocRef",
+      "target": "RED MILE MAULER, UNFOUND",
+      "objective": "Hunt the second Red Mile Mauler at the <Place>",
+      "journal": "I put down the second Red Mile Mauler at the <Place>. Now I need to find the last one.",
+      "say": [
+        "Two down. The last one won't run, they never do."
+      ]
+    },
+    {
+      "type": "defeat",
+      "at": "RECenterLocRef",
+      "target": "RED MILE MAULER, UNFOUND",
+      "objective": "Hunt the last Red Mile Mauler at the <Place>",
+      "journal": "I put down all three Red Mile Maulers at the <Place>.",
+      "say": [
+        "That's all three. We can stop sleeping in shifts."
+      ],
+      "reward": "med"
+    }
+  ]
+}

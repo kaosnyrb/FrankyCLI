@@ -1,0 +1,79 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard46a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-11-02 10:36, after proving out the Ashta defense (MB98a) and reading the fauna list: \"let's start with these on there planets: A Mossgnath thats trampling crops, put it down. Red Mile Mauler pack. Siren pack. Kreet Stalker defense\"",
+  "_note": [
+    "THE KREET STALKERS: MB98a's shape on Kreet (sound the alarm, hold three waves), his 'Kreet Stalker defense'. NARROW, as MB98a: pinned to the creature's own planet, so the words name the creature and the planet aloud (his exemption, 2026-10-26).",
+    "Creatures: PCM_Narion_Kreet_StalkerPredatorA (Starfield.esm), found 11-02 by gen_inspect. Lore (fandom): crab-like, wait for prey, burrow; tested by the UC Xenowarfare Division in 2306. Kept out of the words: the burrowing is the useful fact.",
+    "STAND-IN: place.planet 'Kreet' is not in the closed planet table yet, and Kreet has few sites; the pool is the first question.",
+    "A DRAFT ID: MB ids stop at two digits (MB99a was the last free one, 11-02), so this waits for gen_delve name, as missionboard33a became MB98a. The numbering cap is Eliza's to raise."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A built site on Kreet.",
+    "planet": "Kreet",
+    "_planet": "STAND-IN: not in the closed planet table (only Akila). Eliza's to add."
+  },
+  "prose": {
+    "name": "Defense: Kreet Stalkers at the <Place> on <Planet>",
+    "briefing": "Kreet stalkers have started coming up out of the ground around the <Place>. They wait, and then they don't. The crew want someone on the alarm and someone who can shoot.",
+    "card": "Settlement Contract. Help the <Place> on <Planet> hold against Kreet stalkers. Payment on contract completion."
+  },
+  "speaker": {
+    "name": "Crew Lead",
+    "voice": "GenericMale01",
+    "elevenlabs": "wsHauqjSkdBeAvdbUFmR"
+  },
+  "broadcast": [
+    "Get the alarm on so the crew gets inside. Stalkers come up out of the ground, so watch your feet as much as the horizon."
+  ],
+  "beats": [
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Site Alarm",
+      "objective": "Sound the alarm at the <Place>",
+      "journal": "Kreet stalkers have been coming up around the <Place>. I sounded the alarm and the crew got inside, and now I need to hold the site.",
+      "say": [
+        "Alarm's on and everyone's in. Now watch the ground."
+      ]
+    },
+    {
+      "type": "hold",
+      "at": "RECenterLocRef",
+      "objective": "Hold the <Place> against the Kreet stalkers",
+      "journal": "I held the <Place> against three waves of Kreet stalkers.",
+      "waves": 3,
+      "size": [
+        2,
+        3
+      ],
+      "style": [
+        "squad",
+        "squad",
+        "horde"
+      ],
+      "creatures": [
+        "PCM_Narion_Kreet_StalkerPredatorA"
+      ],
+      "revealObjective": "Kill the Kreet stalkers",
+      "defend": 1,
+      "say": [
+        "That's them gone back under. We'll leave the alarm where it is."
+      ],
+      "reward": "med"
+    }
+  ]
+}

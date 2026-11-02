@@ -1,0 +1,54 @@
+{
+  "schema": 2,
+  "id": "duo_MB99a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-11-02 10:36, after proving out the Ashta defense (MB98a) and reading the fauna list: \"let's start with these on there planets: A Mossgnath thats trampling crops, put it down. Red Mile Mauler pack. Siren pack. Kreet Stalker defense\"",
+  "_note": [
+    "THE MOSSGNATH: a herbivore eating its way through a site's planting; put it down. Rueful, not angry: it is only hungry. NARROW, as MB98a: pinned to the creature's own planet, so the words name the creature and the planet aloud (his exemption, 2026-10-26).",
+    "Target PCM_Cheyenne_Akila_Mossgnath (Starfield.esm 23CAE8, Unaggressive in the record; a defeat spawns its target at Aggression 2, so it will charge).",
+    "No farm theme is known to the office, so no line points at crops on screen: the planting is spoken of, never shown."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A quiet site on Akila: somebody's homestead.",
+    "planet": "Akila",
+    "_planet": "Akila is in the closed table (SCheyenne_PAkila), as MB98a."
+  },
+  "prose": {
+    "name": "Hunt: Mossgnath in the Fields on <Planet>",
+    "briefing": "A Mossgnath has wandered in off the plains at the <Place> and won't be driven back out. The homesteader wants it put down before it eats the rest of the season's planting.",
+    "card": "Settlement Contract. Put down the Mossgnath at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "speaker": {
+    "name": "Homesteader",
+    "voice": "GenericFemale01",
+    "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
+  },
+  "broadcast": [
+    "It's the big one with the moss down its back, you can't miss it. We've tried noise and we've tried lights, and it just keeps eating. It's not doing anything wrong, it's hungry, and we can't afford that much hungry."
+  ],
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "RECenterLocRef",
+      "target": "PCM_Cheyenne_Akila_Mossgnath",
+      "objective": "Put down the Mossgnath at the <Place>",
+      "journal": "I put down the Mossgnath that was eating its way through the planting at the <Place>.",
+      "say": [
+        "That's it down. Poor old thing. We'll have the planting back in by the end of the week."
+      ],
+      "reward": "med"
+    }
+  ]
+}

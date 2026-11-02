@@ -1,0 +1,77 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard45a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-11-02 10:36, after proving out the Ashta defense (MB98a) and reading the fauna list: \"let's start with these on there planets: A Mossgnath thats trampling crops, put it down. Red Mile Mauler pack. Siren pack. Kreet Stalker defense\"",
+  "_note": [
+    "THE SIREN PACK, on Niira: set the bait, then hold while the pack comes to it. Not the Maulers' shape on purpose, so the two packs play differently. NARROW, as MB98a: pinned to the creature's own planet, so the words name the creature and the planet aloud (his exemption, 2026-10-26).",
+    "Creatures: LvlSiren (Starfield.esm, VeryAggressive), found 11-02 by gen_inspect. Lore (fandom): armoured, long-eared predators, native to Lantana VIII-b, brought to Niira by the UC Xenowarfare Division in the Colony War. Said once, in the briefing, as fact.",
+    "STAND-IN: place.planet 'Niira' is not in the closed planet table yet. Bait crate model is the stackable crate, approved.",
+    "A DRAFT ID: MB ids stop at two digits (MB99a was the last free one, 11-02), so this waits for gen_delve name, as missionboard33a became MB98a. The numbering cap is Eliza's to raise."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A built site on Niira.",
+    "planet": "Niira",
+    "_planet": "STAND-IN: not in the closed planet table (only Akila). Eliza's to add."
+  },
+  "prose": {
+    "name": "Hunt: Siren Pack on <Planet>",
+    "briefing": "A Siren pack has been working the ground around the <Place>, descended from the ones the UC brought to Niira as weapons in the war. The site wants the pack drawn in and finished.",
+    "card": "Settlement Contract. Bait and hunt the Siren pack at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "speaker": {
+    "name": "Site Warden",
+    "voice": "GenericFemale01",
+    "elevenlabs": "54Cze5LrTSyLgbO6Fhlc"
+  },
+  "broadcast": [
+    "They won't come at you on open ground, they're too clever for that. Put the bait out at the centre and wait. When they come, they come together."
+  ],
+  "beats": [
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "name": "Bait Crate",
+      "objective": "Set the bait at the <Place>",
+      "journal": "I set the bait out at the <Place>. Now I need to hold the site when the Sirens come for it.",
+      "say": [
+        "Bait's out. They'll smell it long before they see you, so stay ready."
+      ]
+    },
+    {
+      "type": "hold",
+      "at": "RECenterLocRef",
+      "objective": "Hold off the Siren pack at the <Place>",
+      "journal": "The Siren pack came for the bait at the <Place>, and I put every one of them down.",
+      "waves": 2,
+      "size": [
+        2,
+        3
+      ],
+      "style": [
+        "squad",
+        "horde"
+      ],
+      "creatures": [
+        "LvlSiren"
+      ],
+      "revealObjective": "Kill the Sirens",
+      "say": [
+        "That's the whole pack. Nothing's been working that ground but us now."
+      ],
+      "reward": "med"
+    }
+  ]
+}
