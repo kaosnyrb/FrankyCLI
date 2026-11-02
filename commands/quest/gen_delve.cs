@@ -841,6 +841,7 @@ namespace FrankyCLI
                                              args.Any(a => a.Equals("--request", StringComparison.OrdinalIgnoreCase)),
                                              args.Any(a => a.Equals("--list", StringComparison.OrdinalIgnoreCase)));
                 case "pcmpool": return DelveCensus.PcmPool(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
+                case "fauna": return Fauna(dataDir, dry);
                 case "models": return ModelCheck(dataDir, templates, args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "lint":
                     if (args.Any(a => a.Equals("--all", StringComparison.OrdinalIgnoreCase))) return LintAll(dataDir, templates);
@@ -895,6 +896,7 @@ namespace FrankyCLI
                     Console.WriteLine("       gen_delve infogroup <delveId>[,...] [--clear] [--dry]   set the InfoGroup header on its walk-up groups in place, proven at the bytes");
                     Console.WriteLine("       gen_delve reserve <delveId>[,...] [--dry]   reserve a board Delve's TargetLocation in place (no POI encounter takes it), proven at the bytes");
                     Console.WriteLine("       gen_delve pcmpool <pcmBranchNode> [refType ...]   what a PCM request under that node can place, and which carry the ref types");
+                    Console.WriteLine("       gen_delve fauna [--dry]   write data/delves/fauna.json off Starfield.esm: every planet and moon with life, its location, biomes and named creatures (place.planet reads it)");
                     Console.WriteLine("       gen_delve selftest   the build's pure helpers, no plugin or game data loaded, exit 1 on failure");
                     return 1;
             }
@@ -1806,7 +1808,7 @@ namespace FrankyCLI
                     if (!isRequest)
                         Fatal($"{label}.planet pins a REQUEST's planet, and {label} is not one (a board's own place, or remote: true). A found place is drawn near the player, so a planet would test nothing he can reach.");
                     if (!Planets.ContainsKey(p.planet))
-                        Fatal($"{label}.planet is '{p.planet}'; the planets built are {string.Join(", ", Planets.Keys.Select(k => $"\"{k}\""))}.");
+                        Fatal($"{label}.planet is '{p.planet}', and fauna.json has no planet or moon by that name ({Planets.Count} do; spelled as the game shows them, e.g. \"Porrima III\").");
                     if (p.system != null)
                         Fatal($"{label}.planet and {label}.system: a pinned planet already fixes its system, and the two could only disagree.");
                     Console.WriteLine($"  planet   : {label} only on {p.planet} (GetIsCurrentLocationExact on the request, FFCydoniaZ07's shape). "
@@ -3194,15 +3196,8 @@ namespace FrankyCLI
         private static string? TitleType(Recipe r)
             => r.prose.name is string n && n.IndexOf(':') is int c && c > 0 ? n[..c] : null;
 
-        /// <summary>
-        /// Place.planet's CLOSED table: the name a recipe writes, to the planet's LOCATION in Starfield.esm (the form vanilla's
-        /// pinned requests name: SSol_PMars on FFCydoniaZ07). A planet is added here when a recipe needs one, never searched
-        /// for by name. Akila read 2026-11-02 (gen_inspect location): LocTypePlanet, LocTypeSettledPlanet, LocTypeMajorOrbital.
-        /// </summary>
-        private static readonly Dictionary<string, FormKey> Planets = new(StringComparer.Ordinal)
-        {
-            ["Akila"] = FormKey.Factory("01ABE3:Starfield.esm"),   // SCheyenne_PAkila
-        };
+        // Place.planet's table (the name a recipe writes, to the planet's LOCATION, the form vanilla's pinned requests name:
+        // SSol_PMars on FFCydoniaZ07) is READ from data/delves/fauna.json since 2026-11-02: Planets, in delve_fauna.cs.
 
         /// <summary>
         /// "Only on this planet", vanilla's way: GetIsCurrentLocationExact(the planet's location) == 1 on a REQUEST's own

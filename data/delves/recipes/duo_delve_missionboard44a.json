@@ -8,7 +8,7 @@
   "source": "his 2026-11-02 10:36, after proving out the Ashta defense (MB98a) and reading the fauna list: \"let's start with these on there planets: A Mossgnath thats trampling crops, put it down. Red Mile Mauler pack. Siren pack. Kreet Stalker defense\"",
   "_note": [
     "THE RED MILE MAULERS: a pack of three, as the lore has them (\"often encountered in groups of three\"). Three defeats as a group, any order, so no line says first or last. NARROW, as MB98a: pinned to the creature's own planet, so the words name the creature and the planet aloud (his exemption, 2026-10-26).",
-    "STAND-INS, two: (1) the target. Searched 11-02 (gen_inspect Npc 'Mauler', 'RedMile', 'Porrima'): only tankgirlsxenologyexpanded.esm's TG_OutpostClone_RedMileMauler, a third-party mod we must not depend on. The vanilla Mauler's EditorID does not carry its name; Eliza's or his. (2) place.planet 'Porrima III' is not in the closed table yet.",
+    "STAND-INS, two: (1) the target. Searched 11-02 (gen_inspect Npc 'Mauler', 'RedMile', 'Porrima'): only tankgirlsxenologyexpanded.esm's TG_OutpostClone_RedMileMauler, a third-party mod we must not depend on. The vanilla Mauler's EditorID does not carry its name; Eliza's or his. RESOLVED 11-02 (Eliza, his \"They're in there somewhere\"): the vanilla Red Mile Mauler is PCM_Porrima_Porrima-III_Predator01 [196BB2], named on its own FULL, and it is Porrima III's predator in fauna.json. (2) place.planet 'Porrima III' is not in the closed table yet.",
     "A DRAFT ID: MB ids stop at two digits (MB99a was the last free one, 11-02), so this waits for gen_delve name, as missionboard33a became MB98a. The numbering cap is Eliza's to raise.",
     "SEQUENTIAL, 11-02: the lint refuses a defeat in an any-order group, so the three are hunted in a fixed order (edge, far edge, centre) and the lines count up.",
     "FRANCES 2026-11-02 (reviews/2026-11-02-delve-board44a.md): ship, findings 1-3 taken, 4-5 kept. Forced pick answered NO: the Maulers do not come to him when one dies (each defeat spawns at its own marker), so the call says they settle close and the objectives carry the walk: edge, far edge, centre (RETravelA1, RETravelB1, RECenter)."
@@ -44,7 +44,7 @@
     {
       "type": "defeat",
       "at": "RETravelA1LocRef",
-      "target": "RED MILE MAULER, UNFOUND",
+      "target": "PCM_Porrima_Porrima-III_Predator01",
       "objective": "Hunt the first Red Mile Mauler on the edge of the <Place>",
       "journal": "I put down the first Red Mile Mauler at the edge of the <Place>. Now I need to find the second.",
       "say": [
@@ -54,7 +54,7 @@
     {
       "type": "defeat",
       "at": "RETravelB1LocRef",
-      "target": "RED MILE MAULER, UNFOUND",
+      "target": "PCM_Porrima_Porrima-III_Predator01",
       "objective": "Hunt the next Red Mile Mauler at the far edge",
       "journal": "I put down the second Red Mile Mauler at the far edge of the <Place>. Now I need to find the last one at the centre.",
       "say": [
@@ -64,7 +64,7 @@
     {
       "type": "defeat",
       "at": "RECenterLocRef",
-      "target": "RED MILE MAULER, UNFOUND",
+      "target": "PCM_Porrima_Porrima-III_Predator01",
       "objective": "Hunt the last Red Mile Mauler at the <Place>'s centre",
       "journal": "I put down all three Red Mile Maulers at the <Place>.",
       "say": [
