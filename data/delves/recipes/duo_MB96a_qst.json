@@ -1,0 +1,108 @@
+{
+  "schema": 2,
+  "id": "duo_MB96a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica, as Ruth Pargeter",
+  "source": "his 2026-11-02 06:27: \"write anotger 3 missions with droppods in them, they are cool\"",
+  "_note": [
+    "DROP PODS, 3 of 3. The fight, then the care: clear the pod crews, then treat the three people they hurt. MB87a's triage on the back of a drop, so the fight carries a feeling (the gap in the 11-02 feelings chart: combat closes on 'done').",
+    "ELIZA: the three wounded are MB87a's stand-in (placed down at quest start) and the pods land round RECenterLocRef, where the first one lies. Same question as MB95a: are placed friendlies safe from the drop, or does the first wounded move to a marker away from the centre?",
+    "Ruth Pargeter's register on the speaker: level, counting, not warm; the care is in the accuracy. Voice borrowed until his ear casts it. No names, places, factions or currency in any voiced line."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A quiet site under a pod raid, open sky at the centre.",
+    "wounded": {
+      "count": 3,
+      "_wounded": "STAND-IN, MB87a's: three settlers placed down and wounded, one at each marker. Eliza's."
+    }
+  },
+  "prose": {
+    "name": "Rescue: After the Drop at the <Place> on <Planet>",
+    "briefing": "Raiders are dropping onto the <Place> by pod for the second time this week. Three of its people were hurt in the last drop, and nobody can reach them until the pods are dealt with.",
+    "card": "Settlement Contract. Clear a drop pod raid at the <Place> on <Planet>, then treat the wounded. Bring med packs. Payment on contract completion."
+  },
+  "speaker": {
+    "name": "Site Foreman",
+    "voice": "GenericMale01",
+    "elevenlabs": "cjVigY5qzO86Huf0OWal"
+  },
+  "broadcast": [
+    "They're dropping on us again, second time this week. Three of ours are still down from the last one. Crews first, please, and then the three."
+  ],
+  "_speech": "Ruth's counts: the second time, the three. No line names how anyone feels.",
+  "recap": "Pods came down on the <Place>. I cleared the crews and treated the three people they hurt.",
+  "recapSay": [
+    "Three treated, and nobody lost. That's the count I wanted to give."
+  ],
+  "beats": [
+    {
+      "type": "clear",
+      "at": "RECenterLocRef",
+      "_at": "The open middle of the site, for the pods' sky.",
+      "enemies": {
+        "list": "duo_GangMembersList_Spacer",
+        "species": "mix",
+        "pods": {
+          "count": 3,
+          "per": 3
+        }
+      },
+      "objective": "Clear the pod crews at the <Place>",
+      "journal": "I cleared the pod crews at the <Place>. Now I need to see to the three people they hurt.",
+      "say": [
+        "That's the drop dealt with. Three of ours, three med packs. Any order you like."
+      ]
+    },
+    {
+      "type": "use",
+      "group": "wounded",
+      "at": "RECenterLocRef",
+      "model": "WOUNDED SETTLER, UNPICKED",
+      "name": "Wounded Settler",
+      "_use": "STAND-IN, MB87a's: treating takes one Aid_MedPack (the item check). Eliza's.",
+      "objective": "Treat the wounded settlers at the <Place>",
+      "message": {
+        "title": "Wounded Settler",
+        "text": "A graze from a stray round, high on the shoulder. They count the stitches out loud and lose track at four."
+      },
+      "journal": "I stitched a graze across one settler's shoulder."
+    },
+    {
+      "type": "use",
+      "group": "wounded",
+      "at": "REMarkerMediumLocRef",
+      "model": "WOUNDED SETTLER, UNPICKED",
+      "name": "Wounded Settler",
+      "_use": "STAND-IN, MB87a's: treating takes one Aid_MedPack (the item check). Eliza's.",
+      "message": {
+        "title": "Wounded Settler",
+        "text": "Cracked ribs, and every breath is a negotiation. The med pack takes the edge off the next one."
+      },
+      "journal": "I saw to a settler with cracked ribs. They're breathing easier."
+    },
+    {
+      "type": "use",
+      "group": "wounded",
+      "at": "REContainerLocRef",
+      "model": "WOUNDED SETTLER, UNPICKED",
+      "name": "Wounded Settler",
+      "_use": "STAND-IN, MB87a's: treating takes one Aid_MedPack (the item check). Eliza's.",
+      "message": {
+        "title": "Wounded Settler",
+        "text": "A sprained ankle from diving clear. They want to know if you saw the pods land. You did."
+      },
+      "journal": "I strapped the ankle of a settler who sprained it diving clear."
+    }
+  ]
+}

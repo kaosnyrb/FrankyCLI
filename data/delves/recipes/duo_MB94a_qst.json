@@ -1,0 +1,76 @@
+{
+  "schema": 2,
+  "id": "duo_MB94a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-11-02 06:27: \"write anotger 3 missions with droppods in them, they are cool\"",
+  "_note": [
+    "DROP PODS, 1 of 3. The first Delve with a TAUNTER speaker (home-office office/pennames/speakers/the-taunter.json): the target talks on your channel. MB45a's shape (pods outside the way in, then the boss inside), with the issuer swapped for the target.",
+    "THE SILENT CLOSE IS DELIBERATE. One speaker per recipe, and the speaker is her; a say plays when its stage is DONE, so after the defeat nobody is left to talk. Her last line goes on the pod clear, the first time she sounds less sure (the taunter's habit). His close-on-radio rule (20261017-091959) is broken on purpose here; his ear decides whether the quiet works or the Delve wants a closing line from someone else.",
+    "Voice borrowed (used once before) until his ear casts it. No names, places, factions or currency in any voiced line."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Any site with an outside entrance (open sky for the pods) and a boss marker inside. Not MB45a's military: on the board's general request military, entrance and boss together draw ZERO (lint 11-02)."
+  },
+  "prose": {
+    "name": "Bounty: The Drop Leader on <Planet>",
+    "briefing": "A crew boss at the <Place> calls her people down by pod and likes to talk on any channel she can find. The bounty office wants her gone.",
+    "card": "Bounty Contract. Eliminate the crew boss at the <Place> on <Planet>. Expect drop pods. Payment on contract completion."
+  },
+  "speaker": {
+    "name": "Crew Boss",
+    "voice": "GenericFemale01",
+    "elevenlabs": "SAz9YHcvj6GT2YYXdXww"
+  },
+  "broadcast": [
+    "There you are. Took your time. I've sent a few friends down to say hello, so mind your head."
+  ],
+  "_speech": "The taunter: amused, unhurried, comments on how long you took, never says where she is. One line a beat.",
+  "beats": [
+    {
+      "type": "clear",
+      "at": "LocDungeonOutsideEntranceMarkerLocRef",
+      "_at": "Outside the way in: open sky for the pods (MB45a's).",
+      "enemies": {
+        "list": "duo_GangMembersList_Spacer",
+        "species": "mix",
+        "pods": {
+          "count": 3,
+          "per": 3
+        }
+      },
+      "objective": "Clear the drop outside the <Place>",
+      "journal": "The crew boss dropped her people on me by pod outside the <Place>, and I dealt with them. Now I need to find her inside.",
+      "say": [
+        "Huh. Those cost me. Alright, then. Come on in."
+      ]
+    },
+    {
+      "type": "defeat",
+      "at": "LocDungeonBossLocRef",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "gang": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 2,
+        "max": 3,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Defeat the crew boss at the <Place>",
+      "journal": "I killed the crew boss at the <Place>, and her channel has finally gone quiet.",
+      "reward": "med"
+    }
+  ]
+}
