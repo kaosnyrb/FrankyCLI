@@ -9,7 +9,8 @@
   "_note": [
     "DROP PODS, 3 of 3. The fight, then the care: clear the pod crews, then treat the three people they hurt. MB87a's triage on the back of a drop, so the fight carries a feeling (the gap in the 11-02 feelings chart: combat closes on 'done').",
     "ELIZA: the three wounded are MB87a's stand-in (placed down at quest start) and the pods land round RECenterLocRef, where the first one lies. Same question as MB95a: are placed friendlies safe from the drop, or does the first wounded move to a marker away from the centre?",
-    "Ruth Pargeter's register on the speaker: level, counting, not warm; the care is in the accuracy. Voice borrowed until his ear casts it. No names, places, factions or currency in any voiced line."
+    "Ruth Pargeter's register on the speaker: level, counting, not warm; the care is in the accuracy. Voice borrowed until his ear casts it. No names, places, factions or currency in any voiced line.",
+    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB96a.md): rework, findings 1-5 taken, 6 kept, 7 is the stand-in wounded (Eliza's, already asked). Forced pick answered NO: the foreman's last line is a count and nothing else."
   ],
   "place": {
     "theme": {
@@ -41,9 +42,9 @@
     "They're dropping on us again, second time this week. Three of ours are still down from the last one. Crews first, please, and then the three."
   ],
   "_speech": "Ruth's counts: the second time, the three. No line names how anyone feels.",
-  "recap": "Pods came down on the <Place>. I cleared the crews and treated the three people they hurt.",
+  "recap": "Pods came down on the <Place> again. I cleared the crews and treated the three hurt in the drop before.",
   "recapSay": [
-    "Three treated, and nobody lost. That's the count I wanted to give."
+    "Three down, three treated."
   ],
   "beats": [
     {
@@ -59,7 +60,7 @@
         }
       },
       "objective": "Clear the pod crews at the <Place>",
-      "journal": "I cleared the pod crews at the <Place>. Now I need to see to the three people they hurt.",
+      "journal": "I cleared the pod crews at the <Place>. Now I need to see to the three hurt in the last drop.",
       "say": [
         "That's the drop dealt with. Three of ours, three med packs. Any order you like."
       ]
@@ -74,9 +75,9 @@
       "objective": "Treat the wounded settlers at the <Place>",
       "message": {
         "title": "Wounded Settler",
-        "text": "A graze from a stray round, high on the shoulder. They count the stitches out loud and lose track at four."
+        "text": "A gash from a stray round, high on the shoulder. They count the stitches out loud and lose track at four."
       },
-      "journal": "I stitched a graze across one settler's shoulder."
+      "journal": "I stitched a gash across one settler's shoulder."
     },
     {
       "type": "use",
@@ -87,7 +88,7 @@
       "_use": "STAND-IN, MB87a's: treating takes one Aid_MedPack (the item check). Eliza's.",
       "message": {
         "title": "Wounded Settler",
-        "text": "Cracked ribs, and every breath is a negotiation. The med pack takes the edge off the next one."
+        "text": "Cracked ribs. They ask after the other two before they'll let you near them."
       },
       "journal": "I saw to a settler with cracked ribs. They're breathing easier."
     },
@@ -100,7 +101,7 @@
       "_use": "STAND-IN, MB87a's: treating takes one Aid_MedPack (the item check). Eliza's.",
       "message": {
         "title": "Wounded Settler",
-        "text": "A sprained ankle from diving clear. They want to know if you saw the pods land. You did."
+        "text": "A sprained ankle from diving clear. They want to know if you saw the pods come down."
       },
       "journal": "I strapped the ankle of a settler who sprained it diving clear."
     }

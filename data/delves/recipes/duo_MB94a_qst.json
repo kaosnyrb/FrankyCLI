@@ -9,7 +9,8 @@
   "_note": [
     "DROP PODS, 1 of 3. The first Delve with a TAUNTER speaker (home-office office/pennames/speakers/the-taunter.json): the target talks on your channel. MB45a's shape (pods outside the way in, then the boss inside), with the issuer swapped for the target.",
     "THE SILENT CLOSE IS DELIBERATE. One speaker per recipe, and the speaker is her; a say plays when its stage is DONE, so after the defeat nobody is left to talk. Her last line goes on the pod clear, the first time she sounds less sure (the taunter's habit). His close-on-radio rule (20261017-091959) is broken on purpose here; his ear decides whether the quiet works or the Delve wants a closing line from someone else.",
-    "Voice borrowed (used once before) until his ear casts it. No names, places, factions or currency in any voiced line."
+    "Voice borrowed (used once before) until his ear casts it. No names, places, factions or currency in any voiced line.",
+    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB94a.md): ship, findings 1-3 taken, 4 and 5 kept. Forced pick answered NO: she does not still want him to come in, so her last line ends on the doubt and the silence starts with her. Finding 4's timing: the call and the pods share the step-one marker's 250 m, so the line plays as they fall."
   ],
   "place": {
     "theme": {
@@ -23,7 +24,7 @@
   },
   "prose": {
     "name": "Bounty: The Drop Leader on <Planet>",
-    "briefing": "A crew boss at the <Place> calls her people down by pod and likes to talk on any channel she can find. The bounty office wants her gone.",
+    "briefing": "A crew boss at the <Place> calls her people down by pod. The bounty office wants her gone.",
     "card": "Bounty Contract. Eliminate the crew boss at the <Place> on <Planet>. Expect drop pods. Payment on contract completion."
   },
   "speaker": {
@@ -51,7 +52,7 @@
       "objective": "Clear the drop outside the <Place>",
       "journal": "The crew boss dropped her people on me by pod outside the <Place>, and I dealt with them. Now I need to find her inside.",
       "say": [
-        "Huh. Those cost me. Alright, then. Come on in."
+        "Huh. Those cost me."
       ]
     },
     {
@@ -69,7 +70,7 @@
         "chance": 25
       },
       "objective": "Defeat the crew boss at the <Place>",
-      "journal": "I killed the crew boss at the <Place>, and her channel has finally gone quiet.",
+      "journal": "I killed the crew boss at the <Place>.",
       "reward": "med"
     }
   ]
