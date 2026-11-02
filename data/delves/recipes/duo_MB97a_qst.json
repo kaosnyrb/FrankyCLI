@@ -1,0 +1,124 @@
+{
+  "schema": 2,
+  "id": "duo_MB97a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica, as Vic Tarrant",
+  "source": "his 2026-11-02 07:38: \"missi9n idea, signal traces / mission board / Pirates have been attacking traders, visit 3 sights to triangulate there based and then wipe them out\"; 07:42, option 1: \"do option 1 yeah, 3 might feel like a chore abyway\"",
+  "_note": [
+    "SIGNAL TRACES, his idea. A Delve has three places at most (main, second, third), so his three trace sites plus the base would be four. His pick: TWO traces, which is honest triangulation (two bearings cross at a point), then the base. A third trace waits on a fourth place, Eliza's, and he called three a likely chore.",
+    "The traces are the raids' own leftovers: a trader's terminal where they hit her, still logging. The two reads are a group (any order), so no line says first or second; the base gets its marker only when both are done.",
+    "The base is pinned to pirates at the accept (place.faction, plan OT-01), so its residents are the pirates the words name. Fleet members: his 10-31 check stops those missions starting.",
+    "Vic Tarrant's register on the speaker (a convoy master): level, dry, unimpressed. Voice borrowed until his ear casts it. No names, places, factions or currency in any voiced line; 'pirates' is a role.",
+    "DOES NOT LINT YET, on purpose (2026-11-02): a board has main and a remote second only, no <ThirdPlace> token, and the Crimson pin is refused until the member gate exists. His 07:52: \"ask Eliza to look at N places. should be possible\". Letter: home-office office/correspondence/2026-11-02-jessica-eliza-n-places.md."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "The base: a built site somebody hostile holds.",
+    "faction": "CrimsonFleet",
+    "_faction": "Pinned at the accept (plan OT-01): residents are the pirates, so the words may say so.",
+    "second": {
+      "theme": {
+        "require": [
+          "LocTypeOE_ThemeNaturalKeyword"
+        ],
+        "exclude": [
+          "LocTypeOE_NonHostile",
+          "LocTypeOE_ThemeCaveKeyword",
+          "LocTypeTest"
+        ]
+      }
+    },
+    "third": {
+      "theme": {
+        "require": [
+          "LocTypeOE_NonHostile"
+        ],
+        "exclude": [
+          "LocTypeOE_ThemeNaturalKeyword",
+          "LocTypeOE_ThemeCaveKeyword",
+          "LocTypeTest"
+        ]
+      }
+    },
+    "_themes": "THREE DISJOINT POOLS: a trader hit in the open (natural), a trading stop hit (quiet), the base (built, hostile)."
+  },
+  "prose": {
+    "name": "Hunt: Signal Traces",
+    "briefing": "Pirates have been hitting traders in this system. Two of the traders they hit left terminals logging at the <SecondPlace> and the <ThirdPlace>, and between them the logs should point at the base.",
+    "card": "Private Contract. Trace the pirates hitting traders in this system, then clear their base. Payment on contract completion."
+  },
+  "speaker": {
+    "name": "Convoy Master",
+    "voice": "GenericMale01",
+    "elevenlabs": "inKOuEy40NdNVHxcqekZ"
+  },
+  "broadcast": [
+    "You've found where they hit. They take the cargo and leave the terminals, because nobody wants a terminal. Read this one, then the other, and we'll see where the two bearings cross."
+  ],
+  "_speech": "Vic: dry, unimpressed, the joke is in the plain fact. The broadcast plays at the first trace he reaches, either one, so it says 'this one' and 'the other'.",
+  "beats": [
+    {
+      "type": "use",
+      "group": "traces",
+      "place": "second",
+      "at": "REMarkerMediumLocRef",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Trader's Terminal",
+      "objective": "Read the traders' terminals at the <SecondPlace> and the <ThirdPlace>",
+      "message": {
+        "title": "Trader's Terminal",
+        "text": "The tracking log is still running. The raiders came in fast on one bearing, and went back out the same way with the cargo."
+      },
+      "journal": "I read the trader's terminal at the <SecondPlace>. It gives one bearing for the pirates.",
+      "say": [
+        "Bearing logged. On its own, it points at half the system."
+      ]
+    },
+    {
+      "type": "use",
+      "group": "traces",
+      "place": "third",
+      "at": "REMarkerMediumLocRef",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Trader's Terminal",
+      "message": {
+        "title": "Trader's Terminal",
+        "text": "Somebody kept the log going through the whole raid. The bearing they left on is the clearest thing in it."
+      },
+      "journal": "I read the trader's terminal at the <ThirdPlace>. It gives one bearing for the pirates.",
+      "say": [
+        "Bearing logged. Wherever it crosses the other one, that's where they live."
+      ]
+    },
+    {
+      "type": "clear",
+      "at": "RECenterLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_Crimson",
+        "min": 4,
+        "max": 6,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Clear the pirates from their base at the <Place>",
+      "journal": "The two bearings crossed at the <Place>, and I cleared the pirates out of it.",
+      "say": [
+        "So that's where they were. The convoys can stop flying the long way round."
+      ],
+      "reward": "med"
+    }
+  ]
+}
