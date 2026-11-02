@@ -35,6 +35,11 @@
       "journal": "The freighter's wreckage is still in orbit over <Planet>, and the signal amplifier was in a sealed crate inside it. I've got it, and now I need to fit it to the navigation satellite.",
       "model": "Meshes\\ccs\\wreckcargocrate01.nif",
       "name": "Sealed Cargo Crate",
+      "scenery": {
+        "model": "Meshes\\ccs\\freighterwreck01.nif",
+        "bounds": [-42.5, -49.99, -11.25, 22.43, 40.53, 12.25]
+      },
+      "_scenery": "Eliza, 2026-11-02, plan OT-02 (his 10-30 playtest: \"There should be wreckage of the frieghter at the part, currently there isn't\"): Kim's OT-62 freighter (his \"Frieghter looks good\"), re-origined so the crate sits in the gap between the halves (Overtime kitbash/reorigin.py, origin (2.5, -35, 0.5) of her recipe; nearest wreck part 2.54 m from the crate's box). bounds is kitbash.py's WHOLE line; rebuild the NIF and copy it again if her recipe changes.",
       "item": "Signal Amplifier",
       "say": [
         "That's the part."

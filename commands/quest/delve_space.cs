@@ -104,6 +104,12 @@ namespace FrankyCLI
                 if (string.IsNullOrWhiteSpace(b.objective)) Fatal($"beat {i + 1} has no objective; it is the one line that points him at the object.");
                 if (string.IsNullOrWhiteSpace(b.model) || string.IsNullOrWhiteSpace(b.name))
                     Fatal($"beat {i + 1} needs a model and a name: its object is a clone of {(IsBoardSpace(t) ? "the base's own activator" : t.activatorFrom)}, reskinned.");
+                if (b.scenery is Scenery sc)
+                {
+                    if (string.IsNullOrWhiteSpace(sc.model)) Fatal($"beat {i + 1}'s scenery has no model.");
+                    if (sc.bounds.Count != 6 || sc.bounds[0] >= sc.bounds[3] || sc.bounds[1] >= sc.bounds[4] || sc.bounds[2] >= sc.bounds[5])
+                        Fatal($"beat {i + 1}'s scenery.bounds is [{string.Join(", ", sc.bounds)}]; it is kitbash.py's WHOLE line, six numbers, each min below its max.");
+                }
                 // A two-beat board shows its own boxes: no repair script is there to show one.
                 if ((b.say != null && !speaks) || (b.message != null && !two) || b.group != null || b.returnTo != null)
                     Fatal($"beat {i + 1} carries a {(b.message != null ? "message" : b.say != null ? "say" : b.group != null ? "group" : "returnTo")}; the {t.id} kind builds none"
@@ -113,6 +119,64 @@ namespace FrankyCLI
                 if (b.reward != null && !speaks)
                     Fatal($"beat {i + 1} carries a reward; template '{t.id}' is started by hand and pays nothing, so it would be silently ignored.");
             }
+        }
+
+        /// <summary>
+        /// The Static every piece of scenery is cloned from: vanilla's own scrap strip (Starfield.esm 1F3EA3), a STAT the game
+        /// draws, so its LightLayer and flags are ones that render (gen_setmodel's rule: dropping LightLayer once made
+        /// thirteen parts invisible). Its mesh is also the base strip reorigin.py puts at every scenery model's origin.
+        /// </summary>
+        private const string SceneryTemplate = "GenDebrisChunkScrap01";
+
+        /// <summary>
+        /// ONE BEAT'S SCENERY (plan OT-02): a Static named {edid} wearing the recipe's model and bounds, and an alias that
+        /// copies the beat's object alias whole (so it is created at the same marker, the same way) and creates the Static
+        /// instead. The Static is kept and rewritten on a rebuild, so its FormID does not move (his 2026-10-12: "Everytime
+        /// you build the formid's increment"); sc == null removes any {edid} an earlier build made. Model.File and the
+        /// bounds are written and NOTHING ELSE; LightLayer and Flags are asserted unchanged, as ReskinActivator does.
+        /// No objective targets the alias and no script is put on it: scenery shows no marker and no prompt.
+        /// </summary>
+        private static int MakeScenery(StarfieldMod myMod, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Quest clone,
+                                       QuestReferenceAlias? obj, string edid, Scenery? sc, int beat, BeatsMade bm)
+        {
+            var st = myMod.Statics.FirstOrDefault(s => s.EditorID == edid);
+            if (sc == null)
+            {
+                if (st != null) { myMod.Statics.Remove(st.FormKey); Console.WriteLine($"  -scenery : {edid} {st.FormKey} removed (beat {beat} has none now)"); }
+                return 0;
+            }
+            if (obj?.CreateReferenceToObject == null)
+            { Console.WriteLine($"REFUSED: beat {beat}'s object alias creates nothing, so its scenery has nowhere to be created."); return 1; }
+            bool made = st == null;
+            if (st == null)
+            {
+                var src = OwnOrMaster<IStaticGetter>(myMod, env, SceneryTemplate);
+                if (src?.Model == null)
+                { Console.WriteLine($"REFUSED: {SceneryTemplate} is not a Static with a model in {myMod.ModKey.FileName} or its masters."); return 1; }
+                st = myMod.Statics.DuplicateInAsNewRecord(src);
+                st.EditorID = edid;
+            }
+            if (st.Model == null) { Console.WriteLine($"REFUSED: {edid} carries no model to rewrite."); return 1; }
+            var ll = st.Model.LightLayer; var fl = st.Model.Flags;
+            st.Model.File = new Mutagen.Bethesda.Plugins.Assets.AssetLink<
+                Mutagen.Bethesda.Starfield.Assets.StarfieldModelAssetType>(sc.model);
+            if (st.Model.LightLayer != ll || st.Model.Flags != fl)
+            { Console.WriteLine("REFUSED: writing Model.File disturbed LightLayer or Flags."); return 1; }
+            var b = sc.bounds;
+            st.ObjectBounds = new ObjectBounds()
+            {
+                First = new Noggog.P3Float(b[0], b[1], b[2]),
+                Second = new Noggog.P3Float(b[3], b[4], b[5]),
+            };
+            var a = obj.DeepCopy();
+            a.ID = NextAliasId(clone);
+            a.Name = $"DelveBeat{beat}Scenery";
+            a.CreateReferenceToObject!.Object.SetTo(st.FormKey);
+            clone.Aliases!.Add(a);
+            bm.Scenery.Add((beat, (int)a.ID, (int)obj.ID));
+            Console.WriteLine($"  +scenery : {edid} {st.FormKey} ({(made ? "new, a clone of " + SceneryTemplate : "kept")}) model {sc.model}, "
+                              + $"bounds ({b[0]}, {b[1]}, {b[2]})..({b[3]}, {b[4]}, {b[5]}); alias {a.ID} created at alias {a.CreateReferenceToObject.AliasID}, as beat {beat}'s object {obj.ID}");
+            return 0;
         }
 
         /// <summary>A board in orbit with a pickup then a deliver (27a): two scriptless objects on the stock hooks, not his
@@ -352,6 +416,15 @@ namespace FrankyCLI
                 clone.Objectives!.Insert(clone.Objectives.IndexOf(ob) + 1, ob2);
             }
             else if (ReskinActivator(myMod, clone, t, r.id + "_b2", -1, null, null) != 0) return 1;   // a rebuild as one beat drops an old _b2: removes, then no model, so no clone
+
+            // THE SCENERY (plan OT-02): beside each beat's object, at its marker. Both beat numbers are walked so a rebuild
+            // without scenery removes the Static an earlier build made.
+            var objects = two ? new[] { target, target2! } : new[] { target };
+            for (int i = 0; i < 2; i++)
+            {
+                var sc = i < objects.Length ? r.beats[i].scenery : null;
+                if (MakeScenery(myMod, env, clone, i < objects.Length ? objects[i] : null, $"{r.id}_b{i + 1}_scenery", sc, i + 1, bm) != 0) return 1;
+            }
 
             if (two)
             {
@@ -955,6 +1028,24 @@ namespace FrankyCLI
                 fail += Check($"marker alias {ma} fills from a cell collection by {r.beats[Math.Min(mk++, r.beats.Count - 1)].at}",
                               marker?.ReferenceCollectionAliasID == null ? "not from a collection" : mrt?.FirstParameter.Link.FormKey.ToString() ?? "no HasRefType",
                               wrote.ToString());
+            }
+            fail += Check("scenery aliases written, one per beat that names scenery", bm.Scenery.Count.ToString(), r.beats.Count(x => x.scenery != null).ToString());
+            foreach (var (beat, sa, oa) in bm.Scenery)
+            {
+                var sc = r.beats[beat - 1].scenery!;
+                var s = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)sa);
+                var o = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)oa);
+                var st = s?.CreateReferenceToObject == null ? null : m.Statics.FirstOrDefault(x => x.FormKey == s.CreateReferenceToObject.Object.FormKey);
+                fail += Check($"beat {beat}'s scenery (alias {sa}) is created at the same alias as its object (alias {oa})",
+                              s?.CreateReferenceToObject?.AliasID.ToString() ?? "creates nothing", o?.CreateReferenceToObject?.AliasID.ToString() ?? "the object creates nothing");
+                fail += Check($"beat {beat}'s scenery is a Static of this plugin named {r.id}_b{beat}_scenery", st?.EditorID ?? "no Static", $"{r.id}_b{beat}_scenery");
+                fail += Check($"beat {beat}'s scenery wears its model", st?.Model?.File.DataRelativePath.Path ?? "no model",
+                              new Mutagen.Bethesda.Plugins.Assets.AssetLink<Mutagen.Bethesda.Starfield.Assets.StarfieldModelAssetType>(sc.model).DataRelativePath.Path);
+                fail += Check($"beat {beat}'s scenery bounds are the recipe's (kitbash.py's WHOLE)",
+                              st?.ObjectBounds == null ? "none" : $"{st.ObjectBounds.First.X},{st.ObjectBounds.First.Y},{st.ObjectBounds.First.Z},{st.ObjectBounds.Second.X},{st.ObjectBounds.Second.Y},{st.ObjectBounds.Second.Z}",
+                              string.Join(",", sc.bounds));
+                fail += Check($"no objective targets beat {beat}'s scenery", q.Objectives.Any(ob => ob.Targets.Any(x => x.AliasID == sa)) ? "targeted" : "none", "none");
+                fail += Check($"no script on beat {beat}'s scenery", vma.Aliases.Any(x => x.Property.Alias == sa) ? "scripted" : "none", "none");
             }
             fail += Check($"objective {slot.objective}", q.Objectives.FirstOrDefault(o => o.Index == slot.objective)?.DisplayText?.String ?? "missing", Expand(r.beats[0].objective!, t));
             var left = AliasNames(q.Aliases).Select(x => x.name).ToHashSet(StringComparer.OrdinalIgnoreCase);

@@ -598,6 +598,12 @@ namespace FrankyCLI
         private sealed class Theme { public List<string> require { get; set; } = new(); public List<string> exclude { get; set; } = new(); }
         /// <summary>card: board only, REQUIRED there, the mission board's description (the card he reads before taking the job).</summary>
         private sealed class Prose { public string? name { get; set; } public string? briefing { get; set; } public string? card { get; set; } }
+        /// <summary>
+        /// A space beat's scenery (plan OT-02): model, a NIF whose ORIGIN is where the beat's object sits, and bounds, the six
+        /// numbers kitbash.py prints as WHOLE (min x y z, then max x y z). The bounds are SUPPLIED, not derived, as
+        /// gen_setobnd's are: the mesh reader lives in Python, and a second one here could disagree with it.
+        /// </summary>
+        private sealed class Scenery { public string model { get; set; } = ""; public List<float> bounds { get; set; } = new(); }
         private sealed class Beat
         {
             public string at { get; set; } = "";
@@ -634,6 +640,13 @@ namespace FrankyCLI
             /// <summary>beats, OPTIONAL: the NIF this beat's object wears, and its activate prompt. Absent = the base's.</summary>
             public string? model { get; set; }
             public string? name { get; set; }
+            /// <summary>
+            /// beats, SPACE templates only, OPTIONAL: a model CREATED at this beat's own marker beside its object, a plain
+            /// Static with no prompt (plan OT-02, his 2026-10-30 playtest: "There should be wreckage of the frieghter at the
+            /// part, currently there isn't"). A created reference takes no offset, so the model's origin is where the object
+            /// sits: Overtime's kitbash/reorigin.py makes it so. Absent = nothing beside the object.
+            /// </summary>
+            public Scenery? scenery { get; set; }
             /// <summary>
             /// beats, OPTIONAL: the marker is a PLACED OBJECT (REContainerLocRef is the box itself), so disable
             /// it when the quest starts and let this beat's object stand in its place. His way in his own
@@ -1482,6 +1495,9 @@ namespace FrankyCLI
                     foreach (var (key, val) in new[] { ("over", p?.over), ("playerShip", p?.playerShip), ("cellAt", p?.cellAt), ("player", p?.player?.ToString()) })
                         if (val != null)
                             Fatal($"{label}.{key} is set and template '{t.id}' is not a space template; it is a space Delve's knob and would be silently ignored.");
+                for (int i = 0; i < r.beats.Count; i++)
+                    if (r.beats[i].scenery != null)
+                        Fatal($"beat {i + 1} carries scenery and template '{t.id}' is not a space template; it is built only beside an orbit beat's object, so here it would be silently ignored.");
             }
             if (r.place.civilians != null)
                 Fatal("place.civilians retired with the delve4 kind (2026-10-09); on a beats Delve write approach.civilians.");

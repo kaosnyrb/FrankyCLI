@@ -698,6 +698,7 @@ namespace FrankyCLI
             public List<(int on, int to)> SpawnHooks = new();
             public (int place, int cell, int main, FormKey scope)? Orbit;   // an orbit third place: its alias, its space cell's member, the main place it is tested against
             public List<(int alias, FormKey refType)> OrbitMarkers = new();
+            public List<(int beat, int alias, int obj)> Scenery = new();   // space only: each beat's scenery alias and the object alias it copies
             public (int marker, int target)? OrbitMapMarker;   // an orbit's map marker and the object it is named by   // orbit beats' markers, filled from the cell by this ref type   // fight beats' markers carrying the distance hook that spawns them, and the alias it measures to (the player)
             public List<(int objective, int alias, int spawned)> SiteTargets = new();   // the place as a second objective target, beside a target spawned late, lit until its spawned stage
             public List<(int team, FormKey package, int fight, string radius, FormKey template)> SupportTeams = new();   // support teams' collections (inner ref alias ids): empty, Optional, each wearing its own travel to the fight's marker (its source's radius and template)

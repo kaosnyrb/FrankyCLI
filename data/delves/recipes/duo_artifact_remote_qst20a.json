@@ -13,7 +13,7 @@
     "A SLATE, so the broadcast plays when the quest starts (BeginOnQuestStart, never stage 0's fragment), and the opening",
     "line does not say how the job arrived (remote06a's rule). The client calls; the closing line is the radio.",
     "Not a satellite on purpose: 26a to 29a are satellites. MODEL: Satellite_Beacon is the only object proven in orbit, so it",
-    "stands in; a wreck section or a recorder beacon is his or Kim's pick.",
+    "stands in; a wreck section or a recorder beacon is his or Kim's pick. (Superseded 2026-11-02, Eliza: see _model and _scenery.)",
     "Pay: med, capped.",
     "LINT as 'space' (2026-10-26): speech, the say, the reward and <Planet> are refused (space supplies only <Place>, the orbit itself). boardspace supplies <Planet> off the orbit; slatespace wants the same, or say which token and I reword."
   ],
@@ -32,9 +32,14 @@
       "_at": "26a's proven marker.",
       "objective": "Recover the flight recorder over <Planet>",
       "journal": "I picked up the flight recorder from the freighter that broke up over <Planet>. Its crew swear they did nothing wrong. Now somebody can check.",
-      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
-      "_model": "STAND-IN: the only object proven in orbit.",
+      "model": "Meshes\\ccs\\recorderbeacon01.nif",
+      "_model": "Eliza, 2026-11-02, plan OT-02: Kim's S3 recorder (recorder_beacon.json v3: vanilla Beacon01 on a Deimos belly plate), on his 10-30 yes that a custom model can be the activator in space (\"Crossfire has plently\"). Was the Satellite_Beacon stand-in. Kim's (a)/(b) fork (this kitbash, or vanilla Beacon01 beside a wreck SCOL) was still open in her notes; (a) taken because her recorder wreck was built around it.",
       "name": "Flight Recorder",
+      "scenery": {
+        "model": "Meshes\\ccs\\recorderwreck01.nif",
+        "bounds": [-68.66, -41.15, -17.5, 1.21, 63.78, 6.46]
+      },
+      "_scenery": "Eliza, 2026-11-02, plan OT-02: Kim's recorder wreck (his \"lets do another wreck for recorder\"), re-origined to the end of its debris trail where her preview puts the recorder (Overtime kitbash/reorigin.py, origin (39, -60, 9)). bounds is kitbash.py's WHOLE line.",
       "say": [
         "I've got the data now. I'll check it, and we'll find out what actually happened. You could have saved some careers here."
       ],
