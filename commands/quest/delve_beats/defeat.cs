@@ -1,7 +1,10 @@
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace FrankyCLI
 {
@@ -22,7 +25,17 @@ namespace FrankyCLI
                                               Action<string> Fatal, Action<string, string?, bool> List, Action<string, Crowd, int> Range)
             {
                 if (b.enemies != null) Fatal($"{at} sets enemies; a defeat has a target and a gang (enemies is a clear's).");
-                if (string.IsNullOrWhiteSpace(b.target)) Fatal($"{at} has no target: nobody whose death ends the step.");
+                if (b.elite != null)
+                {
+                    if (b.target != null) Fatal($"{at} sets target AND elite; an elite IS the target (made from elite.from), so name one.");
+                    if (string.IsNullOrWhiteSpace(b.elite.name)) Fatal($"{at} elite has no name; an elite is named on its record, and the naming rules are blanked.");
+                    if (string.IsNullOrWhiteSpace(b.elite.from)) Fatal($"{at} elite has no from: the creature it is made from.");
+                    else if (OwnOrMaster<INpcGetter>(Allowed(env, t), env, b.elite.from!) is not INpcGetter src)
+                        Fatal($"{at} elite.from '{b.elite.from}' is not an Npc in {t.mod} or one of its masters (a LeveledNpc cannot be cloned).");
+                    else
+                        Console.WriteLine($"  {at} elite: \"{b.elite.name}\" from {src.EditorID} ({src.Name?.String}), level {(src.Level as INpcLevelGetter)?.Level.ToString() ?? "levelled"}: challenge VeryHard, + Special_Boss, size up one, no template retarget");
+                }
+                else if (string.IsNullOrWhiteSpace(b.target)) Fatal($"{at} has no target: nobody whose death ends the step.");
                 else if (OwnOrMaster<INpcGetter>(Allowed(env, t), env, b.target!) == null && OwnOrMaster<ILeveledNpcGetter>(Allowed(env, t), env, b.target!) == null)
                     Fatal($"{at} target '{b.target}' is not an Npc or LeveledNpc in {t.mod} or one of its masters.");
                 if (b.gang != null)
@@ -50,6 +63,52 @@ namespace FrankyCLI
                 build.spawnedStage[i] = SpawnedStageBase + i;
                 Console.WriteLine($"  +slot    : beat {i + 1} (defeat) -- marker alias {dm.ID}, target {dt.ID} (EMPTY, Optional; filled on spawn), site target {dm.ID} until stage {build.spawnedStage[i]}");
                 return SupportSlot(build, i);
+            }
+
+            /// <summary>
+            /// Each elite defeat's own creature, `<id>_b<N>elite`: the previous build's removed first (named for the Delve, so a
+            /// rebuild sweeps it), the source DUPLICATED (ObjectTemplates and all; CloneNPC copies field by field), then
+            /// vanilla's alpha swaps. The fight's target becomes the new record; SpawnTarget is unchanged.
+            /// </summary>
+            internal override int Prepare(BeatsBuild build)
+            {
+                RemovePrevious(build.myMod.Npcs, e => e.StartsWith(build.r.id + "_b") && e.EndsWith("elite"));
+                var k = build.inputs.EliteKit;
+                for (int i = 0; i < build.r.beats.Count; i++)
+                {
+                    var fb = build.r.beats[i];
+                    if (fb.type != "defeat" || fb.elite == null) continue;
+                    var ff = build.inputs.Fights[i];
+                    var npc = build.myMod.Npcs.DuplicateInAsNewRecord(ff.EliteSrc!);
+                    npc.EditorID = $"{build.r.id}_b{i + 1}elite";
+                    npc.Name = fb.elite.name!;
+                    npc.Aggression = Npc.AggressionType.VeryAggressive;
+                    npc.Confidence = Npc.ConfidenceType.Foolhardy;
+                    npc.Keywords ??= new Noggog.ExtendedList<IFormLinkGetter<IKeywordGetter>>();
+                    if (!npc.Keywords.Any(x => x.FormKey == k!.Blank)) npc.Keywords.Add(new FormLink<IKeywordGetter>(k!.Blank));
+                    if (npc.ObjectTemplates == null || npc.ObjectTemplates.Count == 0)
+                    { Console.WriteLine($"REFUSED: beat {i + 1} elite.from {ff.EliteSrc!.EditorID} has no object template, so there is nothing to make elite."); return 1; }
+                    var log = new List<string>();
+                    foreach (var ot in npc.ObjectTemplates)
+                    {
+                        bool challenge = false, size = false, boss = false;
+                        foreach (var inc in ot.Includes)
+                        {
+                            var m = inc.Mod.FormKey;
+                            if (k!.Challenges.Contains(m)) { if (m != k.VeryHard) log.Add("challenge -> VeryHard"); inc.Mod.SetTo(k.VeryHard); challenge = true; }
+                            else if (k.Sizes.IndexOf(m) is int si && si >= 0) { var up = k.Sizes[Math.Min(si + 1, k.Sizes.Count - 1)]; if (up != m) log.Add($"size up one ({si} -> {k.Sizes.IndexOf(up)})"); inc.Mod.SetTo(up); size = true; }
+                            else if (m == k.Boss) boss = true;
+                        }
+                        ObjectTemplateInclude Add(FormKey fk) => new ObjectTemplateInclude
+                        { Mod = fk.ToLink<IAObjectModificationGetter>(), AttachPointIndex = 0, DontUseAll = true, Optional = true };
+                        if (!challenge) { ot.Includes.Add(Add(k!.VeryHard)); log.Add("+ challenge VeryHard"); }
+                        if (!size) { ot.Includes.Add(Add(k!.Large)); log.Add("+ size Large"); }
+                        if (!boss) { ot.Includes.Add(Add(k!.Boss)); log.Add("+ Special_Boss"); }
+                    }
+                    ff.Target = npc.FormKey;
+                    Console.WriteLine($"  +elite   : {npc.EditorID} {npc.FormKey} \"{npc.Name}\" from {ff.EliteSrc!.EditorID}: {string.Join(", ", log.Distinct())}; VeryAggressive, Foolhardy, name blanked from the rules");
+                }
+                return 0;
             }
 
             protected override string DeathScript => "DefaultAliasOnDeath";

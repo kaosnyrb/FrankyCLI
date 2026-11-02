@@ -19,7 +19,7 @@ namespace FrankyCLI
             protected override void GradeWho(Beat b, string at, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env,
                                               Action<string> Fatal, Action<string, string?, bool> List, Action<string, Crowd, int> Range)
             {
-                if (b.target != null || b.gang != null) Fatal($"{at} sets target or gang; a clear has enemies, every one of whom must die (target and gang are a defeat's).");
+                if (b.target != null || b.elite != null || b.gang != null) Fatal($"{at} sets target, elite or gang; a clear has enemies, every one of whom must die (target, elite and gang are a defeat's).");
                 if (b.enemies == null) Fatal($"{at} has no enemies: nobody to clear, so the step could never end.");
                 else if (b.enemies.pods is Pods p)
                 {

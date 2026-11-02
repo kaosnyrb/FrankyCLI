@@ -1,0 +1,730 @@
+{
+  "FormKey": "00483C:du_overtime.esm",
+  "Header": {
+    "MajorFlags": 0,
+    "FormVersion": 576,
+    "Version2": 0,
+    "VersionControl": 0
+  },
+  "EditorID": "duo_delvetest_e2",
+  "Name": "Hunt: Elder Ashta at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E",
+  "Data": {
+    "Flags": 524288,
+    "Priority": 15,
+    "Type": 0,
+    "Unused": "000000"
+  },
+  "QuestType": "1E2D30:Starfield.esm",
+  "MissionTypeKeyword": "3514C4:Starfield.esm",
+  "MissionBoardDescription": "Hunting Contract. An Elder Ashta at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E. Payment on contract completion.",
+  "Timestamp": 0,
+  "Unknown": 0,
+  "Keywords": [
+    "1A6C4A:Starfield.esm",
+    "3514C4:Starfield.esm"
+  ],
+  "TextDisplayGlobals": [],
+  "MissionBoardInfoPanels": [
+    {
+      "Header": "Target Location",
+      "Line1": "\u003CAlias=TargetLocation\u003E"
+    },
+    {
+      "Header": "Target System",
+      "Line1": "\u003CAlias=TargetSystemLocation\u003E"
+    },
+    {
+      "Header": "Target Planet",
+      "Line1": "\u003CAlias=TargetPlanetLocation\u003E"
+    },
+    {
+      "Header": ""
+    },
+    {
+      "Header": ""
+    },
+    {
+      "Header": ""
+    }
+  ],
+  "DialogConditions": [],
+  "Stages": [
+    {
+      "Index": 5,
+      "Flags": 64,
+      "Unknown": 116,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Note": "Ready stage",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 10,
+      "Flags": 8,
+      "Unknown": 0,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Entry": "An Elder Ashta has made the \u003CAlias=TargetLocation\u003E its ground. Put it down.",
+          "Note": "Mission Accepted",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 100,
+      "Flags": 0,
+      "Unknown": 116,
+      "LogEntries": [
+        {
+          "Flags": 1,
+          "Entry": "I put down the Elder Ashta at the \u003CAlias=TargetLocation\u003E.",
+          "Note": "Mission Complete",
+          "Conditions": [
+            {
+              "Kind": "float",
+              "Function": "GetStageDone",
+              "CompareOperator": 0,
+              "Flags": 0,
+              "Value": 1,
+              "Unknown1": "5BD913",
+              "Unknown2": 0,
+              "RunOnType": 0,
+              "Unknown3": -1,
+              "UseAliases": false,
+              "UsePackageData": false,
+              "FirstLink": "00483C:du_overtime.esm",
+              "SecondParameter": 10
+            }
+          ],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "01000000",
+              "RewardDatas": [
+                {
+                  "XpAwarded": "00081D:du_overtime.esm",
+                  "BonusCredits": "000831:du_overtime.esm",
+                  "Rewards": [],
+                  "Conditions": []
+                }
+              ]
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        },
+        {
+          "Flags": 0,
+          "Conditions": [
+            {
+              "Kind": "float",
+              "Function": "GetStageDone",
+              "CompareOperator": 0,
+              "Flags": 0,
+              "Value": 0,
+              "Unknown1": "5BD913",
+              "Unknown2": 0,
+              "RunOnType": 0,
+              "Unknown3": -1,
+              "UseAliases": false,
+              "UsePackageData": false,
+              "FirstLink": "00483C:du_overtime.esm",
+              "SecondParameter": 10
+            }
+          ],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 200,
+      "Flags": 0,
+      "Unknown": 171,
+      "LogEntries": [
+        {
+          "Flags": 2,
+          "Note": "Mission Rejected",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 900,
+      "Flags": 64,
+      "Unknown": 116,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Note": "Ready stage",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "Objectives": [
+    {
+      "Index": 10,
+      "Flags": 0,
+      "DisplayText": "Hunt the Elder Ashta at the \u003CAlias=TargetLocation\u003E",
+      "Targets": [
+        {
+          "AliasID": 33,
+          "Flags": 0,
+          "DataTypeState": 0,
+          "Conditions": []
+        },
+        {
+          "AliasID": 3,
+          "Flags": 0,
+          "DataTypeState": 0,
+          "Conditions": [
+            {
+              "Kind": "float",
+              "Function": "GetStageDone",
+              "CompareOperator": 0,
+              "Flags": 0,
+              "Value": 0,
+              "Unknown1": "000000",
+              "Unknown2": 0,
+              "RunOnType": 0,
+              "Unknown3": -1,
+              "UseAliases": false,
+              "UsePackageData": false,
+              "FirstLink": "00483C:du_overtime.esm",
+              "SecondParameter": 900
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "Aliases": [
+    {
+      "Kind": "loc",
+      "ID": 0,
+      "Name": "PlayerStarSystemLocation",
+      "Flags": 536870920,
+      "ALFG": 0,
+      "Conditions": [],
+      "LocationTypeKeyword": "00149F:Starfield.esm",
+      "SystemLocationAliasID": -2
+    },
+    {
+      "Kind": "loc",
+      "ID": 5,
+      "Name": "TargetLocation",
+      "Flags": 8388865,
+      "ALFG": 0,
+      "Conditions": [
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "05F198:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "02271F:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 0,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "27B45C:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 0,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "2235B6:Starfield.esm",
+          "SecondParameter": 0
+        }
+      ],
+      "LocationTypeKeyword": "070A54:Starfield.esm",
+      "Alps": {
+        "Conditions": [
+          {
+            "Kind": "float",
+            "Function": "GetIsCurrentLocationExact",
+            "CompareOperator": 0,
+            "Flags": 0,
+            "Value": 1,
+            "Unknown1": "000000",
+            "Unknown2": 0,
+            "RunOnType": 0,
+            "Unknown3": -1,
+            "UseAliases": false,
+            "UsePackageData": false,
+            "FirstLink": "01ABE3:Starfield.esm",
+            "SecondParameter": 0
+          }
+        ]
+      }
+    },
+    {
+      "Kind": "ref",
+      "ID": 3,
+      "Name": "PrimaryRef",
+      "Flags": 256,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 5,
+        "RefType": "05F198:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 11,
+      "Name": "MapMarker",
+      "Flags": 128,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 5,
+        "RefType": "02271F:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "loc",
+      "ID": 8,
+      "Name": "TargetSystemLocation",
+      "Flags": 536871168,
+      "ALFG": 0,
+      "Conditions": [],
+      "LocationTypeKeyword": "00149F:Starfield.esm",
+      "SystemLocationAliasID": 3
+    },
+    {
+      "Kind": "loc",
+      "ID": 2,
+      "Name": "TargetPlanetLocation",
+      "Flags": 1073742080,
+      "ALFG": 0,
+      "Conditions": [],
+      "LocationTypeKeyword": "070A54:Starfield.esm",
+      "ParentSystemLocationAliasID": 3
+    },
+    {
+      "Kind": "ref",
+      "ID": 9,
+      "Name": "PlayerShip",
+      "Flags": 1048578,
+      "ALFG": 0,
+      "Conditions": [],
+      "External": {
+        "Quest": "0174A2:Starfield.esm",
+        "AliasID": 16
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 32,
+      "Name": "MBRIR02Player",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [],
+      "UniqueActor": "000007:Starfield.esm",
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 33,
+      "Name": "DelveBeat1Target",
+      "Flags": 2,
+      "ALFG": 0,
+      "Conditions": [],
+      "VoiceTypes": "Null"
+    }
+  ],
+  "Vmad": {
+    "Version": 6,
+    "ObjectFormat": 2,
+    "ExtraBindDataVersion": 3,
+    "Versioning": 0,
+    "FragmentScript": {
+      "Name": "duo_qf_delvetest_e2",
+      "Flags": 0,
+      "Properties": [
+        {
+          "Type": "Object",
+          "Name": "Alias_Beat1Marker",
+          "Flags": 1,
+          "Object": {
+            "Form": "00483C:du_overtime.esm",
+            "Alias": 3,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Alias_Beat1Target",
+          "Flags": 1,
+          "Object": {
+            "Form": "00483C:du_overtime.esm",
+            "Alias": 33,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Target1",
+          "Flags": 1,
+          "Object": {
+            "Form": "00483D:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        }
+      ]
+    },
+    "Fragments": [
+      {
+        "Stage": 10,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_delvetest_e2",
+        "FragmentName": "Fragment_Stage_0010_Item_00"
+      },
+      {
+        "Stage": 100,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_delvetest_e2",
+        "FragmentName": "Fragment_Stage_0100_Item_00"
+      },
+      {
+        "Stage": 900,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_delvetest_e2",
+        "FragmentName": "Fragment_Stage_0900_Item_00"
+      }
+    ],
+    "Scripts": [
+      {
+        "Name": "MissionQuestScript",
+        "Flags": 0,
+        "Properties": [
+          {
+            "Type": "Object",
+            "Name": "MissionParent",
+            "Flags": 1,
+            "Object": {
+              "Form": "015300:Starfield.esm",
+              "Alias": -1,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "RewardAmountGlobal",
+            "Flags": 1,
+            "Object": {
+              "Form": "000820:du_overtime.esm",
+              "Alias": -1,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "RewardAmountGlobalActual",
+            "Flags": 1,
+            "Object": {
+              "Form": "000820:du_overtime.esm",
+              "Alias": -1,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "PlayerStarSystemLocation",
+            "Flags": 1,
+            "Object": {
+              "Form": "00483C:du_overtime.esm",
+              "Alias": 0,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "TargetSystemLocation",
+            "Flags": 1,
+            "Object": {
+              "Form": "00483C:du_overtime.esm",
+              "Alias": 8,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "TargetPlanetLocation",
+            "Flags": 1,
+            "Object": {
+              "Form": "00483C:du_overtime.esm",
+              "Alias": 2,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "TargetLocation",
+            "Flags": 1,
+            "Object": {
+              "Form": "00483C:du_overtime.esm",
+              "Alias": 5,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "PrimaryRef",
+            "Flags": 1,
+            "Object": {
+              "Form": "00483C:du_overtime.esm",
+              "Alias": 3,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "PlayerShip",
+            "Flags": 1,
+            "Object": {
+              "Form": "00483C:du_overtime.esm",
+              "Alias": 9,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Bool",
+            "Name": "ShutdownOnFailure",
+            "Flags": 1,
+            "Bool": true
+          }
+        ]
+      }
+    ],
+    "Aliases": [
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "00483C:du_overtime.esm",
+            "Alias": 11,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "DefaultAliasMapMarkerScript",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Int",
+                "Name": "MapMarkerCategory",
+                "Flags": 1,
+                "Int": 0
+              },
+              {
+                "Type": "Int",
+                "Name": "UndiscoveredVisibility",
+                "Flags": 1,
+                "Int": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "00483C:du_overtime.esm",
+            "Alias": 33,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "DefaultAliasOnDeath",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Int",
+                "Name": "StageToSet",
+                "Flags": 1,
+                "Int": 100
+              },
+              {
+                "Type": "Int",
+                "Name": "PrereqStage",
+                "Flags": 1,
+                "Int": 10
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "00483C:du_overtime.esm",
+            "Alias": 3,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "duo_delve_near",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Object",
+                "Name": "TargetAlias",
+                "Flags": 1,
+                "Object": {
+                  "Form": "00483C:du_overtime.esm",
+                  "Alias": 32,
+                  "Unused": 0
+                }
+              },
+              {
+                "Type": "Float",
+                "Name": "TargetDistance",
+                "Flags": 1,
+                "Float": 250
+              },
+              {
+                "Type": "Int",
+                "Name": "StageToSet",
+                "Flags": 1,
+                "Int": 900
+              },
+              {
+                "Type": "Int",
+                "Name": "PrereqStage",
+                "Flags": 1,
+                "Int": 10
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "Children": {
+    "Scenes": [],
+    "Topics": []
+  }
+}

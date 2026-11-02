@@ -762,6 +762,16 @@ namespace FrankyCLI
             /// step begins; the step is done when he dies (the Bounty driver's boss, spike 2026-10-14-defeat-and-clear-beats).
             /// </summary>
             public string? target { get; set; }
+            /// <summary>
+            /// defeat, OPTIONAL and instead of target: an ELITE made from a creature, {from, name}. The build clones `from`
+            /// (an Npc, own mod or a master) as `<id>_b<N>elite` with vanilla's own alpha swaps, read off Ashta -> Alpha
+            /// Ashta and Lesser -> Greater Silverfish (manual Inbox 2026-11-02, for 40): the challenge object mod becomes
+            /// mod_CCT_Challenge_VeryHard, mod_CCT_Special_Boss is added, the size steps up one (none: Large), the name is
+            /// `name` with CCT_Instance_Name_Blank so the naming rules do not wrap it, VeryAggressive and Foolhardy (his May
+            /// PredatorHuntTarget's). His May template retarget is NOT done: the probe (his 2026-11-02 "yeah lets make an
+            /// elite Ashta to hunt at a natural site") is whether a plain clone renders.
+            /// </summary>
+            public Elite? elite { get; set; }
             /// <summary>defeat, OPTIONAL: who stands with the target, a mix drawn from list. They need not die.</summary>
             public Crowd? gang { get; set; }
             /// <summary>clear, REQUIRED there: who appears at `at` when the step begins; the step is done when every one is dead (the Hunt driver).</summary>
@@ -791,6 +801,7 @@ namespace FrankyCLI
             public int? near { get; set; }
         }
         /// <summary>A crowd drawn from a FormList: min..max of them; species "one" = a single entry for all (the Hunt driver), "mix" = drawn per enemy.</summary>
+        private sealed class Elite { public string? from { get; set; } public string? name { get; set; } }
         private sealed class Crowd { public string? list { get; set; } public int min { get; set; } public int max { get; set; } public string? species { get; set; } public Pods? pods { get; set; } }
         /// <summary>A clear's enemies arriving by DROP POD (2026-10-21, his "let's do 3 per pod and 3 pods in different points to
         /// start with"): count pods land round the spawn marker and per enemies step out of each, so the pods set the number

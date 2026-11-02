@@ -1,0 +1,47 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_e1",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "eliza",
+  "source": "his 2026-11-02 13:44: \"yeah lets make an elite Ashta to hunt at a natural site\", after my read of his May PredatorHuntTarget and vanilla's Ashta -> Alpha Ashta",
+  "_note": [
+    "ELITE TEST E1: the first `elite` on a defeat. The build clones PCM_Cheyenne_Akila_Ashta as duo_delvetest_e1_b1elite with vanilla's alpha swaps (challenge VeryHard, + Special_Boss, size up one) and its own name, and does NOT retarget the template chain as his May PredatorHuntTarget did.",
+    "What his play answers: (1) does a plain clone render, at all and as an Ashta (if not, the May retarget goes back in, and we know why it existed); (2) does it read as an elite: bigger, harder, the name on its health bar; (3) does the board place a NATURAL site on Akila (no Delve has pinned a planet AND required a theme).",
+    "Silent on purpose: no speaker, broadcast or say, so no voice spend. The words are placeholders for a probe, not Jessica's; if it graduates, a real recipe gets hers. Unbuilt once it has told us."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeNaturalKeyword"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A natural landmark (his ask), 42% of the request pool by part 32's census; how many the content manager can put on Akila is the open question.",
+    "planet": "Akila",
+    "_planet": "Akila from fauna.json (SCheyenne_PAkila), as MB98a and MB99a."
+  },
+  "prose": {
+    "name": "Hunt: Elder Ashta at the <Place> on <Planet>",
+    "briefing": "An Elder Ashta has made the <Place> its ground. Put it down.",
+    "card": "Hunting Contract. An Elder Ashta at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "REWoundedMarkerLocRef",
+      "_at": "Natural landmarks carry the wounded marker (part 32: REWounded + IS Natural, 102 in the cargo corpus); RECenterLocRef left a draw pool of 3.",
+      "elite": {
+        "from": "PCM_Cheyenne_Akila_Ashta",
+        "name": "Elder Ashta"
+      },
+      "_elite": "The ordinary Ashta MB98a's waves proved renders when spawned bare. 'Elder Ashta' is a probe name, not vanilla's 'Alpha Ashta', so the two cannot be confused at the glass.",
+      "objective": "Hunt the Elder Ashta at the <Place>",
+      "journal": "I put down the Elder Ashta at the <Place>.",
+      "reward": "med"
+    }
+  ]
+}

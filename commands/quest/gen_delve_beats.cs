@@ -278,8 +278,8 @@ namespace FrankyCLI
                 }
                 if (b.allies != null && b.type != "hold")
                     Fatal($"beat {i + 1} sets allies and is a {b.type}; only a hold places allies, so they would be silently ignored.");
-                if (!IsFight(b) && (b.target != null || b.gang != null || b.enemies != null || b.loot != null || b.support != null))
-                    Fatal($"beat {i + 1} sets target, gang, enemies, loot or support and is a {b.type}; only a defeat or a clear spawns a fight, so they would be silently ignored.");
+                if (!IsFight(b) && (b.target != null || b.elite != null || b.gang != null || b.enemies != null || b.loot != null || b.support != null))
+                    Fatal($"beat {i + 1} sets target, elite, gang, enemies, loot or support and is a {b.type}; only a defeat or a clear spawns a fight, so they would be silently ignored.");
                 if (b.name != null && Tokens(b.name).Any())
                     Fatal($"beat {i + 1} name carries a <Token>; an activator name is not an alias context.");
                 if (b.name != null && string.IsNullOrWhiteSpace(b.model))

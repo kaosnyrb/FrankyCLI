@@ -34,6 +34,8 @@ namespace FrankyCLI
             public readonly Dictionary<int, FormKey> Allies = new();
             /// <summary>By beat index: a hold's creatures (Npc or LeveledNpc), in the recipe's order, for its own FormList.</summary>
             public readonly Dictionary<int, List<FormKey>> Creatures = new();
+            /// <summary>Vanilla's elite components, resolved once when any defeat names an elite.</summary>
+            public EliteKit? EliteKit;
             /// <summary>By beat index, for defeat and clear: the target and the lists the fight draws from.</summary>
             public readonly Dictionary<int, FightForms> Fights = new();
             /// <summary>By (beat, exchange): a talk exchange's perk.</summary>
@@ -52,7 +54,16 @@ namespace FrankyCLI
         }
 
         /// <summary>A fight beat's forms, resolved own-or-master in ResolveInputs.</summary>
-        private sealed class FightForms { public FormKey? Target, Gang, Enemies, Loot, Support, Ship; }
+        private sealed class FightForms { public FormKey? Target, Gang, Enemies, Loot, Support, Ship; public INpcGetter? EliteSrc; }
+
+        /// <summary>Vanilla's elite components, by EditorID off Starfield.esm (manual Inbox 2026-11-02, for 40).</summary>
+        private sealed class EliteKit
+        {
+            public FormKey VeryHard, Boss, Large, Blank;
+            public HashSet<FormKey> Challenges = new();
+            /// <summary>Small, Normal, Large, Huge, Gigantic: the ladder an elite steps up one rung of.</summary>
+            public List<FormKey> Sizes = new();
+        }
 
         /// <summary>
         /// Resolves a recipe's DelveInputs. Moved out of Build unchanged: every lookup, refusal and gate is as it was.
@@ -178,6 +189,30 @@ namespace FrankyCLI
                 var fb = r.beats[i];
                 if (fb.type != "defeat" && fb.type != "clear") continue;
                 var ff = new FightForms();
+                if (fb.elite?.from is string ef)
+                {
+                    ff.EliteSrc = OwnOrMaster<INpcGetter>(myMod, env, ef);
+                    if (ff.EliteSrc == null) { Console.WriteLine($"REFUSED: beat {i + 1} elite.from '{ef}' is not an Npc in {t.mod} or one of its masters."); fail++; continue; }
+                    if (inputs.EliteKit == null)
+                    {
+                        FormKey? M(string e) => OwnOrMaster<IAObjectModificationGetter>(myMod, env, e)?.FormKey;
+                        var kit = new EliteKit();
+                        var need = new Dictionary<string, FormKey?>
+                        {
+                            ["mod_CCT_Challenge_VeryHard"] = M("mod_CCT_Challenge_VeryHard"), ["mod_CCT_Special_Boss"] = M("mod_CCT_Special_Boss"),
+                            ["CCT_Instance_Name_Blank"] = OwnOrMaster<IKeywordGetter>(myMod, env, "CCT_Instance_Name_Blank")?.FormKey,
+                        };
+                        foreach (var c in new[] { "EasiestLevel1", "VeryEasy", "Easy", "Normal", "Hard", "VeryHard" }) need["mod_CCT_Challenge_" + c] = M("mod_CCT_Challenge_" + c);
+                        foreach (var s in new[] { "Small", "Normal", "Large", "Huge", "Gigantic" }) need["mod_CCT_Size_" + s] = M("mod_CCT_Size_" + s);
+                        var missing = need.Where(x => x.Value == null).Select(x => x.Key).ToList();
+                        if (missing.Count > 0) { Console.WriteLine($"REFUSED: the elite kit is missing {string.Join(", ", missing)} from {t.mod} and its masters."); fail++; continue; }
+                        kit.VeryHard = need["mod_CCT_Challenge_VeryHard"]!.Value; kit.Boss = need["mod_CCT_Special_Boss"]!.Value; kit.Blank = need["CCT_Instance_Name_Blank"]!.Value;
+                        kit.Challenges = need.Where(x => x.Key.StartsWith("mod_CCT_Challenge_")).Select(x => x.Value!.Value).ToHashSet();
+                        kit.Sizes = new[] { "Small", "Normal", "Large", "Huge", "Gigantic" }.Select(s => need["mod_CCT_Size_" + s]!.Value).ToList();
+                        kit.Large = kit.Sizes[2];
+                        inputs.EliteKit = kit;
+                    }
+                }
                 if (fb.target != null)
                 {
                     ff.Target = OwnOrMaster<INpcGetter>(myMod, env, fb.target)?.FormKey ?? OwnOrMaster<ILeveledNpcGetter>(myMod, env, fb.target)?.FormKey;

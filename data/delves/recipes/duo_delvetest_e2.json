@@ -1,0 +1,45 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_e2",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "eliza",
+  "source": "his 2026-11-02 13:44: \"yeah lets make an elite Ashta to hunt at a natural site\", after my read of his May PredatorHuntTarget and vanilla's Ashta -> Alpha Ashta",
+  "_note": [
+    "ELITE TEST E2: E1's elite at ANY quiet site on Akila (MB98a's shape), the control for E1. E1 requires a natural landmark, and the board's request tree can place only 3 (OEJM011, OESD014, OESF001, gen_delve keywords --request); whether any can land on Akila is unknown, so E1 may never list. E2 tests the elite either way.",
+    "Mine, not his ask: named to him in the same turn (2026-11-02). Same elite, same words; only the theme differs. Unbuilt with E1."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Any open site on Akila, MB98a's request (his wind farm), no cave so the hunt is outdoors.",
+    "planet": "Akila",
+    "_planet": "Akila from fauna.json (SCheyenne_PAkila), as MB98a and MB99a."
+  },
+  "prose": {
+    "name": "Hunt: Elder Ashta at the <Place> on <Planet>",
+    "briefing": "An Elder Ashta has made the <Place> its ground. Put it down.",
+    "card": "Hunting Contract. An Elder Ashta at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "RECenterLocRef",
+      "_at": "MB99a's marker on Akila's request pool.",
+      "elite": {
+        "from": "PCM_Cheyenne_Akila_Ashta",
+        "name": "Elder Ashta"
+      },
+      "_elite": "The ordinary Ashta MB98a's waves proved renders when spawned bare. 'Elder Ashta' is a probe name, not vanilla's 'Alpha Ashta', so the two cannot be confused at the glass.",
+      "objective": "Hunt the Elder Ashta at the <Place>",
+      "journal": "I put down the Elder Ashta at the <Place>.",
+      "reward": "med"
+    }
+  ]
+}
