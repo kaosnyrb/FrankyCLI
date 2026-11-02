@@ -1,6 +1,6 @@
 {
   "schema": 2,
-  "id": "duo_delve_missionboard33a",
+  "id": "duo_MB98a_qst",
   "template": "board",
   "deal": "_duo_MB_MissionNode_test",
   "_deal": "The board's test node, until he plays it.",
@@ -12,11 +12,10 @@
     "JAEGER'S FRAME, kept light (office/stories/2026-07-31-jaeger-frame-spec.md, frame 01, the territorial native): the",
     "Ashta were hunting this ground before the outpost went up. Said once, by the client, as a fact about the ground.",
     "The July owed fix holds: no interiority for the animal, nobody says what it wants.",
-    "TWO THINGS NOT BUILT, the lint refuses or ignores each, Eliza's:",
-    "(1) CHEYENNE ONLY. A planet condition on a board's request. Not the second-request planet guard that crashed 10a and",
-    "12a, but the same family, so price it before it goes near the plugin. Stand-in field: place.planet.",
-    "(2) ASHTA WAVES. A hold's waves come from the base driver's gang list (spacers). This wants a creature list, Ashta",
-    "only: hold.list is the stand-in. Which LeveledNpc is Ashta is hers to find.",
+    "BUILT 2026-11-02 (Eliza, his \"yup build\" and \"yeah\"), both were stand-ins:",
+    "(1) AKILA ONLY: place.planet (plan OT-38), FFCydoniaZ07's pin on the board's request. Not the relative planet guard that",
+    "crashed 10a and 12a: it names a fixed planet and no alias. Whether Akila can take this site is his first play.",
+    "(2) ASHTA WAVES: hold.creatures (plan OT-33), the only Ashta in the load order, VeryAggressive (SpawnCreatureWave).",
     "Pay: med, capped.",
     "NARROW, SO IT NAMES THINGS, ALOUD TOO. His 11:33 (\"narrow quests which give you writing more bones\") and 11:36: \"yeah let's make them exempt. This is like something people will go 'Wait how the hell did they do that'\". So the audio says Ashta, Akila and the Rangers; the total-conversion rule (10-12) does not apply to a narrow Delve, his trade."
   ],
@@ -31,7 +30,7 @@
     },
     "_theme": "A non-hostile built site: somebody's outpost. His word is outpost; whether a request on Cheyenne can place one is the pool question.",
     "planet": "Akila",
-    "_planet": "STAND-IN for his 'Only spawns on a outpost on Cheyenne'. Cheyenne is the SYSTEM; the Freestar homeworld he means is the planet Akila in it, where the Ashta are native. The condition is on the planet Akila (or the system, if that is what builds). Not a field yet; Eliza's."
+    "_planet": "His 'Only spawns on a outpost on Cheyenne'. Cheyenne is the SYSTEM; the Freestar homeworld he means is the planet Akila in it, where the Ashta are native. Pinned to the planet (SCheyenne_PAkila)."
   },
   "prose": {
     "name": "Defense: Ashta at the <Place> on <Planet>",
@@ -66,8 +65,10 @@
         "squad",
         "horde"
       ],
-      "list": "ASHTA, UNPICKED",
-      "_list": "STAND-IN: an Ashta-only creature list, Eliza's. Size per side on the horde (his rule).",
+      "creatures": [
+        "PCM_Cheyenne_Akila_Ashta"
+      ],
+      "_creatures": "The ordinary Ashta only. PCM_Cheyenne_Akila_Ashta_Alpha also exists: added to the list, about half of every wave would be alphas (one is picked per enemy), so it is left for his eye. Size per side on the horde (his rule).",
       "revealObjective": "Kill the Ashta",
       "defend": 1,
       "say": [

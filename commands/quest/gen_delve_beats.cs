@@ -231,8 +231,8 @@ namespace FrankyCLI
                 // shipped quests share; with no model there is no clone to carry it.
                 if (b.type == "destroy" && string.IsNullOrWhiteSpace(b.model))
                     Fatal($"beat {i + 1} is a destroy with no model; its health goes on the beat's own clone and only a model makes one.");
-                if (b.type != "hold" && (b.waves != null || b.size != null || b.defend != null || b.stuck != null || b.style != null || b.reveal != null || b.revealObjective != null))
-                    Fatal($"beat {i + 1} sets waves, size, defend, stuck, style, reveal or revealObjective and is not a hold, so they would be silently ignored.");
+                if (b.type != "hold" && (b.waves != null || b.size != null || b.defend != null || b.stuck != null || b.style != null || b.reveal != null || b.revealObjective != null || b.creatures != null))
+                    Fatal($"beat {i + 1} sets waves, size, defend, stuck, style, reveal, revealObjective or creatures and is not a hold, so they would be silently ignored.");
                 if (b.outside != null && b.type != "recover")
                     Fatal($"beat {i + 1} sets outside and is a {b.type}; only a recover places its holder out on open ground (so far), so it would be silently ignored.");
                 KindOf(b)?.GradeBeat(b, i, t, env, Fatal, Warn);
@@ -861,6 +861,8 @@ namespace FrankyCLI
             internal MiscItem? itemSrc;
             /// <summary>The removed driver's GangMembers list. Set in section 1; read in 10.</summary>
             internal FormKey? gangKey;
+            /// <summary>By beat index: the FormList a hold's creature waves draw from (`<id>_b<N>creatures`, hold Slot).</summary>
+            internal readonly Dictionary<int, FormKey> creatureLists = new();
             /// <summary>The removed driver's MaxGangMembers. Set in section 1; read in 10.</summary>
             internal int? gangMax;
             /// <summary>The removed driver's TargetCivListMembers list. Set in section 1; read in 10.</summary>

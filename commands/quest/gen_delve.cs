@@ -717,6 +717,14 @@ namespace FrankyCLI
             /// </summary>
             public Company? allies { get; set; }
             /// <summary>
+            /// beats, a hold, OPTIONAL: the waves are these CREATURES (Npc or LeveledNpc EditorIDs, own mod or a master), not the
+            /// site's faction gang (SiteGang). The build writes them into a FormList of the Delve's own, `<id>_b<N>creatures`,
+            /// and the waves come through duo_delve_lib.SpawnCreatureWave: Aggression 2 (VeryAggressive), the creature idiom
+            /// PlaceNest uses, because SpawnWave's 1 (enemies only) is chosen for human waves and a planet's ambient fauna
+            /// need not count him an enemy. Plan OT-33, his 2026-11-02 "yeah", for missionboard33a's Ashta on Akila.
+            /// </summary>
+            public List<string>? creatures { get; set; }
+            /// <summary>
             /// beats, a hold, OPTIONAL: seconds a wave may stay alive before the quest moves on without it
             /// (the stuck-enemy guard: his infestation driver's 180 s pity timer). Absent = 180.
             /// </summary>

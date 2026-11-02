@@ -32,6 +32,8 @@ namespace FrankyCLI
             public readonly Dictionary<int, FormKey> WhoLists = new();
             /// <summary>By beat index: a hold's allies list.</summary>
             public readonly Dictionary<int, FormKey> Allies = new();
+            /// <summary>By beat index: a hold's creatures (Npc or LeveledNpc), in the recipe's order, for its own FormList.</summary>
+            public readonly Dictionary<int, List<FormKey>> Creatures = new();
             /// <summary>By beat index, for defeat and clear: the target and the lists the fight draws from.</summary>
             public readonly Dictionary<int, FightForms> Fights = new();
             /// <summary>By (beat, exchange): a talk exchange's perk.</summary>
@@ -141,6 +143,19 @@ namespace FrankyCLI
                 var f = OwnOrMaster<IFormListGetter>(myMod, env, al.list ?? "");
                 if (f == null) { Console.WriteLine($"REFUSED: beat {i + 1} allies.list '{al.list}' is not a FormList in {t.mod} or one of its masters."); fail++; continue; }
                 inputs.Allies[i] = f.FormKey;
+            }
+            // A hold's creatures (plan OT-33), own-or-master as every other form here: each an Npc or a LeveledNpc.
+            for (int i = 0; i < r.beats.Count; i++)
+            {
+                if (r.beats[i].creatures is not List<string> cs || r.beats[i].type != "hold") continue;
+                var keys = new List<FormKey>();
+                foreach (var c in cs)
+                {
+                    var k = OwnOrMaster<INpcGetter>(myMod, env, c)?.FormKey ?? OwnOrMaster<ILeveledNpcGetter>(myMod, env, c)?.FormKey;
+                    if (k == null) { Console.WriteLine($"REFUSED: beat {i + 1} creatures '{c}' is not an Npc or LeveledNpc in {t.mod} or one of its masters."); fail++; continue; }
+                    keys.Add(k.Value);
+                }
+                inputs.Creatures[i] = keys;
             }
             // A craft's bench and ingredients, own-or-master (ResolveIngredient's rule: never a plugin that is not a master).
             for (int i = 0; i < r.beats.Count; i++)

@@ -99,15 +99,29 @@ EndFunction
 ; from anywhere but in front), 2 is a HORDE (the wave dealt round-robin across his left and right, so it closes
 ; from two sides). Each group scatters within 10 m of its origin, snapped to navmesh. They then come FOR him because each wave collection wears a Travel-to-player package
 ; (gen_delve writes it), not because of anything here.
+; A human wave: Aggression 1 (Aggressive: enemies only), NOT his gang idiom's 2 (VeryAggressive, which also
+; attacks neutrals): a wave crossing open ground at 2 stopped to fight every animal it met (his play of 09,
+; 2026-10-10: "the waves tend to try and attack any wildlife they run into"). Every built hold calls this with
+; these six arguments, so its signature never changes.
 Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList akGang, Int aiMin, Int aiMax, Int aiOrigins) Global
+    SpawnWaveAs(akMarker, akWave, akGang, aiMin, aiMax, aiOrigins, 1.0)
+EndFunction
+
+; A CREATURE wave (plan OT-33, 2026-11-02, missionboard33a's Ashta on Akila): Aggression 2 (VeryAggressive),
+; PlaceNest's creature idiom, because a planet's ambient fauna (the Ashta are PCM_Cheyenne_Akila_*) need not
+; count him an enemy, and at 1 they would only fight what they already hate. gen_delve calls this when a hold
+; names `creatures`; the list is the Delve's own (<id>_b<N>creatures).
+Function SpawnCreatureWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList akCreatures, Int aiMin, Int aiMax, Int aiOrigins) Global
+    SpawnWaveAs(akMarker, akWave, akCreatures, aiMin, aiMax, aiOrigins, 2.0)
+EndFunction
+
+; The one body both share; only the aggression differs.
+Function SpawnWaveAs(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList akGang, Int aiMin, Int aiMax, Int aiOrigins, Float afAggression) Global
     ObjectReference[] origins = WaveOrigins(akMarker.GetRef(), Game.GetPlayer(), aiOrigins)
     ActorValue Suspicious = Game.GetFormFromFile(748, "Starfield.esm") as ActorValue ; Suspicious [AVIF:000002EC]
     ActorValue Aggression = Game.GetFormFromFile(700, "Starfield.esm") as ActorValue ; Aggression [AVIF:000002BC]
     Float detected = 2.0       ; Suspicious: DetectedActor
-    ; Aggression 1 (Aggressive: enemies only), NOT his gang idiom's 2 (VeryAggressive, which also attacks
-    ; neutrals): a wave crossing open ground at 2 stopped to fight every animal it met (his play of 09,
-    ; 2026-10-10: "the waves tend to try and attack any wildlife they run into").
-    Float aggressive = 1.0
+    Float aggressive = afAggression
 
     Float[] placePosition = new Float[6]
     ; A HORDE is the wave's size PER SIDE (his play of 09: "third wave seems small"), sized on aiOrigins.

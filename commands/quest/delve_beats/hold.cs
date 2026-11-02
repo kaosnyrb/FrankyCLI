@@ -82,6 +82,15 @@ namespace FrankyCLI
                     else if (al.max > 8) Warn($"beat {i + 1} allies.max is {al.max}; with the waves on top, that is a crowd the navmesh may not seat.");
                     else Console.WriteLine($"  beat {i + 1} allies: {al.min}-{al.max} from {al.list}, placed just before the first wave");
                 }
+                if (b.creatures != null)
+                {
+                    if (b.creatures.Count == 0) Fatal($"beat {i + 1} creatures is empty, so a wave would spawn nobody and never clear.");
+                    foreach (var c in b.creatures.Where(c => env.LinkCache.TryResolve<INpcGetter>(c, out _) == false
+                                                         && env.LinkCache.TryResolve<ILeveledNpcGetter>(c, out _) == false))
+                        Fatal($"beat {i + 1} creatures names '{c}', which is not an Npc or LeveledNpc in the load order.");
+                    if (b.creatures.Count > 0)
+                        Console.WriteLine($"  beat {i + 1} waves: CREATURES ({string.Join(", ", b.creatures)}), VeryAggressive, not the site's faction");
+                }
                 if (IsBoard(t) && i == 0)
                     Console.WriteLine($"  beat {i + 1} (hold) is a board's step one: its first wave waits for him to come within {ApproachDistance:0} of its marker, not the accept");
             }
@@ -166,6 +175,15 @@ namespace FrankyCLI
                     build.bm.Waves.Add((int)cid);
                 }
                 Console.WriteLine($"  +slot    : beat {i + 1} (hold) -- spawn marker alias {hm.ID}, wave collections {string.Join(", ", build.waveAliases[i])} (EMPTY, copies of ActiveHostiles)");
+                // Creature waves (plan OT-33): the Delve's own FormList, named for it, so a rebuild sweeps it with the rest.
+                if (build.inputs.Creatures.TryGetValue(i, out var cs))
+                {
+                    var fl = new FormList(build.myMod) { EditorID = $"{build.r.id}_b{i + 1}creatures" };
+                    foreach (var k in cs) fl.Items.Add(new FormLink<IStarfieldMajorRecordGetter>(k));
+                    build.myMod.FormLists.Add(fl);
+                    build.creatureLists[i] = fl.FormKey;
+                    Console.WriteLine($"  +list    : {fl.EditorID} {fl.FormKey} ({cs.Count} creature(s)), beat {i + 1}'s waves");
+                }
                 return 0;
             }
 
@@ -290,10 +308,20 @@ namespace FrankyCLI
                 string mk = $"Alias_Beat{b + 1}Spawn", wv = $"Alias_Beat{b + 1}Wave{w + 1}";
                 build.props.Add(("ReferenceAlias", mk, build.clone.FormKey, build.slotOf[b].markerAlias));
                 build.props.Add(("RefCollectionAlias", wv, build.clone.FormKey, build.waveAliases[b][w]));
-                build.props.Add(("FormList", "Gang", build.gangKey!.Value, -1));
                 var sz = r.beats[b].size!;
                 int origins = WaveStyles[r.beats[b].style?[w] ?? "squad"];
-                build.Add(stage, $"duo_delve_lib.SpawnWave({mk}, {wv}, {build.SiteGang(b)}, {sz[0]}, {sz[1]}, {origins})");
+                if (build.creatureLists.TryGetValue(b, out var cl))
+                {
+                    // Creatures (plan OT-33): their own list, VeryAggressive; no site faction is read.
+                    string cp = $"Beat{b + 1}Creatures";
+                    build.props.Add(("FormList", cp, cl, -1));
+                    build.Add(stage, $"duo_delve_lib.SpawnCreatureWave({mk}, {wv}, {cp}, {sz[0]}, {sz[1]}, {origins})");
+                }
+                else
+                {
+                    build.props.Add(("FormList", "Gang", build.gangKey!.Value, -1));
+                    build.Add(stage, $"duo_delve_lib.SpawnWave({mk}, {wv}, {build.SiteGang(b)}, {sz[0]}, {sz[1]}, {origins})");
+                }
                 int stuck = r.beats[b].stuck ?? DefaultStuckSeconds;
                 int rv = r.beats[b].reveal ?? DefaultRevealSeconds;
                 string stillUp = StillUp(stage, ws[w]);
