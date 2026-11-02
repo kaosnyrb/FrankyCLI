@@ -378,15 +378,19 @@ EndFunction
 ; akKeywords and akGangs are the faction table gen_delve factions wrote, parallel by index.
 
 ; The wave list for the faction the site carries; akDefault when it carries none of the table's (another mod's).
+; Traced (2026-11-02, his "add that debug to OT-01"): a site matching a row and a site carrying none of them both give
+; Spacers on most sites, so only this line tells a real faction from the fallback.
 FormList Function SiteGang(LocationAlias akSite, FormList akKeywords, FormList akGangs, FormList akDefault) Global
     Location loc = akSite.GetLocation()
     Int i = 0
     While i < akKeywords.GetSize()
         If loc.HasKeyword(akKeywords.GetAt(i) as Keyword)
+            Debug.Trace("[duo_delve_lib] SiteGang: " + loc + " carries " + akKeywords.GetAt(i) + " (row " + i + ") -> " + akGangs.GetAt(i))
             Return akGangs.GetAt(i) as FormList
         EndIf
         i += 1
     EndWhile
+    Debug.Trace("[duo_delve_lib] SiteGang: " + loc + " carries none of the " + akKeywords.GetSize() + " table keywords -> DEFAULT " + akDefault)
     Return akDefault
 EndFunction
 
@@ -403,8 +407,12 @@ EndFunction
 
 ; His 10-28: a member of the joinable faction is never sent to fight it. A member's site rolled as akRolled becomes akInstead.
 Function MemberSwap(LocationAlias akSite, FormList akKeywords, Faction akMembers, Keyword akRolled, Keyword akInstead) Global
-    If Game.GetPlayer().IsInFaction(akMembers) && akSite.GetLocation().HasKeyword(akRolled)
+    Bool member = Game.GetPlayer().IsInFaction(akMembers)
+    Bool rolled = akSite.GetLocation().HasKeyword(akRolled)
+    Debug.Trace("[duo_delve_lib] MemberSwap: " + akSite.GetLocation() + " member " + member + ", rolled " + akRolled + " " + rolled)
+    If member && rolled
         SwapSite(akSite, akKeywords, akInstead)
+        Debug.Trace("[duo_delve_lib] MemberSwap: swapped to " + akInstead)
     EndIf
 EndFunction
 
