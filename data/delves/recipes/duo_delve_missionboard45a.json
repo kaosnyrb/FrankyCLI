@@ -11,7 +11,8 @@
     "Creatures: LvlSiren (Starfield.esm, VeryAggressive), found 11-02 by gen_inspect. Lore (fandom): armoured, long-eared predators, native to Lantana VIII-b, brought to Niira by the UC Xenowarfare Division in the Colony War. Said once, in the briefing, as fact.",
     "STAND-IN: place.planet 'Niira' is not in the closed planet table yet. Bait crate model is the stackable crate, approved.",
     "A DRAFT ID: MB ids stop at two digits (MB99a was the last free one, 11-02), so this waits for gen_delve name, as missionboard33a became MB98a. The numbering cap is Eliza's to raise.",
-    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-board45a.md): rework, findings 1-6 taken. The war history moved to the card, where every player reads it. Forced pick answered NO: the pack comes in two waves (squad, then horde), so the warden says they send a couple in first."
+    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-board45a.md): rework, findings 1-6 taken. The war history moved to the card, where every player reads it. Forced pick answered NO: the pack comes in two waves (squad, then horde), so the warden says they send a couple in first.",
+    "JAEGER PASS 2026-11-02, his 'If we know exactly where and what we can get sexy with it': the words use the planet's own lore (fandom, read the same day). Frances's 11-02 findings are kept; only lines were added."
   ],
   "place": {
     "theme": {
@@ -37,7 +38,8 @@
     "elevenlabs": "54Cze5LrTSyLgbO6Fhlc"
   },
   "broadcast": [
-    "You won't catch them, they're too clever for that. But they'll come to a meal. Put the bait out at the centre and wait. They send a couple in first to see what you do, and the rest follow."
+    "You won't catch them, they're too clever for that. But they'll come to a meal. Put the bait out at the centre and wait. They send a couple in first to see what you do, and the rest follow.",
+    "The UC left them behind when the fighting stopped. Half of Niira burned in the war, and the Sirens are what lived through it."
   ],
   "beats": [
     {

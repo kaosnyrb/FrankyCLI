@@ -11,7 +11,8 @@
     "Creatures: PCM_Narion_Kreet_StalkerPredatorA (Starfield.esm), found 11-02 by gen_inspect. Lore (fandom): crab-like, wait for prey, burrow; tested by the UC Xenowarfare Division in 2306. Kept out of the words: the burrowing is the useful fact.",
     "STAND-IN: place.planet 'Kreet' is not in the closed planet table yet, and Kreet has few sites; the pool is the first question.",
     "A DRAFT ID: MB ids stop at two digits (MB99a was the last free one, 11-02), so this waits for gen_delve name, as missionboard33a became MB98a. The numbering cap is Eliza's to raise.",
-    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-board46a.md): ship, findings 1-3 taken, 4 kept (always three waves), 5 kept. Forced pick answered NO: the alarm does not move the residents, so nobody is reported safe. Finding 3: SpawnCreatureWave is not known to bring them up out of the ground, so the advice is their stillness, not the ground."
+    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-board46a.md): ship, findings 1-3 taken, 4 kept (always three waves), 5 kept. Forced pick answered NO: the alarm does not move the residents, so nobody is reported safe. Finding 3: SpawnCreatureWave is not known to bring them up out of the ground, so the advice is their stillness, not the ground.",
+    "JAEGER PASS 2026-11-02, his 'If we know exactly where and what we can get sexy with it': the words use the planet's own lore (fandom, read the same day). Frances's 11-02 findings are kept; only lines were added."
   ],
   "place": {
     "theme": {
@@ -37,7 +38,7 @@
     "elevenlabs": "wsHauqjSkdBeAvdbUFmR"
   },
   "broadcast": [
-    "Get the alarm on so the crew gets inside. Stalkers sit still until they're close, so check anything that isn't moving."
+    "Nobody stays on Kreet long. We're here for the work, and the stalkers were here first. Get the alarm on so the crew gets inside. Stalkers sit still until they're close, so check anything that isn't moving."
   ],
   "beats": [
     {
