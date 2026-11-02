@@ -15,7 +15,8 @@
     "NARROW, as MB98a: pinned to Akila, so Ashta and the Rangers are said aloud (his exemption, 2026-10-26).",
     "THE RANGER IN PERSON, his 14:37: she stands on the outskirts (RETravelA1) and briefs him in a talk; the broadcast went, since she says it to his face. Named persons are Essential since 11-02 (bc14c45), so the hunt cannot kill her.",
     "NARROWER, his 14:39: 'Tamar Hesketh knows this is an Ashta den. She knows what planet shes on.' So she names the den, Akila, Akila City and the crangon it hunts (Elk Crangon, Akila's prey in fauna.md). The lore (fandom): Ashta hunt at night, and a miner once came back to Akila City swearing a house-sized one killed his crew; she tells it as a city rumour, so nothing promises this one is that big (the build makes it one size step up). Five prompts, so her count is not the four his ear caught as formulaic.",
-    "NAMED 2026-11-02 on his \"give e1 and e2 proper numbers\": duo_delvetest_e1 moved to a draft id, then gen_delve name. The two are one family (the Elder Ashta), so e1 took e2's number with the next letter."
+    "NAMED 2026-11-02 on his \"give e1 and e2 proper numbers\": duo_delvetest_e1 moved to a draft id, then gen_delve name. The two are one family (the Elder Ashta), so e1 took e2's number with the next letter.",
+    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB100b.md): ship, findings 1-5 taken, 7-8 kept. Forced pick answered YES: the same Tamar briefs every draw, so 'every few years' became 'now and then'. No line gives the animal a feeling; the walls are now voiced."
   ],
   "place": {
     "theme": {
@@ -55,7 +56,7 @@
         ]
       },
       "greeting": [
-        "You came out. That's an Ashta den, and the old one's had it longer than I've been a Ranger. Every Ashta on Akila hunts at night. This one hunts when it likes. Ask what you need, then go in quiet."
+        "You came out. The old one's had that den longer than I've been a Ranger. Every Ashta on Akila hunts at night. This one hunts in daylight too. Ask what you need, then go in quiet."
       ],
       "exchanges": [
         {
@@ -71,9 +72,9 @@
           ]
         },
         {
-          "prompt": "Do they all get this big?",
+          "prompt": "Do they all get this old?",
           "reply": [
-            "No. Most of them die young out here. Every few years one doesn't, and somebody in Akila City swears they saw one the size of a house."
+            "No. Most of them die young out here. Now and then one doesn't, and somebody behind the walls in Akila City swears they saw one the size of a house."
           ]
         },
         {
@@ -85,7 +86,7 @@
         {
           "prompt": "How do you know it's old?",
           "reply": [
-            "The size, and the scars. An Ashta that lives this long has stopped being afraid of anything on Akila, us included."
+            "The size, and the scars. An Ashta that lives this long doesn't run from anything on Akila, us included."
           ],
           "perk": "Skill_Zoology"
         }

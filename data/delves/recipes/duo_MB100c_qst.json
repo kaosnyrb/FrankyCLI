@@ -10,7 +10,8 @@
     "THE ELDER ASHTA, LETTER C: another Ranger on the edge of a built site the pack has taken, then the pack (a hold on PCM_Cheyenne_Akila_Ashta, MB98a's waves), then the Elder itself (Eliza's elite). The Elder comes last because the hunter is at the centre when the pack is down.",
     "NARROW, as MB98a: pinned to Akila, so Ashta, Akila and the Rangers are said aloud (his exemption, 2026-10-26).",
     "JAEGER: the words use Akila's lore (planets/akila.md and planets.json): never enough Rangers for the ground; the crew got out. No interiority for the animals (the July Jaeger fix): nobody says what the Elder wants, only what it does.",
-    "Named persons are Essential since 11-02, so the Ranger cannot die. A different Ranger from 100b's Tamar Hesketh, and no line refers to her: Overtime is single-encounter."
+    "Named persons are Essential since 11-02, so the Ranger cannot die. A different Ranger from 100b's Tamar Hesketh, and no line refers to her: Overtime is single-encounter.",
+    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB100c.md): ship, findings 2, 3, 5 taken, 4, 6, 7 kept. Forced pick answered YES: residents may stand at a built site (abandoned-only drew 4 sites in the whole corpus), so the crew went: the pack has 'moved in', and the crew prompt became his memory of an old one out past the walls. The radio sends him to the middle."
   ],
   "place": {
     "theme": {
@@ -21,13 +22,13 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "A built site on Akila, a base the pack has taken since its crew pulled out.",
+    "_theme": "A built site on Akila the pack has moved into. Residents may stand (Frances's forced pick, answered yes), so no line says the site is empty.",
     "planet": "Akila",
     "_planet": "Akila, as its heading in data/delves/fauna.md."
   },
   "prose": {
     "name": "Hunt: Elder Ashta and Its Pack at the <Place> on <Planet>",
-    "briefing": "An Elder Ashta and its pack have taken over the <Place> since its crew pulled out. A Ranger is waiting on the edge of the site for whoever answers.",
+    "briefing": "An Elder Ashta and its pack have moved into the <Place>. A Ranger is waiting on the edge of the site for whoever answers.",
     "card": "Settlement Contract. Clear the Ashta pack and its Elder from the <Place> on <Planet>. Payment on contract completion."
   },
   "speaker": {
@@ -42,7 +43,7 @@
       "at": "RETravelA1LocRef",
       "_at": "The edge of the site: he waits on the outskirts, not in the base.",
       "objective": "Meet the Ranger on the edge of the <Place>",
-      "journal": "I met a Ranger on the edge of the <Place>. An Elder Ashta and its pack have taken the place, and I need to clear the pack first.",
+      "journal": "I met a Ranger on the edge of the <Place>. An Elder Ashta and its pack have moved in, and I need to clear the pack first.",
       "person": {
         "name": "Silas Brannock",
         "template": "UC_NA_MASTWorkerMale01",
@@ -56,7 +57,7 @@
         ]
       },
       "greeting": [
-        "You're the hunter? Good, I'm the only Ranger out this way. The pack took this place when the crew pulled out, and the old one leads it. Kill the pack and it'll come out to you."
+        "You're the hunter? Good, I'm the only Ranger out this way. The pack's moved in here, and the old one leads it."
       ],
       "exchanges": [
         {
@@ -66,9 +67,9 @@
           ]
         },
         {
-          "prompt": "What happened to the crew?",
+          "prompt": "Have you seen an old one before?",
           "reply": [
-            "Got out alive, the lot of them. They left the doors open on the way, and the Ashta walked in like they'd been invited."
+            "Once, out past the walls of Akila City. It took four of us to put it down, and three of us walked back."
           ]
         },
         {
@@ -99,7 +100,7 @@
       ],
       "revealObjective": "Kill the Ashta",
       "say": [
-        "That's the pack. Stay where you are, the old one's coming."
+        "That's the pack. Get out in the middle and stand still, the old one's coming."
       ]
     },
     {
@@ -112,7 +113,7 @@
       "objective": "Kill the Elder Ashta at the <Place>",
       "journal": "I killed the Elder Ashta that led the pack at the <Place>.",
       "say": [
-        "The old one's down, and the pack with it. I'll get word to the crew they can come home."
+        "The old one's down. This place is yours again."
       ],
       "reward": "med"
     }

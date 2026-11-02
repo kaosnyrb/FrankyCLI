@@ -12,7 +12,8 @@
     "Mine, not his ask: named to him in the same turn (2026-11-02). Same elite, same words; only the theme differs. Unbuilt with E1.",
     "WORDS, Jessica 2026-11-02 on Eliza's hand-off: the name 'Elder Ashta' kept (it reads as a rank among Ashta, and stays clear of vanilla's Alpha). The build makes it ONE size step up (small to normal), so the words say bigger and older than the rest, never giant.",
     "NARROW, as MB98a: pinned to Akila, so Ashta and the Rangers are said aloud (his exemption, 2026-10-26).",
-    "NAMED 2026-11-02 on his \"give e1 and e2 proper numbers\": duo_delvetest_e2 moved to a draft id, then gen_delve name. The two are one family (the Elder Ashta), so e1 took e2's number with the next letter."
+    "NAMED 2026-11-02 on his \"give e1 and e2 proper numbers\": duo_delvetest_e2 moved to a draft id, then gen_delve name. The two are one family (the Elder Ashta), so e1 took e2's number with the next letter.",
+    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB100a.md): rework, findings 1-4 taken, 5-6 kept. Forced pick answered YES: it lives at the site (the defeat places it there at any hour), so the call says it walked in at midday and hasn't left. The close keeps the night lore instead of saying the night is safer."
   ],
   "place": {
     "theme": {
@@ -45,7 +46,7 @@
       "journal": "I hunted down the Elder Ashta that had made the <Place> its ground.",
       "reward": "med",
       "say": [
-        "That's the old one down. We'll all sleep easier out here tonight."
+        "That's the old one down. Back to watching the nights."
       ]
     }
   ],
@@ -55,7 +56,7 @@
     "elevenlabs": "JBFqnCBsd6RMkjVDRZzb"
   },
   "broadcast": [
-    "Rangers here. This one isn't like the young ones. They circle and wait for dark. This one walks in at midday, takes what it likes, and doesn't care who's watching. Don't let it get close."
+    "Rangers here. This one isn't like the young ones. They circle and wait for dark. This one walked in at midday, took what it liked in front of everyone, and hasn't left. We haven't the people to sit on it. Don't let it get close."
   ],
   "_speech": "An Akila Ranger, steady, has seen a few. Narrow, so Ashta and Rangers are said aloud (his exemption, 2026-10-26). The lore (fandom): Ashta grow bolder at night, so the old one coming at midday is what marks it. Voice borrowed until his ear casts it."
 }
