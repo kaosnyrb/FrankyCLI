@@ -7,6 +7,7 @@
   "author": "jessica",
   "source": "his 2026-10-23: the military family (\"like 10 missionboard missions for Military Dungeons\"), \"we have droppods, those would be cool\", 13:35 \"don't limit ourselves by what's there already in my mod, we can add the markers needed later\", 13:44 \"go for it\"",
   "_note": [
+    "2026-11-02, Eliza on his \"yeah switch them to REWoundedMarkerLocRef\": every LocDungeonItemMarker beat moved to REWoundedMarkerLocRef, because no military site carries an item marker (pool 0 -> 100; plan OT-99). Beats that were at different item markers now share one spot.",
     "THE MILITARY FAMILY, 7 OF ~10: THE BEACONS.",
     "Three beacons are guiding the occupiers' supply runs in. Shut them down in any order; whoever was expecting a",
     "delivery comes to see why. The verb is SILENCE.",
@@ -48,7 +49,7 @@
     {
       "type": "use",
       "group": "beacons",
-      "at": "LocDungeonItemMarker01LocRef",
+      "at": "REWoundedMarkerLocRef",
       "message": {
         "title": "Guide Beacon",
         "text": "Someone has renamed it in its settings, after a ship."
@@ -60,7 +61,7 @@
     {
       "type": "use",
       "group": "beacons",
-      "at": "LocDungeonItemMarker02LocRef",
+      "at": "REWoundedMarkerLocRef",
       "message": {
         "title": "Relay Beacon",
         "text": "Four repairs in its log, all signed by the same hand."

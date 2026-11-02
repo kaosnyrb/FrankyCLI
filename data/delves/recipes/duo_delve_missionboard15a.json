@@ -7,6 +7,7 @@
   "author": "jessica",
   "source": "his 2026-10-23: the military family (\"like 10 missionboard missions for Military Dungeons\"), \"we have droppods, those would be cool\", 13:35 \"don't limit ourselves by what's there already in my mod, we can add the markers needed later\", 13:44 \"go for it\"",
   "_note": [
+    "2026-11-02, Eliza on his \"yeah switch them to REWoundedMarkerLocRef\": every LocDungeonItemMarker beat moved to REWoundedMarkerLocRef, because no military site carries an item marker (pool 0 -> 100; plan OT-99). Beats that were at different item markers now share one spot.",
     "THE MILITARY FAMILY, 10 OF ~10: THE DESERTER.",
     "A soldier walked out of the site and will not go back in. Her discharge papers are still inside, in the office of",
     "the officer who kept them. Talk to her at the door, deal with the officer, fetch the papers, and she radios you",
@@ -111,7 +112,7 @@
     },
     {
       "type": "pickup",
-      "at": "LocDungeonItemMarker03LocRef",
+      "at": "REWoundedMarkerLocRef",
       "item": "Discharge Papers",
       "objective": "Find the soldier's discharge papers",
       "journal": "A soldier walked out of the <Place> and wouldn't go back. I dealt with the officer who wouldn't sign them and found her discharge papers, under eleven more nobody had signed either.",

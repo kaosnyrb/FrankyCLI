@@ -7,6 +7,7 @@
   "author": "jessica",
   "source": "his 2026-10-23: the military family (\"like 10 missionboard missions for Military Dungeons\"), \"we have droppods, those would be cool\", 13:35 \"don't limit ourselves by what's there already in my mod, we can add the markers needed later\", 13:44 \"go for it\"",
   "_note": [
+    "2026-11-02, Eliza on his \"yeah switch them to REWoundedMarkerLocRef\": every LocDungeonItemMarker beat moved to REWoundedMarkerLocRef, because no military site carries an item marker (pool 0 -> 100; plan OT-99). Beats that were at different item markers now share one spot.",
     "THE MILITARY FAMILY, 6 OF ~10: THE QUARTERMASTER.",
     "The occupiers' quartermaster has been selling stolen stock back to the people it was stolen from. Take her, and take",
     "her ledger, which is the proof the client needs. The verb is TAKE, off the woman herself. Pods come for the ledger.",
@@ -54,7 +55,7 @@
     },
     {
       "type": "pickup",
-      "at": "LocDungeonItemMarker03LocRef",
+      "at": "REWoundedMarkerLocRef",
       "item": "Quartermaster's Ledger",
       "objective": "Recover the quartermaster's ledger",
       "journal": "The quartermaster wrote down where every crate came from, and who she sold it to. Mostly the same people. I've got the ledger, and now I need to get it out of the <Place>.",

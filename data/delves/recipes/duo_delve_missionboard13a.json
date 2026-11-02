@@ -7,6 +7,7 @@
   "author": "jessica",
   "source": "his 2026-10-23: the military family (\"like 10 missionboard missions for Military Dungeons\"), \"we have droppods, those would be cool\", 13:35 \"don't limit ourselves by what's there already in my mod, we can add the markers needed later\", 13:44 \"go for it\"",
   "_note": [
+    "2026-11-02, Eliza on his \"yeah switch them to REWoundedMarkerLocRef\": every LocDungeonItemMarker beat moved to REWoundedMarkerLocRef, because no military site carries an item marker (pool 0 -> 100; plan OT-99). Beats that were at different item markers now share one spot.",
     "THE MILITARY FAMILY, 8 OF ~10: THE COURIER.",
     "A courier is carrying orders through the site. Catch her, read the orders on the site's own terminal, and meet what",
     "they said was coming: it comes in pods. The verb is INTERCEPT.",
@@ -34,7 +35,7 @@
   "beats": [
     {
       "type": "defeat",
-      "at": "LocDungeonItemMarker02LocRef",
+      "at": "REWoundedMarkerLocRef",
       "target": "duo_boss_Spacer_Boss_Aggro_Female",
       "gang": {
         "list": "duo_GangMembersList_Spacer",
