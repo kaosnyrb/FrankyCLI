@@ -115,10 +115,11 @@ public static class packin_json
 
     public static int Run(string[] args)
     {
-        if (args.Length < 4 || (args[1] != "export" && args[1] != "resolve"))
+        if (args.Length < 4 || (args[1] != "export" && args[1] != "resolve" && args[1] != "ship"))
         {
             Console.WriteLine("Usage: packin export <PackIn FormKey, e.g. 02447F:Starfield.esm> <out.json>");
             Console.WriteLine("       packin resolve <in.json> <out.json>");
+            Console.WriteLine("       packin ship <ship GBFM FormKey> <out.json>");
             return 1;
         }
         var t0 = DateTime.Now;
@@ -146,6 +147,12 @@ public static class packin_json
                 doc["bounds"] = new JsonArray(Vec(ob.First), Vec(ob.Second));
             doc["refs"] = CellRefs(pk, cache, 0, new Trace(), ref unresolved);
         }
+        else if (args[1] == "ship")
+        {
+            doc = ShipDoc(ParseKey(args[2], "packin ship"), cache);
+            foreach (var r in doc["refs"]!.AsArray())
+                ResolveRef(r!.AsObject(), cache, ref unresolved);
+        }
         else
         {
             doc = JsonNode.Parse(File.ReadAllText(args[2]))!.AsObject();
@@ -158,6 +165,54 @@ public static class packin_json
         int total = Count(doc["refs"]!.AsArray());
         Console.WriteLine($"  {args[3]}: {total} refs (nested included), {unresolved} unresolved");
         return unresolved > 0 ? 2 : 0;
+    }
+
+    /// A WHOLE SHIP as a designed PackIn file (his idea 2026-11-03, ships into kitbashes for the crash-site POIs;
+    /// his fact: "there's a Blueprint_Component with the pos and rotations"). One ref per Blueprint row: its
+    /// `base` is the row's module's SpaceshipLinkedExterior PackIn, `pos` and `rot` the row's Position and
+    /// Rotation exactly as stored, so resolve expands it like any other file. The ship's own OBND goes in
+    /// `bounds`, so packin_render.py --measure can grade the Blueprint's rotation convention the way it graded
+    /// the REFR's. ⚠ Until it has, the rows' `rot` rides on the REFR convention, and the file says so.
+    /// A row with no module, or a module with no exterior PackIn, is refused by name: a ship missing a part
+    /// must not come out looking whole.
+    static JsonObject ShipDoc(FormKey shipKey, ILinkCache cache)
+    {
+        var ship = cache.TryResolve<IGenericBaseFormGetter>(shipKey, out var s) ? s
+            : throw new Exception($"no GenericBaseForm {shipKey} in the load order");
+        var bp = ship.Components?.OfType<IBlueprintComponentGetter>().FirstOrDefault()
+            ?? throw new Exception($"{ship.EditorID} [{shipKey}] carries no Blueprint component, so it is not a whole ship");
+        var exteriorKw = FormKey.Factory("00662F:Starfield.esm");   // SpaceshipLinkedExterior
+        var refs = new JsonArray();
+        foreach (var item in bp.Items)
+        {
+            var module = cache.TryResolve<IGenericBaseFormGetter>(item.BaseItem.FormKey, out var m) ? m
+                : throw new Exception($"{ship.EditorID} part {item.PartID}: module {item.BaseItem.FormKey} does not resolve");
+            var ext = module.Components?.OfType<IFormLinkDataComponentGetter>()
+                .SelectMany(c => c.Links ?? Enumerable.Empty<IFormLinkComponentLinkGetter>())
+                .Where(l => l.Keyword.FormKey == exteriorKw).Select(l => l.LinkedForm.FormKey).ToList()
+                ?? new List<FormKey>();
+            if (ext.Count != 1)
+                throw new Exception($"{ship.EditorID} part {item.PartID} ({module.EditorID}): {ext.Count} SpaceshipLinkedExterior links, expected exactly 1");
+            refs.Add(new JsonObject
+            {
+                ["base"] = ext[0].ToString(),
+                ["pos"] = Vec(item.Position),
+                ["rot"] = Vec(item.Rotation),
+                ["note"] = $"part {item.PartID}: {module.EditorID} [{module.FormKey}]",
+            });
+        }
+        var doc = new JsonObject
+        {
+            ["name"] = ship.EditorID ?? shipKey.ToString(),
+            ["source"] = shipKey.ToString(),
+            ["note"] = "packin ship: one ref per Blueprint row, base = the module's exterior PackIn, pos/rot as the row stores them. "
+                     + "The rows' rot convention is NOT yet measured; it rides on the REFR one.",
+            ["refs"] = refs,
+        };
+        if (ship.ObjectBounds is { } ob)
+            doc["bounds"] = new JsonArray(Vec(ob.First), Vec(ob.Second));
+        Console.WriteLine($"  {ship.EditorID}: {bp.Items.Count} Blueprint rows, bounds {(ship.ObjectBounds is { } o2 ? $"{o2.First} .. {o2.Second}" : "none")}");
+        return doc;
     }
 
     /// A FormKey or a loud refusal. There is no name path to fall back to, on purpose.
