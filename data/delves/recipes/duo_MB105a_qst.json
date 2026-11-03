@@ -20,7 +20,7 @@
   },
   "prose": {
     "name": "Recovery: Jettisoned Hold over <Planet>",
-    "briefing": "A freighter dumped her hold in orbit over <Planet> to outrun raiders. The containers are still drifting, and her captain wants one of them back: the crew's own.",
+    "briefing": "A freighter dumped her hold in orbit over <Planet> to outrun raiders. Her captain is leaving the freight to the company's salvagers and wants one container back, the one that belongs to the crew.",
     "card": "Private Contract. Return a jettisoned crew container to its freighter over <Planet>. Payment on contract completion."
   },
   "beats": [
