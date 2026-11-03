@@ -29,7 +29,21 @@ def mv(R, v): return [sum(R[i][k] * v[k] for k in range(3)) for i in range(3)]
 def mm(A, B): return [[sum(A[i][k] * B[k][j] for k in range(3)) for j in range(3)] for i in range(3)]
 
 
-def bounds(n: Nif):
+# A stored box of centre AND extent float-max is Bethesda's "no box" (2026-11-03: 11 geometries in vanilla's Stroud
+# freighter modules, decals and details, carry it). Added in, one such box made the whole ship +-6.8e38 and would have
+# been written onto an activator's OBND. So it is skipped, and COUNTED, never silently.
+UNSET = 3.0e38
+
+
+def stored_box(bl, w):
+    """A BSGeometry's stored box (centre, extent), or None when it stores Bethesda's float-max "no box". The ONE reader
+    of that box: kitbash.py, kparts.py and clay.py take it from here, so the sentinel cannot be read raw again."""
+    box = w.xform + 52 + 4 + 16           # after transform, collision link, NiBound
+    c = struct.unpack_from("<3f", bl, box); d = struct.unpack_from("<3f", bl, box + 12)
+    return None if any(abs(x) >= UNSET for x in c + d) else (c, d)
+
+
+def bounds(n: Nif, unboxed: list | None = None):
     lo, hi = [1e9] * 3, [-1e9] * 3
     geoms = 0
 
@@ -48,8 +62,12 @@ def bounds(n: Nif):
                     visit(c, WT, WR, WS)
         elif t == "BSGeometry":
             geoms += 1
-            box = w.xform + 52 + 4 + 16           # after transform, collision link, NiBound
-            c = struct.unpack_from("<3f", bl, box); d = struct.unpack_from("<3f", bl, box + 12)
+            sb = stored_box(bl, w)
+            if sb is None:
+                if unboxed is not None:
+                    unboxed.append(i)
+                return
+            c, d = sb
             for sx in (-1, 1):
                 for sy in (-1, 1):
                     for sz in (-1, 1):
@@ -68,12 +86,20 @@ if __name__ == "__main__":
         import json
         if len(sys.argv) != 3:
             sys.exit("REFUSED: kbounds.py --json takes exactly one nif")
-        lo, hi, g = bounds(Nif(Path(sys.argv[2]).read_bytes()))
+        unboxed = []
+        lo, hi, g = bounds(Nif(Path(sys.argv[2]).read_bytes()), unboxed)
         if g == 0:
             sys.exit(f"REFUSED: {sys.argv[2]} has no BSGeometry, so it has no bounds")
-        print(json.dumps({"min": [round(v, 4) for v in lo], "max": [round(v, 4) for v in hi], "geoms": g}))
+        if g == len(unboxed):
+            sys.exit(f"REFUSED: every one of {sys.argv[2]}'s {g} BSGeometry stores no box, so it has no bounds")
+        out = {"min": [round(v, 4) for v in lo], "max": [round(v, 4) for v in hi], "geoms": g}
+        if unboxed:
+            out["unboxed"] = len(unboxed)   # said, and only when it happened, so an unaffected nif prints as before
+        print(json.dumps(out))
         sys.exit(0)
     for p in sys.argv[1:]:
-        lo, hi, g = bounds(Nif(Path(p).read_bytes()))
+        unboxed = []
+        lo, hi, g = bounds(Nif(Path(p).read_bytes()), unboxed)
         print(f"{Path(p).name:26s} {g:3d} geoms  x {lo[0]:6.2f}..{hi[0]:6.2f}  y {lo[1]:6.2f}..{hi[1]:6.2f}  "
-              f"z {lo[2]:6.2f}..{hi[2]:6.2f}   verdict {('STANDS' if abs(lo[2]) <= 0.05 else 'zmin %.2f' % lo[2])}")
+              f"z {lo[2]:6.2f}..{hi[2]:6.2f}   verdict {('STANDS' if abs(lo[2]) <= 0.05 else 'zmin %.2f' % lo[2])}"
+              + (f"   ({len(unboxed)} geom(s) store no box, skipped)" if unboxed else ""))

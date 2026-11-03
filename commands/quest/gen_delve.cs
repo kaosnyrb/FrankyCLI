@@ -2830,7 +2830,9 @@ namespace FrankyCLI
             var lo = V("min"); var hi = V("max");
             if (lo.Length != 3 || hi.Length != 3 || Enumerable.Range(0, 3).Any(k => lo[k] >= hi[k]))
                 throw new InvalidOperationException($"kbounds.py gave {nif} a degenerate box: {text.Trim()}");
-            why = nif;
+            // Geometries storing Bethesda's float-max "no box" are skipped by kbounds.py and counted; the count is said here.
+            int unboxed = doc.RootElement.TryGetProperty("unboxed", out var ub) ? ub.GetInt32() : 0;
+            why = unboxed > 0 ? $"{nif} ({unboxed} geometry(s) store no box, skipped)" : nif;
             return (lo, hi);
         }
 

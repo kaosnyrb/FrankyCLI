@@ -25,7 +25,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 import sfnif, ba2get, smat
 from sfnif import Nif
-from kbounds import xf, mv, mm
+from kbounds import xf, mv, mm, stored_box
 
 NONE = sfnif.NONE
 DATA = ba2get.DATA
@@ -155,7 +155,6 @@ def geometries(n: Nif):
             ln = struct.unpack_from("<I", bl, o + 13)[0]
             path = bl[o + 17:o + 17 + ln].decode("utf-8")
         nm_i = struct.unpack_from("<I", bl, 0)[0]
-        box = w.xform + 52 + 4 + 16
         sh = struct.unpack_from("<I", bl, w.refs[-2])[0]             # skin, SHADER, alpha: the shader's
         mat = None                                                  # name string is the material path
         if sh != NONE:
@@ -163,7 +162,7 @@ def geometries(n: Nif):
             mat = n.strings[si] if si != NONE else None
         out.append({"name": n.strings[nm_i] if nm_i != NONE else "(unnamed)", "T": WT, "R": WR, "S": WS,
                     "mesh": path, "material": mat,
-                    "box": (struct.unpack_from("<3f", bl, box), struct.unpack_from("<3f", bl, box + 12))})
+                    "box": stored_box(bl, w)})   # None when it stores Bethesda's "no box" (kbounds.stored_box)
 
     I = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
     visit(0, [0, 0, 0], I, 1.0)
@@ -180,6 +179,8 @@ def collect(n: Nif, mod_hint: str | None, textured: bool = False):
         raw = fetch_mesh(g["mesh"], mod_hint) if g["mesh"] else None
         if raw is None:
             missing.append((nm, g["mesh"]))
+            if g["box"] is None:   # no mesh AND no box: nothing to draw, still listed as missing
+                continue
             c, d = np.array(g["box"][0]), np.array(g["box"][1])
             corners = np.array([[c[0] + sx * d[0], c[1] + sy * d[1], c[2] + sz * d[2]]
                                 for sx in (-1, 1) for sy in (-1, 1) for sz in (-1, 1)])

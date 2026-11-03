@@ -9,7 +9,7 @@ import struct, sys
 from pathlib import Path
 import sfnif
 from sfnif import Nif
-from kbounds import xf, mv, mm
+from kbounds import xf, mv, mm, stored_box
 
 NONE = sfnif.NONE
 
@@ -35,8 +35,10 @@ def boxes(n, start, PT, PR, PS, out, label, want):
                 if c != NONE and n.type_of(c) in ("NiNode", "BSGeometry"):
                     visit(c, WT, WR, WS)
         elif t == "BSGeometry":
-            box = w.xform + 52 + 4 + 16
-            c = struct.unpack_from("<3f", bl, box); d = struct.unpack_from("<3f", bl, box + 12)
+            sb = stored_box(bl, w)
+            if sb is None:   # stores Bethesda's "no box": adds nothing (kbounds.stored_box)
+                return
+            c, d = sb
             glo, ghi = [1e9] * 3, [-1e9] * 3
             for sx in (-1, 1):
                 for sy in (-1, 1):

@@ -27,7 +27,7 @@ import json, struct, sys
 from pathlib import Path
 import sfnif
 from sfnif import Nif
-from kbounds import xf, mv, mm, bounds
+from kbounds import xf, mv, mm, bounds, stored_box
 
 NONE = sfnif.NONE
 I = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
@@ -51,9 +51,8 @@ def named_boxes(n: Nif) -> dict[str, tuple[list, list]]:
                 if c != NONE and n.type_of(c) in ("NiNode", "BSGeometry"):
                     clo, chi = visit(c, WT, WR, WS)
                     lo = [min(a, b) for a, b in zip(lo, clo)]; hi = [max(a, b) for a, b in zip(hi, chi)]
-        else:
-            box = w.xform + 52 + 4 + 16
-            c = struct.unpack_from("<3f", bl, box); d = struct.unpack_from("<3f", bl, box + 12)
+        elif (sb := stored_box(bl, w)) is not None:   # a geometry storing no box adds nothing (kbounds.stored_box)
+            c, d = sb
             for sx in (-1, 1):
                 for sy in (-1, 1):
                     for sz in (-1, 1):
