@@ -1,6 +1,8 @@
 """Overall bounds of a NIF tree: every BSGeometry's stored box, carried through its NiNode chain.
 
     python kbounds.py <nif>...
+    python kbounds.py --json <nif>      one line, {"min": [x, y, z], "max": [x, y, z], "geoms": n}, for gen_delve
+                                        (a reskinned activator's OBND, plan OT-6E 2026-11-03); refuses a nif with no geometry.
 
 Transform per NiAVObject: world.T = P.R @ (P.S * T) + P.T ; world.R = P.R @ R ; world.S = P.S * S.
 The 3x3 is applied as stored rows (R @ v). ⚠ The row/column convention is unproven for a
@@ -62,6 +64,15 @@ def bounds(n: Nif):
 
 
 if __name__ == "__main__":
+    if sys.argv[1:2] == ["--json"]:
+        import json
+        if len(sys.argv) != 3:
+            sys.exit("REFUSED: kbounds.py --json takes exactly one nif")
+        lo, hi, g = bounds(Nif(Path(sys.argv[2]).read_bytes()))
+        if g == 0:
+            sys.exit(f"REFUSED: {sys.argv[2]} has no BSGeometry, so it has no bounds")
+        print(json.dumps({"min": [round(v, 4) for v in lo], "max": [round(v, 4) for v in hi], "geoms": g}))
+        sys.exit(0)
     for p in sys.argv[1:]:
         lo, hi, g = bounds(Nif(Path(p).read_bytes()))
         print(f"{Path(p).name:26s} {g:3d} geoms  x {lo[0]:6.2f}..{hi[0]:6.2f}  y {lo[1]:6.2f}..{hi[1]:6.2f}  "

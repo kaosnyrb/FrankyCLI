@@ -522,7 +522,10 @@ notifications name each path and come out when it graduates. **`duo_delve_landin
 
 **Beat fields on this template:** `type` (required), `at`, `place` (`main` / `second` / `third`),
 `objective`, `journal`, `message`, and optionally `item` (pickup and recover: the inventory name),
-`model` and `name` (what the object looks like and its prompt; not on a recover, which has no object),
+`model` and `name` (what the object looks like and its prompt; not on a recover, which has no object; the object's
+bounds are MEASURED off that model at every build, `scripts/nif/kbounds.py --json` on the loose nif in the game's Data or the
+Overtime repo's, so a new or re-baked kitbash needs nothing in the recipe; a vanilla or archived model keeps the cloned
+base's bounds, said in the build log; plan OT-6E, 2026-11-03),
 `group`, `replace`, `returnTo`, and on an ending `choose`, `reward`, `person`, on a talk `person`, `greeting`, `exchanges`, and on a hold `waves`,
 `size`, `defend`, `stuck`, `style`, `reveal`, `revealObjective`.
 `returnTo: N` makes this beat an EARLIER beat's object visited again (03 to 05 come back to the centre to

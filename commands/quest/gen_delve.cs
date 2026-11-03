@@ -2787,11 +2787,49 @@ namespace FrankyCLI
         }
 
         /// <summary>
+        /// A MODEL'S BOUNDS, MEASURED OFF THE FILE AT EVERY BUILD (plan OT-6E, his 2026-11-03 "make it so next build fixes it and new
+        /// kitbashes have it too"). A reskin used to carry its base's OBND, 0.51 x 0.56 x 0.31 m, whatever it wore: 24a's relay crate
+        /// is 1.56 x 0.94 x 1.11 and its relay console 5.4 x 4.5 x 6.1. Measured, never stored in a recipe, so a re-baked model cannot
+        /// leave a stale number behind. scripts/nif/kbounds.py --json: every BSGeometry's stored box through its NiNode chain (a
+        /// rotated box overshoots a little, the safe side for bounds). Read LOOSE from the game's Data (what it draws), else from the
+        /// Overtime repo's Data (the kitbash source); neither, as for a vanilla or archived model, returns null and the base's bounds
+        /// stand, said in the build log, never silent. Both roots derive from paths spelled once already (SpeechTools, VoiceCacheDir).
+        /// </summary>
+        private static (float[] lo, float[] hi)? MeasureModel(string path, out string why)
+        {
+            string rel = path.Replace('/', '\\');
+            string game = Directory.GetParent(Directory.GetParent(Retrograde.Utils.SpeechTools.GameVoiceDir)!.FullName)!.FullName;
+            string repo = Path.Combine(Directory.GetParent(VoiceCacheDir)!.FullName, "Data");
+            string? nif = new[] { Path.Combine(game, rel), Path.Combine(repo, rel) }.FirstOrDefault(File.Exists);
+            if (nif == null) { why = $"no loose {rel} in the game's Data or the Overtime repo's (vanilla or archived)"; return null; }
+            string script = Path.Combine(Directory.GetParent(PapyrusDir())!.FullName, "scripts", "nif", "kbounds.py");
+            var psi = new System.Diagnostics.ProcessStartInfo("python")
+            {
+                WorkingDirectory = Path.GetDirectoryName(script)!, UseShellExecute = false,
+                RedirectStandardOutput = true, RedirectStandardError = true,
+            };
+            psi.ArgumentList.Add(script); psi.ArgumentList.Add("--json"); psi.ArgumentList.Add(nif);
+            using var p = System.Diagnostics.Process.Start(psi)!;
+            var err = p.StandardError.ReadToEndAsync();
+            string text = p.StandardOutput.ReadToEnd();
+            p.WaitForExit();
+            if (p.ExitCode != 0) throw new InvalidOperationException($"kbounds.py could not measure {nif}: {err.Result.Trim()}{text.Trim()}");
+            using var doc = System.Text.Json.JsonDocument.Parse(text);
+            float[] V(string k) => doc.RootElement.GetProperty(k).EnumerateArray().Select(e => e.GetSingle()).ToArray();
+            var lo = V("min"); var hi = V("max");
+            if (lo.Length != 3 || hi.Length != 3 || Enumerable.Range(0, 3).Any(k => lo[k] >= hi[k]))
+                throw new InvalidOperationException($"kbounds.py gave {nif} a degenerate box: {text.Trim()}");
+            why = nif;
+            return (lo, hi);
+        }
+
+        /// <summary>
         /// GIVE ONE CREATED ACTIVATOR A DIFFERENT MESH, ON A CLONE. The base's activator is shared by his
         /// shipped cargo quests, so it is never edited: it is duplicated as {edid}, Model.File is written
         /// and NOTHING ELSE (gen_setmodel's rule: dropping LightLayer once made thirteen parts invisible),
         /// LightLayer and Flags are asserted unchanged, and the alias is pointed at the clone. Absent path
         /// = nothing happens and the base's model stands. Any previous clone of this name is removed first.
+        /// Its OBND is MEASURED off the mesh (MeasureModel, plan OT-6E 2026-11-03), not carried from the base.
         /// </summary>
         private static int ReskinActivator(StarfieldMod myMod, Quest clone, Template t, string edid, int aliasId, string? path, string? name)
         {
@@ -2811,8 +2849,17 @@ namespace FrankyCLI
             if (act.Model.LightLayer != ll || act.Model.Flags != fl)
             { Console.WriteLine("REFUSED: writing Model.File disturbed LightLayer or Flags."); return 1; }
             if (!string.IsNullOrWhiteSpace(name)) act.Name = name;
+            var mb = MeasureModel(path, out string mwhy);
+            if (mb.HasValue)
+            {
+                var (lo, hi) = mb.Value;
+                act.ObjectBounds = new ObjectBounds() { First = new Noggog.P3Float(lo[0], lo[1], lo[2]), Second = new Noggog.P3Float(hi[0], hi[1], hi[2]) };
+            }
             alias!.CreateReferenceToObject!.Object.SetTo(act.FormKey);
             Console.WriteLine($"  +reskin  : {edid} {act.FormKey}  model {path}  (clone of {src.EditorID}, alias {aliasId})");
+            Console.WriteLine(mb.HasValue
+                ? $"  +bounds  : {edid} measured off {mwhy}: ({mb.Value.lo[0]:0.##}, {mb.Value.lo[1]:0.##}, {mb.Value.lo[2]:0.##})..({mb.Value.hi[0]:0.##}, {mb.Value.hi[1]:0.##}, {mb.Value.hi[2]:0.##})"
+                : $"  =bounds  : {edid} keeps {src.EditorID}'s bounds: {mwhy}");
             return 0;
         }
 
