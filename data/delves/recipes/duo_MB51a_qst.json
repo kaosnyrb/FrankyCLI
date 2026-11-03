@@ -33,7 +33,8 @@
       "_at": "A space-cell marker; which two the cell offers is Eliza's.",
       "objective": "Recover the signal amplifier from the wreckage",
       "journal": "The freighter's wreckage is still in orbit over <Planet>, and the signal amplifier was in a sealed crate inside it. I've got it, and now I need to fit it to the navigation satellite.",
-      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "model": "Meshes\\ships\\modules\\cargo\\smod\\smod_cargo_panoptes_degama-1000_port.nif",
+      "_model": "Eliza, 2026-11-03, his ruling '51a and 83a fix to other crate' (wreckcargocrate01 'is a ground crate not a space one'). Vanilla's drifting space container, Loot_Space_CargoModule01 'Cargo Module' (about 8 x 4 x 3 m, the smallest vanilla one; archived, so the base's bounds). Measured against Kim's freighterwreck01 by box: it touches the 10T-Hauler part's box and is 0.2 to 0.4 m from two more, so a clip is possible; his eye at the glass decides, and a reorigin of her wreck is the fix if so.",
       "name": "Sealed Cargo Crate",
       "scenery": {
         "model": "Meshes\\ccs\\freighterwreck01.nif",

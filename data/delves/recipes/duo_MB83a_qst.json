@@ -24,7 +24,8 @@
     {
       "type": "pickup",
       "at": "se_GeneralMarkerLocRef01",
-      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "model": "Meshes\\ships\\modules\\cargo\\smod\\smod_cargo_panoptes_degama-1000_port.nif",
+      "_model": "Eliza, 2026-11-03, his ruling '51a and 83a fix to other crate' (wreckcargocrate01 'is a ground crate not a space one'): vanilla's drifting space container, Loot_Space_CargoModule01 'Cargo Module'. Not built: the deliver still waits on a ship model (plan, Kim).",
       "name": "Medical Supply Drop",
       "item": "Medical Supplies",
       "objective": "Collect the medical supply drop over <Planet>",
