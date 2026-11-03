@@ -221,5 +221,37 @@ else:
         g, t = sat(TMP / "cart_grey.png"), sat(TMP / "cart_tex.png")
         check("the textured render has colour the grey one does not", g < 0.01 and t > 0.05, f"coloured px grey {g:.3f}, textured {t:.3f}")
 
+print("kitbash: collapse_materials (a lander's plume, his 2026-11-03 catch)")
+LANDER = vanilla("meshes/ships/rigged/landenghope55/stbd/characterassets/smod_landeng_hope55_stbd.nif", "lander.nif")
+if LANDER and CART:
+    PLUME = {"thrusterflameshape.mat", "thrusterenginemesh.mat", "thrusterenginering.mat"}
+    def geoms(n):                                   # (material file name, scale) of every BSGeometry
+        out = []
+        for i, bl in enumerate(n.blocks):
+            if n.type_of(i) != "BSGeometry":
+                continue
+            w = sfnif.walk("BSGeometry", bl)
+            sh = struct.unpack_from("<I", bl, w.refs[-2])[0]
+            mi = struct.unpack_from("<I", n.blocks[sh], 0)[0] if sh != sfnif.NONE else sfnif.NONE
+            mat = n.strings[mi].replace("\\", "/").rsplit("/", 1)[-1].lower() if mi != sfnif.NONE else ""
+            out.append((mat, struct.unpack_from("<f", bl, w.xform + 48)[0]))
+        return out
+    src = geoms(Nif(LANDER.read_bytes()))
+    check("the lander carries plume geometry to collapse", any(m in PLUME for m, _ in src),
+          f"{sum(m in PLUME for m, _ in src)} of {len(src)}")
+    spec = {"name": "kb_plume", "parts": [{"nif": str(CART)},
+            {"nif": str(LANDER), "translate": [0, 0, 3], "collapse_materials": sorted(PLUME)}]}
+    sfnif.merge(spec, TMP / "kb_plume.nif")
+    got = geoms(Nif((TMP / "kb_plume.nif").read_bytes()))
+    lander = got[-len(src):]                        # the pasted part's geometries come after the base's
+    check("every plume geometry is scaled to 0", all(s == 0.0 for m, s in lander if m in PLUME))
+    check("no other geometry is touched", all(s == s0 for (m, s), (_, s0) in zip(lander, src) if m not in PLUME))
+    check("walks clean", sfnif.check_walk(TMP / "kb_plume.nif") == 0)
+    try:
+        bad = json.loads(json.dumps(spec)); bad["parts"][1]["collapse_materials"] = ["thrusterflameshap.mat"]
+        sfnif.merge(bad, TMP / "x.nif"); check("a collapse name matching nothing is refused", False)
+    except SystemExit as e:
+        check("a collapse name matching nothing is refused", "matched no geometry" in str(e), str(e))
+
 print(f"\n{'ALL PASS' if not fail and not cannot else f'{fail} FAILED, {cannot} COULD NOT RUN'}   (scratch: {TMP})")
 sys.exit(1 if fail else (2 if cannot else 0))

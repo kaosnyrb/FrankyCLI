@@ -238,6 +238,14 @@ def merge(spec: dict, out_path: Path) -> None:
                 raise SystemExit("REFUSED: collision:false on the BASE part; it is the object you stand by")
             dropped = {i for i in range(len(src.blocks))
                        if src.type_of(i) in ("bhkNPCollisionObject", "bhkPhysicsSystem")}
+        # "collapse_materials": [material file names] sets the scale of every BSGeometry wearing one of them to 0,
+        # so it draws nothing while the tree, every link and the walk stay as they were. His catch 2026-11-03 on
+        # the first converted ships: "you've got the like landing jet effects in shot as well, spikes coming off
+        # the ship". A lander's plume is geometry INSIDE the lander's mesh, picked out by its material
+        # (ThrusterFlameShape.mat and kin) and not by its name: the Stroud lander's ThrusterFireMesh blocks are
+        # real metal nozzles. A listed name that matches nothing in the part is refused, so a typo cannot pass.
+        collapse = {m.lower() for m in p.get("collapse_materials", [])}
+        collapsed: set[str] = set()
         remap, k = {}, 0
         for i in range(len(src.blocks)):
             if i not in dropped:
@@ -249,6 +257,13 @@ def merge(spec: dict, out_path: Path) -> None:
             if i in dropped:
                 continue
             nb = bytearray(bl)
+            if collapse and t == "BSGeometry":
+                sh = struct.unpack_from("<I", bl, w.refs[-2])[0]          # skin, SHADER, alpha
+                mi = struct.unpack_from("<I", src.blocks[sh], 0)[0] if sh != NONE else NONE   # not `si`: merge's own
+                mat = src.strings[mi].replace("\\", "/").rsplit("/", 1)[-1].lower() if mi != NONE else ""
+                if mat in collapse:
+                    struct.pack_into("<f", nb, w.xform + 48, 0.0)
+                    collapsed.add(mat)
             for off in w.strs:
                 v = struct.unpack_from("<I", nb, off)[0]
                 if v != NONE: struct.pack_into("<I", nb, off, si(src.strings[v]))
@@ -281,6 +296,8 @@ def merge(spec: dict, out_path: Path) -> None:
                 struct.pack_into("<f", nb, o + 48, s0 * sp)
                 root_children.append(base)
             blocks.append(bytes(nb)); tix.append(ti(t))
+        if collapse - collapsed:
+            raise SystemExit(f"REFUSED: {p['nif']} collapse_materials {sorted(collapse - collapsed)} matched no geometry")
 
     # Append the pasted branches to the base root's children list (count, then the links, at the end).
     if blocks[0] and tix[0] != types.index("NiNode"):

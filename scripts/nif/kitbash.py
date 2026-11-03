@@ -15,6 +15,10 @@ Why (2026-10-08): the first hand-typed placement put the dish at the console's O
 0.11 m off that origin and 0.29 m higher than guessed. He caught it in NifSkope. Coordinates typed by
 hand are a guess; a measured anchor is not.
 
+Two keys remove things from a pasted part without touching its tree: "collision": false drops its Havok
+blocks (not on part 0), and "collapse_materials": ["thrusterflameshape.mat", ...] scales every BSGeometry
+wearing one of those materials to 0 (a lander's plume inside its mesh; a name matching nothing is REFUSED).
+
 After building, prints every pasted part's box and, for each anchored part, ASSERTS its bottom-centre
 landed on the anchor within 1 cm. Exit 1 on a miss.
 """

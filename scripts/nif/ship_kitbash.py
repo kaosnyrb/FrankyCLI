@@ -25,7 +25,9 @@ by a half turn are the same under every candidate; a row turned on X or Y (the B
 --collision is required, because the default is a choice somebody lives with: `keep` leaves every mesh its
 own Havok body (each a moving one, so in zero-g the parts drift apart, his MB51a play 2026-11-02); `base-only`
 keeps part 0's and drops the rest (the fix that held OT-02's wrecks together).
-Markers (flagged, or made only of EditorMarker geometry) are skipped and counted; a mesh packin_assets.py
+Markers (flagged, or made only of EditorMarker geometry) and effect-only meshes (an engine's flame) are
+skipped and counted; a plume INSIDE a real mesh (a lander's) is collapsed by kitbash.py's `collapse_materials`
+(EFFECT_MATERIALS, keyed on the material, his catch 2026-11-03); a mesh packin_assets.py
 never extracted is skipped and NAMED; a mesh with a geometry the renderer could not texture is still pasted.
 Part 0 is the base and kitbash.py will not move it, so the recipe is in the base's frame: the UNTURNED mesh
 nearest the ship's origin, every other part shifted by its offset, and the ship's origin written into `_how`
@@ -41,6 +43,17 @@ import sfnif
 
 EPS = 1e-4
 
+# A running ship's EFFECTS, not its hull, read off both proving ships 2026-11-03 (his catch: "landing jet effects
+# in shot as well, spikes coming off the ship"). Keyed on the MATERIAL, never the geometry's name: the Stroud
+# lander's ThrusterFireMesh/ThrusterRingMesh blocks are real metal nozzles, the Hope lander's are plumes.
+# Lit windows and panels (GlowBright, ShipGlow...) are hull and stay.
+EFFECT_MATERIALS = {"thrusterflameshape.mat", "thrusterenginemesh.mat", "thrusterenginering.mat",
+                    "engineglowflames.mat", "engineglowhot.mat"}
+
+
+def mat_name(g) -> str:
+    return (g.get("material") or "").replace("\\", "/").rsplit("/", 1)[-1].lower()
+
 
 def walk(refs, assets, conv, parent, out, skipped, depth=0):
     for r in refs:
@@ -48,10 +61,14 @@ def walk(refs, assets, conv, parent, out, skipped, depth=0):
         nif = r.get("nif")
         if nif:
             a = assets.get(nif)
+            hull = [] if a is None else [g for g in a["geometries"] if not g["name"].startswith("EditorMarker")
+                                         and mat_name(g) not in EFFECT_MATERIALS]
             if a is None:
                 skipped.append(f"{nif} ({r.get('eid', r['base'])}): not extracted")
             elif a["marker"] or not any(not g["name"].startswith("EditorMarker") for g in a["geometries"]):
                 skipped.append(None)        # a marker, flagged or made only of EditorMarker geometry
+            elif not hull:
+                skipped.append("effect")    # only an effect (an engine's flame): nothing of the ship in it
             else:
                 # Pasted whole even when the renderer could not texture a geometry of it: kitbash.py copies
                 # the NIF's bytes, so a material the renderer missed is the renderer's gap, not the part's.
@@ -147,6 +164,9 @@ def main(argv):
             raise SystemExit(f"REFUSED: two different meshes are both named {fname}; nif/ is flat")
         nif_files[fname] = src.read_bytes()
         part = {"nif": f"nif/{fname}"}
+        fx = sorted({mat_name(g) for g in doc["assets"][nif]["geometries"]} & EFFECT_MATERIALS)
+        if fx:
+            part["collapse_materials"] = fx    # a plume inside a real mesh (a lander's): kitbash.py scales it to 0
         if k != base:
             got, why = decompose(M)
             if why:
@@ -181,10 +201,13 @@ def main(argv):
     out = out_dir / f"{name}.json"
     out.write_text(json.dumps(spec, indent=1) + "\n", encoding="utf-8")
     markers = sum(1 for s in skipped if s is None)
-    unread = [s for s in skipped if s]
+    effects = sum(1 for s in skipped if s == "effect")
+    unread = [s for s in skipped if s and s != "effect"]
+    plumes = sum(1 for p in parts if "collapse_materials" in p)
     print(f"  {out}: {len(parts)} parts (base: {placed[base][3]}, the ship's origin at {origin_at}), "
           f"{len(nif_files)} meshes into {out_dir / 'nif'}")
-    print(f"  skipped: {markers} marker(s), {len(unread)} skipped and named below")
+    print(f"  skipped: {markers} marker(s), {effects} effect-only mesh(es), {len(unread)} skipped and named below; "
+          f"{plumes} part(s) carry a plume collapsed (collapse_materials)")
     for s in unread:
         print(f"    SKIPPED {s}")
     for t in tilted:
