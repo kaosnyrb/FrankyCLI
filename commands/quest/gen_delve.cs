@@ -1616,6 +1616,9 @@ namespace FrankyCLI
             // B1/B2/B3) sit 7 to 14 units apart (part 32). A declared return is one legitimate repeat; a FIGHT at an earlier
             // beat's spot is the other (a hold defending the terminal beside it), and the build gives it that beat's marker
             // alias (FightMarker, 2026-10-28), so it is said as a note of what the build does rather than warned.
+            // ⛔ Two OBJECT beats on one spot are refused (his 2026-11-03, plan OT-99: "they need to be spread out.
+            // Things sharing markers doesn't feel right"): both objects would stand in the same place. A pair with a talk
+            // or an earlier fight in it stays a warning (talk to someone, then deliver to them; kill the boss, take the case).
             for (int i = 0; i < r.beats.Count; i++)
                 for (int j = i + 1; j < r.beats.Count; j++)
                 {
@@ -1626,6 +1629,9 @@ namespace FrankyCLI
                     {
                         if (ret) { }
                         else if (SpawnsAtMarker(b)) Console.WriteLine($"  [note ] beat {j + 1} ({b.type}) is at beat {i + 1}'s spot ({a.at}): the build gives it beat {i + 1}'s marker alias.");
+                        else if (!SpawnsAtMarker(a) && a.type != "talk" && b.type != "talk")
+                            Fatal($"beats {i + 1} and {j + 1} both place an object on {a.at} at the same place: one spot, two beats. "
+                                  + "Put one of them on another marker (gen_delve spread measures the candidates).");
                         else Warn($"beats {i + 1} and {j + 1} are both on {a.at} at the same place: one spot, two beats.");
                     }
                     else if (a.at.Length > 9 && b.at.Length > 9 && a.at.StartsWith("RETravel") && b.at.StartsWith("RETravel")

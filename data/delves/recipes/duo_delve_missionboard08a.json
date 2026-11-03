@@ -7,6 +7,7 @@
   "author": "jessica",
   "source": "his 2026-10-23: the military family (\"like 10 missionboard missions for Military Dungeons\"), and 13:35 \"don't limit ourselves by what's there already in my mod, we can add the markers needed later\"",
   "_note": [
+    "2026-11-03, Eliza on his \"they need to be spread out. Things sharing markers doesn't feel right\" (plan OT-99): the footlocker moved to the edge marker and the Sealed Case to the centre marker; the terminal keeps the wounded marker (centre to wounded median 31 m, edge to wounded 125 m).",
     "2026-11-02, Eliza on his \"yeah switch them to REWoundedMarkerLocRef\": every LocDungeonItemMarker beat moved to REWoundedMarkerLocRef, because no military site carries an item marker (pool 0 -> 100; plan OT-99). Beats that were at different item markers now share one spot.",
     "THE MILITARY FAMILY, 3 OF ~10: THE LAST REPORT. A unit held the site and stopped reporting. Read what they left",
     "in two places, in any order, deal with whoever holds it now, and take the unit's tags out of the room where it",
@@ -48,7 +49,7 @@
     {
       "type": "use",
       "group": "logs",
-      "at": "REWoundedMarkerLocRef",
+      "at": "LocDungeonEdgeMarkerLocRef",
       "message": {
         "title": "Unit Footlocker",
         "text": "A roster taped inside the lid. Six names, five of them crossed out in the same pen, neatly."
@@ -79,7 +80,7 @@
     },
     {
       "type": "pickup",
-      "at": "REWoundedMarkerLocRef",
+      "at": "LocDungeonCenterMarkerLocRef",
       "item": "Unit Tags",
       "objective": "Recover the unit's tags",
       "journal": "A unit at the <Place> stopped reporting after their supplies never came. I read what they left, cleared the people squatting there, and recovered all six of their tags.",

@@ -7,6 +7,7 @@
   "author": "jessica",
   "source": "his 2026-10-23: the military family (\"like 10 missionboard missions for Military Dungeons\"), \"we have droppods, those would be cool\", and 13:35 \"don't limit ourselves by what's there already in my mod, we can add the markers needed later\"",
   "_note": [
+    "2026-11-03, Eliza on his \"they need to be spread out. Things sharing markers doesn't feel right\" (plan OT-99): the Unmarked Crate moved from the wounded marker to the edge marker, so no two crates share a spot (edge to wounded median 125 m, gen_delve spread --dungeons).",
     "2026-11-02, Eliza on his \"yeah switch them to REWoundedMarkerLocRef\": every LocDungeonItemMarker beat moved to REWoundedMarkerLocRef, because no military site carries an item marker (pool 0 -> 100; plan OT-99). Beats that were at different item markers now share one spot.",
     "THE MILITARY FAMILY, 2 OF ~10: DEMOLITION. The case of charges is outside where the last team dropped it; three",
     "weapons crates inside take a charge each, in any order; coming back out, the occupiers' reinforcements land in",
@@ -74,7 +75,7 @@
     {
       "type": "use",
       "group": "charges",
-      "at": "REWoundedMarkerLocRef",
+      "at": "LocDungeonEdgeMarkerLocRef",
       "message": {
         "title": "Unmarked Crate",
         "text": "No markings at all. The lid is nailed down twice as hard as the others."
