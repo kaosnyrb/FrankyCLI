@@ -541,14 +541,14 @@ EndFunction
 ; The pod he fights round is an ordinary placed static, so a save keeps it as any other. If he sees a drop or a
 ; straighten at touchdown, (1) did not cure the fall and (2) is doing the work.
 Function DropPods(ObjectReference akCentre, Int aiPods, Int aiPer, RefCollectionAlias akGroup, FormList akList, Bool abOneSpecies, FormList akLoot, Int aiChance) Global
-    DropPodsAs(akCentre, aiPods, aiPer, akGroup, akList, abOneSpecies, akLoot, aiChance, None, None, 2.0, False)
+    DropPodsAs(akCentre, aiPods, aiPer, akGroup, akList, abOneSpecies, akLoot, aiChance, None, None, 2.0, False, None)
 EndFunction
 
 ; The one body (plan OT-75/76, 2026-11-03, his "per recipe, b": pods are a dial a recipe turns). Over DropPods it adds:
 ; akTarget/akTargetBase, a defeat's target placed at the FIRST pod's door into its alias (his "b": the captain rides
 ; down with her crew); afAggression, 2 for a site fight, 1 for a hold wave that must cross open ground (SpawnWave's
 ; reason); abEvaluate, a hold wave's crew re-pick the wave's Travel package (SpawnWaveAs's reason, his 2026-10-09 play).
-Function DropPodsAs(ObjectReference akCentre, Int aiPods, Int aiPer, RefCollectionAlias akGroup, FormList akList, Bool abOneSpecies, FormList akLoot, Int aiChance, ReferenceAlias akTarget, Form akTargetBase, Float afAggression, Bool abEvaluate) Global
+Function DropPodsAs(ObjectReference akCentre, Int aiPods, Int aiPer, RefCollectionAlias akGroup, FormList akList, Bool abOneSpecies, FormList akLoot, Int aiChance, ReferenceAlias akTarget, Form akTargetBase, Float afAggression, Bool abEvaluate, ObjectReference[] akSpots) Global
     Form marker = Game.GetFormFromFile(0x3B, "Starfield.esm")            ; XMarker
     Form podBase = Game.GetFormFromFile(0x3445, "du_overtime.esm")       ; duo_DropPod01, Kim's droppod_v10
     Form helperBase = Game.GetFormFromFile(0x1BA30, "Starfield.esm")     ; StarbornRingSpin00
@@ -591,7 +591,14 @@ Function DropPodsAs(ObjectReference akCentre, Int aiPods, Int aiPer, RefCollecti
                 Float bearing = turn + i * 360.0 / count + Utility.RandomFloat(-20.0, 20.0)
                 Float r = Utility.RandomFloat(15.0, 25.0)
                 ObjectReference g = akCentre.PlaceAtMe(marker)
-                g.MoveTo(akCentre, r * Math.sin(bearing), r * Math.cos(bearing), 0.0, False)
+                If akSpots != None && akSpots.Length > 0
+                    ; ON A SPOT (a hold's travel ring, OT-75): the pod lands on it, its door turned to the centre.
+                    ObjectReference spot = akSpots[i % akSpots.Length]
+                    bearing = BearingTo(akCentre, spot)
+                    g.MoveTo(spot, 0.0, 0.0, 0.0, False)
+                Else
+                    g.MoveTo(akCentre, r * Math.sin(bearing), r * Math.cos(bearing), 0.0, False)
+                EndIf
                 g.MoveToNearestNavmeshLocation()
                 ; The door (-Y) toward akCentre: the pod sits at heading bearing from it, so +Y points away.
                 ObjectReference d = g.PlaceAtMe(marker)
@@ -674,8 +681,87 @@ Function PodWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList ak
     If per > 6
         per = 6
     EndIf
-    Debug.Trace("[duo_delve_lib] PodWave: " + n + " enemies as " + pods + " pod(s) of " + per)
-    DropPodsAs(centre, pods, per, akWave, akGang, False, None, 0, None, None, 1.0, True)
+    ; ON THE TRAVEL RING (his 2026-11-03 play of MB55a: round the marker "the pods dropped into the building (exterior
+    ; cell) prob need to spawn the pods on the travel ring"): the ring is where things arrive at a POI, its edge, in the
+    ; open. No ring marker in reach: the wave walks, never round the marker again.
+    ObjectReference[] spots = RingSpots(centre, Game.GetPlayer(), pods)
+    If spots.Length == 0
+        Debug.Trace("[duo_delve_lib] PodWave: no travel-ring marker within 300 of the hold, so this wave walks in")
+        SpawnWaveAs(akMarker, akWave, akGang, aiMin, aiMax, 1, 1.0)
+        Return
+    EndIf
+    If spots.Length < pods
+        pods = spots.Length
+        per = (n + pods - 1) / pods
+        If per > 6
+            per = 6
+        EndIf
+    EndIf
+    Debug.Trace("[duo_delve_lib] PodWave: " + n + " enemies as " + pods + " pod(s) of " + per + " on " + spots.Length + " travel-ring marker(s)")
+    DropPodsAs(centre, pods, per, akWave, akGang, False, None, 0, None, None, 1.0, True, spots)
+EndFunction
+
+; Up to aiMax of the site's TRAVEL-RING markers (REOverlayTravelA1..A3, B1..B3: the ring statics WaveOrigins searched
+; before b2ed01d), within 300 of akSite, in random order, each at least 12 from the last picked (a pod is 7.6 wide and
+; a ring's markers sit 7 to 14 apart, manual part 32) and 15 from him. Only LOADED cells answer, so from the site's
+; centre usually one ring (three markers) is findable: the reading WaveOrigins recorded on 2026-10-10.
+ObjectReference[] Function RingSpots(ObjectReference akSite, Actor akPlayer, Int aiMax) Global
+    Int[] ids = new Int[6]
+    ids[0] = 0x0E3800 ; REOverlayTravelA1
+    ids[1] = 0x0E37FF ; A2
+    ids[2] = 0x0E37FE ; A3
+    ids[3] = 0x0E37FD ; B1
+    ids[4] = 0x0E37FC ; B2
+    ids[5] = 0x0E37FB ; B3
+    ObjectReference[] all = new ObjectReference[0]
+    Int b = 0
+    While b < ids.Length
+        ObjectReference[] found = akSite.FindAllReferencesOfType(Game.GetFormFromFile(ids[b], "Starfield.esm"), 300.0)
+        Int i = 0
+        While i < found.Length
+            all.Add(found[i])
+            i += 1
+        EndWhile
+        b += 1
+    EndWhile
+    ObjectReference[] picked = new ObjectReference[0]
+    While all.Length > 0 && picked.Length < aiMax
+        Int k = Utility.RandomInt(0, all.Length - 1)
+        ObjectReference c = all[k]
+        all.Remove(k)
+        Bool ok = akPlayer.GetDistance(c) >= 15.0
+        Int j = 0
+        While ok && j < picked.Length
+            If picked[j].GetDistance(c) < 12.0
+                ok = False
+            EndIf
+            j += 1
+        EndWhile
+        If ok
+            picked.Add(c)
+        EndIf
+    EndWhile
+    Return picked
+EndFunction
+
+; The compass heading from akFrom to akTo, clockwise from +Y: DropPods' convention, where a pod at heading b sits at
+; (r sin b, r cos b). Math has atan and no atan2, so the quadrant is fixed by hand.
+Float Function BearingTo(ObjectReference akFrom, ObjectReference akTo) Global
+    Float dx = akTo.GetPositionX() - akFrom.GetPositionX()
+    Float dy = akTo.GetPositionY() - akFrom.GetPositionY()
+    If dy == 0.0
+        If dx < 0.0
+            Return 270.0
+        EndIf
+        Return 90.0
+    EndIf
+    Float t = Math.atan(dx / dy)
+    If dy < 0.0
+        t += 180.0
+    ElseIf dx < 0.0
+        t += 360.0
+    EndIf
+    Return t
 EndFunction
 
 ; A DEFEAT BY DROP POD (plan OT-76, his 2026-11-03 "b"): the target rides the FIRST pod into akTarget and the gang
@@ -688,7 +774,7 @@ Function PodTarget(ReferenceAlias akMarker, ReferenceAlias akTarget, Form akBase
         SpawnTarget(akMarker, akTarget, akBase, akGang, aiPods * aiPer, aiPods * aiPer, abOneSpecies, akLoot, aiChance)
         Return
     EndIf
-    DropPodsAs(marker, aiPods, aiPer, None, akGang, abOneSpecies, akLoot, aiChance, akTarget, akBase, 2.0, False)
+    DropPodsAs(marker, aiPods, aiPer, None, akGang, abOneSpecies, akLoot, aiChance, akTarget, akBase, 2.0, False, None)
 EndFunction
 
 Function Alert(Actor akEnemy, FormList akLoot, Int aiChance) Global

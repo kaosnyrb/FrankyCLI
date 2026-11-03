@@ -38,7 +38,7 @@ namespace FrankyCLI
             // A wave's style -> duo_delve_lib.SpawnWave's origins: 1 anywhere but in front, 2 his left and his right.
             // Exact-case keys on purpose: the lint refuses "Horde" rather than reading it as a squad.
             private static readonly Dictionary<string, int> WaveStyles = new() { ["squad"] = 1, ["horde"] = 2 };
-            /// <summary>A wave that arrives BY DROP POD round the hold's marker (plan OT-75, his 2026-11-03 "per recipe... it's a
+            /// <summary>A wave that arrives BY DROP POD on the site's travel ring (round the marker until his 2026-11-03 play: "dropped into the building") (plan OT-75, his 2026-11-03 "per recipe... it's a
             /// dial which lets us make different missions"): duo_delve_lib.PodWave. Not in WaveStyles, which maps a WALKING
             /// wave's origins; a pod wave has none. Indoors it walks in (the lib's ladder down).</summary>
             private const string PodStyle = "pods";
@@ -73,7 +73,7 @@ namespace FrankyCLI
                         else if (b.size is { Count: 2 } ps && ps[1] > PodWaveMax)
                             Fatal($"beat {i + 1}'s size reaches {ps[1]}; a \"{PodStyle}\" wave lands at most {PodWaveMax} (4 pods of 6), so the rest would silently never come.");
                         else
-                            Console.WriteLine($"  beat {i + 1} waves {string.Join(", ", b.style.Select((st, k) => (st, k)).Where(x => x.st == PodStyle).Select(x => x.k + 1))} arrive by drop pod round the marker (three to a pod; indoors they walk)");
+                            Console.WriteLine($"  beat {i + 1} waves {string.Join(", ", b.style.Select((st, k) => (st, k)).Where(x => x.st == PodStyle).Select(x => x.k + 1))} arrive by drop pod on the site's travel ring (three to a pod; indoors or with no ring marker, they walk)");
                     }
                 }
                 if (b.stuck is int s && s < 30)

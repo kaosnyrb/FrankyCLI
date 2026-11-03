@@ -550,8 +550,10 @@ landed; the first behind-him build used `MoveTo`'s `abRotateOffset` without `abM
 from "the same place".* **`style`**, optional, one per wave: `squad` (one group, anywhere on that arc; the default)
 or `horde` (one group on his left half of the arc and one on his right, so it closes from two sides), or **`pods`**
 (plan OT-75, 2026-11-03, his *"per recipe... it's a dial which lets us make different missions"*): the wave lands BY DROP
-POD round `at`, the thing he defends, three to a pod (at most 4 of 6, so `size` up to 24), into the wave's own collection
-so its Travel package, reveal and stuck guard hold unchanged; indoors it walks in (`duo_delve_lib.PodWave`). Refused
+POD on the site's TRAVEL RING (his play of MB55a, 2026-11-03: round `at` *"the pods dropped into the building (exterior
+cell) prob need to spawn the pods on the travel ring"*), one pod per ring marker found within 300 of `at`, door to `at`,
+three to a pod (at most 4 of 6, so `size` up to 24), into the wave's own collection so its Travel package, reveal and
+stuck guard hold unchanged; indoors, or with no ring marker loaded, it walks in (`duo_delve_lib.PodWave`). Refused
 beside `creatures`. **`reveal`**,
 optional (his ask 2026-10-12: "after like 20 seconds of the wave we set the enemies as objectives? That way if the
 player hasn't seen them it points them out"): seconds after a wave spawns before its enemies carry objective markers.
