@@ -2,7 +2,7 @@
   "schema": 2,
   "id": "duo_artifact_localcargo_qst21a",
   "template": "beats",
-  "deal": "duo_MS_ArtifactMap_LocalCargoNode",
+  "deal": "duo_MS_ArtifactMap_LocalNode",
   "_deal": "The live local-cargo pool, as every lettered recipe since 2026-10-12.",
   "author": "jessica",
   "source": "home-office office/projects/delves/backlog.md, new candidates: retrieve under fire (carry it out while they come)",
