@@ -806,7 +806,8 @@ namespace FrankyCLI
         /// <summary>A crowd drawn from a FormList: min..max of them; species "one" = a single entry for all (the Hunt driver), "mix" = drawn per enemy.</summary>
         private sealed class Elite { public string? from { get; set; } public string? name { get; set; } }
         private sealed class Crowd { public string? list { get; set; } public int min { get; set; } public int max { get; set; } public string? species { get; set; } public Pods? pods { get; set; } }
-        /// <summary>A clear's enemies arriving by DROP POD (2026-10-21, his "let's do 3 per pod and 3 pods in different points to
+        /// <summary>A clear's enemies, or since 2026-11-03 a defeat's gang with its target in the first pod (plan OT-76), arriving
+        /// by DROP POD (2026-10-21, his "let's do 3 per pod and 3 pods in different points to
         /// start with"): count pods land round the spawn marker and per enemies step out of each, so the pods set the number
         /// and min/max are refused beside them. All vanilla, no record of ours (manual 32, "how a DROP POD comes down").</summary>
         private sealed class Pods { public int count { get; set; } public int per { get; set; } }

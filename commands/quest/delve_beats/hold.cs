@@ -38,6 +38,12 @@ namespace FrankyCLI
             // A wave's style -> duo_delve_lib.SpawnWave's origins: 1 anywhere but in front, 2 his left and his right.
             // Exact-case keys on purpose: the lint refuses "Horde" rather than reading it as a squad.
             private static readonly Dictionary<string, int> WaveStyles = new() { ["squad"] = 1, ["horde"] = 2 };
+            /// <summary>A wave that arrives BY DROP POD round the hold's marker (plan OT-75, his 2026-11-03 "per recipe... it's a
+            /// dial which lets us make different missions"): duo_delve_lib.PodWave. Not in WaveStyles, which maps a WALKING
+            /// wave's origins; a pod wave has none. Indoors it walks in (the lib's ladder down).</summary>
+            private const string PodStyle = "pods";
+            /// <summary>The most a pod wave can land: 4 pods of 6 (duo_delve_lib.PodWave caps both).</summary>
+            private const int PodWaveMax = 24;
 
             /// <summary>The stuck-enemy guard's default, in seconds: his infestation driver's pity timer.</summary>
             private const int DefaultStuckSeconds = 180;
@@ -58,8 +64,17 @@ namespace FrankyCLI
                 {
                     if (b.style.Count != (b.waves ?? 0))
                         Fatal($"beat {i + 1} has {b.style.Count} style(s) for {(b.waves?.ToString() ?? "no")} waves; give one per wave, or leave style out for all squads.");
-                    foreach (var st in b.style.Where(st => !WaveStyles.ContainsKey(st)))
-                        Fatal($"beat {i + 1} has wave style '{st}'; the styles are {string.Join(", ", WaveStyles.Keys)}.");
+                    foreach (var st in b.style.Where(st => !WaveStyles.ContainsKey(st) && st != PodStyle))
+                        Fatal($"beat {i + 1} has wave style '{st}'; the styles are {string.Join(", ", WaveStyles.Keys)}, {PodStyle}.");
+                    if (b.style.Contains(PodStyle))
+                    {
+                        if (b.creatures != null)
+                            Fatal($"beat {i + 1} has a \"{PodStyle}\" wave and creatures; drop pods carry people, so a creature wave walks (take \"{PodStyle}\" out).");
+                        else if (b.size is { Count: 2 } ps && ps[1] > PodWaveMax)
+                            Fatal($"beat {i + 1}'s size reaches {ps[1]}; a \"{PodStyle}\" wave lands at most {PodWaveMax} (4 pods of 6), so the rest would silently never come.");
+                        else
+                            Console.WriteLine($"  beat {i + 1} waves {string.Join(", ", b.style.Select((st, k) => (st, k)).Where(x => x.st == PodStyle).Select(x => x.k + 1))} arrive by drop pod round the marker (three to a pod; indoors they walk)");
+                    }
                 }
                 if (b.stuck is int s && s < 30)
                     Fatal($"beat {i + 1}'s stuck is {s} s; the guard would move the quest on mid-fight. 30 or more.");
@@ -309,8 +324,16 @@ namespace FrankyCLI
                 build.props.Add(("ReferenceAlias", mk, build.clone.FormKey, build.slotOf[b].markerAlias));
                 build.props.Add(("RefCollectionAlias", wv, build.clone.FormKey, build.waveAliases[b][w]));
                 var sz = r.beats[b].size!;
-                int origins = WaveStyles[r.beats[b].style?[w] ?? "squad"];
-                if (build.creatureLists.TryGetValue(b, out var cl))
+                string style = r.beats[b].style?[w] ?? "squad";
+                int origins = style == PodStyle ? 0 : WaveStyles[style];
+                if (style == PodStyle)
+                {
+                    // By drop pod (plan OT-75): round the marker, into this wave's collection, so the Travel package and every
+                    // guard below hold unchanged. The lint has refused creatures here.
+                    build.props.Add(("FormList", "Gang", build.gangKey!.Value, -1));
+                    build.Add(stage, $"duo_delve_lib.PodWave({mk}, {wv}, {build.SiteGang(b)}, {sz[0]}, {sz[1]})");
+                }
+                else if (build.creatureLists.TryGetValue(b, out var cl))
                 {
                     // Creatures (plan OT-33): their own list, VeryAggressive; no site faction is read.
                     string cp = $"Beat{b + 1}Creatures";

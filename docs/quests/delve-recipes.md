@@ -461,7 +461,9 @@ shared by every Delve; the build's read-back checks it is the only quest script 
 different points to start with"*; first on `duo_delve33a`, not yet played). `{ "count", "per" }` on a clear's `enemies`:
 `count` pods (1 to 4) land round the spawn marker at even bearings, 15 to 25 out, one after another 2 to 4 s apart at
 random (his *"randomly staggered by 2-4 seconds so they don't all land at once"*), and `per` (1 to 6) step out of each, so
-the pods set the number and `min` / `max` are refused beside them; refused on a defeat's gang. When he comes near, the
+the pods set the number and `min` / `max` are refused beside them. **A defeat's gang takes the same `gang.pods`** since
+2026-11-03 (plan OT-76, his *"b"*): the TARGET rides the first pod (extra to `count` x `per`) and the gang fill them all,
+through `duo_delve_lib.PodTarget`; indoors they are all placed at the marker by `SpawnTarget` instead. When he comes near, the
 spawned stage's fragment calls `duo_delve_lib.DropPods` in place of `SpawnGroup` (since 2026-10-22; before it,
 `duo_delve_groupnear` carried the pod count), which runs the arrival `duo_podprobe` proved at his glass: the pod hung by
 `AttachTo` from an invisible `StarbornRingSpin00` (a placed static moves its position and not its mesh), the UC04
@@ -546,7 +548,11 @@ pity timer while he has wandered off) the wave forms at `at`. *History: the site
 130 m out, where he saw them stutter); then 25 to 35 m behind him, close enough that he could aim where they
 landed; the first behind-him build used `MoveTo`'s `abRotateOffset` without `abMatchRotation` and every wave came
 from "the same place".* **`style`**, optional, one per wave: `squad` (one group, anywhere on that arc; the default)
-or `horde` (one group on his left half of the arc and one on his right, so it closes from two sides). **`reveal`**,
+or `horde` (one group on his left half of the arc and one on his right, so it closes from two sides), or **`pods`**
+(plan OT-75, 2026-11-03, his *"per recipe... it's a dial which lets us make different missions"*): the wave lands BY DROP
+POD round `at`, the thing he defends, three to a pod (at most 4 of 6, so `size` up to 24), into the wave's own collection
+so its Travel package, reveal and stuck guard hold unchanged; indoors it walks in (`duo_delve_lib.PodWave`). Refused
+beside `creatures`. **`reveal`**,
 optional (his ask 2026-10-12: "after like 20 seconds of the wave we set the enemies as objectives? That way if the
 player hasn't seen them it points them out"): seconds after a wave spawns before its enemies carry objective markers.
 Absent = 20, `0` = never, and it must be under `stuck` (lint). Each wave gets its own objective, the hold's index + 1

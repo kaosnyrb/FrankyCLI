@@ -489,6 +489,10 @@ EndFunction
 ; aiCount enemies within afSpread of akCentre (snapped to the navmesh), into akGroup when one is given: akOne for all,
 ; or one drawn from akList each when akOne is None.
 Function PlaceAround(ObjectReference akCentre, RefCollectionAlias akGroup, FormList akList, Form akOne, Int aiCount, Float afSpread, FormList akLoot, Int aiChance) Global
+    PlaceAroundAs(akCentre, akGroup, akList, akOne, aiCount, afSpread, akLoot, aiChance, 2.0, False)
+EndFunction
+
+Function PlaceAroundAs(ObjectReference akCentre, RefCollectionAlias akGroup, FormList akList, Form akOne, Int aiCount, Float afSpread, FormList akLoot, Int aiChance, Float afAggression, Bool abEvaluate) Global
     Float[] pos = new Float[6]
     Int n = aiCount
     While n > 0
@@ -500,7 +504,10 @@ Function PlaceAround(ObjectReference akCentre, RefCollectionAlias akGroup, FormL
             who = akList.GetAt(Utility.RandomInt(0, akList.GetSize() - 1))
         EndIf
         Actor enemy = akCentre.PlaceAtMe(who, 1, True, False, True, pos, akGroup, True) as Actor
-        Alert(enemy, akLoot, aiChance)
+        AlertAs(enemy, akLoot, aiChance, afAggression)
+        If abEvaluate
+            enemy.EvaluatePackage()
+        EndIf
         n -= 1
     EndWhile
 EndFunction
@@ -534,6 +541,14 @@ EndFunction
 ; The pod he fights round is an ordinary placed static, so a save keeps it as any other. If he sees a drop or a
 ; straighten at touchdown, (1) did not cure the fall and (2) is doing the work.
 Function DropPods(ObjectReference akCentre, Int aiPods, Int aiPer, RefCollectionAlias akGroup, FormList akList, Bool abOneSpecies, FormList akLoot, Int aiChance) Global
+    DropPodsAs(akCentre, aiPods, aiPer, akGroup, akList, abOneSpecies, akLoot, aiChance, None, None, 2.0, False)
+EndFunction
+
+; The one body (plan OT-75/76, 2026-11-03, his "per recipe, b": pods are a dial a recipe turns). Over DropPods it adds:
+; akTarget/akTargetBase, a defeat's target placed at the FIRST pod's door into its alias (his "b": the captain rides
+; down with her crew); afAggression, 2 for a site fight, 1 for a hold wave that must cross open ground (SpawnWave's
+; reason); abEvaluate, a hold wave's crew re-pick the wave's Travel package (SpawnWaveAs's reason, his 2026-10-09 play).
+Function DropPodsAs(ObjectReference akCentre, Int aiPods, Int aiPer, RefCollectionAlias akGroup, FormList akList, Bool abOneSpecies, FormList akLoot, Int aiChance, ReferenceAlias akTarget, Form akTargetBase, Float afAggression, Bool abEvaluate) Global
     Form marker = Game.GetFormFromFile(0x3B, "Starfield.esm")            ; XMarker
     Form podBase = Game.GetFormFromFile(0x3445, "du_overtime.esm")       ; duo_DropPod01, Kim's droppod_v10
     Form helperBase = Game.GetFormFromFile(0x1BA30, "Starfield.esm")     ; StarbornRingSpin00
@@ -620,7 +635,12 @@ Function DropPods(ObjectReference akCentre, Int aiPods, Int aiPer, RefCollection
                 helpers[i].Delete()
                 grounds[i].PlaceAtMe(frag)
                 Utility.Wait(0.3)
-                PlaceAround(doors[i], akGroup, akList, one, aiPer, 1.5, akLoot, aiChance)
+                If i == 0 && akTarget != None && akTargetBase != None
+                    Actor boss = doors[i].PlaceAtMe(akTargetBase, 1, True, False, True, None, akTarget, True) as Actor
+                    AlertAs(boss, akLoot, aiChance, afAggression)
+                    Debug.Trace("[duo_delve_lib] drop pod 1 carries the target")
+                EndIf
+                PlaceAroundAs(doors[i], akGroup, akList, one, aiPer, 1.5, akLoot, aiChance, afAggression, abEvaluate)
                 Debug.Trace("[duo_delve_lib] drop pod " + (i + 1) + " of " + count + " down at " + (now as Int) + " s (launched at " + (launchAt[i] as Int) + "), helper " + off + " off its rest height, swapped (loaded " + restLoaded + ", angles " + (rest.GetAngleX() as Int) + " " + (rest.GetAngleY() as Int) + " " + (rest.GetAngleZ() as Int) + "), " + aiPer + " out at its door")
                 stage[i] = 2
                 down += 1
@@ -631,11 +651,55 @@ Function DropPods(ObjectReference akCentre, Int aiPods, Int aiPer, RefCollection
     EndWhile
 EndFunction
 
+; A HOLD WAVE BY DROP POD (plan OT-75, his 2026-11-02 "a mix of some drop pods and some walking", 11-03 "per recipe":
+; a recipe names the wave's style "pods"). aiMin..aiMax enemies, three to a pod as his first pods were, at most 4 pods
+; of 6, round the hold's marker (the thing he defends), into the wave's collection so they wear its Travel package
+; and come for him, at a wave's aggression 1. INDOORS a pod cannot fall, so the wave walks in instead: his ladder rule,
+; the plain version where the world will not allow the best (card 20261021-132015).
+Function PodWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList akGang, Int aiMin, Int aiMax) Global
+    ObjectReference centre = akMarker.GetRef()
+    If centre.IsInInterior()
+        Debug.Trace("[duo_delve_lib] PodWave: the hold marker is indoors, so this wave walks in")
+        SpawnWaveAs(akMarker, akWave, akGang, aiMin, aiMax, 1, 1.0)
+        Return
+    EndIf
+    Int n = Utility.RandomInt(aiMin, aiMax)
+    Int pods = (n + 2) / 3
+    If pods > 4
+        pods = 4
+    ElseIf pods < 1
+        pods = 1
+    EndIf
+    Int per = (n + pods - 1) / pods
+    If per > 6
+        per = 6
+    EndIf
+    Debug.Trace("[duo_delve_lib] PodWave: " + n + " enemies as " + pods + " pod(s) of " + per)
+    DropPodsAs(centre, pods, per, akWave, akGang, False, None, 0, None, None, 1.0, True)
+EndFunction
+
+; A DEFEAT BY DROP POD (plan OT-76, his 2026-11-03 "b"): the target rides the FIRST pod into akTarget and the gang
+; fill the rest, aiPods x aiPer of them (the target is extra), round the beat's marker as he comes near. The gang need
+; not die, as SpawnTarget's. INDOORS the pods cannot fall, so SpawnTarget places them all at the marker instead.
+Function PodTarget(ReferenceAlias akMarker, ReferenceAlias akTarget, Form akBase, FormList akGang, Int aiPods, Int aiPer, Bool abOneSpecies, FormList akLoot, Int aiChance) Global
+    ObjectReference marker = akMarker.GetRef()
+    If marker.IsInInterior()
+        Debug.Trace("[duo_delve_lib] PodTarget: the marker is indoors, so the crew are placed at it")
+        SpawnTarget(akMarker, akTarget, akBase, akGang, aiPods * aiPer, aiPods * aiPer, abOneSpecies, akLoot, aiChance)
+        Return
+    EndIf
+    DropPodsAs(marker, aiPods, aiPer, None, akGang, abOneSpecies, akLoot, aiChance, akTarget, akBase, 2.0, False)
+EndFunction
+
 Function Alert(Actor akEnemy, FormList akLoot, Int aiChance) Global
+    AlertAs(akEnemy, akLoot, aiChance, 2.0)
+EndFunction
+
+Function AlertAs(Actor akEnemy, FormList akLoot, Int aiChance, Float afAggression) Global
     ActorValue Suspicious = Game.GetFormFromFile(748, "Starfield.esm") as ActorValue ; Suspicious [AVIF:000002EC]
     ActorValue Aggression = Game.GetFormFromFile(700, "Starfield.esm") as ActorValue ; Aggression [AVIF:000002BC]
     akEnemy.SetValue(Suspicious, 2.0) ; DetectedActor
-    akEnemy.SetValue(Aggression, 2.0) ; VeryAggressive
+    akEnemy.SetValue(Aggression, afAggression) ; 2 VeryAggressive (a site fight), 1 Aggressive (a hold wave)
     If akLoot != None && Utility.RandomInt(1, 100) <= aiChance
         akEnemy.AddItem(akLoot.GetAt(Utility.RandomInt(0, akLoot.GetSize() - 1)), 1, False)
     EndIf

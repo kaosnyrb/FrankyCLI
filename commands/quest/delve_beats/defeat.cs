@@ -40,9 +40,19 @@ namespace FrankyCLI
                     Fatal($"{at} target '{b.target}' is not an Npc or LeveledNpc in {t.mod} or one of its masters.");
                 if (b.gang != null)
                 {
-                    if (b.gang.pods != null) Fatal($"{at} gang sets pods; drop pods are built for a clear's enemies only (a defeat's gang is placed beside its target).");
                     List("gang", b.gang.list, true);
-                    Range("gang", b.gang, 0);
+                    if (b.gang.pods is Pods p)
+                    {
+                        // By drop pod (plan OT-76, his 2026-11-03 "b"): the target rides the first pod, the gang fill them all.
+                        if (b.gang.min != 0 || b.gang.max != 0)
+                            Fatal($"{at} gang sets pods AND min/max ({b.gang.min}-{b.gang.max}); the pods set the number (count x per), so min and max would be silently ignored. Take them out.");
+                        if (p.count < 1 || p.count > PodsMax) Fatal($"{at} gang.pods.count is {p.count}; 1 to {PodsMax} pods.");
+                        if (p.per < 1 || p.per > 6) Fatal($"{at} gang.pods.per is {p.per}; 1 to 6 out of each pod.");
+                        if (b.gang.species != null && !SpeciesModes.Contains(b.gang.species))
+                            Fatal($"{at} gang.species is '{b.gang.species}'; it is \"one\" (a single entry from the list for all) or \"mix\".");
+                        Console.WriteLine($"  {at} arrives by drop pod: the target in the first, gang {p.count} x {p.per} = {p.count * p.per} (indoors, all placed at the marker)");
+                    }
+                    else Range("gang", b.gang, 0);
                 }
             }
 
@@ -126,7 +136,10 @@ namespace FrankyCLI
                     build.props.Add(("FormList", $"Gang{b + 1}", gk, -1));
                     gangArgs = $"Gang{b + 1}, {fb.gang!.min}, {fb.gang.max}, {(fb.gang.species == "one" ? "True" : "False")}";
                 }
-                build.Add(stage, $"duo_delve_lib.SpawnTarget({mk}, {tg}, Target{b + 1}, {gangArgs}, {lootArgs})");
+                if (fb.gang?.pods is Pods p && ff.Gang is not null)
+                    build.Add(stage, $"duo_delve_lib.PodTarget({mk}, {tg}, Target{b + 1}, Gang{b + 1}, {p.count}, {p.per}, {(fb.gang.species == "one" ? "True" : "False")}, {lootArgs})");
+                else
+                    build.Add(stage, $"duo_delve_lib.SpawnTarget({mk}, {tg}, Target{b + 1}, {gangArgs}, {lootArgs})");
             }
         }
     }

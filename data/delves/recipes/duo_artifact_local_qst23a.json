@@ -7,6 +7,7 @@
   "author": "jessica, as Ines Corvo",
   "source": "his 2026-10-21 06:57: \"write the local 5, use your pen names\". The five old artifact_local fight families (Bounty, Danger, Dismantle, Strike, Hunt: 42 quests), one new Delve each, each person written by a different pen name.",
   "_note": [
+    "2026-11-03, Eliza on his OT-76 rulings (11-02 \"drop pods\", 11-03 \"b\"): the crew arrive by drop pod as he comes near, the captain in the first pod, the gang 2 x 2 (was 3 to 5 on foot). Built Delve: needs a rebuild and his play.",
     "PEN NAME: home-office office/pennames/ines-corvo.json. Her heat checks do not apply (Overtime is adult, not explicit, his 10-12); her voice does.",
     "STRIKE, THE SPACER LANDING. First Delve of the old Strike family (local qst12 to qst16: his 'the ship and crew",
     "that are landing on the planet to fight', an ARRIVAL, not a target holed up). No ship lands here: the engine",
@@ -37,9 +38,11 @@
       "target": "duo_boss_Spacer_Boss_Aggro_Female",
       "gang": {
         "list": "duo_GangMembersList_Spacer",
-        "min": 3,
-        "max": 5,
-        "species": "mix"
+        "species": "mix",
+        "pods": {
+          "count": 2,
+          "per": 2
+        }
       },
       "loot": {
         "list": "duo_ArtifactList_Local",
