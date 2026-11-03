@@ -2,8 +2,8 @@
   "schema": 2,
   "id": "duo_MB104a_qst",
   "template": "boardspace",
-  "deal": "_duo_MB_MissionNode_test",
-  "_deal": "The board's test node, until he plays it.",
+  "deal": "duo_MB_MissionNode_Exploration",
+  "_deal": "Eliza, 2026-11-03: played (\"yup all good\"), into Exploration on his pick, beside the other Recovery missions MB42a, 43a, 44a.",
   "author": "jessica",
   "source": "his 2026-10-28 20:54 \"thinking we need more space cargo missions\", then \"all these sound good\" to five seeds",
   "_note": [
