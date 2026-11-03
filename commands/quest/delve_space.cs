@@ -91,10 +91,11 @@ namespace FrankyCLI
             for (int i = 0; i < r.beats.Count; i++)
                 if (r.beats[i].repair && !(IsBoardSpace(t) && r.beats.Count == 1))
                     Fatal($"beat {i + 1} sets repair; only a ONE-beat {(IsBoardSpace(t) ? "board" : "boardspace")} use is his MB01a's repair activator, so it would be silently ignored.");
-            if (IsBoardSpace(t) && r.beats.Count == 1 && r.beats[0].repair && r.beats[0].vanish)
-                Fatal("beat 1 sets repair and vanish; the repair activator runs his own script and is never hidden by ours, so vanish would be ignored.");
-            if (!(IsBoardSpace(t) && r.beats.Count == 1) && r.beats.Any(b => b.vanish))
-                Fatal($"a beat sets vanish; on a {t.id} Delve only a one-beat board's plain use takes it (the others' objects already hide on use), so it would be silently ignored.");
+            // vanish (the object disabled on use) is built on the ground beats only; no space recipe has needed it. Refused rather
+            // than half-wired: HideAfterUse is the PROMPT, not the object (his MB104a play, 2026-11-03: "the button prompt stayed
+            // on", after a build that tied the two).
+            if (r.beats.Any(b => b.vanish))
+                Fatal($"a beat sets vanish; on a {t.id} Delve it is not built (the object's prompt goes on use, the object stays), so it would be silently ignored.");
             for (int i = 0; i < r.beats.Count; i++)
             {
                 var b = r.beats[i];
@@ -449,14 +450,14 @@ namespace FrankyCLI
             }
 
             // A PLAIN ONE-BEAT BOARD (MB104a, 2026-11-03): our hook sets the completing stage after the accept, as a two-beat
-            // board's pickup does; the object hides only if the recipe says vanish (a container left adrift stays).
+            // board's pickup does. HideAfterUse is the PROMPT (BlockActivation), true on every use; the object itself stays.
             if (PlainBoard(r, t))
             {
                 var h = StageHook(UseScript, t.completeStage, t.entryStage,
-                                  new ScriptBoolProperty { Name = "HideAfterUse", Data = beat.vanish, Flags = ScriptProperty.Flag.Edited });
+                                  new ScriptBoolProperty { Name = "HideAfterUse", Data = true, Flags = ScriptProperty.Flag.Edited });
                 if (AttachHook(vma, clone.FormKey, (int)target.ID, h, HookEntry.FindOrCreate, true, bm, t.completeStage, t.entryStage) == Hooked.AlreadyCarries)
                 { Console.WriteLine($"REFUSED: alias {target.ID} already carries {UseScript}."); return 1; }
-                Console.WriteLine($"  +hook    : alias {target.ID} {UseScript} sets {t.completeStage} after {t.entryStage}, hides {(beat.vanish ? "on use" : "never")}");
+                Console.WriteLine($"  +hook    : alias {target.ID} {UseScript} sets {t.completeStage} after {t.entryStage}, its prompt gone on use, the object stays");
             }
 
             // THE HOOK: activating the object completes it (his MB01's is used from the ship; this is ours, duo_delve_use, plan
@@ -1022,13 +1023,13 @@ namespace FrankyCLI
                 else
                 {
                     // A plain board (MB104a): no kit, no repair messages, no attackers; our hook on the alias is graded by the
-                    // bm.Hooks pass, with its HideAfterUse the recipe's vanish.
+                    // bm.Hooks pass. HideAfterUse blocks the PROMPT and must be true (MB104a's play: false left it on).
                     fail += Check($"{r.id}_b1 carries no script (not a repair: our hook on its alias completes it)",
                                   (objAct?.VirtualMachineAdapter?.Scripts.Count ?? 0).ToString(), "0");
                     var uh = vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.FirstOrDefault(s => s.Name == UseScript);
-                    fail += Check($"the object's {UseScript} hides on use only if the recipe says vanish",
+                    fail += Check($"the object's {UseScript} blocks its prompt on use (HideAfterUse)",
                                   uh?.Properties.OfType<IScriptBoolPropertyGetter>().FirstOrDefault(p => p.Name == "HideAfterUse")?.Data.ToString() ?? "no hook",
-                                  r.beats[0].vanish.ToString());
+                                  "True");
                 }
                 if (bm.ArrivalDistance > 0)
                 {
