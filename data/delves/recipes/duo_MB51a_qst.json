@@ -37,9 +37,9 @@
       "name": "Sealed Cargo Crate",
       "scenery": {
         "model": "Meshes\\ccs\\freighterwreck01.nif",
-        "bounds": [-42.5, -49.99, -11.25, 22.43, 40.53, 12.25]
+        "bounds": [-41.54, -58.2, -15.99, 25.83, 40.53, 18.52]
       },
-      "_scenery": "Eliza, 2026-11-02, plan OT-02 (his 10-30 playtest: \"There should be wreckage of the frieghter at the part, currently there isn't\"): Kim's OT-62 freighter (his \"Frieghter looks good\"), re-origined so the crate sits in the gap between the halves (Overtime kitbash/reorigin.py, origin (2.5, -35, 0.5) of her recipe; nearest wreck part 2.54 m from the crate's box). bounds is kitbash.py's WHOLE line; rebuild the NIF and copy it again if her recipe changes.",
+      "_scenery": "Eliza, 2026-11-02, plan OT-02 (his 10-30 playtest: \"There should be wreckage of the frieghter at the part, currently there isn't\"): Kim's OT-62 freighter (his \"Frieghter looks good\"), re-origined so the crate sits in the gap between the halves (Overtime kitbash/reorigin.py, origin (2.5, -35, 0.5) of her recipe; nearest wreck part 2.54 m from the crate's box). 2026-11-03, Kim's v6 (the spill tumbles, the aft half pitched -22 and rolled 30): same origin, nothing touches the crate's box, nearest part 0.89 m (the aft half's torn wall, box to box). bounds is kitbash.py's WHOLE line; rebuild the NIF and copy it again if her recipe changes.",
       "item": "Signal Amplifier",
       "say": [
         "That's the part."
