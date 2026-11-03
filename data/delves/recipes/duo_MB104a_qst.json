@@ -10,7 +10,7 @@
     "SPACE CARGO 5: THE WRONG MANIFEST. A container adrift in orbit, listed as machine parts. Pick it up.",
     "THE HOOK: someone is in it, and she is the radio. The broadcast is her, calling from inside the box when the player",
     "comes within range, so the speaker is the stowaway and the card is the owners' (unvoiced). One beat; the closing",
-    "line is the use's say. FITTED TO boardspace: a one-beat board is a use, so the player clamps on and tows it.",
+    "line is the use's say. FITTED TO boardspace: a one-beat board is a use. NO TOW EXISTS (his play, 2026-11-03: activate it, then fly away), so the use fixes a recovery beacon to the hull and she stays inside for the owners' tug.",
     "Every space Delve before these was a satellite (5 of 7); these are about CARGO, his ask. Markers: General01/06/02 and TravelB02 are 51a's and 30a's; which a cell offers is Eliza's. No names, places, factions or currency in a voiced line. Pay: med, capped, placeholder."
   ],
   "place": {
@@ -27,12 +27,12 @@
       "type": "use",
       "at": "se_GeneralMarkerLocRef01",
       "objective": "Secure the drifting container over <Planet>",
-      "journal": "The drifting container over <Planet> wasn't machine parts. There's a woman inside it, and she's been in there four days. I've got it in tow.",
+      "journal": "The drifting container over <Planet> wasn't machine parts. There's a woman inside it, four days in. I fixed a recovery beacon to the hull so the owners' tug can find her.",
       "model": "Meshes\\ships\\modules\\cargo\\smod\\smod_cargo_panoptes_degama-1000_port.nif",
       "_model": "Eliza, 2026-11-03, his play: wreckcargocrate01 'is a ground crate not a space one, looks wrong as theres stuff on the ground next to it'. This is vanilla's own drifting space container, Loot_Space_CargoModule01 'Cargo Module' (about 8 x 4 x 3 m). Archived, so the build keeps the base's bounds, as MB47a's satellite does.",
       "name": "Drifting Cargo Container",
       "say": [
-        "I can hear your clamps on the hull. That's the best sound I've ever heard. Tow me somewhere with air and people, and then you can let me out and forget you ever saw me."
+        "Something just went onto the hull and started ticking. That's a beacon, isn't it? So somebody's coming, and now they'll know where to look. Go on. I've done four days in here. I can do one more."
       ],
       "reward": "med"
     }
