@@ -680,6 +680,14 @@ namespace FrankyCLI
             /// </summary>
             public bool vanish { get; set; }
             /// <summary>
+            /// beats, a ONE-BEAT boardspace use only, OPTIONAL: the object is his MB01a's own activator, script and all
+            /// (ccs_activaterepair: it takes a Ship Repair Kit, shows the repair messages, may spawn attackers, and pays
+            /// itself). Absent = a scriptless object on our duo_delve_use hook, and the completing stage pays, the two-beat
+            /// board's shape (his play of MB104a, 2026-11-03: "when you activate it has a prompt about repairing. That
+            /// doesn't match the mission"). Said, never defaulted, because the repair is a mission and a kit is a cost.
+            /// </summary>
+            public bool repair { get; set; }
+            /// <summary>
             /// beats, a use, OPTIONAL: an Explosion EditorID (own-or-master) placed at the object as the FIRST line of this
             /// beat's stage, ahead of a vanish (his 2026-10-27 on duo_MB52a_qst's burned cache: "just place it, we can always
             /// make our own fire later"; IncendiaryGrenadeExplosion drops a 4.5 m, 12 s fire hazard that burns whoever is in it).
@@ -1526,6 +1534,9 @@ namespace FrankyCLI
             if (IsSpace(t)) GradeSpace(r, t, Fatal);
             else
             {
+                for (int i = 0; i < r.beats.Count; i++)
+                    if (r.beats[i].repair)
+                        Fatal($"beat {i + 1} sets repair and template '{t.id}' is not a space board; only a one-beat boardspace use is his MB01a's repair, so it would be silently ignored.");
                 // place.over shipped 2026-10-22 with no refusal here, so on a beats recipe it was silently ignored; closed with
                 // the two keys that joined it.
                 foreach (var (p, label) in new[] { (r.place, "place"), (r.place.second, "place.second"), (r.place.third, "place.third") })

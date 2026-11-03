@@ -89,6 +89,13 @@ namespace FrankyCLI
             if (two && r.beats[0].reward != null)
                 Fatal("beat 1 carries a reward; a two-beat board pays once, from the deliver, through the board's globals.");
             for (int i = 0; i < r.beats.Count; i++)
+                if (r.beats[i].repair && !(IsBoardSpace(t) && r.beats.Count == 1))
+                    Fatal($"beat {i + 1} sets repair; only a ONE-beat {(IsBoardSpace(t) ? "board" : "boardspace")} use is his MB01a's repair activator, so it would be silently ignored.");
+            if (IsBoardSpace(t) && r.beats.Count == 1 && r.beats[0].repair && r.beats[0].vanish)
+                Fatal("beat 1 sets repair and vanish; the repair activator runs his own script and is never hidden by ours, so vanish would be ignored.");
+            if (!(IsBoardSpace(t) && r.beats.Count == 1) && r.beats.Any(b => b.vanish))
+                Fatal($"a beat sets vanish; on a {t.id} Delve only a one-beat board's plain use takes it (the others' objects already hide on use), so it would be silently ignored.");
+            for (int i = 0; i < r.beats.Count; i++)
             {
                 var b = r.beats[i];
                 if (t.allows.Count > 0 && !t.allows.Contains(b.type ?? ""))
@@ -98,7 +105,7 @@ namespace FrankyCLI
                     Fatal($"beat {i + 1} is at '{b.at}'; an orbit's markers are its space cell's own (se_*), filled from the cell.");
                 if (string.IsNullOrWhiteSpace(b.objective)) Fatal($"beat {i + 1} has no objective; it is the one line that points him at the object.");
                 if (string.IsNullOrWhiteSpace(b.model) || string.IsNullOrWhiteSpace(b.name))
-                    Fatal($"beat {i + 1} needs a model and a name: its object is a clone of {(IsBoardSpace(t) ? "the base's own activator" : t.activatorFrom)}, reskinned.");
+                    Fatal($"beat {i + 1} needs a model and a name: its object is a clone of {(RepairBoard(r, t) ? "the base's own activator" : t.activatorFrom)}, reskinned.");
                 if (b.scenery is Scenery sc)
                 {
                     if (string.IsNullOrWhiteSpace(sc.model)) Fatal($"beat {i + 1}'s scenery has no model.");
@@ -108,7 +115,7 @@ namespace FrankyCLI
                 // A two-beat board shows its own boxes: no repair script is there to show one.
                 if ((b.message != null && !two) || b.group != null || b.returnTo != null)
                     Fatal($"beat {i + 1} carries a {(b.message != null && !two ? "message" : b.group != null ? "group" : "returnTo")}; the {t.id} kind builds none"
-                          + (IsBoardSpace(t) && b.message != null ? " (its object's script shows its own start, success and fail messages)." : "."));
+                          + (IsBoardSpace(t) && b.message != null && b.repair ? " (its object's script shows its own start, success and fail messages)." : "."));
             }
         }
 
@@ -174,6 +181,15 @@ namespace FrankyCLI
         /// MB01a activator, whose script takes a repair kit and pays on the first use.</summary>
         private static bool TwoBeatBoard(Recipe r, Template t)
             => IsBoardSpace(t) && r.beats.Count == 2 && r.beats[0].type == "pickup" && r.beats[1].type == "deliver";
+
+        /// <summary>A one-beat board whose recipe says repair: his MB01a activator, which pays itself. Every other board's
+        /// objects are scriptless on our hooks, and its completing stage pays (MB104a, 2026-11-03).</summary>
+        private static bool RepairBoard(Recipe r, Template t)
+            => IsBoardSpace(t) && r.beats.Count == 1 && r.beats[0].repair;
+
+        /// <summary>A one-beat board that is NOT a repair: a scriptless object, our hook, the stage pays.</summary>
+        private static bool PlainBoard(Recipe r, Template t)
+            => IsBoardSpace(t) && r.beats.Count == 1 && !r.beats[0].repair;
 
         /// <summary>A two-beat board's stages and objective: the pickup's own stage, and the deliver's objective beside the
         /// shell's 20. Neither exists on his MB01a (the build refuses if one does). 40, not 30: the broadcast's arrival is
@@ -314,12 +330,14 @@ namespace FrankyCLI
                 Console.WriteLine($"  cell     : {cell.Name} (alias {cell.ID}) creates {cell.CreateReferenceToObject.Object.FormKey} at alias {anchor[0].id} {anchor[0].name} (was at {wasAt})");
             }
 
-            if (IsBoardSpace(t) && !two)
+            if (RepairBoard(r, t))
             {
                 // THE OBJECT IS HIS MB01's OWN ACTIVATOR, script and all, reskinned (his 2026-10-26: "The activator has
                 // important scripts on it and is critial to the mission"). ccs_activaterepair IS the mission: it places an
-                // installation on load, takes a Ship Repair Kit, may spawn attackers, completes objective 20 and calls
-                // MissionComplete() itself. Its questobjective names the base quest, so the clone's is repointed at this one.
+                // installation on load (the communication satellite, which gives remote data slates when used, his
+                // 2026-11-03: a big part of Crossfire), takes a Ship Repair Kit, may spawn attackers, completes objective 20
+                // and calls MissionComplete() itself. Its questobjective names the base quest, so the clone's is repointed.
+                // Only when the recipe SAYS repair (MB104a, 2026-11-03: a cargo container wearing it asked for a kit).
                 if (ReskinActivator(myMod, clone, t, r.id + "_b1", (int)target.ID, beat.model, beat.name) != 0) return 1;
                 var act = myMod.Activators.First(a => a.FormKey == target.CreateReferenceToObject!.Object.FormKey);
                 var baseKey = myMod.Quests.FirstOrDefault(q => q.EditorID == t.@base)?.FormKey;
@@ -428,6 +446,17 @@ namespace FrankyCLI
                     { Console.WriteLine($"REFUSED: alias {alias} already carries {UseScript}."); return 1; }
                     Console.WriteLine($"  +hook    : alias {alias} {UseScript} sets {set} after {after}");
                 }
+            }
+
+            // A PLAIN ONE-BEAT BOARD (MB104a, 2026-11-03): our hook sets the completing stage after the accept, as a two-beat
+            // board's pickup does; the object hides only if the recipe says vanish (a container left adrift stays).
+            if (PlainBoard(r, t))
+            {
+                var h = StageHook(UseScript, t.completeStage, t.entryStage,
+                                  new ScriptBoolProperty { Name = "HideAfterUse", Data = beat.vanish, Flags = ScriptProperty.Flag.Edited });
+                if (AttachHook(vma, clone.FormKey, (int)target.ID, h, HookEntry.FindOrCreate, true, bm, t.completeStage, t.entryStage) == Hooked.AlreadyCarries)
+                { Console.WriteLine($"REFUSED: alias {target.ID} already carries {UseScript}."); return 1; }
+                Console.WriteLine($"  +hook    : alias {target.ID} {UseScript} sets {t.completeStage} after {t.entryStage}, hides {(beat.vanish ? "on use" : "never")}");
             }
 
             // THE HOOK: activating the object completes it (his MB01's is used from the ship; this is ours, duo_delve_use, plan
@@ -581,7 +610,7 @@ namespace FrankyCLI
                             $"{sv}.Start()",
                             $"Utility.Wait(1.0)   ; let {sv} begin before asking whether it plays",
                             "Int waited = 0",
-                            two ? $"While {sv}.IsPlaying() && waited < 30   ; MissionComplete, below, shuts the quest down"
+                            !RepairBoard(r, t) ? $"While {sv}.IsPlaying() && waited < 30   ; MissionComplete, below, shuts the quest down"
                                 : $"While {sv}.IsPlaying() && waited < 30   ; the activator's MissionComplete waits on this, then shuts the quest down",
                             "    Utility.Wait(1.0)",
                             "    waited += 1",
@@ -592,10 +621,10 @@ namespace FrankyCLI
                         n++;
                     }
                 }
-                // A TWO-BEAT BOARD PAYS FROM ITS OWN LAST STAGE, the ground board's shape (CompleteMission, gen_delve_beats;
-                // vanilla QF_MB_Bounty05_UC_003303A5): no activator holds MissionStateChangeGuard here, so the call BS1's
-                // deadlock forbids a one-beat board is the only thing that pays this one.
-                if (two)
+                // A TWO-BEAT OR PLAIN BOARD PAYS FROM ITS OWN LAST STAGE, the ground board's shape (CompleteMission,
+                // gen_delve_beats; vanilla QF_MB_Bounty05_UC_003303A5): no activator holds MissionStateChangeGuard here, so the
+                // call BS1's deadlock forbids a REPAIR board is the only thing that pays this one.
+                if (!RepairBoard(r, t))
                     code[t.completeStage].AddRange(new[]
                     {
                         "Quest __temp = Self as Quest",
@@ -984,12 +1013,23 @@ namespace FrankyCLI
                 // activate hook beside it, since the script completes the mission itself.
                 var objAct = m.Activators.FirstOrDefault(a => a.EditorID == r.id + "_b1");
                 var repair = objAct?.VirtualMachineAdapter?.Scripts.FirstOrDefault(s => s.Name.Equals("ccs_activaterepair", StringComparison.OrdinalIgnoreCase));
-                if (!two)
+                if (RepairBoard(r, t))
                     fail += Check($"{r.id}_b1 carries his repair script, its questobjective on this quest",
                                   repair == null ? "no ccs_activaterepair" : repair.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == "questobjective")?.Object.FormKey.ToString() ?? "no questobjective",
                                   q.FormKey.ToString());
-                else
+                else if (two)
                     fail += VerifyTwoBeatBoard(m, q, r, t, bm);
+                else
+                {
+                    // A plain board (MB104a): no kit, no repair messages, no attackers; our hook on the alias is graded by the
+                    // bm.Hooks pass, with its HideAfterUse the recipe's vanish.
+                    fail += Check($"{r.id}_b1 carries no script (not a repair: our hook on its alias completes it)",
+                                  (objAct?.VirtualMachineAdapter?.Scripts.Count ?? 0).ToString(), "0");
+                    var uh = vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.FirstOrDefault(s => s.Name == UseScript);
+                    fail += Check($"the object's {UseScript} hides on use only if the recipe says vanish",
+                                  uh?.Properties.OfType<IScriptBoolPropertyGetter>().FirstOrDefault(p => p.Name == "HideAfterUse")?.Data.ToString() ?? "no hook",
+                                  r.beats[0].vanish.ToString());
+                }
                 if (bm.ArrivalDistance > 0)
                 {
                     var dh = vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.FirstOrDefault(s => s.Name == "DefaultAliasOnDistanceLessThan");
@@ -1019,7 +1059,7 @@ namespace FrankyCLI
                 }
                 string src = File.ReadAllText(bm.PscPath);
                 string done = src.Split($"Function {FragmentFunction(t.completeStage)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
-                if (!two)
+                if (RepairBoard(r, t))
                 {
                     fail += Check($"the object (alias {slot.activatorAlias}) carries no stock activate hook",
                                   (vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.Any(s => s.Name == "DefaultAliasOnActivate") == true).ToString(), "False");

@@ -29,6 +29,8 @@
   "beats": [
     {
       "type": "use",
+      "repair": true,
+      "_repair": "Eliza, 2026-11-03: said, never defaulted (MB104a). BS1 tested his MB01a activator as shipped.",
       "at": "se_GeneralMarkerLocRef06",
       "_at": "MB01e's marker (2026-10-26 08:5x). BS1 first kept MB01a's own, se_TravelMarkerLocRefB02, and never filled (StoryManager.0.log: failed to fill aliases, every refresh); his MB01a fails the same way in that log and the one before, while MB01b and MB01e pass, and the three differ only in this ref type and the orbit's altitude. A difference, not a proven cause: this rung tests it.",
       "objective": "Repair the navigation satellite over <Planet>",

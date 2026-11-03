@@ -28,7 +28,8 @@
       "at": "se_GeneralMarkerLocRef01",
       "objective": "Secure the drifting container over <Planet>",
       "journal": "The drifting container over <Planet> wasn't machine parts. There's a woman inside it, and she's been in there four days. I've got it in tow.",
-      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "model": "Meshes\\ships\\modules\\cargo\\smod\\smod_cargo_panoptes_degama-1000_port.nif",
+      "_model": "Eliza, 2026-11-03, his play: wreckcargocrate01 'is a ground crate not a space one, looks wrong as theres stuff on the ground next to it'. This is vanilla's own drifting space container, Loot_Space_CargoModule01 'Cargo Module' (about 8 x 4 x 3 m). Archived, so the build keeps the base's bounds, as MB47a's satellite does.",
       "name": "Drifting Cargo Container",
       "say": [
         "I can hear your clamps on the hull. That's the best sound I've ever heard. Tow me somewhere with air and people, and then you can let me out and forget you ever saw me."
