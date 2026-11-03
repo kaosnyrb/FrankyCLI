@@ -4012,6 +4012,38 @@ namespace FrankyCLI
             Console.WriteLine();
         }
 
+        /// <summary>Every row of a list, uncapped, each field by reflection: a FormLink resolved to its EditorID, a
+        /// nested object one level deep. For lists whose rows ARE the data (a Blueprint's modules).</summary>
+        private static void DumpRowsReflection(string label, System.Collections.IEnumerable? rows, List<IStarfieldModGetter>? allMods)
+        {
+            var list = rows?.Cast<object>().ToList() ?? new List<object>();
+            Console.WriteLine($"      {label} [{list.Count}]:");
+            string One(object? v)
+            {
+                if (v == null) return "null";
+                if (v is IFormLinkGetter fl) return fl.IsNull ? "NULL" : ResolveName(fl.FormKey, allMods);
+                if (v is string || v.GetType().IsPrimitive || v is Enum || v is FormKey || v is Noggog.P3Float) return v.ToString() ?? "";
+                if (v is System.Collections.IEnumerable en)
+                    return "[" + string.Join(", ", en.Cast<object>().Select(One)) + "]";
+                string s = v.ToString() ?? "";
+                if (s != v.GetType().FullName && s != v.GetType().Name) return s;
+                return "{" + string.Join(" ", v.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(p => p.GetIndexParameters().Length == 0 && p.Name != "Registration" && p.Name != "StaticRegistration")
+                    .Select(p => { object? pv; try { pv = p.GetValue(v); } catch { pv = "?"; }
+                                   return $"{p.Name}={(pv is System.Collections.IEnumerable && pv is not string ? "[..]" : pv?.ToString() ?? "null")}"; })) + "}";
+            }
+            for (int i = 0; i < list.Count; i++)
+            {
+                var row = list[i];
+                var fields = row.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(p => p.GetIndexParameters().Length == 0 && p.Name != "Registration" && p.Name != "StaticRegistration")
+                    .OrderBy(p => p.Name)
+                    .Select(p => { object? v; try { v = p.GetValue(row); } catch (Exception ex) { v = $"<{ex.GetType().Name}>"; }
+                                   return $"{p.Name}={One(v)}"; });
+                Console.WriteLine($"        [{i}] {string.Join("  ", fields)}");
+            }
+        }
+
         private static void DumpGenericBaseForm(IGenericBaseFormGetter gbfm, List<IStarfieldModGetter>? allMods)
         {
             Console.WriteLine($"--- GenericBaseForm (GBFM) ---");
@@ -4045,6 +4077,16 @@ namespace FrankyCLI
                             break;
                         case IFullNameComponentGetter fn:
                             Console.WriteLine($"    FullName: {fn.Name}");
+                            break;
+                        case IBlueprintComponentGetter bp:
+                            // A vanilla ship's module list with each module's position and rotation (his fact,
+                            // 2026-11-03: "there's a Blueprint_Component with the pos and rotations", read off
+                            // OE_EncShip_Ecliptic_Small_Bayonet for ships-into-kitbashes). The generic dumper caps a
+                            // list at ten and prints each row as its type name, so every row is printed here,
+                            // uncapped, field by field.
+                            Console.WriteLine($"    Blueprint: BLUF={bp.BLUF} NextPartID={bp.NextPartID}");
+                            DumpRowsReflection("Items", bp.Items, allMods);
+                            DumpRowsReflection("BODSRows", bp.BODSRows, allMods);
                             break;
                         default:
                             // Vanilla modules carry six more component types (AttachParentArray,
