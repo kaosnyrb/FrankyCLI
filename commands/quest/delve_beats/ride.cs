@@ -143,6 +143,13 @@ namespace FrankyCLI
                 Console.WriteLine($"  +ride    : beat {rider}'s person boards on stage {stage}; a turn-down ({BoardFailStage}) takes her off the ship");
             }
 
+            private static QuestReferenceAlias EmptyRefAlias(Quest clone, string name, QuestReferenceAlias.Flag flags)
+            {
+                var a = new QuestReferenceAlias { ID = NextAliasId(clone), Name = name, Flags = flags, ALFG = 0 };
+                a.VoiceTypes.SetTo(FormKey.Null);
+                return a;
+            }
+
             /// <summary>The silent stage her first question sets: it retires her greeting and that question, and gates nothing.</summary>
             private const int SpokenStage = 45;
             /// <summary>The plain stage the script sets as the ship lands (the ground ride's is 900 + its beat).</summary>
@@ -176,15 +183,18 @@ namespace FrankyCLI
                 SortStages(clone);
 
                 var city = r.place.second!.settlement!;
-                var loc = new QuestLocationAlias { ID = NextAliasId(clone), Name = "FinalLocation" };
+                // ⛔ ALFG AND VoiceTypes ARE WRITTEN EMPTY, NEVER LEFT OUT (duo_delvetest_r2's first build, 2026-11-04: all three aliases
+                // came from `new`, had neither subrecord, and the game crashed to desktop loading the plugin, before the save).
+                // Every alias vanilla and we have written carries both; the verify now grades that on these three.
+                var loc = new QuestLocationAlias { ID = NextAliasId(clone), Name = "FinalLocation", ALFG = 0 };
                 clone.Aliases!.Add(loc);
                 if (MakePlaceSettlement(clone, (int)loc.ID, city) != 0) return 1;
-                var mk = new QuestReferenceAlias { ID = NextAliasId(clone), Name = "DelveBeat2Destination", Flags = QuestReferenceAlias.Flag.AllowReserved };
+                var mk = EmptyRefAlias(clone, "DelveBeat2Destination", QuestReferenceAlias.Flag.AllowReserved);
                 var inCity = new LocationAliasReference { AliasID = (int)loc.ID };
                 inCity.RefType.SetTo(markers[ride.at]);
                 mk.Location = inCity;
                 clone.Aliases.Add(mk);
-                var pa = new QuestReferenceAlias { ID = NextAliasId(clone), Name = "DelveBeat2Person", Flags = QuestReferenceAlias.Flag.Optional };
+                var pa = EmptyRefAlias(clone, "DelveBeat2Person", QuestReferenceAlias.Flag.Optional);
                 clone.Aliases.Add(pa);
 
                 var wave = WaveCollectionOf(env.LoadOrder[0].Mod?.Quests.FirstOrDefault(q => q.FormKey.ID == WaveQuestId));

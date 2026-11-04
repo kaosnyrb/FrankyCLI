@@ -2576,6 +2576,10 @@ namespace FrankyCLI
             fail += Check("ride: the arrival stage exists", q.Stages.Any(s => s.Index == rideArrived).ToString(), "True");
             var pc = q.Aliases.OfType<IQuestCollectionAliasGetter>().SelectMany(c => c.Collection).Select(m => m.ReferenceAlias).FirstOrDefault(a => a?.ID == (uint)rideCol);
             fail += Check("ride: Passengers wears DefaultPassengerPackage", pc == null ? "missing" : string.Join(",", pc.PackageData.Select(p => p.FormKey)), "1D302B:Starfield.esm");
+            // Written empty, never left out: a rescue alias missing either is what crashed duo_delvetest_r2 at load (ride.cs).
+            var bare = q.Aliases.OfType<IQuestReferenceAliasGetter>().Where(a => a.ALFG == null || a.VoiceTypes.FormKeyNullable == null).Select(a => a.Name)
+                .Concat(q.Aliases.OfType<IQuestLocationAliasGetter>().Where(a => a.ALFG == null).Select(a => a.Name));
+            fail += Check("ride: every alias carries ALFG and VoiceTypes", string.Join(",", bare), "");
             string who = r.beats[rideBeat].rider is int rider ? $"Alias_Beat{rider}Person" : $"Alias_Beat{rideBeat + 1}Person";
             fail += Check("ride: she boards from a fragment", File.ReadAllText(bm.PscPath).Contains($".AddPassenger({who})").ToString(), "True");
             return fail;
