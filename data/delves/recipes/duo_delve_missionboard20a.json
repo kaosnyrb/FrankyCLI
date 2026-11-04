@@ -29,7 +29,7 @@
   "prose": {
     "name": "Sabotage: Condemned Batch on <Planet>",
     "briefing": "A batch of faulty parts is sitting in the <Place> waiting for a buyer who knows exactly what's wrong with them.",
-    "card": "Three crates of faulty parts at the <Place>, failed inspection twice. Mark every crate condemned before the buyer collects. The buyer knows exactly what's wrong with them."
+    "card": "Three crates of faulty parts at the <Place>, failed inspection twice. Mark them condemned before the buyer collects. The buyer knows what's wrong with them."
   },
   "beats": [
     {
