@@ -7,7 +7,7 @@
   "author": "jessica",
   "source": "his 2026-10-23: the military family (\"like 10 missionboard missions for Military Dungeons\"), \"we have droppods, those would be cool\", and 13:35 \"don't limit ourselves by what's there already in my mod, we can add the markers needed later\"",
   "_note": [
-    "CARD BY VANCE OKONKWO-REYES (2026-11-04, his: 'Each mission is set by a different person, we should use pennames'; no payer label or payment line, his 'redundant noise'). Was: Private Contract. Set charges on the weapons cache at the <Place> on <Planet>. Charges are at the entrance. Payment on contract completion.",
+    "CARD BY VANCE OKONKWO-REYES (2026-11-04, re-cut 09:3x on his 'People shouldn't vaguely hint at things'; his: 'Each mission is set by a different person, we should use pennames'; no payer label or payment line, his 'redundant noise'). Was: Private Contract. Set charges on the weapons cache at the <Place> on <Planet>. Charges are at the entrance. Payment on contract completion.",
     "2026-11-03, Eliza on his \"they need to be spread out. Things sharing markers doesn't feel right\" (plan OT-99): the Unmarked Crate moved from the wounded marker to the edge marker, so no two crates share a spot (edge to wounded median 125 m, gen_delve spread --dungeons).",
     "2026-11-02, Eliza on his \"yeah switch them to REWoundedMarkerLocRef\": every LocDungeonItemMarker beat moved to REWoundedMarkerLocRef, because no military site carries an item marker (pool 0 -> 100; plan OT-99). Beats that were at different item markers now share one spot.",
     "THE MILITARY FAMILY, 2 OF ~10: DEMOLITION. The case of charges is outside where the last team dropped it; three",
@@ -32,7 +32,7 @@
   "prose": {
     "name": "Sabotage: Weapons Cache on <Planet>",
     "briefing": "The occupiers of the <Place> are sitting on a weapons cache. A demolition team went in and didn't come out. Their charges are still at the entrance.",
-    "card": "Weapons cache, the <Place>. Charges are at the entrance. Three crates, one charge each. Our team went in. Set the charges."
+    "card": "Weapons cache, the <Place>. Our demolition team went in and didn't come out. Their charges are at the entrance. Three crates, one charge each."
   },
   "beats": [
     {

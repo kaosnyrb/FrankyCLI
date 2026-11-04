@@ -7,7 +7,7 @@
   "author": "jessica",
   "source": "his 2026-10-17 09:51: \"do the next 5 as well, Json is cheap\". First Delve of the old MB20 Sabotage (books) family. Old MB20a: 'A cache of banned texts has turned up. The order is destruction, not confiscation, and nobody has offered a reason.'",
   "_note": [
-    "CARD BY RUTH PARGETER (2026-11-04, his: 'Each mission is set by a different person, we should use pennames'; no payer label or payment line, his 'redundant noise'). Was: Administrative Contract. Destroy the prohibited texts at the <Place> on <Planet>. An armed crew holds the site. Do not copy them. Payment on contract completion.",
+    "CARD BY RUTH PARGETER (2026-11-04, re-cut 09:3x on his 'People shouldn't vaguely hint at things'; his: 'Each mission is set by a different person, we should use pennames'; no payer label or payment line, his 'redundant noise'). Was: Administrative Contract. Destroy the prohibited texts at the <Place> on <Planet>. An armed crew holds the site. Do not copy them. Payment on contract completion.",
     "THE BANNED TEXTS. The old line's best part is the missing reason, so the Delve keeps it missing. No choice offered:",
     "the job is the job, and the journal is where the player gets to have a feeling about it.",
     "SABOTAGE IS DESTROY (his 2026-10-28 13:07): the classic MB20 cache was shot, not opened. One beat, the cache destroyed",
@@ -40,7 +40,7 @@
   "prose": {
     "name": "Sabotage: Banned Texts on <Planet>",
     "briefing": "A cache of banned texts has turned up at the <Place>, with an armed crew sitting on it. The posting wants them destroyed, not collected, and doesn't say why.",
-    "card": "Banned texts at the <Place>, the third cache this year. To be burned, not read. The crew holding them has not been asked."
+    "card": "Banned texts at the <Place>, the third cache this year. To be burned, not read. An armed crew is holding them."
   },
   "beats": [
     {

@@ -7,7 +7,7 @@
   "author": "jessica",
   "source": "his 2026-10-23: the military family (\"like 10 missionboard missions for Military Dungeons\"), \"we have droppods, those would be cool\", 13:35 \"don't limit ourselves by what's there already in my mod, we can add the markers needed later\", 13:44 \"go for it\"",
   "_note": [
-    "CARD BY VIC TARRANT (2026-11-04, his: 'Each mission is set by a different person, we should use pennames'; no payer label or payment line, his 'redundant noise'). Was: Private Contract. Shut down the three beacons at the <Place> on <Planet>. Payment on contract completion.",
+    "CARD BY VIC TARRANT (2026-11-04, re-cut 09:3x on his 'People shouldn't vaguely hint at things'; his: 'Each mission is set by a different person, we should use pennames'; no payer label or payment line, his 'redundant noise'). Was: Private Contract. Shut down the three beacons at the <Place> on <Planet>. Payment on contract completion.",
     "2026-11-03, Eliza on his \"they need to be spread out. Things sharing markers doesn't feel right\" (plan OT-99): the Relay Beacon moved from the wounded marker to the edge marker, so no two beacons share a spot (edge to wounded median 125 m).",
     "2026-11-02, Eliza on his \"yeah switch them to REWoundedMarkerLocRef\": every LocDungeonItemMarker beat moved to REWoundedMarkerLocRef, because no military site carries an item marker (pool 0 -> 100; plan OT-99). Beats that were at different item markers now share one spot.",
     "THE MILITARY FAMILY, 7 OF ~10: THE BEACONS.",
@@ -32,7 +32,7 @@
   "prose": {
     "name": "Sabotage: Beacon Network on <Planet>",
     "briefing": "Three beacons at the <Place> are guiding the occupiers' supply runs in. Without them, the runs miss.",
-    "card": "Three beacons at the <Place>, all live, all guiding supply runs in. Shut them off. Someone will come asking where their delivery went."
+    "card": "Three beacons at the <Place>, all live, all guiding supply runs in. Shut them off. Whoever's waiting on the delivery will come looking."
   },
   "beats": [
     {
