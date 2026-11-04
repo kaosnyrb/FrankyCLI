@@ -87,7 +87,7 @@ namespace FrankyCLI
             if (two && string.IsNullOrWhiteSpace(r.beats[0].item))
                 Fatal("beat 1 is a pickup with no item; it names what he picks up and the deliver takes back.");
             if (two && r.beats[0].reward != null)
-                Fatal("beat 1 carries a reward; a two-beat board pays once, from the deliver, through the board's globals.");
+                Fatal("beat 1 carries a reward; a two-beat board pays once, from the deliver's stage.");
             for (int i = 0; i < r.beats.Count; i++)
                 if (r.beats[i].repair && !(IsBoardSpace(t) && r.beats.Count == 1))
                     Fatal($"beat {i + 1} sets repair; only a ONE-beat {(IsBoardSpace(t) ? "board" : "boardspace")} use is his MB01a's repair activator, so it would be silently ignored.");
@@ -440,15 +440,8 @@ namespace FrankyCLI
                 // sat on the script's globals, showed and paid the stage's easy 1250).
                 for (int j = 0; j < endings.Count; j++)
                 {
-                    var en = clone.Stages.First(x => x.Index == endings[j]);
-                    en.LogEntries[0].Entry = Expand(asked.answers[j].journal!, t);
-                    var rds = en.LogEntries[0].StageCompleteDatas.SelectMany(c => c.RewardDatas).ToList();
-                    if (rds.Count != 1) { Console.WriteLine($"REFUSED: stage {en.Index} carries {rds.Count} reward entries; this tool writes exactly one."); return 1; }
-                    var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{asked.answers[j].reward}");
-                    var xg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_xp_{asked.answers[j].reward}");
-                    if (cg == null || xg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{asked.answers[j].reward} / duo_reward_xp_{asked.answers[j].reward}."); return 1; }
-                    rds[0].BonusCredits.SetTo(cg.FormKey);
-                    rds[0].XpAwarded.SetTo(xg.FormKey);
+                    clone.Stages.First(x => x.Index == endings[j]).LogEntries[0].Entry = Expand(asked.answers[j].journal!, t);
+                    if (PayOnStage(myMod, clone, t, endings[j], asked.answers[j].reward!, bm) != 0) return 1;
                 }
                 foreach (var st in new[] { AskStage, silent })
                 {
@@ -734,9 +727,8 @@ namespace FrankyCLI
                             $"{t.questScript} kmyQuest = __temp as {t.questScript}",
                             "kmyQuest.MissionComplete()",
                         });
-                // THE PAY goes onto the board's reward globals, which the card also shows (the ground board's rule: never onto
-                // the stage, or it pays twice). Absent, his MB01a's own stand (duo_reward_creds_easy).
-                // ⚠ FALSIFIED 2026-11-04 (his play of duo_delvetest_c1, plan OT-9K): a med tier here showed and paid the stage's easy 1250.
+                // THE PAY is the stage's, as everywhere (OT-9K, his plays of duo_delvetest_c1, 2026-11-04). The script's globals
+                // follow it, because MissionParent's completion message reads RewardAmountGlobalActual.
                 if ((two ? r.beats[1] : beat).reward is string tier)
                 {
                     var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{tier}");
@@ -749,7 +741,8 @@ namespace FrankyCLI
                         rp.Object.SetTo(cg.FormKey);
                     }
                     bm.PaidGlobal = cg.FormKey;
-                    Console.WriteLine($"  reward   : the board pays {cg.EditorID} (RewardAmountGlobal and its Actual)");
+                    Console.WriteLine($"  reward   : the board's globals follow {cg.EditorID} (RewardAmountGlobal and its Actual)");
+                    if (PayOnStage(myMod, clone, t, t.completeStage, tier, bm) != 0) return 1;
                 }
             }
             else
@@ -846,19 +839,25 @@ namespace FrankyCLI
                     Console.WriteLine($"  closing  : stage {t.completeStage} plays {sv} and waits for it before Stop()");
                 }
             }
-            if (beat.reward is string tier)
-            {
-                var st = clone.Stages?.FirstOrDefault(x => x.Index == t.completeStage);
-                var rds = st?.LogEntries.FirstOrDefault()?.StageCompleteDatas.SelectMany(c => c.RewardDatas).ToList();
-                if (rds == null || rds.Count != 1) { Console.WriteLine($"REFUSED: stage {t.completeStage} carries {rds?.Count ?? 0} reward entries; this tool writes exactly one."); return 1; }
-                var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{tier}");
-                var xg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_xp_{tier}");
-                if (cg == null || xg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{tier} / duo_reward_xp_{tier}."); return 1; }
-                rds[0].BonusCredits.SetTo(cg.FormKey);
-                rds[0].XpAwarded.SetTo(xg.FormKey);
-                bm.StageReward[t.completeStage] = (cg.FormKey, xg.FormKey);
-                Console.WriteLine($"  reward   : stage {t.completeStage} pays {cg.EditorID} + {xg.EditorID}");
-            }
+            return beat.reward is string tier ? PayOnStage(myMod, clone, t, t.completeStage, tier, bm) : 0;
+        }
+
+        /// <summary>
+        /// THE PAY: a tier onto an ending stage's one reward entry (QRCR, QRXP). On every kind of Delve this is what pays, and on a
+        /// board the card shows stage 100's (his plays of duo_delvetest_c1, 2026-11-04). The entry is replaced, never added,
+        /// so nothing pays twice; the verify reads it back off disk (bm.StageReward).
+        /// </summary>
+        private static int PayOnStage(StarfieldMod myMod, Quest clone, Template t, int stage, string tier, BeatsMade bm)
+        {
+            var rds = clone.Stages?.FirstOrDefault(x => x.Index == stage)?.LogEntries.FirstOrDefault()?.StageCompleteDatas.SelectMany(c => c.RewardDatas).ToList();
+            if (rds == null || rds.Count != 1) { Console.WriteLine($"REFUSED: stage {stage} carries {rds?.Count ?? 0} reward entries; this tool writes exactly one."); return 1; }
+            var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{tier}");
+            var xg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_xp_{tier}");
+            if (cg == null || xg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{tier} / duo_reward_xp_{tier}."); return 1; }
+            rds[0].BonusCredits.SetTo(cg.FormKey);
+            rds[0].XpAwarded.SetTo(xg.FormKey);
+            bm.StageReward[stage] = (cg.FormKey, xg.FormKey);
+            Console.WriteLine($"  reward   : stage {stage} pays {cg.EditorID} + {xg.EditorID}");
             return 0;
         }
 
@@ -1236,16 +1235,16 @@ namespace FrankyCLI
             }
             else
                 fail += Check("stage 0 runs on start", q.Stages.Any(s => s.Index == 0 && s.Flags.HasFlag(QuestStage.Flag.RunOnStart)).ToString(), "True");
+            foreach (var (st, (cg, xg)) in bm.StageReward)
+            {
+                var rd = q.Stages.FirstOrDefault(x => x.Index == st)?.LogEntries.FirstOrDefault()?.StageCompleteDatas.SelectMany(c => c.RewardDatas).FirstOrDefault();
+                fail += Check($"stage {st} pays the beat's tier", rd == null ? "no reward entry" : $"{rd.BonusCredits.FormKey} + {rd.XpAwarded.FormKey}", $"{cg} + {xg}");
+            }
             if (IsSlateSpace(t))
             {
                 if (r.broadcast != null)
                     fail += Check("the call starts with the quest (its scene's BeginOnQuestStart), never from stage 0's fragment",
                                   q.Scenes.Any(sc => sc.EditorID == $"{r.id}_say1_scene" && (sc.Flags?.HasFlag(Scene.Flag.BeginOnQuestStart) ?? false)).ToString(), "True");
-                foreach (var (st, (cg, xg)) in bm.StageReward)
-                {
-                    var rd = q.Stages.FirstOrDefault(x => x.Index == st)?.LogEntries.FirstOrDefault()?.StageCompleteDatas.SelectMany(c => c.RewardDatas).FirstOrDefault();
-                    fail += Check($"stage {st} pays the beat's tier", rd == null ? "no reward entry" : $"{rd.BonusCredits.FormKey} + {rd.XpAwarded.FormKey}", $"{cg} + {xg}");
-                }
                 if (bm.ClosingLine is string cl)
                 {
                     var src = File.ReadAllText(bm.PscPath);

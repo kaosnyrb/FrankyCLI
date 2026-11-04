@@ -1430,10 +1430,9 @@ namespace FrankyCLI
                 if (steps[^1].IsGroup && r.reward != null) paid.Add((r.reward, steps[^1].DoneStage));
                 if (t.questScript != null)
                 {
-                    // A board mission pays through the board (MissionComplete -> MissionParent), off the script's reward
-                    // globals, which the card also shows: so a tier goes THERE, and never onto the stage, or it pays twice.
-                    // ⚠ FALSIFIED 2026-11-04 (his play of duo_delvetest_c1, plan OT-9K): a med tier here showed and paid the stage's easy 1250.
-                    // Absent, the base's own globals stand (MB28a: duo_reward_creds_easy), as a slate Delve keeps its base's stage pay.
+                    // A board mission's tier goes on the stage like any other (below): OT-9K, proven by his plays of
+                    // duo_delvetest_c1, 2026-11-04. These globals are kept in step because MissionParent's completion
+                    // message reads RewardAmountGlobalActual; they do not pay and the card does not read them.
                     var qs = vma.Scripts.First(s => s.Name == t.questScript);
                     foreach (var (tier, _) in paid)
                     {
@@ -1445,23 +1444,11 @@ namespace FrankyCLI
                             if (rp == null) { Console.WriteLine($"REFUSED: {t.questScript} carries no {pn} to pay through."); return 1; }
                             rp.Object.SetTo(cg.FormKey);
                         }
-                        Console.WriteLine($"  reward   : the board pays {cg.EditorID} (RewardAmountGlobal and its Actual)");
+                        Console.WriteLine($"  reward   : the board's globals follow {cg.EditorID} (RewardAmountGlobal and its Actual)");
                     }
-                    paid.Clear();
                 }
                 foreach (var (tier, stage) in paid)
-                {
-                    var st = clone.Stages.First(x => x.Index == stage);
-                    var rds = st.LogEntries[0].StageCompleteDatas.SelectMany(c => c.RewardDatas).ToList();
-                    if (rds.Count != 1) { Console.WriteLine($"REFUSED: stage {st.Index} carries {rds.Count} reward entries; this tool writes exactly one."); return 1; }
-                    var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{tier}");
-                    var xg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_xp_{tier}");
-                    if (cg == null || xg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{tier} / duo_reward_xp_{tier}."); return 1; }
-                    rds[0].BonusCredits.SetTo(cg.FormKey);
-                    rds[0].XpAwarded.SetTo(xg.FormKey);
-                    bm.StageReward[st.Index] = (cg.FormKey, xg.FormKey);
-                    Console.WriteLine($"  reward   : stage {st.Index} pays {cg.EditorID} + {xg.EditorID}");
-                }
+                    if (PayOnStage(myMod, clone, t, stage, tier, bm) != 0) return 1;
                 // The offer: the line the player reads at the find, on the stage that enters the choice.
                 if (r.offer?.journal != null)
                 {
