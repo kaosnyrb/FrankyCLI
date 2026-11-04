@@ -1,0 +1,41 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_c1",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-04 08:12 \"lets do OT-9j\": the plan's one probe, a buttoned message from an activation in orbit, its answer picking the stage",
+  "_note": [
+    "CHOOSE PROBE C1 (plan OT-9J): MB104a's object and orbit, silent, with placeholder words. Not a mission; Jessica's buttons and endings are hers.",
+    "Reading it: use the container, a box with two buttons shows. Press one: the mission completes and pays, and the journal is that button's line and not the other's. Play it twice, one button each.",
+    "Any fault is the ask, not the orbit: MB104a plays on this object. Unbuilt once a real ask has played."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "MB104a's."
+  },
+  "prose": {
+    "name": "Recovery: Choose Probe over <Planet>",
+    "briefing": "Test mission. A cargo container is drifting over <Planet>. Use it and pick a button.",
+    "card": "Test contract. Use the container over <Planet> and pick a button. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Use the drifting container over <Planet>",
+      "model": "Meshes\\ships\\modules\\cargo\\smod\\smod_cargo_panoptes_degama-1000_port.nif",
+      "name": "Drifting Cargo Container",
+      "ask": {
+        "title": "Drifting Container",
+        "text": "Test box. Pick a button: each one is its own ending.",
+        "answers": [
+          { "label": "First button", "journal": "Test journal: I pressed the FIRST button at the container over <Planet>." },
+          { "label": "Second button", "journal": "Test journal: I pressed the SECOND button at the container over <Planet>." }
+        ]
+      },
+      "reward": "med"
+    }
+  ]
+}

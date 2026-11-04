@@ -688,6 +688,12 @@ namespace FrankyCLI
             /// </summary>
             public bool repair { get; set; }
             /// <summary>
+            /// beats, a plain one-beat boardspace use, OPTIONAL: activating the object shows a box with a BUTTON per answer, and
+            /// each answer is its own ending, with its own journal line (plan OT-9J, Jessica's choose at an object). The beat's
+            /// journal and say are refused beside it, because the answers own the ending. Absent = the use just completes.
+            /// </summary>
+            public BeatAsk? ask { get; set; }
+            /// <summary>
             /// beats, a use, OPTIONAL: an Explosion EditorID (own-or-master) placed at the object as the FIRST line of this
             /// beat's stage, ahead of a vanish (his 2026-10-27 on duo_MB52a_qst's burned cache: "just place it, we can always
             /// make our own fire later"; IncendiaryGrenadeExplosion drops a 4.5 m, 12 s fire hazard that burns whoever is in it).
@@ -821,6 +827,10 @@ namespace FrankyCLI
         private sealed class Pods { public int count { get; set; } public int per { get; set; } }
         private sealed class Loot { public string? list { get; set; } public int chance { get; set; } }
         private sealed class BeatMessage { public string? title { get; set; } public string? text { get; set; } }
+        /// <summary>The box of a beat's ask (OT-9J). answers is 2 to MaxAnswers, in button order.</summary>
+        private sealed class BeatAsk { public string? title { get; set; } public string? text { get; set; } public List<BeatAnswer> answers { get; set; } = new(); }
+        /// <summary>One button: its label, and the ending's journal line. No say yet: an ending's voice waits on the probe.</summary>
+        private sealed class BeatAnswer { public string? label { get; set; } public string? journal { get; set; } }
 
         private static readonly JsonSerializerOptions JsonOpts = new()
         { PropertyNameCaseInsensitive = true, ReadCommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true };

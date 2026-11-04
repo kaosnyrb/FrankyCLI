@@ -117,6 +117,16 @@ namespace FrankyCLI
                 if ((b.message != null && !two) || b.group != null || b.returnTo != null)
                     Fatal($"beat {i + 1} carries a {(b.message != null && !two ? "message" : b.group != null ? "group" : "returnTo")}; the {t.id} kind builds none"
                           + (IsBoardSpace(t) && b.message != null && b.repair ? " (its object's script shows its own start, success and fail messages)." : "."));
+                if (b.ask is BeatAsk ask)
+                {
+                    if (!PlainBoard(r, t)) Fatal($"beat {i + 1} sets ask; only a plain one-beat boardspace use is built (OT-9J), so it would be silently ignored.");
+                    if (b.journal != null || b.say != null) Fatal($"beat {i + 1} sets ask and a journal or say; each answer is its own ending and owns its journal, so these would be silently ignored.");
+                    if (string.IsNullOrWhiteSpace(ask.title) || string.IsNullOrWhiteSpace(ask.text)) Fatal($"beat {i + 1}'s ask needs a title and text.");
+                    if (ask.answers.Count < 2 || ask.answers.Count > MaxAnswers) Fatal($"beat {i + 1}'s ask has {ask.answers.Count} answers; a choice is 2 to {MaxAnswers} buttons.");
+                    foreach (var a in ask.answers)
+                        if (string.IsNullOrWhiteSpace(a.label) || string.IsNullOrWhiteSpace(a.journal)) Fatal($"beat {i + 1}'s ask has an answer with no label or no journal; a button is a label and an ending.");
+                    if (ask.answers.Select(a => a.label).Distinct().Count() != ask.answers.Count) Fatal($"beat {i + 1}'s ask has two buttons with one label.");
+                }
             }
         }
 
@@ -197,6 +207,24 @@ namespace FrankyCLI
         /// the template's arrivalStage 30.</summary>
         private const int PickupStage = 40;
         private const int DeliverObjective = 30;
+
+        /// <summary>
+        /// THE ASK (plan OT-9J, Jessica's choose at an object): the use sets AskStage, whose fragment shows the buttoned box and
+        /// sets the answer's ending. Answer 1 ends on the completing stage, the rest on the stages after it, each a COPY of it
+        /// with its own journal line (the ground choose endings' shape). 40 is free on a one-beat board: only a two-beat's
+        /// pickup takes it.
+        /// ⛔ AskCompleteOffset IS WHY THE ENDINGS CAN DIFFER. MissionComplete() always ends in SetStage(CompleteStage), so with
+        /// the shipped 100 a second ending would run stage 100 too, and write answer 1's journal over its own. So an ask's quest
+        /// sets CompleteStage to a silent stage of its own; every ending pays through MissionComplete() as a plain board does,
+        /// and only the stage the player chose ever writes to the log.
+        /// </summary>
+        private const int AskStage = 40;
+        private const int MaxAnswers = 4;
+        private const int AskCompleteOffset = 9;
+
+        /// <summary>The stages that end a one-beat board: the completing stage, then one more per further answer.</summary>
+        private static List<int> EndingStages(Beat beat, Template t)
+            => Enumerable.Range(t.completeStage, Math.Max(beat.ask?.answers.Count ?? 1, 1)).ToList();
 
         /// <summary>
         /// The space build, between the self-links and the prose (Build calls it in place of the beats' places and beats).
@@ -391,6 +419,34 @@ namespace FrankyCLI
                 e.Entry = Expand(b.journal, t);
             }
 
+            // THE ASK's stages: the box's own, an ending per answer, and the silent stage MissionComplete() will set.
+            if (beat.ask is BeatAsk asked)
+            {
+                var endings = EndingStages(beat, t);
+                int silent = t.completeStage + AskCompleteOffset;
+                foreach (var st in endings.Skip(1).Append(AskStage).Append(silent))
+                    if (clone.Stages!.Any(s => s.Index == st)) { Console.WriteLine($"REFUSED: the shell already has a stage {st}; an ask's stages must be its own."); return 1; }
+                var done = clone.Stages!.FirstOrDefault(x => x.Index == t.completeStage);
+                if (done == null || done.LogEntries.Count != 1 || done.LogEntries[0].Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest) != true)
+                { Console.WriteLine($"REFUSED: stage {t.completeStage} is not a single-entry completing stage to copy an ending from."); return 1; }
+                done.LogEntries[0].Entry = Expand(asked.answers[0].journal!, t);
+                for (int j = 1; j < endings.Count; j++)
+                {
+                    var copy = done.DeepCopy();
+                    copy.Index = (ushort)endings[j];
+                    copy.LogEntries[0].Entry = Expand(asked.answers[j].journal!, t);
+                    clone.Stages.Add(copy);
+                }
+                foreach (var st in new[] { AskStage, silent })
+                {
+                    var ns = CloneStage(clone, st);
+                    if (ns == null) return 1;
+                    clone.Stages.Add(ns);
+                }
+                SortStages(clone);
+                Console.WriteLine($"  +stage   : {AskStage}, the ask; endings {string.Join(", ", endings)}; {silent}, silent, the script's CompleteStage");
+            }
+
             // THE SECOND OBJECT (a two-beat board): a second marker from the SAME cell by its own ref type and a second
             // activator created at it, both COPIES of the first pair (a slot that works brings every field this tool does
             // not know), numbered above the cell collection as every orbit slot must be (19a). Its objective is the shell's
@@ -453,11 +509,12 @@ namespace FrankyCLI
             // board's pickup does. HideAfterUse is the PROMPT (BlockActivation), true on every use; the object itself stays.
             if (PlainBoard(r, t))
             {
-                var h = StageHook(UseScript, t.completeStage, t.entryStage,
+                int useSets = beat.ask != null ? AskStage : t.completeStage;
+                var h = StageHook(UseScript, useSets, t.entryStage,
                                   new ScriptBoolProperty { Name = "HideAfterUse", Data = true, Flags = ScriptProperty.Flag.Edited });
-                if (AttachHook(vma, clone.FormKey, (int)target.ID, h, HookEntry.FindOrCreate, true, bm, t.completeStage, t.entryStage) == Hooked.AlreadyCarries)
+                if (AttachHook(vma, clone.FormKey, (int)target.ID, h, HookEntry.FindOrCreate, true, bm, useSets, t.entryStage) == Hooked.AlreadyCarries)
                 { Console.WriteLine($"REFUSED: alias {target.ID} already carries {UseScript}."); return 1; }
-                Console.WriteLine($"  +hook    : alias {target.ID} {UseScript} sets {t.completeStage} after {t.entryStage}, its prompt gone on use, the object stays");
+                Console.WriteLine($"  +hook    : alias {target.ID} {UseScript} sets {useSets} after {t.entryStage}, its prompt gone on use, the object stays");
             }
 
             // THE HOOK: activating the object completes it (his MB01's is used from the ship; this is ours, duo_delve_use, plan
@@ -551,6 +608,37 @@ namespace FrankyCLI
                     }
                 }
 
+                // THE ASK (OT-9J): the box and its buttons, whose answer picks the ending. Show() waits for the button, so the
+                // fragment holds here and the object's hook has already hidden the prompt (duo_delve_use hides, then sets).
+                RemovePrevious(myMod.Messages, e => e == r.id + "_ask");
+                if (beat.ask is BeatAsk ask)
+                {
+                    var msgSrc = myMod.Messages.FirstOrDefault(m => m.EditorID == MessageTemplate);
+                    if (msgSrc == null) { Console.WriteLine($"REFUSED: no message template '{MessageTemplate}' in {t.mod}."); return 1; }
+                    var msg = myMod.Messages.DuplicateInAsNewRecord(msgSrc);
+                    msg.EditorID = $"{r.id}_ask";
+                    msg.Name = Expand(ask.title!, t);
+                    msg.Description = Expand(ask.text!, t);
+                    msg.OwnerQuest.SetTo(clone.FormKey);
+                    msg.MenuButtons.Clear();
+                    foreach (var a in ask.answers) msg.MenuButtons.Add(new MessageButton { Text = Expand(a.label!, t) });
+                    extraProps.Add(("Message", "AskMessage", msg.FormKey, -1));
+                    var endings = EndingStages(beat, t);
+                    var lines = new List<string> { "Int answer = AskMessage.Show()" };
+                    for (int j = 0; j < endings.Count; j++)
+                    {
+                        lines.Add(j == 0 ? "If answer == 0" : j < endings.Count - 1 ? $"ElseIf answer == {j}" : "Else");
+                        lines.Add($"    SetStage({endings[j]})");
+                    }
+                    lines.Add("EndIf");
+                    code[AskStage] = lines;
+                    foreach (var st in endings) code[st] = new() { $"SetObjectiveCompleted({slot.objective})" };
+                    var qsAsk = vma.Scripts.First(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase));
+                    if (qsAsk.Properties.Any(p => p.Name == "CompleteStage")) { Console.WriteLine($"REFUSED: {t.questScript} already sets CompleteStage on the shell."); return 1; }
+                    qsAsk.Properties.Add(new ScriptIntProperty { Name = "CompleteStage", Data = t.completeStage + AskCompleteOffset, Flags = ScriptProperty.Flag.Edited });
+                    Console.WriteLine($"  +ask     : {msg.EditorID} {msg.FormKey}  \"{msg.Name}\", {ask.answers.Count} buttons to stages {string.Join(", ", endings)}");
+                }
+
                 // THE RADIO (rung 2, his "go", 2026-10-26). The lines are the beats build's own radio scenes (MakeRadioLine),
                 // spoken by its never-placed speaker (MakeSpeaker); only where they start differs.
                 if (r.speaker != null)
@@ -626,12 +714,13 @@ namespace FrankyCLI
                 // gen_delve_beats; vanilla QF_MB_Bounty05_UC_003303A5): no activator holds MissionStateChangeGuard here, so the
                 // call BS1's deadlock forbids a REPAIR board is the only thing that pays this one.
                 if (!RepairBoard(r, t))
-                    code[t.completeStage].AddRange(new[]
-                    {
-                        "Quest __temp = Self as Quest",
-                        $"{t.questScript} kmyQuest = __temp as {t.questScript}",
-                        "kmyQuest.MissionComplete()",
-                    });
+                    foreach (var st in EndingStages(beat, t))
+                        code[st].AddRange(new[]
+                        {
+                            "Quest __temp = Self as Quest",
+                            $"{t.questScript} kmyQuest = __temp as {t.questScript}",
+                            "kmyQuest.MissionComplete()",
+                        });
                 // THE PAY goes onto the board's reward globals, which the card also shows (the ground board's rule: never onto
                 // the stage, or it pays twice). Absent, his MB01a's own stand (duo_reward_creds_easy).
                 if ((two ? r.beats[1] : beat).reward is string tier)
@@ -849,6 +938,47 @@ namespace FrankyCLI
             => string.Join(", ", AliasNames(aliases).OrderBy(x => x.id).Select(x => x.member ? $"{x.id} [{x.name}]" : $"{x.id} {x.name}"));
 
         /// <summary>
+        /// An ask, off the written plugin (OT-9J): the box and its buttons against the recipe, each ending a completing stage with
+        /// the answer's journal that pays and completes the objective, the ask's fragment reaching every ending, and
+        /// CompleteStage on a silent stage. Expected values come from the recipe, never from what the build printed.
+        /// </summary>
+        private static int VerifyAsk(IStarfieldModGetter m, IQuestGetter q, Recipe r, Template t, BeatAsk ask, BeatsMade bm, int objective)
+        {
+            int fail = 0;
+            var msg = m.Messages.FirstOrDefault(x => x.EditorID == r.id + "_ask");
+            fail += Check("the ask is a pausing box owned by this quest",
+                          msg == null ? "missing" : $"{msg.Flags} {msg.OwnerQuest.FormKey}", $"MessageBox {q.FormKey}");
+            fail += Check("its buttons are the recipe's labels, in order",
+                          string.Join(" | ", msg?.MenuButtons.Select(b => b.Text?.String) ?? Array.Empty<string?>()),
+                          string.Join(" | ", ask.answers.Select(a => Expand(a.label!, t))));
+            string src = File.ReadAllText(bm.PscPath);
+            string Body(int st) => src.Split($"Function {FragmentFunction(st)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
+            string asks = Body(AskStage);
+            var endings = EndingStages(r.beats[0], t);
+            for (int j = 0; j < endings.Count; j++)
+            {
+                int st = endings[j];
+                var le = q.Stages.FirstOrDefault(x => x.Index == st)?.LogEntries.SingleOrDefault();
+                fail += Check($"answer {j + 1}'s stage {st} completes the quest with its own journal",
+                              le == null ? "no single log entry" : $"{le.Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest)} {le.Entry?.String}",
+                              $"True {Expand(ask.answers[j].journal!, t)}");
+                string b = Body(st);
+                fail += Check($"answer {j + 1}'s stage {st} completes objective {objective} and pays once",
+                              $"{b.Contains($"SetObjectiveCompleted({objective})")} {b.Split("kmyQuest.MissionComplete()").Length - 1}", "True 1");
+                fail += Check($"the ask's fragment sets stage {st}", asks.Contains($"SetStage({st})").ToString(), "True");
+            }
+            int silent = t.completeStage + AskCompleteOffset;
+            var qs = q.VirtualMachineAdapter?.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase));
+            fail += Check($"{t.questScript}.CompleteStage is the silent stage",
+                          qs?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == "CompleteStage")?.Data.ToString() ?? "unset", silent.ToString());
+            var sl = q.Stages.FirstOrDefault(x => x.Index == silent)?.LogEntries.FirstOrDefault();
+            fail += Check($"stage {silent} exists, writes no journal, completes nothing, runs no fragment",
+                          sl == null ? "missing" : $"{string.IsNullOrEmpty(sl.Entry?.String)} {sl.Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest) == true} {Body(silent).Length}",
+                          "True False 0");
+            return fail;
+        }
+
+        /// <summary>
         /// A two-beat board's own claims, off disk: two scriptless objects, the second at its own marker, the deliver's
         /// objective on the second, the item, and the fragment lines that move it. The hooks are graded by VerifySpace's
         /// own pass over bm.Hooks; the markers by its OrbitMarkers pass.
@@ -1030,6 +1160,7 @@ namespace FrankyCLI
                     fail += Check($"the object's {UseScript} blocks its prompt on use (HideAfterUse)",
                                   uh?.Properties.OfType<IScriptBoolPropertyGetter>().FirstOrDefault(p => p.Name == "HideAfterUse")?.Data.ToString() ?? "no hook",
                                   "True");
+                    if (r.beats[0].ask is BeatAsk ask) fail += VerifyAsk(m, q, r, t, ask, bm, slot.objective);
                 }
                 if (bm.ArrivalDistance > 0)
                 {
