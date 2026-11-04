@@ -58,8 +58,11 @@ namespace FrankyCLI
                 Fatal("place.cellAt is empty; it names the alias the space cell is created at (vanilla's encounters: PlayerShip).");
             if (p.altitude is double alt && !(alt >= OrbitAltitudeBand.min && alt <= OrbitAltitudeBand.max))
                 Fatal($"place.altitude is {alt}; his settled band is {OrbitAltitudeBand.min} to {OrbitAltitudeBand.max} (past ~32 the engine discards it).");
-            if (p.second != null || p.third != null)
-                Fatal("place.second or place.third is set; a space Delve has one place, the orbit.");
+            bool rescue = RescueBoard(r, t);
+            if (rescue && p.second?.settlement == null)
+                Fatal("a rescue flies her to a city; place.second.settlement names it.");
+            if ((p.second != null && !rescue) || p.third != null)
+                Fatal("place.second or place.third is set; a space Delve has one place, the orbit (a rescue alone adds a city).");
             if (p.orbit != null)
                 Fatal("place.orbit is set; on a space template the main place IS the orbit, so there is nothing to choose.");
             if (p.who != null) Fatal("place.who is set; nobody stands in orbit.");
@@ -80,14 +83,16 @@ namespace FrankyCLI
             bool two = TwoBeatBoard(r, t);
             if (IsBoardSpace(t) && r.beats.Count == 1 && r.beats[0].type != "use")
                 Fatal($"beat 1 is a '{r.beats[0].type}'; a one-beat board is a use, his MB01a's activator.");
-            if (IsBoardSpace(t) && r.beats.Count == 2 && !two)
-                Fatal($"the beats are {string.Join(" then ", r.beats.Select(x => x.type))}; a two-beat board builds a pickup then a deliver, and nothing else yet.");
+            if (IsBoardSpace(t) && r.beats.Count == 2 && !two && !rescue)
+                Fatal($"the beats are {string.Join(" then ", r.beats.Select(x => x.type))}; a two-beat board builds a pickup then a deliver, or a use then a ride, and nothing else yet.");
             if (two && string.Equals(r.beats[0].at, r.beats[1].at, StringComparison.OrdinalIgnoreCase))
                 Fatal($"both beats are at '{r.beats[0].at}'; the two objects need two of the cell's markers.");
             if (two && string.IsNullOrWhiteSpace(r.beats[0].item))
                 Fatal("beat 1 is a pickup with no item; it names what he picks up and the deliver takes back.");
-            if (two && r.beats[0].reward != null)
-                Fatal("beat 1 carries a reward; a two-beat board pays once, from the deliver's stage.");
+            if ((two || rescue) && r.beats[0].reward != null)
+                Fatal("beat 1 carries a reward; a two-beat board pays once, from its last stage.");
+            if (rescue && r.beats[0].repair)
+                Fatal("beat 1 sets repair; a rescue's use is a plain object on our hook.");
             for (int i = 0; i < r.beats.Count; i++)
                 if (r.beats[i].repair && !(IsBoardSpace(t) && r.beats.Count == 1))
                     Fatal($"beat {i + 1} sets repair; only a ONE-beat {(IsBoardSpace(t) ? "board" : "boardspace")} use is his MB01a's repair activator, so it would be silently ignored.");
@@ -101,6 +106,7 @@ namespace FrankyCLI
                 var b = r.beats[i];
                 if (t.allows.Count > 0 && !t.allows.Contains(b.type ?? ""))
                     Fatal($"beat {i + 1} is a '{b.type}' and template '{t.id}' builds only {string.Join(", ", t.allows)}. What it cannot do: {string.Join("; ", t.cannot)}");
+                if (b.type == "ride") continue;   // its own rules, in RideBeat: a person and a city, not an object in the cell
                 if (b.PlaceIndex != 0) Fatal($"beat {i + 1} is at the {PlaceKey[Math.Max(b.PlaceIndex, 0)]}; a space Delve has one place, the orbit.");
                 if (!b.at.StartsWith("se_", StringComparison.OrdinalIgnoreCase))
                     Fatal($"beat {i + 1} is at '{b.at}'; an orbit's markers are its space cell's own (se_*), filled from the cell.");
@@ -114,8 +120,8 @@ namespace FrankyCLI
                         Fatal($"beat {i + 1}'s scenery.bounds is [{string.Join(", ", sc.bounds)}]; it is kitbash.py's WHOLE line, six numbers, each min below its max.");
                 }
                 // A two-beat board shows its own boxes: no repair script is there to show one.
-                if ((b.message != null && !two) || b.group != null || b.returnTo != null)
-                    Fatal($"beat {i + 1} carries a {(b.message != null && !two ? "message" : b.group != null ? "group" : "returnTo")}; the {t.id} kind builds none"
+                if ((b.message != null && !two && !rescue) || b.group != null || b.returnTo != null)
+                    Fatal($"beat {i + 1} carries a {(b.message != null && !two && !rescue ? "message" : b.group != null ? "group" : "returnTo")}; the {t.id} kind builds none"
                           + (IsBoardSpace(t) && b.message != null && b.repair ? " (its object's script shows its own start, success and fail messages)." : "."));
                 if (b.ask is BeatAsk ask)
                 {
@@ -194,6 +200,11 @@ namespace FrankyCLI
         private static bool TwoBeatBoard(Recipe r, Template t)
             => IsBoardSpace(t) && r.beats.Count == 2 && r.beats[0].type == "pickup" && r.beats[1].type == "deliver";
 
+        /// <summary>A board in orbit with a use then a ride (MB104a, his 2026-11-04): using the object puts a person aboard, and
+        /// a landing in a city ends it. RideBeat.Rescue.</summary>
+        private static bool RescueBoard(Recipe r, Template t)
+            => IsBoardSpace(t) && r.beats.Count == 2 && r.beats[0].type == "use" && r.beats[1].type == "ride";
+
         /// <summary>A one-beat board whose recipe says repair: his MB01a activator, which pays itself. Every other board's
         /// objects are scriptless on our hooks, and its completing stage pays (MB104a, 2026-11-03).</summary>
         private static bool RepairBoard(Recipe r, Template t)
@@ -236,7 +247,7 @@ namespace FrankyCLI
                                       IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Dictionary<string, FormKey> markers, BeatsMade bm)
         {
             var beat = r.beats[0];
-            bool two = TwoBeatBoard(r, t);
+            bool two = TwoBeatBoard(r, t), rescue = RescueBoard(r, t);
             var slot = t.beatSlots.FirstOrDefault();
             if (slot == null) { Console.WriteLine($"REFUSED: template '{t.id}' names no beat slot (the marker and the object it creates there)."); return 1; }
             var vma = clone.VirtualMachineAdapter;
@@ -402,9 +413,9 @@ namespace FrankyCLI
             { Console.WriteLine($"REFUSED: objective {slot.objective} does not target alias {target.ID}, the object."); return 1; }
             ob.DisplayText = Expand(beat.objective!, t);
             // A two-beat board's pickup journals on its own stage; the deliver's goes where a one-beat board's does.
-            if (two && (clone.Stages!.Any(s => s.Index == PickupStage) || clone.Objectives!.Any(o => o.Index == DeliverObjective)))
+            if ((two || rescue) && (clone.Stages!.Any(s => s.Index == PickupStage) || clone.Objectives!.Any(o => o.Index == DeliverObjective)))
             { Console.WriteLine($"REFUSED: the shell already has a stage {PickupStage} or objective {DeliverObjective}; a two-beat board's must be its own."); return 1; }
-            if (two)
+            if (two || rescue)
             {
                 var pickSt = CloneStage(clone, PickupStage);
                 if (pickSt == null) return 1;
@@ -412,7 +423,7 @@ namespace FrankyCLI
                 SortStages(clone);
                 Console.WriteLine($"  +stage   : {PickupStage}, the pickup");
             }
-            foreach (var (b, st) in two ? new[] { (beat, PickupStage), (r.beats[1], slot.journalStage) } : new[] { (beat, slot.journalStage) })
+            foreach (var (b, st) in two || rescue ? new[] { (beat, PickupStage), (r.beats[1], slot.journalStage) } : new[] { (beat, slot.journalStage) })
             {
                 if (b.journal == null) continue;
                 var e = clone.Stages?.FirstOrDefault(s => s.Index == st)?.LogEntries?.FirstOrDefault();
@@ -513,9 +524,9 @@ namespace FrankyCLI
 
             // A PLAIN ONE-BEAT BOARD (MB104a, 2026-11-03): our hook sets the completing stage after the accept, as a two-beat
             // board's pickup does. HideAfterUse is the PROMPT (BlockActivation), true on every use; the object itself stays.
-            if (PlainBoard(r, t))
+            if (PlainBoard(r, t) || rescue)
             {
-                int useSets = beat.ask != null ? AskStage : t.completeStage;
+                int useSets = rescue ? PickupStage : beat.ask != null ? AskStage : t.completeStage;
                 var h = StageHook(UseScript, useSets, t.entryStage,
                                   new ScriptBoolProperty { Name = "HideAfterUse", Data = true, Flags = ScriptProperty.Flag.Edited });
                 if (AttachHook(vma, clone.FormKey, (int)target.ID, h, HookEntry.FindOrCreate, true, bm, useSets, t.entryStage) == Hooked.AlreadyCarries)
@@ -596,6 +607,10 @@ namespace FrankyCLI
                         "EndIf",
                         $"SetObjectiveCompleted({DeliverObjective})",
                     };
+                }
+                else if (rescue && RideBeat.Rescue(myMod, clone, t, r, env, markers, bm, vma, ob, slot.objective, DeliverObjective, PickupStage, (int)target.ID, code, extraProps) != 0) return 1;
+                if (two || rescue)
+                {
                     RemovePrevious(myMod.Messages, e => e.StartsWith(r.id + "_msg"));
                     var msgSrc = myMod.Messages.FirstOrDefault(m => m.EditorID == MessageTemplate);
                     for (int i = 0; i < 2; i++)
@@ -687,14 +702,14 @@ namespace FrankyCLI
                     // 2026-10-26 09:38: the SetStage stack "is waiting on stack <the fragment> to finish"). So ShutdownOnCompletion
                     // stays as shipped and the fragment shuts nothing down itself.
                     // A two-beat board's pickup line plays as the item comes aboard; nothing waits on it.
-                    if (two && beat.say != null)
+                    if ((two || rescue) && beat.say != null)
                     {
                         var scene = MakeRadioLine(myMod, clone, r, n, PickupStage, beat.say, bm);
                         sayProps.Add(($"Say{n + 1}", scene.FormKey));
                         code[PickupStage].Add($"Say{n + 1}.Start()");
                         n++;
                     }
-                    var closer = two ? r.beats[1] : beat;
+                    var closer = two || rescue ? r.beats[1] : beat;
                     if (closer.say != null)
                     {
                         var scene = MakeRadioLine(myMod, clone, r, n, t.completeStage, closer.say, bm);
@@ -729,7 +744,7 @@ namespace FrankyCLI
                         });
                 // THE PAY is the stage's, as everywhere (OT-9K, his plays of duo_delvetest_c1, 2026-11-04). The script's globals
                 // follow it, because MissionParent's completion message reads RewardAmountGlobalActual.
-                if ((two ? r.beats[1] : beat).reward is string tier)
+                if ((two || rescue ? r.beats[1] : beat).reward is string tier)
                 {
                     var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{tier}");
                     if (cg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{tier}."); return 1; }
@@ -1056,7 +1071,7 @@ namespace FrankyCLI
             if (IsBoardSpace(t)) fail += CheckBoardLabel(q, r);
             if (IsBoardSpace(t))
                 // Pinned off his MB01a's census (gen_inspect qall duo_MB01a_qst, Defiant, 2026-10-26), never re-read from the shell.
-                fail += Check("quest-level scripts (the board's, kept)", string.Join(",", vma.Scripts.Select(s => s.Name.ToLowerInvariant()).OrderBy(x => x)),
+                fail += Check("quest-level scripts (the board's, kept)", string.Join(",", vma.Scripts.Select(s => s.Name.ToLowerInvariant()).Where(n => bm.Ride == null || n != "defaultpassengerquestscript").OrderBy(x => x)),
                               "defaultquestchangelocationscript,missionbountyspacescript");
             else
                 fail += Check("quest-level scripts (the driver removed, none added)", string.Join(",", vma.Scripts.Select(s => s.Name)), "");
@@ -1167,6 +1182,13 @@ namespace FrankyCLI
                                   q.FormKey.ToString());
                 else if (two)
                     fail += VerifyTwoBeatBoard(m, q, r, t, bm);
+                else if (RescueBoard(r, t))
+                {
+                    fail += VerifyRide(q, r, bm, (int)(q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.Name == "FinalLocation")?.ID ?? 0));
+                    string rideSrc = File.ReadAllText(bm.PscPath);
+                    fail += Check("rescue: she is created at the ship's passenger marker", rideSrc.Contains("HomeShipPassengerMarker.GetRef().PlaceActorAtMe(Rider)").ToString(), "True");
+                    fail += Check("rescue: she is deleted when the quest ends", rideSrc.Contains("Alias_Beat2Person.GetRef().Delete()").ToString(), "True");
+                }
                 else
                 {
                     // A plain board (MB104a): no kit, no repair messages, no attackers; our hook on the alias is graded by the
@@ -1199,7 +1221,9 @@ namespace FrankyCLI
                 var says = (vma.Script?.Properties ?? new List<IScriptPropertyGetter>()).OfType<IScriptObjectPropertyGetter>().Where(p => p.Name.StartsWith("Say")).ToList();
                 fail += Check("each Say property names one of this quest's scenes",
                               says.Count(p => q.Scenes.Any(s => s.FormKey == p.Object.FormKey)).ToString(), says.Count.ToString());
-                fail += Check("one radio scene per spoken line", q.Scenes.Count.ToString(), says.Count.ToString());
+                // A rescue's talk adds her greeting and a scene per question beside the radio lines.
+                int talkScenes = q.Scenes.Count(s => s.EditorID?.Contains("_talk") == true);
+                fail += Check("one radio scene per spoken line", (q.Scenes.Count - talkScenes).ToString(), says.Count.ToString());
                 if (bm.ClosingLine is string cl)
                 {
                     string fin = File.ReadAllText(bm.PscPath).Split($"Function {FragmentFunction(t.completeStage)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";

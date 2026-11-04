@@ -2,6 +2,7 @@ using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace FrankyCLI
@@ -47,7 +48,17 @@ namespace FrankyCLI
                                              Action<string> Fatal, Action<string> Warn)
             {
                 string at = $"beat {i + 1} (ride)";
-                if (!IsBoard(t)) Fatal($"{at} is on a {t.kind} template; a ride is proven on the ground board only.");
+                if (!IsBoard(t) && !IsBoardSpace(t)) Fatal($"{at} is on a {t.kind} template; a ride is built on the two boards only.");
+                if (IsBoardSpace(t))
+                {
+                    // The rescue: nobody stands in orbit, so the ride carries her own person, and the talk's rules are hers.
+                    if (b.rider != null) Fatal($"{at} sets rider; in orbit nobody is met first, so the ride carries its own person.");
+                    if (b.place != "second") Fatal($"{at} needs \"place\": \"second\", the city she is carried to.");
+                    if (!string.Equals(b.at, "AutofillGeneric01", StringComparison.OrdinalIgnoreCase)) Fatal($"{at} is at '{b.at}'; the one spot every city lists is AutofillGeneric01.");
+                    if (b.exchanges?.Any(x => x.perk != null) == true) Fatal($"{at} has a perk on an exchange; a rescue's talk resolves none, so it would be silently ignored.");
+                    BeatKinds["talk"].GradeBeat(b, i, t, env, Fatal, Warn);
+                    return;
+                }
                 if (b.model != null || b.name != null || b.replace || b.message != null || b.returnTo != null || b.group != null || b.choose != null || b.person != null)
                     Fatal($"{at} sets model, name, replace, message, returnTo, group, choose or person; a ride has none of them (the rider is its person), so they would be silently ignored.");
                 if (b.PlaceIndex == 0) Fatal($"{at} is at the main place; a ride carries her somewhere, so it needs \"place\": \"second\" or \"third\".");
@@ -65,20 +76,18 @@ namespace FrankyCLI
                 return 0;
             }
 
-            /// <summary>A marker at the destination, the Passengers collection in vanilla's shape, and the stock script on the quest.</summary>
-            internal override int Slot(BeatsBuild build, int i)
+            /// <summary>The Passengers collection: empty, wearing vanilla's package. Null, having said why, if the source carries a fill.</summary>
+            private static QuestCollectionAlias? PassengersAlias(IQuestCollectionAliasGetter src, uint id)
             {
-                uint mid = NextAliasId(build.clone);
-                var mk = build.markerPattern.DeepCopy(); mk.ID = mid; mk.Name = "DelveBeat" + (i + 1) + "Destination";
-                build.clone.Aliases.Add(mk);
-                uint cid = NextAliasId(build.clone);
-                var col = EmptyCollection(build.inputs.WaveSrc!, cid, "Passengers");
-                if (col == null) { Console.WriteLine("REFUSED: the source collection carries a fill; the passengers must start empty."); return 1; }
+                var col = EmptyCollection(src, id, "Passengers");
+                if (col == null) { Console.WriteLine("REFUSED: the source collection carries a fill; the passengers must start empty."); return null; }
                 col.Collection[0].ReferenceAlias!.PackageData.Add(new FormLink<IPackageGetter>(PassengerPackage));
-                build.clone.Aliases.Add(col);
-                build.slotOf[i] = new BeatSlot { markerAlias = (int)mid, activatorAlias = -1, journalStage = build.beatStage[i] };
-                build.spawnedStage[i] = SpawnedStageBase + i;   // a plain stage the script sets when the ship arrives
+                return col;
+            }
 
+            /// <summary>The stock script, as RQ_OE_TransportPerson_02 carries it, with the quest's own aliases and stages.</summary>
+            private static ScriptEntry PassengerEntry(FormKey quest, int col, int place, int marker, int arrived, int off)
+            {
                 var sc = new ScriptEntry { Name = PassengerScript };
                 ScriptObjectProperty Link(string name, FormKey key, int alias = -1)
                 {
@@ -88,13 +97,30 @@ namespace FrankyCLI
                     return p;
                 }
                 foreach (var (name, id) in PassengerForms) sc.Properties.Add(Link(name, Sf(id)));
-                sc.Properties.Add(Link("Alias_Passengers", build.clone.FormKey, (int)cid));
-                sc.Properties.Add(Link("Alias_PassengerDestination", build.clone.FormKey, PlaceAliasOf(build.t, build.r.beats[i].PlaceIndex, build.made.ThirdPlaceAlias)));
-                sc.Properties.Add(Link("Alias_PassengerDestinationMarker", build.clone.FormKey, (int)mid));
-                sc.Properties.Add(new ScriptIntProperty { Name = "StageToSetOnPlayerShipArrivesAtDestination", Data = build.spawnedStage[i], Flags = ScriptProperty.Flag.Edited });
-                sc.Properties.Add(new ScriptIntProperty { Name = "StageToSetWhenAllPassengersDisembark", Data = build.beatStage[i], Flags = ScriptProperty.Flag.Edited });
+                sc.Properties.Add(Link("Alias_Passengers", quest, col));
+                sc.Properties.Add(Link("Alias_PassengerDestination", quest, place));
+                sc.Properties.Add(Link("Alias_PassengerDestinationMarker", quest, marker));
+                sc.Properties.Add(new ScriptIntProperty { Name = "StageToSetOnPlayerShipArrivesAtDestination", Data = arrived, Flags = ScriptProperty.Flag.Edited });
+                sc.Properties.Add(new ScriptIntProperty { Name = "StageToSetWhenAllPassengersDisembark", Data = off, Flags = ScriptProperty.Flag.Edited });
                 sc.Properties.Add(new ScriptBoolProperty { Name = "ShowTraces", Data = true, Flags = ScriptProperty.Flag.Edited });
-                build.vma.Scripts.Add(sc);
+                return sc;
+            }
+
+            /// <summary>A marker at the destination, the Passengers collection in vanilla's shape, and the stock script on the quest.</summary>
+            internal override int Slot(BeatsBuild build, int i)
+            {
+                uint mid = NextAliasId(build.clone);
+                var mk = build.markerPattern.DeepCopy(); mk.ID = mid; mk.Name = "DelveBeat" + (i + 1) + "Destination";
+                build.clone.Aliases.Add(mk);
+                uint cid = NextAliasId(build.clone);
+                var col = PassengersAlias(build.inputs.WaveSrc!, cid);
+                if (col == null) return 1;
+                build.clone.Aliases.Add(col);
+                build.slotOf[i] = new BeatSlot { markerAlias = (int)mid, activatorAlias = -1, journalStage = build.beatStage[i] };
+                build.spawnedStage[i] = SpawnedStageBase + i;   // a plain stage the script sets when the ship arrives
+
+                build.vma.Scripts.Add(PassengerEntry(build.clone.FormKey, (int)cid, PlaceAliasOf(build.t, build.r.beats[i].PlaceIndex, build.made.ThirdPlaceAlias),
+                                                     (int)mid, build.spawnedStage[i], build.beatStage[i]));
                 build.bm.Ride = (i, (int)cid, (int)mid, build.spawnedStage[i], build.beatStage[i]);
                 Console.WriteLine($"  +slot    : beat {i + 1} (ride) -- destination marker alias {mid}, Passengers collection {cid}, {PassengerScript}: arrives {build.spawnedStage[i]}, disembarked {build.beatStage[i]}");
                 return 0;
@@ -115,6 +141,114 @@ namespace FrankyCLI
                 build.Add(stage, $"{script}.AddPassenger({pa})");
                 build.Add(BoardFailStage, $"{script}.RemovePassengerActor({pa}.GetActorRef())");
                 Console.WriteLine($"  +ride    : beat {rider}'s person boards on stage {stage}; a turn-down ({BoardFailStage}) takes her off the ship");
+            }
+
+            /// <summary>The silent stage her first question sets: it retires her greeting and that question, and gates nothing.</summary>
+            private const int SpokenStage = 45;
+            /// <summary>The plain stage the script sets as the ship lands (the ground ride's is 900 + its beat).</summary>
+            private const int RescueArrivedStage = SpawnedStageBase + 1;
+
+            /// <summary>
+            /// THE RESCUE (MB104a, his 2026-11-04 "MB104a should have you rescue her"): a boardspace use, then a ride with its
+            /// own person. Using the object creates her at the ship's own passenger marker, vanilla's way
+            /// (SQ_PlayerShipScript.DebugAddPassengers), and she is a passenger from that moment: the objective is already the
+            /// city, and her talk is there if he walks back to her, gated on nothing he must do, so a player who never speaks to
+            /// her still finishes (his console rule, 10-30). Her first question sets a silent stage only, because BuildTalk's
+            /// closing reply must set something; nothing waits on it.
+            /// The city is new to this shell, which has no second place: a location alias pinned as the ground build pins one,
+            /// and the destination marker filled inside it, both as played on duo_delvetest_r1.
+            /// What it removes when the quest ends: she is a created ref no alias will clean up, so the completing stage flags
+            /// her for deletion and a turn-down takes her off the ship and deletes her.
+            /// </summary>
+            internal static int Rescue(StarfieldMod myMod, Quest clone, Template t, Recipe r,
+                                       IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Dictionary<string, FormKey> markers, BeatsMade bm,
+                                       QuestAdapter vma, QuestObjective ob, int useObjective, int rideObjective, int pickupStage, int objectAlias,
+                                       SortedDictionary<int, List<string>> code, List<(string type, string pname, FormKey key, int alias)> extraProps)
+            {
+                var ride = r.beats[1];
+                foreach (var st in new[] { SpokenStage, RescueArrivedStage })
+                {
+                    if (clone.Stages!.Any(s => s.Index == st)) { Console.WriteLine($"REFUSED: the shell already has a stage {st}; a rescue's must be its own."); return 1; }
+                    var ns = CloneStage(clone, st);
+                    if (ns == null) return 1;
+                    clone.Stages.Add(ns);
+                }
+                SortStages(clone);
+
+                var city = r.place.second!.settlement!;
+                var loc = new QuestLocationAlias { ID = NextAliasId(clone), Name = "FinalLocation" };
+                clone.Aliases!.Add(loc);
+                if (MakePlaceSettlement(clone, (int)loc.ID, city) != 0) return 1;
+                var mk = new QuestReferenceAlias { ID = NextAliasId(clone), Name = "DelveBeat2Destination", Flags = QuestReferenceAlias.Flag.AllowReserved };
+                var inCity = new LocationAliasReference { AliasID = (int)loc.ID };
+                inCity.RefType.SetTo(markers[ride.at]);
+                mk.Location = inCity;
+                clone.Aliases.Add(mk);
+                var pa = new QuestReferenceAlias { ID = NextAliasId(clone), Name = "DelveBeat2Person", Flags = QuestReferenceAlias.Flag.Optional };
+                clone.Aliases.Add(pa);
+
+                var wave = WaveCollectionOf(env.LoadOrder[0].Mod?.Quests.FirstOrDefault(q => q.FormKey.ID == WaveQuestId));
+                if (wave == null) { Console.WriteLine("REFUSED: a rescue copies its Passengers collection from UC08_AB_AnomalyBattle, and it is not in the load."); return 1; }
+                uint cid = NextAliasId(clone);
+                var col = PassengersAlias(wave, cid);
+                if (col == null) return 1;
+                clone.Aliases.Add(col);
+
+                var p = ride.person!;
+                var tmpl = OwnOrMaster<INpcGetter>(myMod, env, p.template!);
+                if (tmpl == null) { Console.WriteLine($"REFUSED: NPC '{p.template}' is not in {t.mod} or one of its masters."); return 1; }
+                var vt = OwnOrMaster<IVoiceTypeGetter>(myMod, env, p.voice!);
+                if (vt == null) { Console.WriteLine($"REFUSED: VoiceType '{p.voice}' is not in {t.mod} or one of its masters."); return 1; }
+                FormKey? outfit = null;
+                if (!string.IsNullOrWhiteSpace(p.outfit))
+                {
+                    var o = OwnOrMaster<IOutfitGetter>(myMod, env, p.outfit!);
+                    if (o == null) { Console.WriteLine($"REFUSED: Outfit '{p.outfit}' is not in {t.mod} or one of its masters."); return 1; }
+                    outfit = o.FormKey;
+                }
+                RemovePrevious(myMod.Npcs, e => e.StartsWith(r.id + "_person"));
+                var npc = ClonePerson(myMod, r, 1, tmpl, vt.FormKey, outfit);
+                bm.People[1] = (npc.FormKey, p.name!);
+                Console.WriteLine($"  +npc     : {npc.EditorID} {npc.FormKey}  \"{p.name}\"  (clone of {tmpl.EditorID})");
+
+                // The talk's own build, with the use as its opener: the person's scenes open once she exists.
+                var steps = new List<Step> { new Step { Beats = { 0 }, DoneStage = pickupStage }, new Step { Beats = { 1 }, DoneStage = t.completeStage } };
+                TalkBeat.BuildTalk(myMod, clone, r, 1, steps, new Dictionary<int, int> { [1] = SpokenStage }, t.entryStage, (int)pa.ID, npc.FormKey,
+                                   npc.Flags.HasFlag(Npc.Flag.Female), bm, new Dictionary<(int beat, int ex), FormKey>());
+                clone.Data!.Priority = TalkQuestPriority;
+
+                vma.Scripts.Add(PassengerEntry(clone.FormKey, (int)cid, (int)loc.ID, (int)mk.ID, RescueArrivedStage, t.completeStage));
+                bm.Ride = (1, (int)cid, (int)mk.ID, RescueArrivedStage, t.completeStage);
+
+                var ob2 = ob.DeepCopy();
+                ob2.Index = (ushort)rideObjective;
+                foreach (var x in ob2.Targets.Where(x => x.AliasID == objectAlias)) x.AliasID = (int)mk.ID;
+                ob2.DisplayText = Expand(ride.objective!, t);
+                clone.Objectives!.Insert(clone.Objectives.IndexOf(ob) + 1, ob2);
+
+                extraProps.Add(("ReferenceAlias", "Alias_Beat2Person", clone.FormKey, (int)pa.ID));
+                extraProps.Add(("SQ_PlayerShipScript", "SQ_PlayerShip", Sf(0x0174A2), -1));
+                extraProps.Add(("ActorBase", "Rider", npc.FormKey, -1));
+                string script = $"((Self as Quest) as {PassengerScript})";
+                code[pickupStage] = new()
+                {
+                    $"SetObjectiveCompleted({useObjective})",
+                    "Alias_Beat2Person.ForceRefTo(SQ_PlayerShip.HomeShipPassengerMarker.GetRef().PlaceActorAtMe(Rider))",
+                    $"{script}.AddPassenger(Alias_Beat2Person)",
+                    $"SetObjectiveDisplayed({rideObjective})",
+                };
+                code[t.completeStage] = new() { "Alias_Beat2Person.GetRef().Delete()", $"SetObjectiveCompleted({rideObjective})" };
+                code[BoardFailStage] = new()
+                {
+                    "Actor aboard = Alias_Beat2Person.GetActorRef()",
+                    "If aboard",
+                    $"    {script}.RemovePassengerActor(aboard)",
+                    "    aboard.Disable()",
+                    "    aboard.Delete()",
+                    "EndIf",
+                };
+                Console.WriteLine($"  +rescue  : the use sets {pickupStage}: she is created aboard, a passenger; {city} (alias {loc.ID}), destination alias {mk.ID}, person alias {pa.ID}, Passengers {cid}; arrives {RescueArrivedStage}, off {t.completeStage}");
+                return 0;
             }
         }
     }

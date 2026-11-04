@@ -1,0 +1,65 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_r2",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-04 15:51 \"yeah go\" on the orbit rescue: MB104a's object and orbit, Jessica's words from her letter 2026-11-04-jessica-eliza-mb104a-is-a-rescue.md",
+  "_note": [
+    "RESCUE PROBE R2 (plan OT-9H): a use in orbit, then a ride with its own person. Her words are Jessica's; the real one is MB104a once this plays.",
+    "Reading it: fly to the container and use it. The box shows, she is aboard, the objective is the city. Walk back: a greeting and three questions, none required. Land at Akila City: she gets off, it completes and pays.",
+    "Also try: land without ever talking to her (it should still complete). Any fault at the start is the new city aliases on the orbit quest: the object and orbit play on MB104a."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "MB104a's.",
+    "second": { "settlement": "Akila City" }
+  },
+  "prose": {
+    "name": "Recovery: Rescue Probe over <Planet>",
+    "briefing": "Test mission. A cargo container is drifting over <Planet>. Open it and fly whoever is inside to <SecondPlace>.",
+    "card": "Test contract. Container lost over <Planet>, four days adrift. Find it and bring it in."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Open the drifting container over <Planet>",
+      "model": "Meshes\\ships\\modules\\cargo\\smod\\smod_cargo_panoptes_degama-1000_port.nif",
+      "name": "Lost Cargo Container",
+      "message": {
+        "title": "Lost Cargo Container",
+        "text": "The lock is on the outside. You open it, and she climbs straight across into your airlock."
+      }
+    },
+    {
+      "type": "ride",
+      "at": "AutofillGeneric01",
+      "place": "second",
+      "objective": "Fly her to <SecondPlace>",
+      "journal": "The container over <Planet> wasn't machine parts. A woman had spent four days in it. I took her aboard and flew her to <SecondPlace>.",
+      "reward": "med",
+      "person": {
+        "name": "Rescued Stowaway",
+        "template": "UC_NA_MASTWorkerFemale03",
+        "voice": "GenericFemale01",
+        "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
+      },
+      "greeting": ["I've never been so glad to see the inside of someone else's ship. I'll stay out of your way. Where do you want me?"],
+      "exchanges": [
+        { "prompt": "Sit anywhere. I'll get you to a city.", "reply": ["Anywhere's fine. Thank you."] },
+        { "prompt": "How did you end up in a cargo box?", "reply": ["I needed a way off that rock, and the box was going. It seemed like a good idea for about an hour."] },
+        { "prompt": "Four days. Are you hurt?", "reply": ["Hungry. Stiff. Very tired of the dark. Nothing a city won't fix."] }
+      ]
+    }
+  ],
+  "speaker": {
+    "name": "Voice in the Container",
+    "voice": "GenericFemale01",
+    "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
+  },
+  "broadcast": [
+    "Is that a ship? Please be a ship. I've been in this box four days and the air scrubber's started making a noise I don't like, so if you're here for the container, I'm in it."
+  ]
+}

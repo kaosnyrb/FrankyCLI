@@ -220,7 +220,7 @@ namespace FrankyCLI
                     Fatal($"beat {i + 1} is a {b.type} with no item: the player gets a thing with no name.");
                 if (!Carries(b) && b.item != null)
                     Fatal($"beat {i + 1} names an item and is not a pickup or a recover, so it would be silently ignored.");
-                if (b.type != "talk" && (b.greeting != null || b.exchanges != null))
+                if (b.type is not ("talk" or "ride") && (b.greeting != null || b.exchanges != null))
                     Fatal($"beat {i + 1} has a greeting or exchanges and is a {b.type}; only a talk beat has a conversation, so they would be silently ignored.");
                 if (b.returnTo is int back)
                 {
@@ -393,7 +393,7 @@ namespace FrankyCLI
                 }
             }
             for (int i = 0; i < r.beats.Count; i++)
-                if (r.beats[i].choose == null && r.beats[i].person != null && r.beats[i].type != "talk")
+                if (r.beats[i].choose == null && r.beats[i].person != null && r.beats[i].type is not ("talk" or "ride"))
                     Fatal($"beat {i + 1} sets person and is not a choose ending or a talk, so it would be silently ignored.");
             // A reward tier is read on an ENDING: every choose ending, or the beat that is the whole last step (it sets
             // the completing stage, whose pay this replaces). Anywhere else the stage it would pay on completes nothing.
@@ -445,7 +445,7 @@ namespace FrankyCLI
                 }
             }
             // The people the approach places at the endings; a talk beat's person is created by its alias instead.
-            int personCount = r.beats.Count(b => b.person != null && b.type != "talk");
+            int personCount = r.beats.Count(b => b.person != null && b.type is not ("talk" or "ride"));
             int occBase = OccupantBase(t), firstBeat = t.entryStage + 10;
             if (personCount > 0)
             {
@@ -1743,25 +1743,7 @@ namespace FrankyCLI
                 foreach (var (b, pr) in inputs.Persons)
                 {
                     var pp = r.beats[b].person!;
-                    var npc = Retrograde.Utils.NPCTools.CloneNPC(myMod, pr.tmpl.DeepCopy());
-                    npc.EditorID = $"{r.id}_person{b + 1}";
-                    npc.Name = pp.name!;
-                    npc.Voice.SetTo(pr.voice ?? pr.tmpl.Voice.FormKey);
-                    npc.Aggression = Npc.AggressionType.Unaggressive;
-                    npc.Confidence = Npc.ConfidenceType.Average;
-                    // ⛔ Not a New Atlantis MAST worker (his 2026-10-19, off "default ones with different voice actors and its
-                    // jarring"). The clone copied the template's factions (NewAtlantisFaction, NewAtlantisMASTWorkerFaction,
-                    // CrimeFactionUC), and vanilla's ambient greetings gate on faction, so a vanilla actor greeted him on every
-                    // planet, and harming him was a UC crime anywhere. He belongs to no faction and no crime faction.
-                    npc.Factions.Clear();
-                    npc.CrimeFaction.Clear();
-                    if (pr.outfit is FormKey ofk) npc.DefaultOutfit.SetTo(ofk);
-                    // ESSENTIAL (his 2026-11-02, off MB95a's pods landing round Pip Arden: "important npcs should be marked as
-                    // quest/essitinal so they don't die"). A named person is someone the Delve still needs; a wave, a pod crew
-                    // or a stray shot must not end the mission. On the record, which is this Delve's own clone and placed
-                    // nowhere else. Their nameless company is not.
-                    npc.Flags |= Npc.Flag.Essential;
-                    myMod.Npcs.Add(npc);
+                    var npc = ClonePerson(myMod, r, b, pr.tmpl, pr.voice, pr.outfit);
                     npcOf[b] = npc.FormKey;
                     bm.People[b] = (npc.FormKey, pp.name!);
                     Console.WriteLine($"  +npc     : {npc.EditorID} {npc.FormKey}  \"{pp.name}\"  (clone of {pr.tmpl.EditorID})" + (pp.outfit != null ? $"  outfit {pp.outfit}" : ""));
@@ -2390,6 +2372,35 @@ namespace FrankyCLI
         }
 
         /// <summary>
+        /// A named person's NPC, cloned from a friendly vanilla template. NPCTools.CloneNPC copies the body field by field and
+        /// NOT the name or the voice, so both are written here; unaggressive, average confidence, dressed from the recipe (his
+        /// 2026-10-08 asks).
+        /// ⛔ Not a New Atlantis MAST worker (his 2026-10-19, off "default ones with different voice actors and its jarring").
+        /// The clone copied the template's factions (NewAtlantisFaction, NewAtlantisMASTWorkerFaction, CrimeFactionUC), and
+        /// vanilla's ambient greetings gate on faction, so a vanilla actor greeted him on every planet, and harming him was a UC
+        /// crime anywhere. He belongs to no faction and no crime faction.
+        /// ESSENTIAL (his 2026-11-02, off MB95a's pods landing round Pip Arden: "important npcs should be marked as
+        /// quest/essitinal so they don't die"). A named person is someone the Delve still needs; a wave, a pod crew or a stray
+        /// shot must not end the mission. On the record, which is this Delve's own clone and placed nowhere else. Their
+        /// nameless company is not.
+        /// </summary>
+        private static Npc ClonePerson(StarfieldMod myMod, Recipe r, int b, INpcGetter tmpl, FormKey? voice, FormKey? outfit)
+        {
+            var npc = Retrograde.Utils.NPCTools.CloneNPC(myMod, tmpl.DeepCopy());
+            npc.EditorID = $"{r.id}_person{b + 1}";
+            npc.Name = r.beats[b].person!.name!;
+            npc.Voice.SetTo(voice ?? tmpl.Voice.FormKey);
+            npc.Aggression = Npc.AggressionType.Unaggressive;
+            npc.Confidence = Npc.ConfidenceType.Average;
+            npc.Factions.Clear();
+            npc.CrimeFaction.Clear();
+            if (outfit is FormKey ofk) npc.DefaultOutfit.SetTo(ofk);
+            npc.Flags |= Npc.Flag.Essential;
+            myMod.Npcs.Add(npc);
+            return npc;
+        }
+
+        /// <summary>
         /// Put each spoken line's audio where the game looks for it: Sound\Voice\&lt;plugin&gt;\&lt;voice type&gt;\
         /// &lt;topic id, 8 hex&gt;.wem. From the cache when the same words in the same voice exist, else generated
         /// (ElevenLabs, then Wwise) and cached. The previous build's files go first, by its manifest.
@@ -2549,6 +2560,27 @@ namespace FrankyCLI
         }
 
         /// <summary>Read the written plugin back OFF DISK and grade every claim the beats build made.</summary>
+        /// <summary>A ride, off disk: the stock script's stages and places, the package on Passengers, her boarding from a fragment.</summary>
+        private static int VerifyRide(IQuestGetter q, Recipe r, BeatsMade bm, int place)
+        {
+            var (rideBeat, rideCol, rideMarker, rideArrived, rideDone) = bm.Ride!.Value;
+            int fail = 0;
+            var ps = q.VirtualMachineAdapter!.Scripts.FirstOrDefault(s => s.Name == "DefaultPassengerQuestScript");
+            string StageProp(string n) => ps?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == n)?.Data.ToString() ?? "missing";
+            string AliasProp(string n) => ps?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == n)?.Alias.ToString() ?? "missing";
+            fail += Check("ride: the ship arriving sets the arrival stage", StageProp("StageToSetOnPlayerShipArrivesAtDestination"), rideArrived.ToString());
+            fail += Check("ride: everyone off sets the beat's stage", StageProp("StageToSetWhenAllPassengersDisembark"), rideDone.ToString());
+            fail += Check("ride: Passengers is the collection", AliasProp("Alias_Passengers"), rideCol.ToString());
+            fail += Check("ride: the destination is the beat's place", AliasProp("Alias_PassengerDestination"), place.ToString());
+            fail += Check("ride: the marker is the beat's marker", AliasProp("Alias_PassengerDestinationMarker"), rideMarker.ToString());
+            fail += Check("ride: the arrival stage exists", q.Stages.Any(s => s.Index == rideArrived).ToString(), "True");
+            var pc = q.Aliases.OfType<IQuestCollectionAliasGetter>().SelectMany(c => c.Collection).Select(m => m.ReferenceAlias).FirstOrDefault(a => a?.ID == (uint)rideCol);
+            fail += Check("ride: Passengers wears DefaultPassengerPackage", pc == null ? "missing" : string.Join(",", pc.PackageData.Select(p => p.FormKey)), "1D302B:Starfield.esm");
+            string who = r.beats[rideBeat].rider is int rider ? $"Alias_Beat{rider}Person" : $"Alias_Beat{rideBeat + 1}Person";
+            fail += Check("ride: she boards from a fragment", File.ReadAllText(bm.PscPath).Contains($".AddPassenger({who})").ToString(), "True");
+            return fail;
+        }
+
         private static int VerifyBeats(string modFile, Mutagen.Bethesda.Plugins.Binary.Parameters.BinaryReadParameters readParams,
                                        Recipe r, Template t, BeatsMade bm, string mastersBefore)
         {
@@ -2995,22 +3027,7 @@ namespace FrankyCLI
                               pn == null ? "missing" : $"{pn.Factions.Count} faction(s), crime {(pn.CrimeFaction.IsNull ? "none" : pn.CrimeFaction.FormKey.ToString())}",
                               "0 faction(s), crime none");
             }
-            // A ride: the stock script's stages and places, the package on the Passengers collection, her boarding, read back.
-            if (bm.Ride is (int rideBeat, int rideCol, int rideMarker, int rideArrived, int rideDone))
-            {
-                var ps = vma.Scripts.FirstOrDefault(s => s.Name == "DefaultPassengerQuestScript");
-                string StageProp(string n) => ps?.Properties.OfType<ScriptIntProperty>().FirstOrDefault(p => p.Name == n)?.Data.ToString() ?? "missing";
-                string AliasProp(string n) => ps?.Properties.OfType<ScriptObjectProperty>().FirstOrDefault(p => p.Name == n)?.Alias.ToString() ?? "missing";
-                fail += Check("ride: the ship arriving sets the arrival stage", StageProp("StageToSetOnPlayerShipArrivesAtDestination"), rideArrived.ToString());
-                fail += Check("ride: everyone off sets the beat's stage", StageProp("StageToSetWhenAllPassengersDisembark"), rideDone.ToString());
-                fail += Check("ride: Passengers is the collection", AliasProp("Alias_Passengers"), rideCol.ToString());
-                fail += Check("ride: the destination is the beat's place", AliasProp("Alias_PassengerDestination"), PlaceAliasOf(t, r.beats[rideBeat].PlaceIndex, -1).ToString());
-                fail += Check("ride: the marker is the beat's marker", AliasProp("Alias_PassengerDestinationMarker"), rideMarker.ToString());
-                fail += Check("ride: the arrival stage exists", q.Stages.Any(s => s.Index == rideArrived).ToString(), "True");
-                var pc = q.Aliases.OfType<IQuestCollectionAliasGetter>().SelectMany(c => c.Collection).Select(m => m.ReferenceAlias).FirstOrDefault(a => a?.ID == (uint)rideCol);
-                fail += Check("ride: Passengers wears DefaultPassengerPackage", pc == null ? "missing" : string.Join(",", pc.PackageData.Select(p => p.FormKey)), "1D302B:Starfield.esm");
-                fail += Check("ride: she boards from a fragment", File.ReadAllText(bm.PscPath).Contains(".AddPassenger(Alias_Beat" + r.beats[rideBeat].rider + "Person)").ToString(), "True");
-            }
+            if (bm.Ride is (int groundRide, _, _, _, _)) fail += VerifyRide(q, r, bm, PlaceAliasOf(t, r.beats[groundRide].PlaceIndex, -1));
 
             // Walk-up lines: vanilla's Hello shape, read back.
             if (bm.Hellos.Count > 0)

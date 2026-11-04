@@ -146,7 +146,7 @@ namespace FrankyCLI
             /// does not re-open with the ask); the side questions are not, so they outlive the completion.
             /// The person's lines are voiced by HIS voice (TalkLines), the player's are silent (WEMFile 0, as in vanilla).
             /// </summary>
-            private static void BuildTalk(StarfieldMod myMod, Quest clone, Recipe r, int b, List<Step> steps,
+            internal static void BuildTalk(StarfieldMod myMod, Quest clone, Recipe r, int b, List<Step> steps,
                                           Dictionary<int, int> beatStage, int entryStage, int personAlias, FormKey npc, bool female, BeatsMade bm,
                                           Dictionary<(int beat, int ex), FormKey> talkPerks)
             {

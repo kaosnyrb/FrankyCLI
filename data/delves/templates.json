@@ -216,7 +216,8 @@
       "allows": [
         "use",
         "pickup",
-        "deliver"
+        "deliver",
+        "ride"
       ],
       "carriesItem": false,
       "placeAlias": 2,
@@ -236,7 +237,8 @@
       "_beatSlots": "SpawnMarker01 (12, from the space cell by its ref type) and PrimaryRef (3, created at 12): objective 20's target. Objective 10 (\"Go to any planet in the <Alias=TargetSystemLocation> system\") is his MB01a's text, kept.",
       "tokens": {
         "Planet": "TargetPlanetLocation",
-        "System": "TargetSystemLocation"
+        "System": "TargetSystemLocation",
+        "SecondPlace": "FinalLocation"
       },
       "_tokens": "<Planet> is the orbit alias; his read, 2026-10-26: it prints the body's name (\"Jemison\"), unconfirmed in game.",
       "cannot": [
