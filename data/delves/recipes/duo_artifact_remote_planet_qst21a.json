@@ -68,6 +68,7 @@
     },
     {
       "type": "deliver",
+      "reward": "easy",
       "at": "RECenterLocRef",
       "objective": "Leave the canister at the courier beacon",
       "journal": "I got the clinic's vaccine cultures out of the <Place> past the people who jumped their courier, and left them at the courier beacon for collection.",

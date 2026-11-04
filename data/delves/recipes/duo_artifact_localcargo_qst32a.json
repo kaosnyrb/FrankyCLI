@@ -115,6 +115,7 @@
     },
     {
       "type": "talk",
+      "reward": "easy",
       "place": "second",
       "at": "RECenterLocRef",
       "objective": "Deliver the package at the <SecondPlace>",

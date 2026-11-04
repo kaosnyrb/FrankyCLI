@@ -2,6 +2,7 @@
   "schema": 2,
   "id": "duo_MB53a_qst",
   "template": "board",
+  "reward": "easy",
   "deal": "duo_MB_MissionNode_Assault",
   "_deal": "Assault, beside 45a, 46a and 52a: the classic Sabotage families (MB19, MB20) deal from Assault. His 2026-10-28 \"promote 53a to Assult\"; moved by gen_delve move, never a rebuild.",
   "author": "jessica",

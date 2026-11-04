@@ -68,6 +68,7 @@
     },
     {
       "type": "deliver",
+      "reward": "easy",
       "at": "RECenterLocRef",
       "objective": "Take the samples to the drop beacon",
       "journal": "I got the crew's core samples out of the <Place> through the attack and left them at their drop beacon for pickup.",

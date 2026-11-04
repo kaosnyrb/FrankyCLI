@@ -335,6 +335,9 @@ namespace FrankyCLI
             /// A new optional field, so schema stays 1. His play of duo_delve07, 2026-10-08.
             /// </summary>
             public string? recap { get; set; }
+            /// <summary>The pay tier (easy / med / hard) of a Delve that ends on a GROUP, which has no one ending beat to carry it.
+            /// Required there, refused anywhere else: every other ending carries its tier on its own beat or answer.</summary>
+            public string? reward { get; set; }
             /// <summary>
             /// beats, OPTIONAL when the last step is a group (and refused otherwise): the speaker's closing line, spoken on the
             /// completing stage, recap's spoken twin. A group's members fire in any order, so no member's say can be the last

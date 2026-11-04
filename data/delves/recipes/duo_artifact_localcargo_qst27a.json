@@ -84,6 +84,7 @@
     },
     {
       "type": "talk",
+      "reward": "easy",
       "at": "RECenterLocRef",
       "objective": "Take the letters to his sister at the <Place>",
       "journal": "I followed a soldier's note from the <SecondPlace> to his letters at the <ThirdPlace>, and gave them to his sister at the <Place>.",

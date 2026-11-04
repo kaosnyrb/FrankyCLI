@@ -592,6 +592,8 @@ must be the last step. Each is its own place (two endings' places that can draw 
 own objective (all shown together once the choice opens), and its own completing stage: the first ending
 100, the next a COPY of 100 at 110 (so it completes and pays the same way), and so on. Each needs a
 `reward` tier (`easy` / `med` / `hard`, Overtime's `duo_reward_*` globals) written onto its stage.
+
+**⛔ EVERY RECIPE SETS ITS PAY OR FAILS LINT (his 2026-11-04: *"every mission must set rewards or it should fail linting"*).** An unset tier is the base stage's easy, which nobody chose. The ending beat carries it, or each `choose` ending, or each `ask` answer. **A Delve ending on a group has no one beat to carry it, so it sets a top-level `"reward"`**, beside `recap`, refused anywhere else.
 Walking to one takes the carried things, blocks every ending's prompt, HIDES the others' objectives
 (never failed: neither side is the villain) and ends the quest. An optional `person`
 `{ "name", "template", "outfit", "company": { "list", "min", "max" } }` is a friendly NPC cloned from a

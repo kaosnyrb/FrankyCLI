@@ -2,6 +2,7 @@
   "schema": 2,
   "id": "duo_MB54a_qst",
   "template": "board",
+  "reward": "easy",
   "deal": "duo_MB_MissionNode_Assault",
   "_deal": "Assault, beside 52a and 53a. His 2026-10-28 \"Assault seems fine, the vents are in a dungeon\"; moved by gen_delve move, never a rebuild.",
   "author": "jessica",

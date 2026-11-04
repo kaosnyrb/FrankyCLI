@@ -406,10 +406,29 @@ namespace FrankyCLI
                     Fatal($"beat {i + 1} sets reward and is not an ending (a choose ending, or the single beat that ends the Delve), so it would be silently ignored.");
                     continue;
                 }
+                TierExists($"beat {i + 1} reward", tier);
+            }
+            // EVERY MISSION SETS ITS PAY (his 2026-11-04: "every mission must set rewards or it should fail linting"), because an
+            // unset tier is the base stage's easy, which nobody chose. A choose ending is held to it above. A Delve ending on a
+            // group has no one beat to carry it, so the tier is the recipe's own, beside its recap.
+            if (steps.Count > 0)
+            {
+                if (steps[^1].IsGroup)
+                {
+                    if (r.reward == null) Fatal("the Delve ends on a group and the recipe sets no reward; set a top-level \"reward\" (easy / med / hard), beside recap.");
+                    else TierExists("recipe reward", r.reward);
+                }
+                else if (!steps[^1].IsChoose && r.beats[soleLast].reward == null && r.beats[soleLast].ask == null)   // an ask's answers carry theirs
+                    Fatal($"beat {soleLast + 1} ends the Delve and sets no reward; every mission sets its pay (easy / med / hard).");
+            }
+            if (r.reward != null && (steps.Count == 0 || !steps[^1].IsGroup))
+                Fatal("the recipe sets a top-level reward and does not end on a group, so it would be silently ignored; the tier goes on the ending beat.");
+            void TierExists(string at, string tier)
+            {
                 foreach (var kind in new[] { "creds", "xp" })
                     if (!env.LoadOrder.PriorityOrder.WinningOverrides<IGlobalGetter>()
                             .Any(x => string.Equals(x.EditorID, $"duo_reward_{kind}_{tier}", StringComparison.OrdinalIgnoreCase)))
-                        Fatal($"beat {i + 1} reward '{tier}': no global duo_reward_{kind}_{tier} in the load order.");
+                        Fatal($"{at} '{tier}': no global duo_reward_{kind}_{tier} in the load order.");
             }
             if (r.offer != null)
             {
@@ -1403,9 +1422,12 @@ namespace FrankyCLI
                 // ending, the first one too, rather than trusting what the copy inherited.
                 // A single-beat last step with a tier is an ending too: it sets the completing stage, so its tier
                 // replaces the base's own pay there (the lint holds reward to these two places).
+                // Ending on a group, the tier is the recipe's and the stage is the step's own.
                 var paid = steps.Where(s => s.IsChoose).SelectMany(s => s.Beats)
                     .Concat(steps[^1].IsChoose || steps[^1].IsGroup || r.beats[steps[^1].Beats[0]].reward == null
-                            ? Enumerable.Empty<int>() : new[] { steps[^1].Beats[0] }).ToList();
+                            ? Enumerable.Empty<int>() : new[] { steps[^1].Beats[0] })
+                    .Select(b => (tier: r.beats[b].reward!, stage: beatStage[b])).ToList();
+                if (steps[^1].IsGroup && r.reward != null) paid.Add((r.reward, steps[^1].DoneStage));
                 if (t.questScript != null)
                 {
                     // A board mission pays through the board (MissionComplete -> MissionParent), off the script's reward
@@ -1413,10 +1435,10 @@ namespace FrankyCLI
                     // ⚠ FALSIFIED 2026-11-04 (his play of duo_delvetest_c1, plan OT-9K): a med tier here showed and paid the stage's easy 1250.
                     // Absent, the base's own globals stand (MB28a: duo_reward_creds_easy), as a slate Delve keeps its base's stage pay.
                     var qs = vma.Scripts.First(s => s.Name == t.questScript);
-                    foreach (var b in paid)
+                    foreach (var (tier, _) in paid)
                     {
-                        var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{r.beats[b].reward}");
-                        if (cg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{r.beats[b].reward}."); return 1; }
+                        var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{tier}");
+                        if (cg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{tier}."); return 1; }
                         foreach (var pn in new[] { "RewardAmountGlobal", "RewardAmountGlobalActual" })
                         {
                             var rp = qs.Properties.OfType<ScriptObjectProperty>().FirstOrDefault(p => p.Name == pn);
@@ -1427,14 +1449,14 @@ namespace FrankyCLI
                     }
                     paid.Clear();
                 }
-                foreach (var b in paid)
+                foreach (var (tier, stage) in paid)
                 {
-                    var st = clone.Stages.First(x => x.Index == beatStage[b]);
+                    var st = clone.Stages.First(x => x.Index == stage);
                     var rds = st.LogEntries[0].StageCompleteDatas.SelectMany(c => c.RewardDatas).ToList();
                     if (rds.Count != 1) { Console.WriteLine($"REFUSED: stage {st.Index} carries {rds.Count} reward entries; this tool writes exactly one."); return 1; }
-                    var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{r.beats[b].reward}");
-                    var xg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_xp_{r.beats[b].reward}");
-                    if (cg == null || xg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{r.beats[b].reward} / duo_reward_xp_{r.beats[b].reward}."); return 1; }
+                    var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{tier}");
+                    var xg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_xp_{tier}");
+                    if (cg == null || xg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{tier} / duo_reward_xp_{tier}."); return 1; }
                     rds[0].BonusCredits.SetTo(cg.FormKey);
                     rds[0].XpAwarded.SetTo(xg.FormKey);
                     bm.StageReward[st.Index] = (cg.FormKey, xg.FormKey);

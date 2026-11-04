@@ -64,6 +64,7 @@
     },
     {
       "type": "deliver",
+      "reward": "easy",
       "at": "RECenterLocRef",
       "objective": "Set out the picnic",
       "journal": "A courier drone dropped somebody's proposal picnic in the wrong spot at the <Place>. I found the small box and the hamper, set out the picnic where it was meant to be, and tucked the small box under the hamper lid. I did not open the small box.",

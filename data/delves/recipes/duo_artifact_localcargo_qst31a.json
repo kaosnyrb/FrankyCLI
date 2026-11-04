@@ -136,6 +136,7 @@
     },
     {
       "type": "deliver",
+      "reward": "easy",
       "at": "RECenterLocRef",
       "place": "second",
       "objective": "Deliver the survey crate to the <SecondPlace>",

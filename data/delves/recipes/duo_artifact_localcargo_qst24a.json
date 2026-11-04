@@ -100,6 +100,7 @@
     },
     {
       "type": "deliver",
+      "reward": "easy",
       "returnTo": 2,
       "at": "RECenterLocRef",
       "objective": "Bring the Relay Online",

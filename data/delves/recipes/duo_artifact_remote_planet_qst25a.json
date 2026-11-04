@@ -33,6 +33,7 @@
   "beats": [
     {
       "type": "clear",
+      "reward": "easy",
       "at": "REMarkerMediumLocRef",
       "enemies": {
         "list": "duo_GangMembersList_PreditorMegalist_A",

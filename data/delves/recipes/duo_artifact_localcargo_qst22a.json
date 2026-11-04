@@ -98,6 +98,7 @@
     },
     {
       "type": "deliver",
+      "reward": "easy",
       "returnTo": 2,
       "at": "REContainerLocRef",
       "objective": "Return the pay to the locker",

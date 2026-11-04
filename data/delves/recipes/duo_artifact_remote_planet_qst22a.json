@@ -2,6 +2,7 @@
   "schema": 2,
   "id": "duo_artifact_remote_planet_qst22a",
   "template": "beats",
+  "reward": "easy",
   "deal": "duo_MS_ArtifactMap_RemotePlanetNode",
   "_deal": "The remote planet pool, as remote01a (his 2026-10-14).",
   "author": "jessica",

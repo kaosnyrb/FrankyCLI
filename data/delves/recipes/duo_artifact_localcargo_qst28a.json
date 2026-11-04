@@ -54,6 +54,7 @@
     },
     {
       "type": "hold",
+      "reward": "easy",
       "at": "RETravelB1LocRef",
       "objective": "Defend the relay",
       "journal": "I fitted the transmitter at the <Place> and held off three waves of attackers while it aligned. The relay is live.",

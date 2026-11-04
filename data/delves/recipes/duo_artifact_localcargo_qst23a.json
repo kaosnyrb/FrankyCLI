@@ -85,6 +85,7 @@
     },
     {
       "type": "deliver",
+      "reward": "easy",
       "returnTo": 2,
       "at": "RECenterLocRef",
       "objective": "Get the Reclaimer Running",

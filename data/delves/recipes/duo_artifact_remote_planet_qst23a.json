@@ -55,6 +55,7 @@
     },
     {
       "type": "hold",
+      "reward": "easy",
       "at": "RETravelB1LocRef",
       "objective": "Defend the terminal",
       "journal": "I powered the research terminal at the <Place> and held it while the team copied their data off-world. They have all of it.",
