@@ -7,7 +7,7 @@
   "author": "jessica",
   "source": "his 2026-10-23 15:00: \"let's do the next type now\", after the military ten (his plan, 13:10: \"like 10 missionboard missions\" per dungeon type)",
   "_note": [
-    "CARD BY RUTH PARGETER (2026-11-04, his: 'Each mission is set by a different person, we should use pennames'; no payer label or payment line, his 'redundant noise'). Was: Private Contract. Condemn the three crates of faulty parts at the <Place> on <Planet>. Payment on contract completion.",
+    "CARD BY RUTH PARGETER (2026-11-04, re-cut 09:3x on his 'that doesn't read right': the first said neither what was in the crates nor who 'she' was; his: 'Each mission is set by a different person, we should use pennames'; no payer label or payment line, his 'redundant noise'). Was: Private Contract. Condemn the three crates of faulty parts at the <Place> on <Planet>. Payment on contract completion.",
     "THE INDUSTRIAL FAMILY, 5 OF 10: THE BAD BATCH.",
     "A batch of faulty parts is waiting in the plant for a buyer who knows they are faulty. Mark the three crates as",
     "condemned in any order, then meet the buyer when she comes to collect. The verb is CONDEMN.",
@@ -29,7 +29,7 @@
   "prose": {
     "name": "Sabotage: Condemned Batch on <Planet>",
     "briefing": "A batch of faulty parts is sitting in the <Place> waiting for a buyer who knows exactly what's wrong with them.",
-    "card": "Three crates at the <Place>, each failed on four counts. To be marked condemned before the buyer arrives. She has bought from this batch before."
+    "card": "Three crates of faulty parts at the <Place>, failed inspection twice. Mark every crate condemned before the buyer collects. The buyer knows exactly what's wrong with them."
   },
   "beats": [
     {
