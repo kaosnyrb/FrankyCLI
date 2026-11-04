@@ -212,12 +212,13 @@
       "itemSource": "duo_Artifact09_item01",
       "_twoBeats": "TWO BEATS, a pickup then a deliver (27a, his 2026-10-27 \"let's do 27a\"): his activator would take a kit and pay on the first use, so both objects are clones of activatorFrom (scriptless, as slatespace's) on the stock DefaultAliasOnActivate, the deliver gated on the pickup's stage 40. The second object is a copy of the first pair at its own marker from the same cell (every LVLSC_AllSpacePOIs cell tags se_GeneralMarkerLocRef01 and se_TravelMarkerLocRefB02 on distinct refs, gen_inspect cellrt 2026-10-27); its objective is 20 copied to 30. The item (a clone of itemSource) goes to the ship he flies and is taken back from him or his ship, his ccs_activaterepair's two places. Stage 100 pays through MissionComplete(), the ground board's shape.",
       "beats": 1,
-      "maxBeats": 2,
+      "maxBeats": 4,
       "allows": [
         "use",
         "pickup",
         "deliver",
-        "ride"
+        "ride",
+        "talk"
       ],
       "carriesItem": false,
       "placeAlias": 2,

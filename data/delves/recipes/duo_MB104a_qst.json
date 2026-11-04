@@ -42,12 +42,8 @@
       }
     },
     {
-      "type": "ride",
-      "at": "AutofillGeneric01",
-      "place": "second",
-      "objective": "Fly her to <SecondPlace>",
-      "journal": "The container over <Planet> wasn't machine parts. A woman had spent four days in it. I took her aboard and flew her to <SecondPlace>.",
-      "reward": "med",
+      "type": "talk",
+      "objective": "Check on her",
       "person": {
         "name": "Rosie Marlow",
         "template": "UC_NA_MASTWorkerFemale03",
@@ -74,6 +70,31 @@
           "prompt": "Four days. Are you hurt?",
           "reply": [
             "Hungry. Stiff. Very tired of the dark. Nothing a city won't fix."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ride",
+      "at": "AutofillGeneric01",
+      "place": "second",
+      "objective": "Fly her to <SecondPlace>",
+      "rider": 2
+    },
+    {
+      "type": "talk",
+      "rider": 2,
+      "objective": "See her off",
+      "journal": "The container over <Planet> wasn't machine parts. A woman had spent four days in it. I took her aboard and flew her to <SecondPlace>.",
+      "reward": "med",
+      "greeting": [
+        "PLACEHOLDER, Jessica's: she thanks him at the ramp."
+      ],
+      "exchanges": [
+        {
+          "prompt": "PLACEHOLDER, Jessica's: goodbye.",
+          "reply": [
+            "PLACEHOLDER, Jessica's: her last line."
           ]
         }
       ]

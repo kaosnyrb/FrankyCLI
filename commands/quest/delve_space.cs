@@ -83,8 +83,8 @@ namespace FrankyCLI
             bool two = TwoBeatBoard(r, t);
             if (IsBoardSpace(t) && r.beats.Count == 1 && r.beats[0].type != "use")
                 Fatal($"beat 1 is a '{r.beats[0].type}'; a one-beat board is a use, his MB01a's activator.");
-            if (IsBoardSpace(t) && r.beats.Count == 2 && !two && !rescue)
-                Fatal($"the beats are {string.Join(" then ", r.beats.Select(x => x.type))}; a two-beat board builds a pickup then a deliver, or a use then a ride, and nothing else yet.");
+            if (IsBoardSpace(t) && r.beats.Count >= 2 && !two && !rescue)
+                Fatal($"the beats are {string.Join(" then ", r.beats.Select(x => x.type))}; a board builds a pickup then a deliver, or a rescue's use, talk, ride, talk, and nothing else yet.");
             if (two && string.Equals(r.beats[0].at, r.beats[1].at, StringComparison.OrdinalIgnoreCase))
                 Fatal($"both beats are at '{r.beats[0].at}'; the two objects need two of the cell's markers.");
             if (two && string.IsNullOrWhiteSpace(r.beats[0].item))
@@ -106,7 +106,12 @@ namespace FrankyCLI
                 var b = r.beats[i];
                 if (t.allows.Count > 0 && !t.allows.Contains(b.type ?? ""))
                     Fatal($"beat {i + 1} is a '{b.type}' and template '{t.id}' builds only {string.Join(", ", t.allows)}. What it cannot do: {string.Join("; ", t.cannot)}");
-                if (b.type == "ride") continue;   // its own rules, in RideBeat: a person and a city, not an object in the cell
+                if (rescue && i > 0)
+                {
+                    if (b.exchanges?.Any(x => x.perk != null) == true) Fatal($"beat {i + 1} has a perk on an exchange; a rescue's talk resolves none, so it would be silently ignored.");
+                    if (string.IsNullOrWhiteSpace(b.objective)) Fatal($"beat {i + 1} has no objective; each step of a rescue points him somewhere.");
+                    continue;   // aboard or in a city, not an object in the cell; their own rules are in TalkBeat and RideBeat
+                }
                 if (b.PlaceIndex != 0) Fatal($"beat {i + 1} is at the {PlaceKey[Math.Max(b.PlaceIndex, 0)]}; a space Delve has one place, the orbit.");
                 if (!b.at.StartsWith("se_", StringComparison.OrdinalIgnoreCase))
                     Fatal($"beat {i + 1} is at '{b.at}'; an orbit's markers are its space cell's own (se_*), filled from the cell.");
@@ -200,10 +205,10 @@ namespace FrankyCLI
         private static bool TwoBeatBoard(Recipe r, Template t)
             => IsBoardSpace(t) && r.beats.Count == 2 && r.beats[0].type == "pickup" && r.beats[1].type == "deliver";
 
-        /// <summary>A board in orbit with a use then a ride (MB104a, his 2026-11-04): using the object puts a person aboard, and
-        /// a landing in a city ends it. RideBeat.Rescue.</summary>
+        /// <summary>A board in orbit with a use, a talk aboard, a ride to a city and a talk to see her off (MB104a, his 2026-11-04):
+        /// the use puts a person aboard. RideBeat.Rescue.</summary>
         private static bool RescueBoard(Recipe r, Template t)
-            => IsBoardSpace(t) && r.beats.Count == 2 && r.beats[0].type == "use" && r.beats[1].type == "ride";
+            => IsBoardSpace(t) && r.beats.Select(b => b.type).SequenceEqual(new[] { "use", "talk", "ride", "talk" });
 
         /// <summary>A one-beat board whose recipe says repair: his MB01a activator, which pays itself. Every other board's
         /// objects are scriptless on our hooks, and its completing stage pays (MB104a, 2026-11-03).</summary>
@@ -423,7 +428,7 @@ namespace FrankyCLI
                 SortStages(clone);
                 Console.WriteLine($"  +stage   : {PickupStage}, the pickup");
             }
-            foreach (var (b, st) in two || rescue ? new[] { (beat, PickupStage), (r.beats[1], slot.journalStage) } : new[] { (beat, slot.journalStage) })
+            foreach (var (b, st) in two || rescue ? new[] { (beat, PickupStage), (r.beats[^1], slot.journalStage) } : new[] { (beat, slot.journalStage) })
             {
                 if (b.journal == null) continue;
                 var e = clone.Stages?.FirstOrDefault(s => s.Index == st)?.LogEntries?.FirstOrDefault();
@@ -709,7 +714,7 @@ namespace FrankyCLI
                         code[PickupStage].Add($"Say{n + 1}.Start()");
                         n++;
                     }
-                    var closer = two || rescue ? r.beats[1] : beat;
+                    var closer = two || rescue ? r.beats[^1] : beat;
                     if (closer.say != null)
                     {
                         var scene = MakeRadioLine(myMod, clone, r, n, t.completeStage, closer.say, bm);
@@ -744,7 +749,7 @@ namespace FrankyCLI
                         });
                 // THE PAY is the stage's, as everywhere (OT-9K, his plays of duo_delvetest_c1, 2026-11-04). The script's globals
                 // follow it, because MissionParent's completion message reads RewardAmountGlobalActual.
-                if ((two || rescue ? r.beats[1] : beat).reward is string tier)
+                if ((two || rescue ? r.beats[^1] : beat).reward is string tier)
                 {
                     var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{tier}");
                     if (cg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{tier}."); return 1; }
@@ -1188,6 +1193,9 @@ namespace FrankyCLI
                     string rideSrc = File.ReadAllText(bm.PscPath);
                     fail += Check("rescue: she is created at the ship's passenger marker", rideSrc.Contains("HomeShipPassengerMarker.GetRef().PlaceActorAtMe(Rider)").ToString(), "True");
                     fail += Check("rescue: a turn-down deletes her, a landing does not", (rideSrc.Contains("aboard.Delete()") && !rideSrc.Contains("Alias_Beat2Person.GetRef().Delete()")).ToString(), "True");
+                    fail += Check("rescue: she becomes a passenger on the check-in, not the use",
+                                  (rideSrc.IndexOf($"Function {FragmentFunction(PickupStage)}()") < rideSrc.IndexOf($"Function {FragmentFunction(50)}()")
+                                   && rideSrc.IndexOf(".AddPassenger(") > rideSrc.IndexOf($"Function {FragmentFunction(50)}()")).ToString(), "True");
                 }
                 else
                 {

@@ -1650,7 +1650,7 @@ namespace FrankyCLI
                 for (int j = i + 1; j < r.beats.Count; j++)
                 {
                     var (a, b) = (r.beats[i], r.beats[j]);
-                    if (a.PlaceIndex != b.PlaceIndex) continue;
+                    if (a.PlaceIndex != b.PlaceIndex || !Placed(a) || !Placed(b)) continue;
                     bool ret = b.returnTo == i + 1;
                     if (string.Equals(a.at, b.at, StringComparison.OrdinalIgnoreCase))
                     {

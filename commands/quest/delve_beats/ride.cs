@@ -51,13 +51,9 @@ namespace FrankyCLI
                 if (!IsBoard(t) && !IsBoardSpace(t)) Fatal($"{at} is on a {t.kind} template; a ride is built on the two boards only.");
                 if (IsBoardSpace(t))
                 {
-                    // The rescue: nobody stands in orbit, so the ride carries her own person, and the talk's rules are hers.
-                    if (b.rider != null) Fatal($"{at} sets rider; in orbit nobody is met first, so the ride carries its own person.");
+                    // The rescue: the check-in's person rides.
                     if (b.place != "second") Fatal($"{at} needs \"place\": \"second\", the city she is carried to.");
                     if (!string.Equals(b.at, "AutofillGeneric01", StringComparison.OrdinalIgnoreCase)) Fatal($"{at} is at '{b.at}'; the one spot every city lists is AutofillGeneric01.");
-                    if (b.exchanges?.Any(x => x.perk != null) == true) Fatal($"{at} has a perk on an exchange; a rescue's talk resolves none, so it would be silently ignored.");
-                    BeatKinds["talk"].GradeBeat(b, i, t, env, Fatal, Warn);
-                    return;
                 }
                 if (b.model != null || b.name != null || b.replace || b.message != null || b.returnTo != null || b.group != null || b.choose != null || b.person != null)
                     Fatal($"{at} sets model, name, replace, message, returnTo, group, choose or person; a ride has none of them (the rider is its person), so they would be silently ignored.");
@@ -150,34 +146,40 @@ namespace FrankyCLI
                 return a;
             }
 
-            /// <summary>The silent stage her first question sets: it retires her greeting and that question, and gates nothing.</summary>
-            private const int SpokenStage = 45;
+            /// <summary>Her check-in done: she is a passenger from here (the talk's closing reply sets it).</summary>
+            private const int CheckedInStage = 50;
             /// <summary>The plain stage the script sets as the ship lands (the ground ride's is 900 + its beat).</summary>
             private const int RescueArrivedStage = SpawnedStageBase + 1;
+            /// <summary>The stage the script sets when she has left the ship: the goodbye opens, and it is the ride's end.</summary>
+            private const int OffShipStage = SpawnedStageBase + 2;
 
             /// <summary>
-            /// THE RESCUE (MB104a, his 2026-11-04 "MB104a should have you rescue her"): a boardspace use, then a ride with its
-            /// own person. Using the object creates her at the ship's own passenger marker, vanilla's way
-            /// (SQ_PlayerShipScript.DebugAddPassengers), and she is a passenger from that moment: the objective is already the
-            /// city, and her talk is there if he walks back to her, gated on nothing he must do, so a player who never speaks to
-            /// her still finishes (his console rule, 10-30). Her first question sets a silent stage only, because BuildTalk's
-            /// closing reply must set something; nothing waits on it.
+            /// THE RESCUE (MB104a, his 2026-11-04 "MB104a should have you rescue her", then his 16:42 "It's odd you don't talk to her
+            /// after she gets on board" and "she leaves without saying goodbye"): four steps on a boardspace, a use, a talk aboard,
+            /// a ride to a city, a talk to see her off. Using the object creates her at the ship's own passenger marker, vanilla's
+            /// way (SQ_PlayerShipScript.DebugAddPassengers). The check-in's closing reply makes her a passenger, not the use: until
+            /// then a landing is nothing to the stock script, so landing before talking cannot put her off early. The goodbye's
+            /// closing reply completes the mission, so the script's "everyone off" is a stage of ours and no longer the end; if he
+            /// left the ship first the script counts her off while she is still aboard, so that stage moves her to the city's
+            /// marker, because an actor left on the ship after the quest stops would ride on it for good. Both talks are one
+            /// person's, each gated on its own step (plan OT-96).
             /// The city is new to this shell, which has no second place: a location alias pinned as the ground build pins one,
             /// and the destination marker filled inside it, both as played on duo_delvetest_r1.
-            /// What it removes when the quest ends: a turn-down takes her off the ship and deletes her; a landing leaves her in the
-            /// city, a non-persistent ref the game clears with the cell.
+            /// What it removes when the quest ends: a turn-down takes her off the ship and deletes her; a landing leaves her in
+            /// the city, a non-persistent ref the game clears with the cell.
             /// </summary>
             internal static int Rescue(StarfieldMod myMod, Quest clone, Template t, Recipe r,
                                        IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Dictionary<string, FormKey> markers, BeatsMade bm,
-                                       QuestAdapter vma, QuestObjective ob, int useObjective, int rideObjective, int pickupStage, int objectAlias,
+                                       QuestAdapter vma, QuestObjective ob, int useObjective, int firstObjective, int pickupStage, int objectAlias,
                                        SortedDictionary<int, List<string>> code, List<(string type, string pname, FormKey key, int alias)> extraProps)
             {
-                var ride = r.beats[1];
-                foreach (var st in new[] { SpokenStage, RescueArrivedStage })
+                Beat checkIn = r.beats[1], ride = r.beats[2], goodbye = r.beats[3];
+                foreach (var (st, b) in new[] { (CheckedInStage, checkIn), (RescueArrivedStage, (Beat?)null), (OffShipStage, ride) })
                 {
                     if (clone.Stages!.Any(s => s.Index == st)) { Console.WriteLine($"REFUSED: the shell already has a stage {st}; a rescue's must be its own."); return 1; }
                     var ns = CloneStage(clone, st);
                     if (ns == null) return 1;
+                    if (b?.journal != null) ns.LogEntries[0].Entry = Expand(b.journal, t);
                     clone.Stages.Add(ns);
                 }
                 SortStages(clone);
@@ -189,7 +191,7 @@ namespace FrankyCLI
                 var loc = new QuestLocationAlias { ID = NextAliasId(clone), Name = "FinalLocation", ALFG = 0 };
                 clone.Aliases!.Add(loc);
                 if (MakePlaceSettlement(clone, (int)loc.ID, city) != 0) return 1;
-                var mk = EmptyRefAlias(clone, "DelveBeat2Destination", QuestReferenceAlias.Flag.AllowReserved);
+                var mk = EmptyRefAlias(clone, "DelveBeat3Destination", QuestReferenceAlias.Flag.AllowReserved);
                 var inCity = new LocationAliasReference { AliasID = (int)loc.ID };
                 inCity.RefType.SetTo(markers[ride.at]);
                 mk.Location = inCity;
@@ -204,7 +206,7 @@ namespace FrankyCLI
                 if (col == null) return 1;
                 clone.Aliases.Add(col);
 
-                var p = ride.person!;
+                var p = checkIn.person!;
                 var tmpl = OwnOrMaster<INpcGetter>(myMod, env, p.template!);
                 if (tmpl == null) { Console.WriteLine($"REFUSED: NPC '{p.template}' is not in {t.mod} or one of its masters."); return 1; }
                 var vt = OwnOrMaster<IVoiceTypeGetter>(myMod, env, p.voice!);
@@ -221,22 +223,34 @@ namespace FrankyCLI
                 bm.People[1] = (npc.FormKey, p.name!);
                 Console.WriteLine($"  +npc     : {npc.EditorID} {npc.FormKey}  \"{p.name}\"  (clone of {tmpl.EditorID})");
 
-                // The talk's own build, with the use as its opener: the person's scenes open once she exists.
-                var steps = new List<Step> { new Step { Beats = { 0 }, DoneStage = pickupStage }, new Step { Beats = { 1 }, DoneStage = t.completeStage } };
-                TalkBeat.BuildTalk(myMod, clone, r, 1, steps, new Dictionary<int, int> { [1] = SpokenStage }, t.entryStage, (int)pa.ID, npc.FormKey,
-                                   npc.Flags.HasFlag(Npc.Flag.Female), bm, new Dictionary<(int beat, int ex), FormKey>());
+                // The talks' own build. Each opens on the step before it: the check-in once she exists, the goodbye once she is off.
+                var steps = new List<Step>
+                {
+                    new Step { Beats = { 0 }, DoneStage = pickupStage }, new Step { Beats = { 1 }, DoneStage = CheckedInStage },
+                    new Step { Beats = { 2 }, DoneStage = OffShipStage }, new Step { Beats = { 3 }, DoneStage = t.completeStage },
+                };
+                var stages = new Dictionary<int, int> { [1] = CheckedInStage, [3] = t.completeStage };
+                foreach (int b in new[] { 1, 3 })
+                    TalkBeat.BuildTalk(myMod, clone, r, b, steps, stages, t.entryStage, (int)pa.ID, npc.FormKey,
+                                       npc.Flags.HasFlag(Npc.Flag.Female), bm, new Dictionary<(int beat, int ex), FormKey>());
                 clone.Data!.Priority = TalkQuestPriority;
 
-                vma.Scripts.Add(PassengerEntry(clone.FormKey, (int)cid, (int)loc.ID, (int)mk.ID, RescueArrivedStage, t.completeStage));
-                bm.Ride = (1, (int)cid, (int)mk.ID, RescueArrivedStage, t.completeStage);
+                vma.Scripts.Add(PassengerEntry(clone.FormKey, (int)cid, (int)loc.ID, (int)mk.ID, RescueArrivedStage, OffShipStage));
+                bm.Ride = (2, (int)cid, (int)mk.ID, RescueArrivedStage, OffShipStage);
 
-                var ob2 = ob.DeepCopy();
-                ob2.Index = (ushort)rideObjective;
-                foreach (var x in ob2.Targets.Where(x => x.AliasID == objectAlias)) x.AliasID = (int)mk.ID;
-                ob2.DisplayText = Expand(ride.objective!, t);
-                clone.Objectives!.Insert(clone.Objectives.IndexOf(ob) + 1, ob2);
+                // One objective per step after the use's, ten apart, each a copy of the use's pointed at its own target.
+                int checkObj = firstObjective, rideObj = firstObjective + 10, byeObj = firstObjective + 20, at = clone.Objectives!.IndexOf(ob);
+                foreach (var (i, b, target) in new[] { (checkObj, checkIn, pa.ID), (rideObj, ride, mk.ID), (byeObj, goodbye, pa.ID) })
+                {
+                    var o2 = ob.DeepCopy();
+                    o2.Index = (ushort)i;
+                    foreach (var x in o2.Targets.Where(x => x.AliasID == objectAlias)) x.AliasID = (int)target;
+                    o2.DisplayText = Expand(b.objective!, t);
+                    clone.Objectives.Insert(++at, o2);
+                }
 
                 extraProps.Add(("ReferenceAlias", "Alias_Beat2Person", clone.FormKey, (int)pa.ID));
+                extraProps.Add(("ReferenceAlias", "Alias_Beat3Destination", clone.FormKey, (int)mk.ID));
                 extraProps.Add(("SQ_PlayerShipScript", "SQ_PlayerShip", Sf(0x0174A2), -1));
                 extraProps.Add(("ActorBase", "Rider", npc.FormKey, -1));
                 string script = $"((Self as Quest) as {PassengerScript})";
@@ -244,13 +258,24 @@ namespace FrankyCLI
                 {
                     $"SetObjectiveCompleted({useObjective})",
                     "Alias_Beat2Person.ForceRefTo(SQ_PlayerShip.HomeShipPassengerMarker.GetRef().PlaceActorAtMe(Rider))",
-                    $"{script}.AddPassenger(Alias_Beat2Person)",
-                    $"SetObjectiveDisplayed({rideObjective})",
+                    $"SetObjectiveDisplayed({checkObj})",
                 };
-                // ⛔ NOT deleted here (his play of r2, 2026-11-04: "Didn't see her get off the ship this time"). This stage runs as she
-                // leaves the ship, so a Delete() took her with it; r1, which had none, showed her walking off. PlaceActorAtMe makes
-                // a non-persistent ref, so the game clears her with the cell once the quest lets go.
-                code[t.completeStage] = new() { $"SetObjectiveCompleted({rideObjective})" };
+                code[CheckedInStage] = new()
+                {
+                    $"SetObjectiveCompleted({checkObj})",
+                    $"{script}.AddPassenger(Alias_Beat2Person)",
+                    $"SetObjectiveDisplayed({rideObj})",
+                };
+                code[OffShipStage] = new()
+                {
+                    $"SetObjectiveCompleted({rideObj})",
+                    "Actor offShip = Alias_Beat2Person.GetActorRef()",
+                    "If offShip.GetCurrentShipRef()   ; he left first, and the interior unloaded round her",
+                    "    offShip.MoveTo(Alias_Beat3Destination.GetRef())",
+                    "EndIf",
+                    $"SetObjectiveDisplayed({byeObj})",
+                };
+                code[t.completeStage] = new() { $"SetObjectiveCompleted({byeObj})" };
                 code[BoardFailStage] = new()
                 {
                     "Actor aboard = Alias_Beat2Person.GetActorRef()",
@@ -260,7 +285,7 @@ namespace FrankyCLI
                     "    aboard.Delete()",
                     "EndIf",
                 };
-                Console.WriteLine($"  +rescue  : the use sets {pickupStage}: she is created aboard, a passenger; {city} (alias {loc.ID}), destination alias {mk.ID}, person alias {pa.ID}, Passengers {cid}; arrives {RescueArrivedStage}, off {t.completeStage}");
+                Console.WriteLine($"  +rescue  : use {pickupStage} (aboard), check-in {CheckedInStage} (a passenger), landed {RescueArrivedStage}, off {OffShipStage}, goodbye {t.completeStage}; {city} (alias {loc.ID}), destination {mk.ID}, person {pa.ID}, Passengers {cid}");
                 return 0;
             }
         }

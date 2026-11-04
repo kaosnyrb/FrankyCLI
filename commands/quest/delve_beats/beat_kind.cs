@@ -115,7 +115,7 @@ namespace FrankyCLI
 
         /// <summary>Whether a beat happens at a place and names a marker (its kind's HasPlace); true for a type with no kind,
         /// so the lint's own refusal of that type is what speaks, not a skipped marker.</summary>
-        private static bool Placed(Beat b) => KindOf(b)?.HasPlace != false;
+        private static bool Placed(Beat b) => KindOf(b)?.HasPlace != false && !(b.type == "talk" && b.at.Length == 0);   // a rescue's talks happen aboard
 
         /// <summary>The kinds a recipe uses, each once, in the order its beats first use them.</summary>
         private static IEnumerable<BeatKind> KindsIn(Recipe r) => r.beats.Select(KindOf).OfType<BeatKind>().Distinct();

@@ -41,7 +41,15 @@ namespace FrankyCLI
                     || b.group != null || b.choose != null)
                     Fatal($"{at} sets model, name, replace, message, say, returnTo, group or choose; a talk beat has none of them "
                           + "(the person is its object and his voice its line), so they would be silently ignored.");
-                if (b.person is not Person p) { Fatal($"{at} has no person: nobody to talk to."); }
+                if (b.at.Length == 0 && !IsBoardSpace(t)) Fatal($"{at} has no at: the marker he stands on (only a rescue's talks happen aboard, with none).");
+                if (b.rider != null)
+                {
+                    // A rescue's goodbye: the check-in's person, and its one line ends the mission, so a side question could not be heard after it.
+                    if (!IsBoardSpace(t)) Fatal($"{at} sets rider; a talk reuses an earlier person on a rescue only.");
+                    if (b.person != null) Fatal($"{at} sets rider and person; the rider is its person.");
+                    if (b.exchanges?.Count != 1) Fatal($"{at} is a goodbye with {b.exchanges?.Count ?? 0} exchanges; it has one, because its reply ends the mission.");
+                }
+                else if (b.person is not Person p) { Fatal($"{at} has no person: nobody to talk to."); }
                 else
                 {
                     if (string.IsNullOrWhiteSpace(p.name) || string.IsNullOrWhiteSpace(p.template)) Fatal($"{at} person needs both a name and a template.");
@@ -155,7 +163,8 @@ namespace FrankyCLI
                 int k = steps.FindIndex(s => s.Beats.Contains(b));
                 int enter = k == 0 ? entryStage : steps[k - 1].DoneStage;   // step one opens on the entry stage: 0 on a slate, the board's accept (10)
                 string tag = $"{r.id}_talk{b + 1}";
-                string vt = tb.person!.voice!, vid = tb.person.elevenlabs!;
+                var who = tb.person ?? r.beats[tb.rider!.Value - 1].person!;   // a rescue's goodbye is the check-in's person again
+                string vt = who.voice!, vid = who.elevenlabs!;
 
                 ConditionFloat IsHim()
                 {
@@ -253,7 +262,7 @@ namespace FrankyCLI
                 // to a silent "Captain", under this shape and under vanilla's created-speaker one (the alias gate, group 768,
                 // lines 2: ca77155, played on 19a 2026-10-22, no change). This is the shape that PLAYED with the header, set in
                 // place by gen_delve infogroup; the alias shape with the header is unplayed, so it is not what a build writes.
-                if (tb.person!.hellos is List<List<string>> hellos)
+                if (tb.person?.hellos is List<List<string>> hellos)
                 {
                     string htag = $"{r.id}_hellos";
                     var ht = clone.DialogTopics.FirstOrDefault(d => d.EditorID == htag);

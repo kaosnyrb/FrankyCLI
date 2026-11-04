@@ -652,7 +652,14 @@ Two stages, both set by the script: a plain stage (900 + beat) when the ship lan
 
 ### The rescue: a ride in orbit
 
-**PLAYED 2026-11-04, probe `duo_delvetest_r2`, his "yup worked that time": radio at the box, the use put her aboard, he talked to her below decks, landed at Akila, paid.** A `boardspace` Delve of two beats, a `use` then a `ride`. Nobody stands in orbit, so the ride carries its own `person`, `greeting` and `exchanges` (no `rider`), `place.second.settlement` names the city, and `at` is `AutofillGeneric01`. Using the object creates her at the ship's own passenger marker (`HomeShipPassengerMarker`, vanilla's `DebugAddPassengers`), and she is a passenger from that moment: the objective is already the city. Her talk is there if he walks back to her and nothing waits on it, so a player who never speaks to her still finishes. `exchanges[0]` drops off the menu once asked, as on the ground, and sets a silent stage. The use takes `message`, its box; `<SecondPlace>` works here.
+**The two-step form PLAYED 2026-11-04 on `duo_delvetest_r2` (his "yup worked that time"); he then asked for four steps (his 16:42: "It's odd you don't talk to her after she gets on board", "she leaves without saying goodbye"), BUILT, UNPLAYED.** A `boardspace` Delve of exactly four beats, `use`, `talk`, `ride`, `talk`, with `place.second.settlement` naming the city:
+
+1. **`use`**: the object in orbit, with its `message` box. It creates her at the ship's own passenger marker (`HomeShipPassengerMarker`, vanilla's `DebugAddPassengers`).
+2. **`talk`**, no `at`, carrying the `person`: her check-in, aboard. Its closing reply makes her a passenger and opens the flight, so a landing before it is nothing to the script.
+3. **`ride`**, `rider: 2`, `at: AutofillGeneric01`, `place: second`: the flight. Its `journal` lands when she is off the ship.
+4. **`talk`**, no `at`, `rider: 2`, carrying the `reward`: the goodbye, opened when she is off the ship. One exchange only: its reply completes the mission, so a side question could not be heard after it.
+
+Her check-in's side questions stay askable to the end. If he leaves the ship before she does, she is moved to the destination marker, so she is never stranded aboard. ⚠ Voiced lines still cannot name a place (`voice_check.py`, NOUN). `<SecondPlace>` works on this shape.
 
 ---
 
