@@ -67,9 +67,9 @@
       ],
       "exchanges": [
         {
-          "prompt": "Sit anywhere. I'll get you to a city.",
+          "prompt": "Where can I take you?",
           "reply": [
-            "Anywhere's fine. Thank you."
+            "The nearest city with people in it. I'll find my feet from there. And thank you."
           ]
         },
         {
