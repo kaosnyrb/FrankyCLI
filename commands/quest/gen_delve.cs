@@ -627,6 +627,8 @@ namespace FrankyCLI
             public string? journal { get; set; }
             /// <summary>"main" (default), "second" or "third": which drawn POI this beat happens at.</summary>
             public string? place { get; set; }
+            /// <summary>ride only: which earlier talk beat's person comes aboard (1-based, as `defend` and `returnTo`).</summary>
+            public int? rider { get; set; }
             /// <summary>0 main, 1 second, 2 third; -1 for a name that is none of them (the lint refuses it).</summary>
             public int PlaceIndex => place == null || place.Equals("main", StringComparison.OrdinalIgnoreCase) ? 0
                                    : place.Equals("second", StringComparison.OrdinalIgnoreCase) ? 1

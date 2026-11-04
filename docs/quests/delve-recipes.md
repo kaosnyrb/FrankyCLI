@@ -630,6 +630,26 @@ sets its stage first and checks the item afterwards, so as a gate it would compl
 `Data/scripts`. **Two places drawing one POI is warned**, so keep a trail's places disjoint by theme
 (`duo_delve08a` splits natural and military).
 
+## Ride: a person comes aboard (`ride`)
+
+**Built 2026-11-04 (plan OT-9H), board only, probe `duo_delvetest_r1`.** The person of an earlier `talk` beat boards the player's ship when the ride's step begins, and is carried to the beat's place. Vanilla's own shape (`RQ_OE_TransportPerson_02`, `RQ_OE_Rescue_01`): the stock `DefaultPassengerQuestScript` on the quest, a `Passengers` collection wearing `DefaultPassengerPackage`, `AddPassenger` from a stage fragment.
+
+```json
+{ "type": "ride", "rider": 1, "at": "AutofillGeneric01", "place": "second",
+  "objective": "Fly the surveyor to <SecondPlace>", "journal": "...", "reward": "med" }
+```
+
+| field | what it is |
+|---|---|
+| `rider` | required: the earlier `talk` beat whose person boards, 1-based. Her talk's closing reply opens the ride |
+| `at`, `place` | where she is going. `place` is `second` or `third`, never the main place. `at` is the marker the objective points at |
+
+Two stages, both set by the script: a plain stage (900 + beat) when the ship lands or docks **inside the place's location**, then the beat's own stage when she has left the ship (walked out, or the ship's interior unloaded). A ride that ends the Delve completes on that second one. Her side questions and hellos stay askable aboard, because neither is gated on a place. A turn-down (stage 200) takes her off the ship's list.
+
+⚠ Proven at the records only until his play. ⚠ One ride per Delve (the script has one destination). ⚠ A destination at a drawn POI is unproven: a landing has to count as inside its location; the probe uses a city. ⚠ No passenger-slot check: a full ship takes her anyway.
+
+---
+
 ## Speech: a speaker, a broadcast, and lines on stages (opt in)
 
 ```json

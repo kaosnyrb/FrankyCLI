@@ -1,0 +1,52 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_r1",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-04 15:13 \"let's build passengers\": the plan's OT-9H probe, a person met at a site comes aboard and is carried to a city",
+  "_note": [
+    "RIDE PROBE R1 (plan OT-9H): placeholder words, not a mission; a passenger's words and shape are Jessica's.",
+    "Reading it: talk to the stranded surveyor at the site and pick the top line. She runs to your ship. Aboard, walk up and talk: do her hello and her side question still work? Land at Akila City. She gets off, the mission completes and pays.",
+    "Then the ways out: fly off before she boards (she should catch up aboard, the script moves her), and turn the mission down while she is aboard (she should leave the ship's list)."
+  ],
+  "place": {
+    "theme": { "require": [], "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeTest"] },
+    "second": { "settlement": "Akila City" }
+  },
+  "prose": {
+    "name": "Rescue: Ride Probe on <Planet>",
+    "briefing": "Test mission. A surveyor is stranded at the <Place>. Talk to her and take her to <SecondPlace>.",
+    "card": "Test contract. Pick up a stranded surveyor at the <Place> on <Planet> and fly her to <SecondPlace>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "REMarkerMediumLocRef",
+      "objective": "Find the stranded surveyor at the <Place>",
+      "journal": "Test journal: I found the surveyor and she is coming aboard.",
+      "person": {
+        "name": "Stranded Surveyor",
+        "template": "UC_NA_MASTWorkerFemale03",
+        "voice": "GenericFemale01",
+        "elevenlabs": "oW8bn5YtBB89X2nJ0DT9",
+        "hellos": [ ["Test hello. This is me, walking up."] ]
+      },
+      "greeting": ["Test greeting. I need a lift to the city."],
+      "exchanges": [
+        { "prompt": "Get to my ship.", "reply": ["Test reply. On my way."] },
+        { "prompt": "Are you comfortable?", "reply": ["Test reply. This side question should still work aboard."] }
+      ]
+    },
+    {
+      "type": "ride",
+      "rider": 1,
+      "at": "AutofillGeneric01",
+      "place": "second",
+      "objective": "Fly the surveyor to <SecondPlace>",
+      "journal": "Test journal: I landed and the surveyor got off.",
+      "reward": "med"
+    }
+  ]
+}

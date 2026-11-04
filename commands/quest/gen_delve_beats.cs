@@ -779,6 +779,7 @@ namespace FrankyCLI
             public List<(int beat, int stage, int alias, FormKey npc, int exchanges, int conditions)> Talks = new();   // each talk beat, for the verify
             public int Linger = -1;   // the stage that stops a quest ending on a talk, once its person unloads; -1 = none
             public int LingerFrom;    // the completing stage it waits behind (the last step's DoneStage)
+            public (int beat, int passengers, int marker, int arrived, int done)? Ride;   // a ride beat's pieces, for the verify
             public List<(int beat, FormKey npc, int lines)> Hellos = new();   // a talk person's walk-up lines, for the verify
             public List<(int place, int anchor, FormKey global)> Leashes = new();   // each place's GetDistance: the alias it measures from, under which global
             public Dictionary<int, (FormKey creds, FormKey xp)> StageReward = new();
@@ -2675,7 +2676,8 @@ namespace FrankyCLI
             else
             {
                 // A board mission: the script the board talks to, alone, with exactly the driver's board properties.
-                fail += Check($"quest-level scripts (no driver, {t.questScript} only)", string.Join(",", vma.Scripts.Select(s => s.Name)), t.questScript);
+                fail += Check($"quest-level scripts (no driver, {t.questScript}" + (bm.Ride != null ? " and the passenger script)" : " only)"), string.Join(",", vma.Scripts.Select(s => s.Name)),
+                              t.questScript + (bm.Ride != null ? ",DefaultPassengerQuestScript" : ""));
                 var qs = vma.Scripts.FirstOrDefault(s => s.Name == t.questScript);
                 // Ending on a talk adds exactly one: ShutdownOnCompletion, off (graded below with the linger).
                 var keeps = t.questScriptKeeps.Concat(bm.Linger >= 0 ? new[] { "ShutdownOnCompletion" } : Array.Empty<string>());
@@ -2993,6 +2995,23 @@ namespace FrankyCLI
                               pn == null ? "missing" : $"{pn.Factions.Count} faction(s), crime {(pn.CrimeFaction.IsNull ? "none" : pn.CrimeFaction.FormKey.ToString())}",
                               "0 faction(s), crime none");
             }
+            // A ride: the stock script's stages and places, the package on the Passengers collection, her boarding, read back.
+            if (bm.Ride is (int rideBeat, int rideCol, int rideMarker, int rideArrived, int rideDone))
+            {
+                var ps = vma.Scripts.FirstOrDefault(s => s.Name == "DefaultPassengerQuestScript");
+                string StageProp(string n) => ps?.Properties.OfType<ScriptIntProperty>().FirstOrDefault(p => p.Name == n)?.Data.ToString() ?? "missing";
+                string AliasProp(string n) => ps?.Properties.OfType<ScriptObjectProperty>().FirstOrDefault(p => p.Name == n)?.Alias.ToString() ?? "missing";
+                fail += Check("ride: the ship arriving sets the arrival stage", StageProp("StageToSetOnPlayerShipArrivesAtDestination"), rideArrived.ToString());
+                fail += Check("ride: everyone off sets the beat's stage", StageProp("StageToSetWhenAllPassengersDisembark"), rideDone.ToString());
+                fail += Check("ride: Passengers is the collection", AliasProp("Alias_Passengers"), rideCol.ToString());
+                fail += Check("ride: the destination is the beat's place", AliasProp("Alias_PassengerDestination"), PlaceAliasOf(t, r.beats[rideBeat].PlaceIndex, -1).ToString());
+                fail += Check("ride: the marker is the beat's marker", AliasProp("Alias_PassengerDestinationMarker"), rideMarker.ToString());
+                fail += Check("ride: the arrival stage exists", q.Stages.Any(s => s.Index == rideArrived).ToString(), "True");
+                var pc = q.Aliases.OfType<IQuestCollectionAliasGetter>().SelectMany(c => c.Collection).Select(m => m.ReferenceAlias).FirstOrDefault(a => a?.ID == (uint)rideCol);
+                fail += Check("ride: Passengers wears DefaultPassengerPackage", pc == null ? "missing" : string.Join(",", pc.PackageData.Select(p => p.FormKey)), "1D302B:Starfield.esm");
+                fail += Check("ride: she boards from a fragment", File.ReadAllText(bm.PscPath).Contains(".AddPassenger(Alias_Beat" + r.beats[rideBeat].rider + "Person)").ToString(), "True");
+            }
+
             // Walk-up lines: vanilla's Hello shape, read back.
             if (bm.Hellos.Count > 0)
             {
