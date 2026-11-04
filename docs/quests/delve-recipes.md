@@ -652,7 +652,7 @@ Two stages, both set by the script: a plain stage (900 + beat) when the ship lan
 
 ### The rescue: a ride in orbit
 
-**Built 2026-11-04, unplayed, probe `duo_delvetest_r2`.** A `boardspace` Delve of two beats, a `use` then a `ride`. Nobody stands in orbit, so the ride carries its own `person`, `greeting` and `exchanges` (no `rider`), `place.second.settlement` names the city, and `at` is `AutofillGeneric01`. Using the object creates her at the ship's own passenger marker (`HomeShipPassengerMarker`, vanilla's `DebugAddPassengers`), and she is a passenger from that moment: the objective is already the city. Her talk is there if he walks back to her and nothing waits on it, so a player who never speaks to her still finishes. `exchanges[0]` drops off the menu once asked, as on the ground, and sets a silent stage. The use takes `message`, its box; `<SecondPlace>` works here.
+**PLAYED 2026-11-04, probe `duo_delvetest_r2`, his "yup worked that time": radio at the box, the use put her aboard, he talked to her below decks, landed at Akila, paid.** A `boardspace` Delve of two beats, a `use` then a `ride`. Nobody stands in orbit, so the ride carries its own `person`, `greeting` and `exchanges` (no `rider`), `place.second.settlement` names the city, and `at` is `AutofillGeneric01`. Using the object creates her at the ship's own passenger marker (`HomeShipPassengerMarker`, vanilla's `DebugAddPassengers`), and she is a passenger from that moment: the objective is already the city. Her talk is there if he walks back to her and nothing waits on it, so a player who never speaks to her still finishes. `exchanges[0]` drops off the menu once asked, as on the ground, and sets a silent stage. The use takes `message`, its box; `<SecondPlace>` works here.
 
 ---
 

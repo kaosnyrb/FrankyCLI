@@ -164,8 +164,8 @@ namespace FrankyCLI
             /// closing reply must set something; nothing waits on it.
             /// The city is new to this shell, which has no second place: a location alias pinned as the ground build pins one,
             /// and the destination marker filled inside it, both as played on duo_delvetest_r1.
-            /// What it removes when the quest ends: she is a created ref no alias will clean up, so the completing stage flags
-            /// her for deletion and a turn-down takes her off the ship and deletes her.
+            /// What it removes when the quest ends: a turn-down takes her off the ship and deletes her; a landing leaves her in the
+            /// city, a non-persistent ref the game clears with the cell.
             /// </summary>
             internal static int Rescue(StarfieldMod myMod, Quest clone, Template t, Recipe r,
                                        IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Dictionary<string, FormKey> markers, BeatsMade bm,
@@ -247,7 +247,10 @@ namespace FrankyCLI
                     $"{script}.AddPassenger(Alias_Beat2Person)",
                     $"SetObjectiveDisplayed({rideObjective})",
                 };
-                code[t.completeStage] = new() { "Alias_Beat2Person.GetRef().Delete()", $"SetObjectiveCompleted({rideObjective})" };
+                // ⛔ NOT deleted here (his play of r2, 2026-11-04: "Didn't see her get off the ship this time"). This stage runs as she
+                // leaves the ship, so a Delete() took her with it; r1, which had none, showed her walking off. PlaceActorAtMe makes
+                // a non-persistent ref, so the game clears her with the cell once the quest lets go.
+                code[t.completeStage] = new() { $"SetObjectiveCompleted({rideObjective})" };
                 code[BoardFailStage] = new()
                 {
                     "Actor aboard = Alias_Beat2Person.GetActorRef()",

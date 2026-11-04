@@ -1187,7 +1187,7 @@ namespace FrankyCLI
                     fail += VerifyRide(q, r, bm, (int)(q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.Name == "FinalLocation")?.ID ?? 0));
                     string rideSrc = File.ReadAllText(bm.PscPath);
                     fail += Check("rescue: she is created at the ship's passenger marker", rideSrc.Contains("HomeShipPassengerMarker.GetRef().PlaceActorAtMe(Rider)").ToString(), "True");
-                    fail += Check("rescue: she is deleted when the quest ends", rideSrc.Contains("Alias_Beat2Person.GetRef().Delete()").ToString(), "True");
+                    fail += Check("rescue: a turn-down deletes her, a landing does not", (rideSrc.Contains("aboard.Delete()") && !rideSrc.Contains("Alias_Beat2Person.GetRef().Delete()")).ToString(), "True");
                 }
                 else
                 {
