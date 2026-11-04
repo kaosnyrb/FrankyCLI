@@ -7,6 +7,7 @@
   "author": "jessica",
   "source": "his 2026-10-29 22:08 \"ok now lets look at eve combat missions\", then 22:09 \"yup\"",
   "_note": [
+    "CARD BY VANCE OKONKWO-REYES (2026-11-04, his: 'Each mission is set by a different person, we should use pennames'; no payer label or payment line, his 'redundant noise'). Was: Private Contract. Plant a tracker on the ship at the <Place> on <Planet>, then leave. Payment on contract completion.",
     "THE COMBAT FAMILY, 8: RECON. Plan: home-office office/projects/delves/combat-family.md.",
     "EVE's recon missions: reach the point and leave; the fight is optional. Plant a tracker, then get clear.",
     "STAND-INS: a landed ship static (model); beat type 'escape' (done at a distance from the site). Eliza's. Pay: med."
@@ -24,7 +25,7 @@
   "prose": {
     "name": "Sabotage: Tracker at the <Place> on <Planet>",
     "briefing": "A crew's ship is down at the <Place>. Someone wants a tracker on it, and the crew none the wiser.",
-    "card": "Private Contract. Plant a tracker on the ship at the <Place> on <Planet>, then leave. Payment on contract completion."
+    "card": "Ship on the ground at the <Place>. Put a tracker on it and leave. Nobody sees you. No shooting."
   },
   "beats": [
     {

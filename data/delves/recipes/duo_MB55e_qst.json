@@ -7,6 +7,7 @@
   "author": "jessica, as Vic Tarrant",
   "source": "his 2026-10-31 07:25: \"Overheard on like a data purge, so computer has stuff you need to clear\", after my list of variants for the same gameplay (07:18 \"so what other variants could we do with the same gameplay family\")",
   "_note": [
+    "CARD BY AOI NAKAGAWA (2026-11-04, his: 'Each mission is set by a different person, we should use pennames'; no payer label or payment line, his 'redundant noise'). Was: Private Contract. Purge the owners' records from the data core at the <Place> on <Planet>. Payment on contract completion.",
     "THE OVERHEARD VARIANT OF THE RUNAWAY PLANT'S GAMEPLAY: same beats (use a terminal, hold it while it runs), a different job and a different voice. The terminal purges the owners' records, which the site's occupiers are copying off to sell; the only voice is one of the occupiers on their own open channel, which the player overhears. The first Delve where the enemy has the voice.",
     "PEN NAME: home-office office/pennames/vic-tarrant.json. Her heat checks do not apply; her voice does: level, dry, faintly amused, unimpressed, a shift being run. Natural English with contractions (card 20261024-103920), no telegraphese.",
     "Faction unpinned on purpose: every word holds for whoever the site rolled. Nothing names a faction, a person or a currency; 'sell' and 'our week' hold for any crew.",
@@ -27,7 +28,7 @@
   "prose": {
     "name": "Sabotage: Data Purge on <Planet>",
     "briefing": "The <Place>'s owners left their records on its data core when the crew fled, and whoever has the site now is copying them off to sell. The owners want the core purged before the copy finishes.",
-    "card": "Private Contract. Purge the owners' records from the data core at the <Place> on <Planet>. Payment on contract completion."
+    "card": "Our records are on the data core at the <Place>. Mostly payroll. Not that it matters. Purge it before whoever's there finishes copying it."
   },
   "beats": [
     {
