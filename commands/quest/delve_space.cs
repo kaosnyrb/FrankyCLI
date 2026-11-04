@@ -120,11 +120,12 @@ namespace FrankyCLI
                 if (b.ask is BeatAsk ask)
                 {
                     if (!PlainBoard(r, t)) Fatal($"beat {i + 1} sets ask; only a plain one-beat boardspace use is built (OT-9J), so it would be silently ignored.");
-                    if (b.journal != null || b.say != null) Fatal($"beat {i + 1} sets ask and a journal or say; each answer is its own ending and owns its journal, so these would be silently ignored.");
+                    if (b.journal != null || b.say != null || b.reward != null) Fatal($"beat {i + 1} sets ask and a journal, say or reward; each answer is its own ending and owns its journal and pay, so these would be silently ignored.");
                     if (string.IsNullOrWhiteSpace(ask.title) || string.IsNullOrWhiteSpace(ask.text)) Fatal($"beat {i + 1}'s ask needs a title and text.");
                     if (ask.answers.Count < 2 || ask.answers.Count > MaxAnswers) Fatal($"beat {i + 1}'s ask has {ask.answers.Count} answers; a choice is 2 to {MaxAnswers} buttons.");
                     foreach (var a in ask.answers)
-                        if (string.IsNullOrWhiteSpace(a.label) || string.IsNullOrWhiteSpace(a.journal)) Fatal($"beat {i + 1}'s ask has an answer with no label or no journal; a button is a label and an ending.");
+                        if (string.IsNullOrWhiteSpace(a.label) || string.IsNullOrWhiteSpace(a.journal) || string.IsNullOrWhiteSpace(a.reward))
+                            Fatal($"beat {i + 1}'s ask has an answer with no label, journal or reward; a button is a label and an ending, and an unset pay would be the shell's easy, which nobody chose.");
                     if (ask.answers.Select(a => a.label).Distinct().Count() != ask.answers.Count) Fatal($"beat {i + 1}'s ask has two buttons with one label.");
                 }
             }
@@ -429,13 +430,25 @@ namespace FrankyCLI
                 var done = clone.Stages!.FirstOrDefault(x => x.Index == t.completeStage);
                 if (done == null || done.LogEntries.Count != 1 || done.LogEntries[0].Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest) != true)
                 { Console.WriteLine($"REFUSED: stage {t.completeStage} is not a single-entry completing stage to copy an ending from."); return 1; }
-                done.LogEntries[0].Entry = Expand(asked.answers[0].journal!, t);
                 for (int j = 1; j < endings.Count; j++)
                 {
                     var copy = done.DeepCopy();
                     copy.Index = (ushort)endings[j];
-                    copy.LogEntries[0].Entry = Expand(asked.answers[j].journal!, t);
                     clone.Stages.Add(copy);
+                }
+                // THE PAY IS ON THE STAGE, each ending's own (his play of duo_delvetest_c1, 2026-11-04: a med recipe, whose tier
+                // sat on the script's globals, showed and paid the stage's easy 1250).
+                for (int j = 0; j < endings.Count; j++)
+                {
+                    var en = clone.Stages.First(x => x.Index == endings[j]);
+                    en.LogEntries[0].Entry = Expand(asked.answers[j].journal!, t);
+                    var rds = en.LogEntries[0].StageCompleteDatas.SelectMany(c => c.RewardDatas).ToList();
+                    if (rds.Count != 1) { Console.WriteLine($"REFUSED: stage {en.Index} carries {rds.Count} reward entries; this tool writes exactly one."); return 1; }
+                    var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{asked.answers[j].reward}");
+                    var xg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_xp_{asked.answers[j].reward}");
+                    if (cg == null || xg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{asked.answers[j].reward} / duo_reward_xp_{asked.answers[j].reward}."); return 1; }
+                    rds[0].BonusCredits.SetTo(cg.FormKey);
+                    rds[0].XpAwarded.SetTo(xg.FormKey);
                 }
                 foreach (var st in new[] { AskStage, silent })
                 {
@@ -723,6 +736,7 @@ namespace FrankyCLI
                         });
                 // THE PAY goes onto the board's reward globals, which the card also shows (the ground board's rule: never onto
                 // the stage, or it pays twice). Absent, his MB01a's own stand (duo_reward_creds_easy).
+                // ⚠ FALSIFIED 2026-11-04 (his play of duo_delvetest_c1, plan OT-9K): a med tier here showed and paid the stage's easy 1250.
                 if ((two ? r.beats[1] : beat).reward is string tier)
                 {
                     var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{tier}");
@@ -966,6 +980,10 @@ namespace FrankyCLI
                 fail += Check($"answer {j + 1}'s stage {st} completes objective {objective} and pays once",
                               $"{b.Contains($"SetObjectiveCompleted({objective})")} {b.Split("kmyQuest.MissionComplete()").Length - 1}", "True 1");
                 fail += Check($"the ask's fragment sets stage {st}", asks.Contains($"SetStage({st})").ToString(), "True");
+                var rd = le?.StageCompleteDatas.SelectMany(c => c.RewardDatas).SingleOrDefault();
+                fail += Check($"answer {j + 1}'s stage {st} pays its own tier",
+                              $"{m.Globals.FirstOrDefault(g => g.FormKey == rd?.BonusCredits.FormKey)?.EditorID} {m.Globals.FirstOrDefault(g => g.FormKey == rd?.XpAwarded.FormKey)?.EditorID}",
+                              $"duo_reward_creds_{ask.answers[j].reward} duo_reward_xp_{ask.answers[j].reward}");
             }
             int silent = t.completeStage + AskCompleteOffset;
             var qs = q.VirtualMachineAdapter?.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase));

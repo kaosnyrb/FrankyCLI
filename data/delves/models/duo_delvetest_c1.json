@@ -1,5 +1,5 @@
 {
-  "FormKey": "0048FA:du_overtime.esm",
+  "FormKey": "0048FD:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -153,8 +153,8 @@
               "QSRD": "01000000",
               "RewardDatas": [
                 {
-                  "XpAwarded": "00081D:du_overtime.esm",
-                  "BonusCredits": "000831:du_overtime.esm",
+                  "XpAwarded": "00081E:du_overtime.esm",
+                  "BonusCredits": "000820:du_overtime.esm",
                   "Rewards": [],
                   "Conditions": []
                 }
@@ -183,8 +183,8 @@
               "QSRD": "01000000",
               "RewardDatas": [
                 {
-                  "XpAwarded": "00081D:du_overtime.esm",
-                  "BonusCredits": "000831:du_overtime.esm",
+                  "XpAwarded": "00081F:du_overtime.esm",
+                  "BonusCredits": "00082C:du_overtime.esm",
                   "Rewards": [],
                   "Conditions": []
                 }
@@ -422,7 +422,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "0048FB:du_overtime.esm",
+        "Object": "0048FE:du_overtime.esm",
         "AliasID": 12,
         "Create": 0,
         "Level": 2
@@ -575,7 +575,7 @@
           "Name": "AskMessage",
           "Flags": 1,
           "Object": {
-            "Form": "0048FC:du_overtime.esm",
+            "Form": "0048FF:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -652,7 +652,7 @@
                   "Name": "targetLocationAlias",
                   "Flags": 1,
                   "Object": {
-                    "Form": "0048FA:du_overtime.esm",
+                    "Form": "0048FD:du_overtime.esm",
                     "Alias": 8,
                     "Unused": 0
                   }
@@ -693,7 +693,7 @@
             "Name": "TargetSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "0048FA:du_overtime.esm",
+              "Form": "0048FD:du_overtime.esm",
               "Alias": 8,
               "Unused": 0
             }
@@ -703,7 +703,7 @@
             "Name": "TargetPlanetLocation",
             "Flags": 1,
             "Object": {
-              "Form": "0048FA:du_overtime.esm",
+              "Form": "0048FD:du_overtime.esm",
               "Alias": 2,
               "Unused": 0
             }
@@ -713,7 +713,7 @@
             "Name": "PlayerShip",
             "Flags": 1,
             "Object": {
-              "Form": "0048FA:du_overtime.esm",
+              "Form": "0048FD:du_overtime.esm",
               "Alias": 9,
               "Unused": 0
             }
@@ -733,7 +733,7 @@
             "Name": "PrimaryRef",
             "Flags": 1,
             "Object": {
-              "Form": "0048FA:du_overtime.esm",
+              "Form": "0048FD:du_overtime.esm",
               "Alias": 3,
               "Unused": 0
             }
@@ -749,7 +749,7 @@
             "Name": "SpaceMapMarker",
             "Flags": 1,
             "Object": {
-              "Form": "0048FA:du_overtime.esm",
+              "Form": "0048FD:du_overtime.esm",
               "Alias": 16,
               "Unused": 0
             }
@@ -759,7 +759,7 @@
             "Name": "RewardAmountGlobal",
             "Flags": 1,
             "Object": {
-              "Form": "000820:du_overtime.esm",
+              "Form": "000831:du_overtime.esm",
               "Alias": -1,
               "Unused": 0
             }
@@ -769,7 +769,7 @@
             "Name": "RewardAmountGlobalActual",
             "Flags": 1,
             "Object": {
-              "Form": "000820:du_overtime.esm",
+              "Form": "000831:du_overtime.esm",
               "Alias": -1,
               "Unused": 0
             }
@@ -779,7 +779,7 @@
             "Name": "PlayerStarSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "0048FA:du_overtime.esm",
+              "Form": "0048FD:du_overtime.esm",
               "Alias": 0,
               "Unused": 0
             }
@@ -802,7 +802,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0048FA:du_overtime.esm",
+            "Form": "0048FD:du_overtime.esm",
             "Alias": 3,
             "Unused": 0
           }
@@ -854,7 +854,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0048FA:du_overtime.esm",
+            "Form": "0048FD:du_overtime.esm",
             "Alias": 16,
             "Unused": 0
           }

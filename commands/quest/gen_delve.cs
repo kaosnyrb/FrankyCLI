@@ -829,8 +829,8 @@ namespace FrankyCLI
         private sealed class BeatMessage { public string? title { get; set; } public string? text { get; set; } }
         /// <summary>The box of a beat's ask (OT-9J). answers is 2 to MaxAnswers, in button order.</summary>
         private sealed class BeatAsk { public string? title { get; set; } public string? text { get; set; } public List<BeatAnswer> answers { get; set; } = new(); }
-        /// <summary>One button: its label, and the ending's journal line. No say yet: an ending's voice waits on the probe.</summary>
-        private sealed class BeatAnswer { public string? label { get; set; } public string? journal { get; set; } }
+        /// <summary>One button: its label, the ending's journal line, and its pay tier (easy / med / hard). No say yet.</summary>
+        private sealed class BeatAnswer { public string? label { get; set; } public string? journal { get; set; } public string? reward { get; set; } }
 
         private static readonly JsonSerializerOptions JsonOpts = new()
         { PropertyNameCaseInsensitive = true, ReadCommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true };

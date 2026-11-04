@@ -31,11 +31,10 @@
         "title": "Drifting Container",
         "text": "Test box. Pick a button: each one is its own ending.",
         "answers": [
-          { "label": "First button", "journal": "Test journal: I pressed the FIRST button at the container over <Planet>." },
-          { "label": "Second button", "journal": "Test journal: I pressed the SECOND button at the container over <Planet>." }
+          { "label": "First button", "journal": "Test journal: I pressed the FIRST button at the container over <Planet>.", "reward": "med" },
+          { "label": "Second button", "journal": "Test journal: I pressed the SECOND button at the container over <Planet>.", "reward": "hard" }
         ]
-      },
-      "reward": "med"
+      }
     }
   ]
 }

@@ -1410,6 +1410,7 @@ namespace FrankyCLI
                 {
                     // A board mission pays through the board (MissionComplete -> MissionParent), off the script's reward
                     // globals, which the card also shows: so a tier goes THERE, and never onto the stage, or it pays twice.
+                    // ⚠ FALSIFIED 2026-11-04 (his play of duo_delvetest_c1, plan OT-9K): a med tier here showed and paid the stage's easy 1250.
                     // Absent, the base's own globals stand (MB28a: duo_reward_creds_easy), as a slate Delve keeps its base's stage pay.
                     var qs = vma.Scripts.First(s => s.Name == t.questScript);
                     foreach (var b in paid)
