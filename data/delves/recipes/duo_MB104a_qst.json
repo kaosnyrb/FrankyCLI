@@ -7,7 +7,8 @@
   "author": "jessica",
   "source": "his 2026-10-28 20:54 \"thinking we need more space cargo missions\", then \"all these sound good\" to five seeds",
   "_note": [
-    "PLAYER'S PART (2026-11-04, his: 'MB104a should have you rescue her'): open the container and take her aboard as a guest, then fly her to a city. The built beats (the recovery beacon) stand until orbit pickup exists; the rescue beats are in letter office/correspondence/2026-11-04-jessica-eliza-mb104a-is-a-rescue.md. CARD in the owners' hand, no payer label or payment line (his 11-04). HER NAME: Rosie Marlow (the person's label aboard, never spoken; Eliza's catch 11-04).",
+    "PLAYER'S PART (2026-11-04, his: 'MB104a should have you rescue her'): open the container and take her aboard as a guest, then fly her to a city. Built as the rescue 2026-11-04 (Eliza), the beats from letter office/correspondence/2026-11-04-jessica-eliza-mb104a-is-a-rescue.md; proven on duo_delvetest_r2. CARD in the owners' hand, no payer label or payment line (his 11-04). HER NAME: Rosie Marlow (the person's label aboard, never spoken; Eliza's catch 11-04).",
+    "Eliza, 2026-11-04: the lines below about a recovery beacon, one beat and the closing say are the 11-03 build's, retired by the rescue; kept as history.",
     "SPACE CARGO 5: THE WRONG MANIFEST. A container adrift in orbit, listed as machine parts. Pick it up.",
     "THE HOOK: someone is in it, and she is the radio. The broadcast is her, calling from inside the box when the player",
     "comes within range, so the speaker is the stowaway and the card is the owners' (unvoiced). One beat; the closing",
@@ -16,7 +17,11 @@
   ],
   "place": {
     "altitude": 32.0,
-    "_altitude": "His 2026-10-27 32 (MB01's band top, 'feels cool'), as remote_qst20a."
+    "_altitude": "His 2026-10-27 32 (MB01's band top, 'feels cool'), as remote_qst20a.",
+    "second": {
+      "settlement": "Akila City"
+    },
+    "_second": "Eliza's pick for the build, the city r2 played. Hers to change: 'Akila City' or 'New Atlantis'."
   },
   "prose": {
     "name": "Recovery: Lost Container over <Planet>",
@@ -27,15 +32,51 @@
     {
       "type": "use",
       "at": "se_GeneralMarkerLocRef01",
-      "objective": "Secure the drifting container over <Planet>",
-      "journal": "The drifting container over <Planet> wasn't machine parts. There's a woman inside it, four days in. I fixed a recovery beacon to the hull so the owners' tug can find her.",
+      "objective": "Open the drifting container over <Planet>",
       "model": "Meshes\\ships\\modules\\cargo\\smod\\smod_cargo_panoptes_degama-1000_port.nif",
       "_model": "Eliza, 2026-11-03, his play: wreckcargocrate01 'is a ground crate not a space one, looks wrong as theres stuff on the ground next to it'. This is vanilla's own drifting space container, Loot_Space_CargoModule01 'Cargo Module' (about 8 x 4 x 3 m). Archived, so the build keeps the base's bounds, as MB47a's satellite does.",
       "name": "Drifting Cargo Container",
-      "say": [
-        "Something just went onto the hull and started ticking. That's a beacon, isn't it? So somebody's coming, and now they'll know where to look. Go on. I've done four days in here. I can do one more."
+      "message": {
+        "title": "Drifting Cargo Container",
+        "text": "The lock is on the outside. You open it, and she climbs straight across into your airlock."
+      }
+    },
+    {
+      "type": "ride",
+      "at": "AutofillGeneric01",
+      "place": "second",
+      "objective": "Fly her to <SecondPlace>",
+      "journal": "The container over <Planet> wasn't machine parts. A woman had spent four days in it. I took her aboard and flew her to <SecondPlace>.",
+      "reward": "med",
+      "person": {
+        "name": "Rosie Marlow",
+        "template": "UC_NA_MASTWorkerFemale03",
+        "voice": "GenericFemale01",
+        "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
+      },
+      "greeting": [
+        "I've never been so glad to see the inside of someone else's ship. I'll stay out of your way. Where do you want me?"
       ],
-      "reward": "med"
+      "exchanges": [
+        {
+          "prompt": "Sit anywhere. I'll get you to a city.",
+          "reply": [
+            "Anywhere's fine. Thank you."
+          ]
+        },
+        {
+          "prompt": "How did you end up in a cargo box?",
+          "reply": [
+            "I needed a way off that rock, and the box was going. It seemed like a good idea for about an hour."
+          ]
+        },
+        {
+          "prompt": "Four days. Are you hurt?",
+          "reply": [
+            "Hungry. Stiff. Very tired of the dark. Nothing a city won't fix."
+          ]
+        }
+      ]
     }
   ],
   "speaker": {
