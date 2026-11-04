@@ -359,7 +359,7 @@ namespace FrankyCLI
                 case "npc":
                     foreach (var rec in mod.Npcs)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
-                        { DumpRecord(rec, "Npc", cache); DumpNpcExtras(rec, allMods); found++; }
+                        { DumpRecord(rec, "Npc", cache); DumpNpcExtras(rec, allMods, cache); found++; }
                     break;
                 case "location":
                     foreach (var rec in mod.Locations)
@@ -2378,7 +2378,7 @@ namespace FrankyCLI
             return found;
         }
 
-        private static void DumpNpcExtras(INpcGetter npc, List<IStarfieldModGetter>? allMods)
+        private static void DumpNpcExtras(INpcGetter npc, List<IStarfieldModGetter>? allMods, ILinkCache? cache)
         {
             // Resolve a FormKey to its EditorID by scanning loaded mods.
             string Resolve(FormKey fk)
@@ -2461,7 +2461,70 @@ namespace FrankyCLI
                 }
             }
 
+            DumpNpcAppearance(npc, cache);
             Console.WriteLine();
+        }
+
+        /// The face and body, every entry with its values (his ask, 2026-11-04: "extend gen_inspect",
+        /// so quest NPCs can be designed by the generator rather than sculpted by hand in the CK).
+        ///
+        /// ⛔ THE GENERIC DUMP PRINTED THESE AS `[37 items]` OVER A COLUMN OF
+        /// `NpcMorphBlendBinaryOverlay`, so Sarah Morgan's whole face read as a count and a class
+        /// name: the same type-name-where-the-value-should-be defect `Render` was written to close,
+        /// one level further in. These lists nest (a morph carries its own list), so they get a
+        /// bounded deep render and NO item cap, because the 37th slider is as much the face as the 1st.
+        private static void DumpNpcAppearance(INpcGetter npc, ILinkCache? cache)
+        {
+            Console.WriteLine("--- Npc Appearance ---");
+            Console.WriteLine($"  Race: {Render(npc.Race, cache)}");
+            Console.WriteLine($"  SkinToneIndex: {npc.SkinToneIndex}   Skin: {Render(npc.Skin, cache)}");
+            Console.WriteLine($"  HairColor: {npc.HairColor}   FacialHairColor: {npc.FacialHairColor}   EyebrowColor: {npc.EyebrowColor}");
+            Console.WriteLine($"  EyeColor: {npc.EyeColor}   TeethColor: {npc.TeethColor}   JewelryColor: {npc.JewelryColor}");
+            Console.WriteLine($"  Weight: {RenderDeep(npc.Weight, cache, 2)}");
+            Console.WriteLine($"  BodyMorphRegionValues: {RenderDeep(npc.BodyMorphRegionValues, cache, 2)}");
+            Console.WriteLine($"  HeadParts [{npc.HeadParts.Count}]:");
+            foreach (var hp in npc.HeadParts) Console.WriteLine($"    {Render(hp, cache)}");
+
+            void List(string name, System.Collections.IEnumerable? items)
+            {
+                var all = items?.Cast<object>().ToList() ?? new List<object>();
+                Console.WriteLine($"  {name} [{all.Count}]:");
+                for (int i = 0; i < all.Count; i++)
+                    Console.WriteLine($"    [{i}] {RenderDeep(all[i], cache, 3)}");
+            }
+            List("FaceMorphs", npc.FaceMorphs);
+            List("MorphBlends", npc.MorphBlends);
+            List("FaceDialPositions", npc.FaceDialPositions);
+            List("Tints", npc.Tints);
+        }
+
+        /// `Render` with recursion: objects expand to `{ Prop=value }` and lists to `[a, b]`, down to
+        /// `depth` levels, empties skipped exactly as `Render` skips them. Bounded on purpose, for the
+        /// reason `Render` gives: an unbounded walk over a graph with FormLinks in it is a browser.
+        private static string RenderDeep(object? v, ILinkCache? cache, int depth)
+        {
+            if (v == null) return "null";
+            if (v is IFormLinkGetter || v is string || v.GetType().IsPrimitive || v.GetType().IsEnum) return Render(v, cache);
+            if (v is System.Collections.IEnumerable en)
+            {
+                var parts = new List<string>();
+                foreach (var item in en) parts.Add(depth > 0 ? RenderDeep(item, cache, depth - 1) : Render(item, cache, expand: false));
+                return $"[{string.Join(", ", parts)}]";
+            }
+            var t = v.GetType();
+            string str = v.ToString() ?? "";
+            if (str != t.FullName && str != t.Name) return str;
+            if (depth <= 0) return t.Name.Replace("BinaryOverlay", "");
+            var bits = new List<string>();
+            foreach (var p in t.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (p.GetIndexParameters().Length > 0 || p.Name == "Registration" || p.Name == "StaticRegistration") continue;
+                object? pv;
+                try { pv = p.GetValue(v); } catch { continue; }
+                if (pv == null || IsEmptyValue(pv)) continue;
+                bits.Add($"{p.Name}={RenderDeep(pv, cache, depth - 1)}");
+            }
+            return bits.Count == 0 ? "{}" : "{ " + string.Join(", ", bits) + " }";
         }
 
         /// <summary>
