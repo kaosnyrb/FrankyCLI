@@ -7,7 +7,7 @@
   "author": "jessica",
   "source": "his 2026-10-29 21:56 \"now look at the indurstrial missions in eve online\", then 22:04 \"yup go ahead. We have the bones of 4 with the terrabrew missions. They ask you to deliver the items with no mention how to get\"",
   "_note": [
-    "PLAYER'S PART (2026-11-04, his ask; beats not yet changed, proposal in chat): get the core out of a site somebody else holds: lifting it trips the site's alarm and the holders' friends come for it (a hold after the pickup). The site's own guards are the first half, as MB54a's dungeon was.",
+    "PLAYER'S PART (2026-11-04, his ask, beats written on his 'sounds good, write the beats'): get the core out of a site somebody else holds: the site's own guards first (as MB54a's dungeon), then lifting the core sets off the alarm and their friends come for it, two waves held at the core.",
     "THE INDUSTRY FAMILY, 2: THE DATA CORE. Plan: home-office office/projects/delves/industry-family.md.",
     "EVE's relic hacking that feeds invention: a research core out of a hostile site, to a lab. Buildable today",
     "(pickup, deliver at a second place). Pay: med."
@@ -47,9 +47,27 @@
       "name": "Data Core",
       "item": "Data Core",
       "objective": "Recover the data core from the <Place>",
-      "journal": "I've got the data core from the <Place>. I need to take it to the lab at the <SecondPlace>.",
+      "journal": "I've got the data core from the <Place>, and lifting it set off the site's alarm. I need to hold out until whoever answers it stops coming.",
       "say": [
-        "That's the core. Bring it to the lab."
+        "That's the core, and that's their alarm going off. Find some cover and let them come to you."
+      ]
+    },
+    {
+      "type": "hold",
+      "at": "REContainerLocRef",
+      "objective": "Fight off the reinforcements at the <Place>",
+      "journal": "Lifting the core brought the site's people running, and I fought them off. Now I need to take the core to the lab at the <SecondPlace>.",
+      "waves": 2,
+      "size": [
+        3,
+        5
+      ],
+      "style": [
+        "squad",
+        "horde"
+      ],
+      "say": [
+        "That's the last of them. Bring the core in while it's quiet."
       ]
     },
     {

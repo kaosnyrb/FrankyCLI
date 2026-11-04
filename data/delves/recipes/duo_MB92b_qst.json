@@ -25,7 +25,7 @@
     "card": "Comms Office Contract. A faint signal is coming from the <Place> on <Planet>. Find its source. Payment on completion."
   },
   "_note": [
-    "PLAYER'S PART (2026-11-04, his ask; beats not yet changed, proposal in chat): read a camp that is gone: the recorder plus two more things left behind, found by looking in any order, each a message of what he sees. Nothing is explained, as Frances ruled.",
+    "PLAYER'S PART (2026-11-04, his ask, beats written on his 'sounds good, write the beats'): read a camp that is gone. The recorder first, then two things the camp left, found by looking in any order, then back to the recorder to switch it off: the ending is his hand on the switch. Nothing is explained, as Frances ruled.",
     "FAINT SIGNAL: a new board family, his Trello card. Every letter has the SAME card, title and first journal, so the board never says which one he has drawn; what changes is what is at the source. The broadcast is the signal itself, heard on arrival.",
     "⛔ FAMILY RULE: no letter's broadcast may hint at what the source is (card 20261031-080934): the survivor, the loop, the coffee and the bait must all sound like someone who wants to be found.",
     "The source is a placed beacon (outpost beacon01, Overtime's own, on 7 recipes; Satellite_Beacon is ruled out on land). Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
@@ -42,9 +42,46 @@
       "name": "Field Recorder",
       "message": {
         "title": "Field Recorder",
-        "text": "The recorder has sent the same message every six hours. The first one is four years old. You switch it off."
+        "text": "The recorder has sent the same message every six hours. The first one is four years old."
       },
-      "journal": "The signal was a recording on a loop at the <Place>, four years old. I switched it off.",
+      "journal": "The signal is a recording on a loop at the <Place>, four years old. I should look around the camp before I switch it off."
+    },
+    {
+      "type": "use",
+      "group": "camp",
+      "at": "REMarkerMediumLocRef",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "_model": "A camp stove or cook pot would say it better; Kim's shelf. The field terminal is the stand-in.",
+      "name": "Camp Stove",
+      "objective": "Look around the survey camp at the <Place>",
+      "message": {
+        "title": "Camp Stove",
+        "text": "A pot on the stove, scrubbed and turned upside down to dry. Four mugs beside it."
+      },
+      "journal": "I found a pot scrubbed and left to dry, with four mugs beside it."
+    },
+    {
+      "type": "use",
+      "group": "camp",
+      "at": "REContainerLocRef",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Survey Locker",
+      "message": {
+        "title": "Survey Locker",
+        "text": "Four sets of field gear, folded. The survey charts are rolled and labelled, and the last one is blank."
+      },
+      "journal": "I found their gear folded in the locker, and the last survey chart blank."
+    },
+    {
+      "type": "use",
+      "returnTo": 1,
+      "at": "RECenterLocRef",
+      "objective": "Switch off the recorder at the <Place>",
+      "message": {
+        "title": "Field Recorder",
+        "text": "You switch it off."
+      },
+      "journal": "The signal was a recording on a loop at the <Place>, four years old. I looked around the camp, and then I switched it off.",
       "reward": "med"
     }
   ],

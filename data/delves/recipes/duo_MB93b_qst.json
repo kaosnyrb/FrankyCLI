@@ -7,7 +7,7 @@
   "author": "jessica",
   "source": "his 2026-10-31 12:48: \"general idea for missioms, meeting up with someone\", then \"yup write em\" 12:51",
   "_note": [
-    "PLAYER'S PART (2026-11-04, his ask; beats not yet changed, proposal in chat): take the kit back from the scavenger going through it: she left it out, someone found it first (a defeat with a small gang before the pickup). Breaks Frances's 'nothing hostile'; his call.",
+    "PLAYER'S PART (2026-11-04, his ask, beats written on his 'sounds good, write the beats'): take the kit back: she left it out, and scavengers found it first. A small clear at the kit, under the same 'Meet the contact' objective, so the no-show is still a surprise; then the note. Overrides Frances's 'nothing hostile' on his 11-04 yes.",
     "THE MEET-UP: a new board family, his idea. The job is turning up; the story is who is there and what they want. Talks at a placed person are built, so most letters need nothing new.",
     "Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
     "LETTER b: THE NO-SHOW: nobody is there. Her kit is, with a note: her sister's having a baby and she has the only ship. Nothing hostile, nothing explained further.",
@@ -31,9 +31,25 @@
   },
   "beats": [
     {
+      "type": "clear",
+      "at": "REMarkerMediumLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 2,
+        "max": 3,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Meet the contact at the <Place>",
+      "journal": "My contact wasn't at the <Place>. Scavengers were, going through a kit she'd left. They're dead, and I need to collect the kit."
+    },
+    {
       "type": "pickup",
       "at": "REMarkerMediumLocRef",
-      "objective": "Meet the contact at the <Place>",
+      "objective": "Collect the contact's kit",
       "journal": "My contact wasn't there. She'd left the kit with a note: her sister was having a baby, and she was the only one with a ship. I took the kit.",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Contact's Kit",

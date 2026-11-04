@@ -7,7 +7,7 @@
   "author": "jessica",
   "source": "his 2026-10-29 06:14 \"are we making too many 'special' ones? Wondering how we make daily driver ones people wouldnt mind replaying\", then \"lets try some plain first\"",
   "_note": [
-    "PLAYER'S PART (2026-11-04, his ask; beats not yet changed, proposal in chat): search the pickup site: the crate burst on landing and the parts are strewn across it, so three are found by looking (a group of pickups, any order). Still a common: no reveal, nobody shoots.",
+    "PLAYER'S PART (2026-11-04, his ask, beats written on his 'sounds good, write the beats'): search the pickup site: the crate split open when it was dropped and the parts are across the ground, so three lots are found by looking (a group of uses, any order; group takes uses only). Still a common: no reveal, nobody shoots.",
     "PLAIN 1: THE HAUL. Pick up a crate of parts at one quiet site and take it to another. Nobody shoots.",
     "A COMMON, NOT A SPECIAL: written to survive the tenth play. No reveal, no secret, no twist; the issuer has a small",
     "ordinary stake and says it in one short line. What changes on a replay is the place, the drive and what is there",
@@ -41,30 +41,54 @@
   },
   "prose": {
     "name": "Hauling: Spare Parts on <Planet>",
-    "briefing": "A crate of spare parts is waiting at the <Place>, and the <SecondPlace> has been short of them for a week.",
-    "card": "Private Contract. Collect a crate of spare parts from the <Place> and deliver it to the <SecondPlace>. Payment on delivery."
+    "briefing": "A crate of spare parts split open when it was dropped at the <Place>, and the <SecondPlace> has been short of them for a week.",
+    "card": "Private Contract. Gather a split crate of spare parts at the <Place> and deliver them to the <SecondPlace>. Payment on delivery."
   },
   "beats": [
     {
-      "type": "pickup",
-      "at": "REContainerLocRef",
-      "replace": true,
-      "objective": "Collect the spare parts at the <Place>",
-      "journal": "I picked up a crate of spare parts at the <Place>. I need to take it to the <SecondPlace>.",
+      "type": "use",
+      "group": "parts",
+      "at": "RECenterLocRef",
       "model": "Meshes\\ccs\\wreckcargocrate01.nif",
-      "name": "Parts Crate",
-      "item": "Spare Parts Crate",
-      "say": [
-        "That's the one. Take it over, there's no rush on the road."
-      ]
+      "name": "Spilled Parts",
+      "objective": "Gather the spilled parts at the <Place>",
+      "message": {
+        "title": "Spilled Parts",
+        "text": "Half a box of couplings, most of them still in their wrappers. You pack them up."
+      },
+      "journal": "I found a box of couplings, most of them still wrapped."
     },
     {
-      "type": "deliver",
+      "type": "use",
+      "group": "parts",
+      "at": "REMarkerMediumLocRef",
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "name": "Spilled Parts",
+      "message": {
+        "title": "Spilled Parts",
+        "text": "Bolts across the ground, and one valve housing that rolled clear without a scratch. You pick up what you can."
+      },
+      "journal": "I picked up a spill of bolts and a valve housing that rolled clear."
+    },
+    {
+      "type": "use",
+      "group": "parts",
+      "at": "REContainerLocRef",
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "name": "Spilled Parts",
+      "message": {
+        "title": "Spilled Parts",
+        "text": "What's left of the crate, and under its lid the heavy parts that didn't roll. You load them."
+      },
+      "journal": "I loaded the heavy parts that stayed under the crate's lid."
+    },
+    {
+      "type": "use",
       "at": "REContainerLocRef",
       "place": "second",
       "replace": true,
       "objective": "Deliver the spare parts to the <SecondPlace>",
-      "journal": "I took a crate of spare parts from the <Place> to the <SecondPlace>, where they'd been short for a week.",
+      "journal": "I gathered a split crate of spare parts at the <Place> and took them to the <SecondPlace>, where they'd been short for a week.",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Parts Drop",
       "say": [
@@ -79,7 +103,7 @@
     "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
   },
   "broadcast": [
-    "There's a crate of parts waiting at the pickup. It's nothing special, but the people at the other end have been making do without it for a week."
+    "The crate came down hard at the pickup and split open. Gather up what you can find and take it over. They've been making do without it for a week."
   ],
   "_speech": "A supplier with a small, ordinary stake. Daniel; his ear decides."
 }

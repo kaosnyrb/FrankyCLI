@@ -7,7 +7,7 @@
   "author": "jessica",
   "source": "his 2026-10-29 21:43 \"look at the mining gameplay system of Eve online... What other missions could we do\", then 21:51 \"Write all these ideas down. My thinking is we build and if its not fun we tweak\"",
   "_note": [
-    "PLAYER'S PART (2026-11-04, his ask; beats not yet changed, proposal in chat): clear the workings: the dig was left when creatures moved in, and the ore crate is in among them (a creature clear before the pickup, 32a's shape).",
+    "PLAYER'S PART (2026-11-04, his ask, beats written on his 'sounds good, write the beats'): clear the workings: the crew pulled out when creatures moved into the dig, and the ore crate is in among them. 32a's clear, the predator list, then the haul.",
     "THE MINING FAMILY, 3: THE ORE RUN. Plan: home-office office/projects/delves/mining-family.md.",
     "EVE's courier mission with ore in the crate: 41a's haul, dig to refinery. Buildable today. Pay: easy."
   ],
@@ -20,7 +20,7 @@
         "LocTypeOE_ThemeCaveKeyword"
       ]
     },
-    "_theme": "A quiet worked site, residents alive and left alone.",
+    "_theme": "A quiet worked site. Nobody is placed there: the crew left when the creatures came.",
     "second": {
       "remote": true,
       "theme": {
@@ -35,10 +35,25 @@
   },
   "prose": {
     "name": "Hauling: Raw Ore on <Planet>",
-    "briefing": "A crate of raw ore is waiting at the <Place>, and the refinery at the <SecondPlace> has been idle without it.",
-    "card": "Private Contract. Collect a crate of raw ore from the <Place> and deliver it to the <SecondPlace>. Payment on delivery."
+    "briefing": "The crew at the <Place> pulled out when creatures moved into the workings, and left a crate of raw ore behind. The refinery at the <SecondPlace> has been idle without it.",
+    "card": "Private Contract. Clear the creatures out of the <Place> and deliver its raw ore to the <SecondPlace>. Payment on delivery."
   },
   "beats": [
+    {
+      "type": "clear",
+      "at": "REContainerLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_PreditorMegalist_A",
+        "min": 3,
+        "max": 5,
+        "species": "one"
+      },
+      "objective": "Clear the creatures out of the <Place>",
+      "journal": "The creatures that drove the crew out of the <Place> are dead. Now I need to find the ore crate they left.",
+      "say": [
+        "That's the workings clear. The crate should be right where the crew left it."
+      ]
+    },
     {
       "type": "pickup",
       "at": "REContainerLocRef",
@@ -65,7 +80,7 @@
       "say": [
         "That's in the intake. We can start up again."
       ],
-      "reward": "easy"
+      "reward": "med"
     }
   ],
   "speaker": {
@@ -74,7 +89,7 @@
     "elevenlabs": "7QTeMqXOsYj1AQaKLcrf"
   },
   "broadcast": [
-    "There's a crate of raw ore waiting at the dig. It's dirty and it's heavy, and the refinery's been idle waiting for it."
+    "There's a crate of raw ore at the dig. The crew pulled out when something moved into the workings, so go in ready for it."
   ],
   "_speech": "A common job's plain voice. 43a's voice as a stand-in; his ear decides."
 }
