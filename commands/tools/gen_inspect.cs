@@ -349,7 +349,13 @@ namespace FrankyCLI
                 case "activator":
                     foreach (var rec in mod.Activators)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
-                        { DumpRecord(rec, "Activator", cache); found++; }
+                        {
+                            DumpRecord(rec, "Activator", cache); found++;
+                            // 2026-11-05, BGSC-11890: the generic dump names "ObjectProperty" and hides what
+                            // it holds, and the Armillary's one property was the question.
+                            foreach (var p in rec.Properties ?? new List<IObjectPropertyGetter>())
+                                Console.WriteLine($"  Property: {p.ActorValue.FormKey} = {p.Value}");
+                        }
                     break;
                 case "light":
                     foreach (var rec in mod.Lights)
@@ -1312,7 +1318,9 @@ namespace FrankyCLI
                 string baseName = NameOf(po.Base.FormKey, cache);
                 Console.WriteLine($"    PlacedObject {po.FormKey} EditorID={po.EditorID}"
                                   + $" Base={po.Base.FormKey}{(baseName.Length > 0 ? " " + baseName : "")}"
-                                  + $" Pos={po.Position} Rot={po.Rotation}");
+                                  + $" Pos={po.Position} Rot={po.Rotation}"
+                                  // 2026-11-05: a ref's record flags decide whether it exists in play, and this line hid them.
+                                  + (po.MajorRecordFlagsRaw != 0 ? $" Flags=0x{po.MajorRecordFlagsRaw:X}" : ""));
                 if (po.MapMarker != null)
                 {
                     var mm = po.MapMarker;

@@ -217,13 +217,14 @@ namespace FrankyCLI
             // could legitimately be called "placeref" (gen_placeprim says the same in its own head).
             var pos = new List<string>();
             string? rotStr = null, edid = null;
-            bool dry = false, persistent = false;
+            bool dry = false, persistent = false, disabled = false;
             for (int i = 0; i < args.Length; i++)
             {
                 if (i == 1) continue;
                 var a = args[i];
                 if (a == "--dry") { dry = true; }
                 else if (a == "--persistent") { persistent = true; }
+                else if (a == "--disabled") { disabled = true; }
                 else if (a == "--rot" && i + 1 < args.Length) { rotStr = args[++i]; }
                 else if (a == "--edid" && i + 1 < args.Length) { edid = args[++i]; }
                 else pos.Add(a);
@@ -232,7 +233,8 @@ namespace FrankyCLI
             if (pos.Count < 4)
             {
                 Console.WriteLine("Usage: placeref <modname> <cell> <base> <x,y,z>");
-                Console.WriteLine("                [--rot <rx,ry,rz>] [--edid <edid>] [--persistent] [--dry]");
+                Console.WriteLine("                [--rot <rx,ry,rz>] [--edid <edid>] [--persistent] [--disabled] [--dry]");
+                Console.WriteLine("  --disabled    set record flag 0x800, Initially Disabled (a ref a script enables later)");
                 Console.WriteLine("  --persistent  put it in the cell's PERSISTENT group AND set record flag");
                 Console.WriteLine("          0x400. Both halves, because either alone fails silently. Needed");
                 Console.WriteLine("          by anything referenced from outside its own cell -- a teleport");
@@ -374,6 +376,12 @@ namespace FrankyCLI
                 // landing bays put their XMarkerHeading in Persistent, and a bay door wired to
                 // a temporary one renders correctly, opens, and takes you nowhere -- which is
                 // exactly what it did on avontechstardust's dev bay on 2026-09-14.
+                // --disabled: record flag 0x800, Initially Disabled. A ref a script turns on later
+                // (the Armillary in a grav drive, BGSC-11890, 2026-11-05: vanilla's is 0x800 and the
+                // ship screen calls Enable() when the player builds it). Placed without it, the
+                // thing stands in every ship from the start and nothing reports that.
+                if (disabled) placed.MajorRecordFlagsRaw |= 0x800;
+
                 if (persistent)
                 {
                     placed.MajorRecordFlagsRaw |= 0x400;
@@ -384,7 +392,8 @@ namespace FrankyCLI
                     cell.Temporary.Add(placed);
                 }
                 Console.WriteLine("  placed REFR " + placed.FormKey + " in " + cell.EditorID
-                                  + (persistent ? "  [PERSISTENT, flag 0x400]" : ""));
+                                  + (persistent ? "  [PERSISTENT, flag 0x400]" : "")
+                                  + (disabled ? "  [INITIALLY DISABLED, flag 0x800]" : ""));
             }
 
             // The GameEnvironment holds the plugin open, so the write happens after the using
