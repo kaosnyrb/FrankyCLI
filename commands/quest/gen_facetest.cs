@@ -63,7 +63,7 @@ namespace FrankyCLI
 
         private static int Survey(IStarfieldModGetter sf)
         {
-            Console.WriteLine("formid\teditorid\tname\tblends\tol1\tmd2\tmd1\tyo1\teu\taf\tas\tdials\ttints\tlipstick\teyeshadow\tskin\tweight_template\tderm\tderm_intensity");
+            Console.WriteLine("formid\teditorid\tname\tblends\tol1\tmd2\tmd1\tyo1\teu\taf\tas\tdials\ttints\tlipstick\teyeshadow\tskin\tweight_template\tderm\tderm_intensity\tuse_template\tformversion");
             foreach (var n in sf.Npcs)
             {
                 if (!n.Flags.HasFlag(Npc.Flag.Female) || n.MorphBlends == null || n.MorphBlends.Count == 0) continue;
@@ -76,7 +76,8 @@ namespace FrankyCLI
                     n.FaceDialPositions?.Count ?? 0, n.Tints?.Count ?? 0, Tint("Lipstick"), Tint("Eyeshadow"), n.SkinToneIndex,
                     n.DefaultTemplate.IsNull ? "-" : n.DefaultTemplate.FormKey.ToString(),
                     n.Tints?.FirstOrDefault(x => x.TintGroup == "Dermaesthetic")?.TintName ?? "-",
-                    n.Tints?.FirstOrDefault(x => x.TintGroup == "Dermaesthetic")?.TintIntensity.ToString() ?? "-"));
+                    n.Tints?.FirstOrDefault(x => x.TintGroup == "Dermaesthetic")?.TintIntensity.ToString() ?? "-",
+                    (ushort)n.UseTemplateActors, n.FormVersion));
             }
             return 0;
         }
@@ -150,6 +151,23 @@ namespace FrankyCLI
             e.Tints[dermAt] = sk6;
             Console.WriteLine($"E: Dermaesthetic now {sk6.TintName} at {sk6.TintIntensity}, {sk6.TintTexture}");
             var f = Make("F"); Harvest(f, guard);
+
+            // G, same morning: E and F both read light, and the guard turned out to take her traits from a leveled list, so she
+            // proved nothing. The one header difference left: ours are written at FormVersion 576, vanilla NPCs at 581, and the
+            // engine reads that number to know how to parse the record. G is B with only the header moved.
+            var gv = Make("G"); Harvest(gv);
+            gv.FormVersion = donor.FormVersion;
+            Console.WriteLine($"G: FormVersion {gv.FormVersion}");
+
+            // H, same morning: vanilla's own shape, measured. Of 1,656 female NPCs with face data 1,045 inherit traits and, of the
+            // 611 with their own, 591 are baked, so vanilla all but never renders a dark face at runtime. H has the template's
+            // own lists, and the Traits flag pointing at the donor, who carries the bake.
+            var h = Make("H");
+            h.UseTemplateActors = Npc.TemplateActorType.Traits;
+            var ta = new TemplateActors();
+            ta.TraitTemplate = donor.FormKey.ToNullableLink<INpcTemplateTargetGetter>();
+            h.TemplateActors = ta;
+            h.Voice.SetTo(donor.Voice.FormKey);
 
             foreach (var rec in mod.EnumerateMajorRecords()) rec.IsCompressed = false;
             final = Path.Combine(dataPath, modname + ".esm");
