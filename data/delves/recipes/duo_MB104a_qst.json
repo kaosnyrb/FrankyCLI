@@ -60,7 +60,17 @@
           [
             "Don't mind me. I'm just enjoying the air."
           ]
-        ]
+        ],
+        "_bio": {
+          "age": "early twenties (authored 2026-11-06)",
+          "from": "a small outpost world she wanted off; 'that rock' is all she says of it (her lines)",
+          "why_there": "no money for passage; a cargo transfer was leaving anyway, so she got in a container (her lines)",
+          "wants": "a city, a hot meal, a bed, then work; nothing bigger (her lines)",
+          "talks": "frightened and covering it with jokes; short sentences; grateful, not gushing (her lines, _speech)",
+          "never": "explains what she ran from; asks the player for more than a seat (authored)",
+          "look": "worn practical work clothes, four days unwashed; not a clean white shirt (authored; outfit is Eliza's pick off his StarArmory lists)",
+          "_why": "His 2026-11-06: a fact sheet per NPC (history, age, motive). Kept small on purpose: a single encounter on a repeatable Delve, and strong emotions are one-off (his 11-02)."
+        }
       },
       "greeting": [
         "I've never been so glad to see the inside of someone else's ship. I'll stay out of your way. Where do you want me?"
