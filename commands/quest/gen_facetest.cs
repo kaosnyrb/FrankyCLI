@@ -94,6 +94,12 @@ namespace FrankyCLI
                         n.HeadParts.Count, n.Tints?.FirstOrDefault(x => x.TintGroup == "Dermaesthetic")?.TintName ?? "-"));
                 return 0;
             }
+            if (verb == "tintgroups")
+            {
+                foreach (var g in sf.Npcs.SelectMany(n => n.Tints ?? Enumerable.Empty<INpcTintGetter>()).GroupBy(t => t.TintGroup ?? "-").OrderByDescending(x => x.Count()))
+                    Console.WriteLine($"{g.Count()}	{g.Key}	{string.Join(", ", g.Select(t => t.TintName).Distinct().Take(5))}");
+                return 0;
+            }
             if (verb == "race")
             {
                 foreach (var fd in sf.Races.Single(r => r.EditorID == "HumanRace").ChargenAndSkintones!.Female!.Chargen!.FaceDials)
