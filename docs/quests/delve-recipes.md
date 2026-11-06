@@ -630,6 +630,15 @@ sets its stage first and checks the item afterwards, so as a gate it would compl
 `Data/scripts`. **Two places drawing one POI is warned**, so keep a trail's places disjoint by theme
 (`duo_delve08a` splits natural and military).
 
+## A person's face (`face`)
+
+**Built 2026-11-06, plan OT-06.** Any `person` can set `"face": "<EditorID>"` from [`data/delves/faces.md`](../../data/delves/faces.md), the table `gen_delve faces` writes: 1,166 baked vanilla humans, tagged by sex, age, bone family and skin tone. She wears that NPC's whole head: face, skin, hair, jewelry. Her name, `outfit` and `voice` stay the recipe's, and no file is copied or Creation Kit step needed. A name not in the table is refused at build.
+
+- ⭐ **This is the only way to set a face's colour.** With no `face`, a person has the template's face at the one tone an unbaked NPC has, and `SkinToneIndex` moves only her hands and body, so a high index gives dark hands under a tan face.
+- `skin` in the table is the tone of the face. `origin` is the bone family, not a colour: many `af` faces are skin 0, so read the two together.
+- Prefer a row with no ★. A ★ is somebody in the game, and a player may know the face.
+- ⚠ The person's own face lists are ignored, so sliders do nothing on a `face` person.
+
 ## Ride: a person comes aboard (`ride`)
 
 **Built 2026-11-04 (plan OT-9H), board only, probe `duo_delvetest_r1`.** The person of an earlier `talk` beat boards the player's ship when the ride's step begins, and is carried to the beat's place. Vanilla's own shape (`RQ_OE_TransportPerson_02`, `RQ_OE_Rescue_01`): the stock `DefaultPassengerQuestScript` on the quest, a `Passengers` collection wearing `DefaultPassengerPackage`, `AddPassenger` from a stage fragment.

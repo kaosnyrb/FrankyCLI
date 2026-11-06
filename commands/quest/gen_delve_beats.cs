@@ -1743,7 +1743,7 @@ namespace FrankyCLI
                 foreach (var (b, pr) in inputs.Persons)
                 {
                     var pp = r.beats[b].person!;
-                    var npc = ClonePerson(myMod, r, b, pr.tmpl, pr.voice, pr.outfit);
+                    var npc = ClonePerson(myMod, r, b, pr.tmpl, pr.voice, pr.outfit, pr.face);
                     npcOf[b] = npc.FormKey;
                     bm.People[b] = (npc.FormKey, pp.name!);
                     Console.WriteLine($"  +npc     : {npc.EditorID} {npc.FormKey}  \"{pp.name}\"  (clone of {pr.tmpl.EditorID})" + (pp.outfit != null ? $"  outfit {pp.outfit}" : ""));
@@ -2384,7 +2384,7 @@ namespace FrankyCLI
         /// shot must not end the mission. On the record, which is this Delve's own clone and placed nowhere else. Their
         /// nameless company is not.
         /// </summary>
-        private static Npc ClonePerson(StarfieldMod myMod, Recipe r, int b, INpcGetter tmpl, FormKey? voice, FormKey? outfit)
+        private static Npc ClonePerson(StarfieldMod myMod, Recipe r, int b, INpcGetter tmpl, FormKey? voice, FormKey? outfit, FormKey? face = null)
         {
             var npc = Retrograde.Utils.NPCTools.CloneNPC(myMod, tmpl.DeepCopy());
             npc.EditorID = $"{r.id}_person{b + 1}";
@@ -2396,6 +2396,14 @@ namespace FrankyCLI
             npc.CrimeFaction.Clear();
             if (outfit is FormKey ofk) npc.DefaultOutfit.SetTo(ofk);
             npc.Flags |= Npc.Flag.Essential;
+            // person.face: she wears a baked NPC's head, vanilla's own shape (1,045 of 1,656 female NPCs inherit traits this way).
+            if (face is FormKey ffk)
+            {
+                npc.UseTemplateActors = Npc.TemplateActorType.Traits;
+                var ta = new TemplateActors();
+                ta.TraitTemplate = ffk.ToNullableLink<INpcTemplateTargetGetter>();
+                npc.TemplateActors = ta;
+            }
             myMod.Npcs.Add(npc);
             return npc;
         }

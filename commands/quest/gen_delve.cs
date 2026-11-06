@@ -395,6 +395,13 @@ namespace FrankyCLI
             public string? template { get; set; }
             /// <summary>OPTIONAL: an Outfit EditorID written as the NPC's DefaultOutfit. Absent = the template's own.</summary>
             public string? outfit { get; set; }
+            /// <summary>
+            /// OPTIONAL: a baked vanilla NPC's EditorID from data/delves/faces.json, whose whole head this person wears: face, skin,
+            /// hair, jewelry. Through TemplateActors.TraitTemplate, so no file is copied and no Creation Kit is needed (the 2026-11-06
+            /// face test). Her name, outfit and voice stay the recipe's. Absent = the template's face, at the one tone an
+            /// unbaked NPC has.
+            /// </summary>
+            public string? face { get; set; }
             /// <summary>OPTIONAL: nameless friendly NPCs placed around this person. Absent = they stand alone.</summary>
             public Company? company { get; set; }
             /// <summary>talk, REQUIRED there: the VoiceType EditorID his lines are filed under (GenericMale01 / GenericFemale01).</summary>
@@ -880,6 +887,7 @@ namespace FrankyCLI
                                              args.Any(a => a.Equals("--list", StringComparison.OrdinalIgnoreCase)));
                 case "pcmpool": return DelveCensus.PcmPool(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "fauna": return Fauna(dataDir, dry);
+                case "faces": return Faces(dataDir, dry);
                 case "models": return ModelCheck(dataDir, templates, args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "lint":
                     if (args.Any(a => a.Equals("--all", StringComparison.OrdinalIgnoreCase))) return LintAll(dataDir, templates);
@@ -934,6 +942,7 @@ namespace FrankyCLI
                     Console.WriteLine("       gen_delve infogroup <delveId>[,...] [--clear] [--dry]   set the InfoGroup header on its walk-up groups in place, proven at the bytes");
                     Console.WriteLine("       gen_delve reserve <delveId>[,...] [--dry]   reserve a board Delve's TargetLocation in place (no POI encounter takes it), proven at the bytes");
                     Console.WriteLine("       gen_delve pcmpool <pcmBranchNode> [refType ...]   what a PCM request under that node can place, and which carry the ref types");
+                    Console.WriteLine("       gen_delve faces [--dry]   write data/delves/faces.json and faces.md off Starfield.esm: every baked human a person can wear");
                     Console.WriteLine("       gen_delve fauna [--dry]   write data/delves/fauna.json off Starfield.esm: every planet and moon with life, its location, biomes and named creatures (place.planet reads it)");
                     Console.WriteLine("       gen_delve selftest   the build's pure helpers, no plugin or game data loaded, exit 1 on failure");
                     return 1;

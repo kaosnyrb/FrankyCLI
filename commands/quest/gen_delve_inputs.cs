@@ -21,7 +21,7 @@ namespace FrankyCLI
         private sealed class DelveInputs
         {
             /// <summary>By beat index: the NPC a beat's person is cloned from, and its outfit, company list and voice.</summary>
-            public readonly Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company, FormKey? voice)> Persons = new();
+            public readonly Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company, FormKey? voice, FormKey? face)> Persons = new();
             /// <summary>The empty RefCollection a hold or a clear copies for its waves; null when no beat holds or clears.</summary>
             public IQuestCollectionAliasGetter? WaveSrc;
             /// <summary>The package a hold's waves run, to come for the player; null when no beat holds or clears.</summary>
@@ -106,7 +106,15 @@ namespace FrankyCLI
                     if (vty == null) { Console.WriteLine($"REFUSED: VoiceType '{pp.voice}' is not in {t.mod} or one of its masters."); fail++; continue; }
                     vo = vty.FormKey;
                 }
-                inputs.Persons[i] = (n, of, co, vo);
+                FormKey? fa = null;
+                if (!string.IsNullOrWhiteSpace(pp.face))
+                {
+                    var fn = OwnOrMaster<INpcGetter>(myMod, env, pp.face!);
+                    if (fn == null) { Console.WriteLine($"REFUSED: face '{pp.face}' is not an NPC in {t.mod} or one of its masters."); fail++; continue; }
+                    if (!IsFace(pp.face!)) { Console.WriteLine($"REFUSED: face '{pp.face}' is not in data/delves/faces.json, so it has no bake of its own to wear."); fail++; continue; }
+                    fa = fn.FormKey;
+                }
+                inputs.Persons[i] = (n, of, co, vo, fa);
             }
             // A hold's waves are empty RefCollection aliases filled at runtime. None of our bases carries
             // one, so each is a copy of vanilla's own: UC08_AB_AnomalyBattle's ActiveHostiles, an empty

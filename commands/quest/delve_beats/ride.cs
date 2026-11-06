@@ -219,7 +219,7 @@ namespace FrankyCLI
                     outfit = o.FormKey;
                 }
                 RemovePrevious(myMod.Npcs, e => e.StartsWith(r.id + "_person"));
-                var npc = ClonePerson(myMod, r, 1, tmpl, vt.FormKey, outfit);
+                var npc = ClonePerson(myMod, r, 1, tmpl, vt.FormKey, outfit, string.IsNullOrWhiteSpace(p.face) ? null : OwnOrMaster<INpcGetter>(myMod, env, p.face!)?.FormKey);
                 bm.People[1] = (npc.FormKey, p.name!);
                 Console.WriteLine($"  +npc     : {npc.EditorID} {npc.FormKey}  \"{p.name}\"  (clone of {tmpl.EditorID})");
 
