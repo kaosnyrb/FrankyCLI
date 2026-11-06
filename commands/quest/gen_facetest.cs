@@ -53,6 +53,29 @@ namespace FrankyCLI
             var sf = env.LoadOrder[0].Mod!;
             gen_quest_main.BuildReadParams(env.LoadOrder);
             if (verb == "survey") return Survey(sf);
+            if (verb == "race")
+            {
+                foreach (var fd in sf.Races.Single(r => r.EditorID == "HumanRace").ChargenAndSkintones!.Female!.Chargen!.FaceDials)
+                    Console.WriteLine("DIAL " + string.Join(" | ", typeof(IFaceDialGetter).GetProperties().Select(q => $"{q.Name}={q.GetValue(fd)}")));
+                var race = sf.Races.Single(r => r.EditorID == "HumanRace");
+                var fem = race.ChargenAndSkintones!.Female!;
+                Console.WriteLine($"FaceSkinTones {fem.FaceSkinTones} | BodySkinTones {fem.BodySkinTones} | HandSkinTones {fem.HandSkinTones} | FCTP {fem.FCTP}");
+                foreach (var pr in fem.Chargen!.GetType().GetProperties())
+                {
+                    var v = pr.GetValue(fem.Chargen);
+                    if (v is System.Collections.IEnumerable en && v is not string)
+                    {
+                        var items = en.Cast<object>().ToList();
+                        Console.WriteLine($"{pr.Name} [{items.Count}]");
+                        foreach (var it in items.Take(120))
+                            Console.WriteLine("  " + string.Join(" | ", it.GetType().GetProperties()
+                                .Where(q => q.PropertyType == typeof(string) || q.PropertyType.IsPrimitive)
+                                .Select(q => $"{q.Name}={q.GetValue(it)}")));
+                    }
+                    else Console.WriteLine($"{pr.Name}: {v}");
+                }
+                return 0;
+            }
             if (verb == "build")
                 return Build(out written, out final, sf, env.DataFolderPath,
                              args.Length > 2 ? args[2] : "UC_NA_MASTWorkerFemale03",
