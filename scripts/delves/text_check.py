@@ -40,7 +40,8 @@ PER-LINE FAULTS (each fails the run):
 
 WANTS (WARN only): a named person whose `person._bio` has no `wants` (his 2026-11-06 fact-sheet ruling,
 home-office office/projects/delves/README.md rule 12). A warning, because most people were written before the rule.
-Every run ends on three questions no checker can answer (Chekhov, Vonnegut's want, Hocking's dissonance).
+Every run ends on five questions no checker can answer (Chekhov, Vonnegut's want, Hocking's dissonance,
+CD Projekt's bad-or-worse choice, and the too-clever line).
 
 CORPUS RATES (WARN only, the exit code is unchanged, because the fix is a judgement):
   journal entries in first person, floor 75% (vanilla 87%; ours 57% before the pass, 79% after).
@@ -206,10 +207,12 @@ def main():
         pct = 100 * first / journals
         print(f"\nRATES: journal first person {pct:.0f}% {'WARN, floor 75%' if pct < 75 else 'ok (floor 75%, vanilla 87%)'}")
     print(f"\n{hits} flagged. TYPE, CARD, OBJ, NEXT, DASH, PEOPLE, NAME, SPEAKER and LOCAL (see the header).")
-    print("\nBEFORE FRANCES, three questions no checker can answer (his 2026-11-06, Jessica's to ask):\n"
+    print("\nBEFORE FRANCES, five questions no checker can answer (his 2026-11-06, Jessica's to ask):\n"
           "   CHEKHOV     everything placed or named pays off; nothing the words mention is missing from the world.\n"
           "   WANT        every person wants something, even a glass of water (Vonnegut), and the lines show it.\n"
-          "   DISSONANCE  the card, the radio and the journal promise what the beats actually do (Hocking).")
+          "   DISSONANCE  the card, the radio and the journal promise what the beats actually do (Hocking).\n"
+          "   CHOICE      any choice is bad or worse, never good or evil; no button is the obvious right one (CD Projekt).\n"
+          "   CLEVER      no line is clever at the cost of plain; a too-clever line goes vague (writers of NPC barks).")
     return 1 if hits else 0
 
 
