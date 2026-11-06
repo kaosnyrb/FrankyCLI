@@ -1,6 +1,8 @@
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Order;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
 using Retrograde;
 using Retrograde.Utils;
@@ -70,6 +72,28 @@ namespace FrankyCLI
                 }
                 return 0;
             }
+            if (verb == "mod")
+            {
+                // A template plugin's NPCs, read straight from its file, whether or not it is in the load order.
+                string file = Path.Combine(env.DataFolderPath, args[2]);
+                using var m = StarfieldMod.CreateFromBinaryOverlay(file, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
+                Console.WriteLine("formid	editorid	female	blends	morphs	dials	tints	skin	use	trait	default	headparts	derm");
+                if (args.Length > 3)
+                {
+                    var one = m.Npcs.Single(n => n.EditorID == args[3]);
+                    Console.WriteLine($"Race {one.Race.FormKey} Skin {one.Skin.FormKey} HairColor {one.HairColor} Eye {one.EyeColor} Outfit {one.DefaultOutfit.FormKey}");
+                    foreach (var t in one.Tints!) Console.WriteLine($"TINT type={t.TintType} group={t.TintGroup} name={t.TintName} tex={t.TintTexture} intensity={t.TintIntensity} color={t.TintColor}");
+                    foreach (var hp in one.HeadParts) Console.WriteLine($"HEADPART {hp.FormKey}");
+                    foreach (var b in one.MorphBlends!.Take(6)) Console.WriteLine($"BLEND {b.BlendName} {b.Intensity}");
+                    return 0;
+                }
+                foreach (var n in m.Npcs)
+                    Console.WriteLine(string.Join("	", n.FormKey.ID.ToString("X6"), n.EditorID, n.Flags.HasFlag(Npc.Flag.Female),
+                        n.MorphBlends?.Count ?? 0, n.FaceMorphs?.Count ?? 0, n.FaceDialPositions?.Count ?? 0, n.Tints?.Count ?? 0, n.SkinToneIndex,
+                        (ushort)n.UseTemplateActors, n.TemplateActors?.TraitTemplate.FormKey.ToString() ?? "-", n.DefaultTemplate.FormKey,
+                        n.HeadParts.Count, n.Tints?.FirstOrDefault(x => x.TintGroup == "Dermaesthetic")?.TintName ?? "-"));
+                return 0;
+            }
             if (verb == "race")
             {
                 foreach (var fd in sf.Races.Single(r => r.EditorID == "HumanRace").ChargenAndSkintones!.Female!.Chargen!.FaceDials)
@@ -94,7 +118,7 @@ namespace FrankyCLI
                 return 0;
             }
             if (verb == "build")
-                return Build(out written, out final, sf, env.DataFolderPath,
+                return Build(out written, out final, env.LoadOrder, sf, env.DataFolderPath,
                              args.Length > 2 ? args[2] : "UC_NA_MASTWorkerFemale03",
                              args.Length > 3 ? args[3] : throw new ArgumentException("gen_facetest build needs a donor EditorID"),
                              args.Length > 4 ? args[4] : "facetest");
@@ -123,7 +147,8 @@ namespace FrankyCLI
             return 0;
         }
 
-        private static int Build(out string? written, out string? final, IStarfieldModGetter sf, string dataPath, string templateId, string donorId, string modname)
+        private static int Build<TLO>(out string? written, out string? final, TLO env, IStarfieldModGetter sf, string dataPath, string templateId, string donorId, string modname)
+            where TLO : ILoadOrderGetter<IModListingGetter<IStarfieldModGetter>>
         {
             INpcGetter One(string id) => sf.Npcs.SingleOrDefault(n => n.EditorID == id)
                 ?? throw new KeyNotFoundException($"NPC '{id}' is not in Starfield.esm");
@@ -232,6 +257,32 @@ namespace FrankyCLI
                 ?? throw new KeyNotFoundException("no NPC carries African_Female_md1_sk8");
             sk8.TintIntensity = 100;
             m.Tints![m.Tints.FindIndex(t => t.TintGroup == "Dermaesthetic")] = sk8;
+
+            // N, O, P, his "how does retrograde do it in frankycli?". Retrograde's bases (du_outlaws_template.esm) carry two tints,
+            // lipstick and eyeshadow, no Dermaesthetic, no dials and usually no head parts, and its clones set SkinToneIndex at
+            // random. N and O are that recipe at the two ends of the slider, on the same person. P is B with her Dermaesthetic
+            // removed and nothing else, at the top: does our harvested face take the slider once that layer has gone?
+            using var outlaws = StarfieldMod.CreateFromBinaryOverlay(Path.Combine(dataPath, "du_outlaws_template.esm"), StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env));
+            Npc Retro(string letter, byte tone)
+            {
+                var npc = NPCTools.CloneNPC(mod, outlaws.Npcs.Single(x => x.EditorID == "duout_base_female01").DeepCopy());
+                npc.EditorID = $"duo_facetest_{letter}";
+                npc.Name = $"Face Test {letter}";
+                npc.Voice.SetTo(template.Voice.FormKey);
+                npc.DefaultOutfit.SetTo(template.DefaultOutfit.FormKey);
+                npc.Aggression = Npc.AggressionType.Unaggressive;
+                npc.Confidence = Npc.ConfidenceType.Average;
+                npc.Factions.Clear();
+                npc.CrimeFaction.Clear();
+                npc.HeadParts.Add(new FormKey(sf.ModKey, 0x1BF485).ToLink<IHeadPartGetter>());
+                npc.SkinToneIndex = tone;
+                mod.Npcs.Add(npc);
+                return npc;
+            }
+            Retro("N", 0);
+            Retro("O", 8);
+            var pp = Make("P"); Harvest(pp); pp.SkinToneIndex = 8;
+            pp.Tints!.RemoveAll(t => t.TintGroup == "Dermaesthetic");
 
             var j = NPCTools.CloneNPC(mod, donor.DeepCopy());
             j.EditorID = "duo_facetest_J";
