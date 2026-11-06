@@ -32,6 +32,7 @@ namespace FrankyCLI
     {
         private const float OL1_RAISE = 0.1f;
         private const string DARK_DERM = "African_Female_ol1_Sk6";
+        private const string OLDER_DONOR = "Staryard_GladysCoffin";
 
         public static int Run(string[] args)
         {
@@ -168,6 +169,26 @@ namespace FrankyCLI
             ta.TraitTemplate = donor.FormKey.ToNullableLink<INpcTemplateTargetGetter>();
             h.TemplateActors = ta;
             h.Voice.SetTo(donor.Voice.FormKey);
+
+            // I, his "two more alongside": H's route on an older donor, which is Odile's case (OT-06), and with the template's
+            // voice LEFT, so talking to her says whether the Traits flag takes the voice, which a voiced Delve person depends on.
+            var older = One(OLDER_DONOR);
+            var i = Make("I");
+            i.UseTemplateActors = Npc.TemplateActorType.Traits;
+            var tb = new TemplateActors();
+            tb.TraitTemplate = older.FormKey.ToNullableLink<INpcTemplateTargetGetter>();
+            i.TemplateActors = tb;
+
+            // J: Elana's own record under a new FormID, every field hers but the FormKey, so the bake is the ONE thing missing.
+            // Dark means the template was the fault and the runtime can do it; light means the bake is what carries the colour.
+            var j = NPCTools.CloneNPC(mod, donor.DeepCopy());
+            j.EditorID = "duo_facetest_J";
+            j.Name = "Face Test J";
+            j.Voice.SetTo(donor.Voice.FormKey);
+            j.Factions.Clear();
+            j.CrimeFaction.Clear();
+            j.FormVersion = donor.FormVersion;
+            mod.Npcs.Add(j);
 
             foreach (var rec in mod.EnumerateMajorRecords()) rec.IsCompressed = false;
             final = Path.Combine(dataPath, modname + ".esm");
