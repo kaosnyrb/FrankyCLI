@@ -57,7 +57,7 @@ namespace FrankyCLI
                     if (p.company != null) Fatal($"{at} person.company is an ending's; a talk beat's person stands alone, so it would be silently ignored.");
                     if (string.IsNullOrWhiteSpace(p.elevenlabs)) Fatal($"{at} person.elevenlabs is required: the voice his lines are generated in.");
                     if (string.IsNullOrWhiteSpace(p.voice)
-                        || !env.LoadOrder.PriorityOrder.WinningOverrides<IVoiceTypeGetter>().Any(v => Allowed(env, t).Contains(v.FormKey.ModKey)
+                        || !p.voice.StartsWith("duo_voice_") && !env.LoadOrder.PriorityOrder.WinningOverrides<IVoiceTypeGetter>().Any(v => Allowed(env, t).Contains(v.FormKey.ModKey)
                                && string.Equals(v.EditorID, p.voice, StringComparison.OrdinalIgnoreCase)))
                         Fatal($"{at} person.voice '{p.voice}' is not a VoiceType in {t.mod} or one of its masters: his lines are filed under it.");
                 }
