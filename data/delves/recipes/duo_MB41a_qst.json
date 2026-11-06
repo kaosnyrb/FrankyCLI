@@ -5,6 +5,7 @@
   "deal": "duo_MB_MissionNode_Delivery",
   "_deal": "LIVE, his 2026-10-26 \"Go on delivery and Explore\": its category's originals move to duo_MB_MissionNode_Delivery_Legacy behind Classic Missions. Was the board test node.",
   "_note": [
+    "REWORK 2026-11-06 on the five checks (his 'have a look at the toolbox delivery quest with these new rules', then 'Make edits'): the card in Odile's hand without the stock lines (11-04); the wrench paid off on Kit's closing reply (Chekhov); 'Walls are for people who've stopped' cut (too clever); _bio on both. Kept on his word: the cook (his 10-30 playtest) and Kit's 'Sorry, it's a mess' ('most bases are cluttered and mess is relative'). Old card: Delivery Contract. Deliver a toolbox from the <Place>, <Planet> to the <SecondPlace>, <SecondPlanet>. Payment on delivery.",
     "CARGO RUN, REMOTE TO REMOTE, ON THE BOARD. His 2026-10-14 14:33: 'thinking we should have a cargo run mission,",
     "remote to remote. Talking on both ends', then 14:53 'it'll be both types eventually, but let's start missionboard'",
     "and 'This is peak dad game'. Design and words are Jessica's.",
@@ -48,7 +49,7 @@
   "prose": {
     "name": "Hauling: Engineer's Toolbox to <SecondPlanet>",
     "briefing": "A retiring engineer at the <Place> wants her toolbox taken to the apprentice she trained, who runs his own site at the <SecondPlace> now.",
-    "card": "Delivery Contract. Deliver a toolbox from the <Place>, <Planet> to the <SecondPlace>, <SecondPlanet>. Payment on delivery."
+    "card": "Retiring after forty years. My toolbox goes to the lad I trained, who runs the <SecondPlace> on <SecondPlanet> now. Mind the big wrench."
   },
   "beats": [
     {
@@ -66,7 +67,16 @@
           [
             "Mind your feet, love."
           ]
-        ]
+        ],
+        "_bio": {
+          "age": "about sixty (authored 2026-11-06; his playtest: she looks younger than she sounds, OT-06)",
+          "from": "forty years an engineer, fixing other people's mistakes (her lines)",
+          "why_there": "retiring; the box goes to the apprentice she trained (her lines)",
+          "wants": "the box with someone who will use it, and to stop before her knees stop her (her lines)",
+          "talks": "brisk, dry, 'love'; practical about everything except the wrench (her lines)",
+          "never": "sentimental out loud; says she will miss the work (authored)",
+          "look": "older than the template reads; work-worn welding overalls (outfit as set; age is OT-06, Eliza's)"
+        }
       },
       "greeting": [
         "You're the hauler? I'm retiring, and my toolbox goes to the lad I trained. The big wrench in it was my mother's."
@@ -81,7 +91,7 @@
         {
           "prompt": "A wrench that old should be on a wall.",
           "reply": [
-            "You'd know. Nobody makes steel like that any more. It's for using, though. Walls are for people who've stopped."
+            "You'd know. Nobody makes steel like that any more. It's for using, though."
           ],
           "perk": "BackgroundIndustrialist"
         },
@@ -126,7 +136,16 @@
           [
             "Can I help? Sorry, it's a mess."
           ]
-        ]
+        ],
+        "_bio": {
+          "age": "late twenties (authored 2026-11-06)",
+          "from": "trained by Odile; running a site of his own for the first time (his lines)",
+          "why_there": "it is his site now (his lines)",
+          "wants": "to be ready, and to stop being scared every morning (his lines)",
+          "talks": "quick, a bit apologetic, warm about her (his lines)",
+          "never": "admits to Odile that he's struggling; the borrowed wrench stays secret (his lines)",
+          "look": "young mechanic, teal tank top (outfit as set)"
+        }
       },
       "greeting": [
         "That's her box. She actually sent it."
@@ -135,7 +154,7 @@
         {
           "prompt": "She wanted you to have it.",
           "reply": [
-            "She told me I'd never be ready for this box. I'll call her tonight."
+            "She told me I'd never be ready for this box. Her mother's wrench and all. I'll call her tonight."
           ]
         },
         {
