@@ -38,6 +38,10 @@ PER-LINE FAULTS (each fails the run):
            the same name tells a replaying player it is the same person, whatever the lines do. Frances Hale's
            forced pick on the raiders, 43a and 43e, both "Settler".
 
+WANTS (WARN only): a named person whose `person._bio` has no `wants` (his 2026-11-06 fact-sheet ruling,
+home-office office/projects/delves/README.md rule 12). A warning, because most people were written before the rule.
+Every run ends on three questions no checker can answer (Chekhov, Vonnegut's want, Hocking's dissonance).
+
 CORPUS RATES (WARN only, the exit code is unchanged, because the fix is a judgement):
   journal entries in first person, floor 75% (vanilla 87%; ours 57% before the pass, 79% after).
 
@@ -183,10 +187,29 @@ def main():
     for n, ids in people.items():
         if len(ids) > 1 and (not a.id or a.id in ids):
             flag(", ".join(sorted(ids)), "NAME", "person", f"two recipes place a \"{n}\"")
+    nobio = []
+    for rid, d in load(a.rev, a.id):
+        if "delvetest" in rid:
+            continue
+        for i, b in enumerate(d.get("beats") or [], 1):
+            p = b.get("person") or {}
+            if p.get("name") and not (p.get("_bio") or {}).get("wants"):
+                nobio.append(f"{rid} beat {i} ({p['name']})")
+    if nobio:
+        print(f"\nWANTS (warning, his 2026-11-06 fact sheet, home-office delves README rule 12): "
+              f"{len(nobio)} named person(s) with no _bio.wants")
+        for line in nobio if a.id else nobio[:5]:
+            print(f"   {line}")
+        if not a.id and len(nobio) > 5:
+            print(f"   ... and {len(nobio) - 5} more; written before 11-06, backfilled when their Delve is reworked")
     if journals:
         pct = 100 * first / journals
         print(f"\nRATES: journal first person {pct:.0f}% {'WARN, floor 75%' if pct < 75 else 'ok (floor 75%, vanilla 87%)'}")
     print(f"\n{hits} flagged. TYPE, CARD, OBJ, NEXT, DASH, PEOPLE, NAME, SPEAKER and LOCAL (see the header).")
+    print("\nBEFORE FRANCES, three questions no checker can answer (his 2026-11-06, Jessica's to ask):\n"
+          "   CHEKHOV     everything placed or named pays off; nothing the words mention is missing from the world.\n"
+          "   WANT        every person wants something, even a glass of water (Vonnegut), and the lines show it.\n"
+          "   DISSONANCE  the card, the radio and the journal promise what the beats actually do (Hocking).")
     return 1 if hits else 0
 
 
