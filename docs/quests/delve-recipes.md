@@ -632,7 +632,9 @@ sets its stage first and checks the item afterwards, so as a gate it would compl
 
 ## A person's face (`face`)
 
-**Built 2026-11-06, plan OT-06.** Any `person` can set `"face": "<EditorID>"` from [`data/delves/faces.md`](../../data/delves/faces.md), the table `gen_delve faces` writes: 1,166 baked vanilla humans, tagged by sex, age, bone family and skin tone. She wears that NPC's whole head: face, skin, hair, jewelry. Her name, `outfit` and `voice` stay the recipe's, and no file is copied or Creation Kit step needed. A name not in the table is refused at build.
+**Built 2026-11-06, plan OT-06.** Any `person` can set `"face": "<EditorID>"` from [`data/delves/faces.md`](../../data/delves/faces.md), the table `gen_delve faces` writes: 1,166 baked vanilla humans, tagged by sex, age, bone family and skin tone. She wears that NPC's whole head: face, skin, hair, jewelry, and her VoiceType. Her name and `outfit` stay the recipe's, and no file is copied or Creation Kit step needed. A name not in the table is refused at build.
+
+- ⛔ **A voiced person's `voice` must be the one in her row** (his MB41a play, 2026-11-06: *"face looks right, but no audio"*). The face brings its VoiceType with it and audio is filed under it, so a mismatch plays silence and the build refuses it, saying what to write. `elevenlabs` is unaffected, and a line already voiced stays in the cache. A row with `none` cannot speak.
 
 - ⭐ **This is the only way to set a face's colour.** With no `face`, a person has the template's face at the one tone an unbaked NPC has, and `SkinToneIndex` moves only her hands and body, so a high index gives dark hands under a tan face.
 - `skin` in the table is the tone of the face. `origin` is the bone family, not a colour: many `af` faces are skin 0, so read the two together.

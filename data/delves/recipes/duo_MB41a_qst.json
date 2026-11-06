@@ -62,7 +62,7 @@
         "name": "Odile Rasmussen",
         "template": "UC_NA_MASTWorkerFemale03",
         "outfit": "Outfit_UtilityOveralls_Mechanic_Welding_with_WeldingHatUp_Gray",
-        "face": "female_eu_ol1_scan",
+        "face": "EncCitizenFaceF01_09",
         "voice": "GenericFemale01",
         "elevenlabs": "pFZP5JQG7iQjIQuC4Bku",
         "hellos": [
@@ -77,7 +77,7 @@
           "wants": "the box with someone who will use it, and to stop before her knees stop her (her lines)",
           "talks": "brisk, dry, 'love'; practical about everything except the wrench (her lines)",
           "never": "sentimental out loud; says she will miss the work (authored)",
-          "look": "work-worn welding overalls (outfit as set); the old European face female_eu_ol1_scan, no makeup or marks (OT-06, Eliza, 2026-11-06)"
+          "look": "work-worn welding overalls (outfit as set); the old face EncCitizenFaceF01_09, messy updo, work dirt (OT-06, Eliza, 2026-11-06)"
         }
       },
       "greeting": [

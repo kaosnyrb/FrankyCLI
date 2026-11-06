@@ -397,9 +397,9 @@ namespace FrankyCLI
             public string? outfit { get; set; }
             /// <summary>
             /// OPTIONAL: a baked vanilla NPC's EditorID from data/delves/faces.json, whose whole head this person wears: face, skin,
-            /// hair, jewelry. Through TemplateActors.TraitTemplate, so no file is copied and no Creation Kit is needed (the 2026-11-06
-            /// face test). Her name, outfit and voice stay the recipe's. Absent = the template's face, at the one tone an
-            /// unbaked NPC has.
+            /// hair, jewelry, AND VOICE TYPE. Through TemplateActors.TraitTemplate, so no file is copied and no Creation Kit is needed (the
+            /// 2026-11-06 face test). Her name and outfit stay the recipe's; a voiced person's `voice` must equal the donor's.
+            /// Absent = the template's face, at the one tone an unbaked NPC has.
             /// </summary>
             public string? face { get; set; }
             /// <summary>OPTIONAL: nameless friendly NPCs placed around this person. Absent = they stand alone.</summary>

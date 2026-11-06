@@ -111,7 +111,9 @@ namespace FrankyCLI
                 {
                     var fn = OwnOrMaster<INpcGetter>(myMod, env, pp.face!);
                     if (fn == null) { Console.WriteLine($"REFUSED: face '{pp.face}' is not an NPC in {t.mod} or one of its masters."); fail++; continue; }
-                    if (!IsFace(pp.face!)) { Console.WriteLine($"REFUSED: face '{pp.face}' is not in data/delves/faces.json, so it has no bake of its own to wear."); fail++; continue; }
+                    var fr = FaceOf(pp.face!);
+                    if (fr == null) { Console.WriteLine($"REFUSED: face '{pp.face}' is not in data/delves/faces.json, so it has no bake of its own to wear."); fail++; continue; }
+                    if (pp.voice != null && pp.voice != fr.voice) { Console.WriteLine($"REFUSED: face '{pp.face}' brings the voice type {fr.voice ?? "none"} with it, and this person's voice is {pp.voice}, so her lines would play under nothing. Set voice to {fr.voice ?? "a face that has one"}."); fail++; continue; }
                     fa = fn.FormKey;
                 }
                 inputs.Persons[i] = (n, of, co, vo, fa);
