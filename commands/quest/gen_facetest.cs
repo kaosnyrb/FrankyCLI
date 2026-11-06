@@ -35,6 +35,16 @@ namespace FrankyCLI
 
         public static int Run(string[] args)
         {
+            int rc = Inner(args, out string? written, out string? final);
+            // The plugin is in his load order, so the environment holds it open until disposed: a rebuild writes beside it
+            // and swaps here, after Inner's environment has gone.
+            if (written != null) { File.Move(written, final!, true); Console.WriteLine($"Written: {final}"); }
+            return rc;
+        }
+
+        private static int Inner(string[] args, out string? written, out string? final)
+        {
+            written = final = null;
             string verb = args.Length > 1 ? args[1] : "survey";
             using var env = GameEnvironment.Typical
                 .Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield)
@@ -43,7 +53,7 @@ namespace FrankyCLI
             gen_quest_main.BuildReadParams(env.LoadOrder);
             if (verb == "survey") return Survey(sf);
             if (verb == "build")
-                return Build(sf, env.DataFolderPath,
+                return Build(out written, out final, sf, env.DataFolderPath,
                              args.Length > 2 ? args[2] : "UC_NA_MASTWorkerFemale03",
                              args.Length > 3 ? args[3] : throw new ArgumentException("gen_facetest build needs a donor EditorID"),
                              args.Length > 4 ? args[4] : "facetest");
@@ -71,7 +81,7 @@ namespace FrankyCLI
             return 0;
         }
 
-        private static int Build(IStarfieldModGetter sf, string dataPath, string templateId, string donorId, string modname)
+        private static int Build(out string? written, out string? final, IStarfieldModGetter sf, string dataPath, string templateId, string donorId, string modname)
         {
             INpcGetter One(string id) => sf.Npcs.SingleOrDefault(n => n.EditorID == id)
                 ?? throw new KeyNotFoundException($"NPC '{id}' is not in Starfield.esm");
@@ -142,15 +152,15 @@ namespace FrankyCLI
             var f = Make("F"); Harvest(f, guard);
 
             foreach (var rec in mod.EnumerateMajorRecords()) rec.IsCompressed = false;
-            string outPath = Path.Combine(dataPath, modname + ".esm");
-            mod.WriteToBinary(outPath, gen_quest_main.BuildWriteParams());
+            final = Path.Combine(dataPath, modname + ".esm");
+            written = Path.Combine(Path.GetTempPath(), modname + ".esm");
+            mod.WriteToBinary(written, gen_quest_main.BuildWriteParams());
 
             Console.WriteLine($"template: {template.EditorID} [{template.FormKey}]  skin {template.SkinToneIndex}");
             Console.WriteLine($"donor:    {donor.EditorID} [{donor.FormKey}] \"{donor.Name?.String}\"  skin {donor.SkinToneIndex}");
             Console.WriteLine($"C: {removed} makeup tints removed, {raised} ol1 blends and {groups} ol1 morph groups raised by {OL1_RAISE}");
             foreach (var n in mod.Npcs)
                 Console.WriteLine($"{n.EditorID}\t{n.FormKey.ID:X8}\tUseTemplateActors {n.UseTemplateActors}\tTemplateActors {(n.TemplateActors == null ? "none" : "SET")}\tDefaultTemplate {n.DefaultTemplate.FormKey}");
-            Console.WriteLine($"Written: {outPath}");
             return 0;
         }
 
