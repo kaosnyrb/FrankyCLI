@@ -103,18 +103,6 @@ namespace FrankyCLI
                 if (!string.IsNullOrWhiteSpace(pp.voice))
                 {
                     var vty = OwnOrMaster<IVoiceTypeGetter>(myMod, env, pp.voice!);
-                    // A person's own voice type, his 2026-11-06 "we not make a voice type for the npc and assign it": a recipe that
-                    // names duo_voice_<x> gets the record in the plugin, a copy of the generic for her sex.
-                    if (vty == null && pp.voice!.StartsWith("duo_voice_"))
-                    {
-                        var basis = OwnOrMaster<IVoiceTypeGetter>(myMod, env, n.Flags.HasFlag(Npc.Flag.Female) ? "GenericFemale01" : "GenericMale01");
-                        if (basis == null) { Console.WriteLine("REFUSED: no generic VoiceType to copy."); fail++; continue; }
-                        var own = basis.Duplicate(myMod.GetNextFormKey());
-                        own.EditorID = pp.voice;
-                        myMod.VoiceTypes.Add(own);
-                        vty = own;
-                        Console.WriteLine($"  +voice   : {own.EditorID} {own.FormKey}  (a copy of {basis.EditorID})");
-                    }
                     if (vty == null) { Console.WriteLine($"REFUSED: VoiceType '{pp.voice}' is not in {t.mod} or one of its masters."); fail++; continue; }
                     vo = vty.FormKey;
                 }
@@ -125,7 +113,7 @@ namespace FrankyCLI
                     if (fn == null) { Console.WriteLine($"REFUSED: face '{pp.face}' is not an NPC in {t.mod} or one of its masters."); fail++; continue; }
                     var fr = FaceOf(pp.face!);
                     if (fr == null) { Console.WriteLine($"REFUSED: face '{pp.face}' is not in data/delves/faces.json, so it has no bake of its own to wear."); fail++; continue; }
-                    if (pp.voice != null && !pp.voice.StartsWith("duo_voice_") && pp.voice != fr.voice) { Console.WriteLine($"REFUSED: face '{pp.face}' brings the voice type {fr.voice ?? "none"} with it, and this person's voice is {pp.voice}, so her lines would play under nothing. Set voice to {fr.voice ?? "a face that has one"}."); fail++; continue; }
+                    if (pp.voice != null && pp.voice != fr.voice) { Console.WriteLine($"REFUSED: face '{pp.face}' brings the voice type {fr.voice ?? "none"} with it, and this person's voice is {pp.voice}, so her lines would play under nothing. Set voice to {fr.voice ?? "a face that has one"}."); fail++; continue; }
                     fa = fn.FormKey;
                 }
                 inputs.Persons[i] = (n, of, co, vo, fa);
