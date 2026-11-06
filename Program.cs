@@ -142,6 +142,10 @@ switch (mode)
         // gen_aspcpatch — patches du_retrograde: copies ASPC + expands primitive to cell bounds
         return gen_aspcpatch.Run();
 
+    case "gen_facetest":
+        // gen_facetest survey | build <template> <donor> [modname]  (spike: npc-faces-harvest-and-tweak)
+        return gen_facetest.Run(args);
+
     case "gen_dlgtest":
         // gen_dlgtest [modname]  — structural test for NPCDialogueNoun (no AI, no audio)
         return gen_dlgtest.Run(Get(args, 1, "dlgtest"));
