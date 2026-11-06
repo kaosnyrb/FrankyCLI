@@ -31,6 +31,7 @@ namespace FrankyCLI
     public static class gen_facetest
     {
         private const float OL1_RAISE = 0.1f;
+        private const string DARK_DERM = "African_Female_ol1_Sk6";
 
         public static int Run(string[] args)
         {
@@ -52,7 +53,7 @@ namespace FrankyCLI
 
         private static int Survey(IStarfieldModGetter sf)
         {
-            Console.WriteLine("formid\teditorid\tname\tblends\tol1\tmd2\tmd1\tyo1\teu\taf\tas\tdials\ttints\tlipstick\teyeshadow\tskin\tweight_template");
+            Console.WriteLine("formid\teditorid\tname\tblends\tol1\tmd2\tmd1\tyo1\teu\taf\tas\tdials\ttints\tlipstick\teyeshadow\tskin\tweight_template\tderm\tderm_intensity");
             foreach (var n in sf.Npcs)
             {
                 if (!n.Flags.HasFlag(Npc.Flag.Female) || n.MorphBlends == null || n.MorphBlends.Count == 0) continue;
@@ -63,7 +64,9 @@ namespace FrankyCLI
                     Sum("_ol1_").ToString("0.00"), Sum("_md2_").ToString("0.00"), Sum("_md1_").ToString("0.00"), Sum("_yo1_").ToString("0.00"),
                     Sum("_eu_").ToString("0.00"), Sum("_af_").ToString("0.00"), Sum("_as_").ToString("0.00"),
                     n.FaceDialPositions?.Count ?? 0, n.Tints?.Count ?? 0, Tint("Lipstick"), Tint("Eyeshadow"), n.SkinToneIndex,
-                    n.DefaultTemplate.IsNull ? "-" : n.DefaultTemplate.FormKey.ToString()));
+                    n.DefaultTemplate.IsNull ? "-" : n.DefaultTemplate.FormKey.ToString(),
+                    n.Tints?.FirstOrDefault(x => x.TintGroup == "Dermaesthetic")?.TintName ?? "-",
+                    n.Tints?.FirstOrDefault(x => x.TintGroup == "Dermaesthetic")?.TintIntensity.ToString() ?? "-"));
             }
             return 0;
         }
@@ -92,9 +95,9 @@ namespace FrankyCLI
                 return npc;
             }
 
-            void Harvest(Npc npc)
+            void Harvest(Npc npc, INpcGetter? from = null)
             {
-                var d = donor.DeepCopy();
+                var d = (from ?? donor).DeepCopy();
                 npc.MorphBlends!.Clear(); npc.MorphBlends.AddRange(d.MorphBlends!);
                 npc.FaceMorphs!.Clear(); npc.FaceMorphs.AddRange(d.FaceMorphs!);
                 npc.FaceDialPositions!.Clear(); npc.FaceDialPositions.AddRange(d.FaceDialPositions!);
@@ -121,6 +124,22 @@ namespace FrankyCLI
                     foreach (var g in face.MorphGroups.Where(x => x.MorphGroup == region && Math.Abs(x.BlendIntensity - value) < 1e-6f))
                     { g.BlendIntensity += OL1_RAISE; groups++; }
             var d2 = Make("D"); Harvest(d2);
+
+            // E and F, 2026-11-06 am: B reads lighter than Elana, and the guard (skin 6, no bake) reads right through a visor.
+            // Same SkinToneIndex; what differs is the Dermaesthetic tint: Elana African_Female_ol1_Sk3 at 31, the guard
+            // African_Female_md1_Sk6 at 64. E is B with only that swapped for the Sk6 of her own age. F is the guard's whole
+            // face on the same template, no helmet: it separates "the tint" from "the template pulls her light".
+            var guard = One("Staryard_UC_GuardF");
+            var e = Make("E"); Harvest(e);
+            var sk6 = sf.Npcs.SelectMany(n => n.Tints ?? Enumerable.Empty<INpcTintGetter>())
+                .FirstOrDefault(t => t.TintName == DARK_DERM)?.DeepCopy()
+                ?? throw new KeyNotFoundException($"no NPC in Starfield.esm carries the tint {DARK_DERM}");
+            var dermAt = e.Tints!.FindIndex(t => t.TintGroup == "Dermaesthetic");
+            if (dermAt < 0) throw new InvalidOperationException("the donor has no Dermaesthetic tint");
+            sk6.TintIntensity = 64;
+            e.Tints[dermAt] = sk6;
+            Console.WriteLine($"E: Dermaesthetic now {sk6.TintName} at {sk6.TintIntensity}, {sk6.TintTexture}");
+            var f = Make("F"); Harvest(f, guard);
 
             foreach (var rec in mod.EnumerateMajorRecords()) rec.IsCompressed = false;
             string outPath = Path.Combine(dataPath, modname + ".esm");
