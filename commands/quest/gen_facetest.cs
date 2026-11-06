@@ -53,6 +53,23 @@ namespace FrankyCLI
             var sf = env.LoadOrder[0].Mod!;
             gen_quest_main.BuildReadParams(env.LoadOrder);
             if (verb == "survey") return Survey(sf);
+            if (verb == "find")
+            {
+                var rx = new System.Text.RegularExpressions.Regex(args[2], System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                foreach (var rec in sf.EnumerateMajorRecords().Where(r => r.EditorID != null && rx.IsMatch(r.EditorID)))
+                    Console.WriteLine($"{rec.GetType().Name.Replace("BinaryOverlay", "")}	{rec.FormKey}	{rec.EditorID}");
+                return 0;
+            }
+            if (verb == "avmd")
+            {
+                foreach (var rec in sf.EnumerateMajorRecords().Where(r => r.EditorID != null && r.EditorID.Contains(args[2], StringComparison.OrdinalIgnoreCase)
+                                                                          && r.GetType().Name.Contains("ActorValueModulation")))
+                {
+                    Console.WriteLine($"=== {rec.EditorID} {rec.FormKey}");
+                    Dump(rec, typeof(IActorValueModulationGetter), "  ", 0);
+                }
+                return 0;
+            }
             if (verb == "race")
             {
                 foreach (var fd in sf.Races.Single(r => r.EditorID == "HumanRace").ChargenAndSkintones!.Female!.Chargen!.FaceDials)
@@ -204,6 +221,18 @@ namespace FrankyCLI
 
             // J: Elana's own record under a new FormID, every field hers but the FormKey, so the bake is the ONE thing missing.
             // Dark means the template was the fault and the runtime can do it; light means the bake is what carries the colour.
+            // K, L, M, his "check that skin colour isn't a slider too". The chargen slider's stored value is SkinToneIndex. K and L
+            // are B at its two ends, one field changed from B, so if they match each other it does nothing on an NPC. M is
+            // everything pushed at once: top index, the darkest skin layer vanilla has, at full strength.
+            var k = Make("K"); Harvest(k); k.SkinToneIndex = 0;
+            var l = Make("L"); Harvest(l); l.SkinToneIndex = 8;
+            var m = Make("M"); Harvest(m); m.SkinToneIndex = 8;
+            var sk8 = sf.Npcs.SelectMany(n => n.Tints ?? Enumerable.Empty<INpcTintGetter>())
+                .FirstOrDefault(t => t.TintName == "African_Female_md1_sk8")?.DeepCopy()
+                ?? throw new KeyNotFoundException("no NPC carries African_Female_md1_sk8");
+            sk8.TintIntensity = 100;
+            m.Tints![m.Tints.FindIndex(t => t.TintGroup == "Dermaesthetic")] = sk8;
+
             var j = NPCTools.CloneNPC(mod, donor.DeepCopy());
             j.EditorID = "duo_facetest_J";
             j.Name = "Face Test J";
@@ -224,6 +253,26 @@ namespace FrankyCLI
             foreach (var n in mod.Npcs)
                 Console.WriteLine($"{n.EditorID}\t{n.FormKey.ID:X8}\tUseTemplateActors {n.UseTemplateActors}\tTemplateActors {(n.TemplateActors == null ? "none" : "SET")}\tDefaultTemplate {n.DefaultTemplate.FormKey}");
             return 0;
+        }
+
+        private static void Dump(object o, Type t, string pad, int depth)
+        {
+            foreach (var p in t.GetProperties().Where(q => q.GetIndexParameters().Length == 0 && q.Name != "Registration" && q.Name != "StaticRegistration" && q.Name != "BinaryWriteTranslator"))
+            {
+                object? v; try { v = p.GetValue(o); } catch { continue; }
+                if (v is System.Collections.IEnumerable e && v is not string && depth < 4)
+                {
+                    var items = e.Cast<object>().ToList();
+                    Console.WriteLine($"{pad}{p.Name} [{items.Count}]");
+                    foreach (var it in items.Take(14))
+                    {
+                        var iface = it.GetType().GetInterfaces().FirstOrDefault(x => x.Name.EndsWith("Getter") && x.Namespace == "Mutagen.Bethesda.Starfield" && !x.Name.Contains("Loqui") && x.GetProperties().Length > 0);
+                        if (iface != null) { Console.WriteLine($"{pad}  - {iface.Name}"); Dump(it, iface, pad + "    ", depth + 1); }
+                        else Console.WriteLine($"{pad}  - {it}");
+                    }
+                }
+                else Console.WriteLine($"{pad}{p.Name}: {v}");
+            }
         }
 
         private static bool IsMakeup(string? s) =>
