@@ -8,9 +8,12 @@
   "source": "his 2026-10-31 12:48: \"general idea for missioms, meeting up with someone\", then \"yup write em\" 12:51",
   "_note": [
     "THE MEET-UP: a new board family, his idea. The job is turning up; the story is who is there and what they want. Talks at a placed person are built, so most letters need nothing new.",
+    "THE PLAYER'S PART: the order you say it in. He gives two things and tells you to say them how you like; she hears the ship first or the apology first, and that is the ending. Today only exchanges[0] can close a talk, so ship-first is built and apology-first waits in _choice (letter to Eliza 2026-11-07). Until it can be chosen this Delve has no player's part, so it stays unbuilt.",
     "Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
     "LETTER d: THE GO-BETWEEN: two old partners who have not spoken in ten years. He sends: the ship is hers, and he was wrong about the engine. She answers that she'll fetch it herself. The player never goes back; the answer is the end.",
-    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93d.md): rework, findings 1-6 taken, 7 kept. Forced pick answered YES: he put the ship first on purpose so the apology arrived second, and she notices ('he puts it second'). Her close is a decision, not an errand: no 'tell him'."
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93d.md): rework, findings 1-6 taken, 7 kept. Forced pick answered YES: he put the ship first on purpose so the apology arrived second, and she notices ('he puts it second'). Her close is a decision, not an errand: no 'tell him'.",
+    "REWORK 2026-11-07 (his 'go' on my five): the player's part above; 'ten years' cut from five to two (title, her closer); his greeting no longer repeats the briefing; the knowing-generalisation perk prompt and 'Courier? Good.' cut; the salvage and 'no use for it' now pay off (stripping wrecks, his eyes, the engine that lost them a ship); _bio with wants on both.",
+    "LINT 2026-11-07: fails on place.second.fill 'late' with a person at the second place. The rule landed after this draft (OT-03, 870a40c); it failed before the rework too. A build question for Eliza, in the same letter."
   ],
   "place": {
     "theme": {
@@ -39,7 +42,7 @@
   },
   "prose": {
     "name": "Hauling: A Message Ten Years Late",
-    "briefing": "An old salvager at the <Place> has a message for his former partner in the same system, and needs someone to carry it because they haven't spoken in ten years.",
+    "briefing": "An old salvager at the <Place> wants a message carried to his former partner in the same system. They haven't spoken in years.",
     "card": "Private Contract. Take a message from the <Place> on <Planet> to someone in the same system. Payment on completion."
   },
   "beats": [
@@ -56,31 +59,36 @@
         "elevenlabs": "omRordDZNt4Gy45cetUa",
         "hellos": [
           [
-            "Courier? Good. Sit, if you like."
+            "You'll be the one carrying it. It isn't a long message."
           ]
-        ]
+        ],
+        "_bio": {
+          "age": "sixties (authored 2026-11-07)",
+          "from": "half his life stripping wrecks with her (his lines)",
+          "why_there": "grounded: his eyes won't pass for flying now (his lines)",
+          "wants": "her to have the ship, and to hear he was wrong, without having to watch her face when she does (his lines)"
+        }
       },
       "greeting": [
-        "I've a message for my old partner, and it has to go by somebody, because we haven't spoken in ten years."
+        "We stripped wrecks together half our lives, then stopped speaking over an engine. There's something she should hear, and I'm the wrong one to say it."
       ],
       "exchanges": [
         {
           "prompt": "What's the message?",
           "reply": [
-            "The ship's hers. I've no use for it now. And tell her I was wrong about the engine."
+            "Two things. The ship's hers; my eyes have gone and I can't fly it. And I was wrong about the engine. She'll know what that means."
           ]
         },
         {
-          "prompt": "Ten years of keeping out of each other's way.",
+          "prompt": "What was wrong with the engine?",
           "reply": [
-            "It's easy, out here. You just don't land where they are."
-          ],
-          "perk": "TRAIT_Introvert"
+            "She said it was running hot and I said she was fussing. We lost the ship we had before this one. Nobody was hurt. That was luck, not me."
+          ]
         },
         {
           "prompt": "Why not say it yourself?",
           "reply": [
-            "Because the last time I tried, I said the wrong thing first. This way you'll say it in the right order."
+            "Because the last time I tried, I said the wrong thing first. Say it how you like. You'll do it better than me."
           ]
         }
       ],
@@ -101,7 +109,13 @@
           [
             "If you're selling something, I'm not buying."
           ]
-        ]
+        ],
+        "_bio": {
+          "age": "sixties (authored 2026-11-07)",
+          "from": "the same wrecks, the same years (his lines)",
+          "why_there": "working alone since the split; the engine is why they split (his lines)",
+          "wants": "him to say he was wrong; the ship was never the point (her lines)"
+        }
       },
       "greeting": [
         "Not selling? Then you're carrying something, and there's only one man who'd send me a courier instead of calling. Go on, then. What did he say?"
@@ -123,13 +137,21 @@
         {
           "prompt": "He doesn't call?",
           "reply": [
-            "Not in ten years. I've heard him on the general channel now and then, complaining about the weather."
+            "Not once. I hear him on the general channel now and then, complaining about the weather."
           ]
         }
       ],
       "place": "second",
       "reward": "med",
-      "_talk": "The HAND-BACK: her answer ends the job. The player never carries it back; the answer is the ending."
+      "_talk": "The HAND-BACK: her answer ends the job. The player never carries it back; the answer is the ending.",
+      "_choice": {
+        "_why": "Pending Eliza: a second exchange that also closes the talk, with its own journal. Same words as exchanges[0], the other order.",
+        "prompt": "He was wrong about the engine. And the ship's yours.",
+        "reply": [
+          "He said wrong, out loud? That's all I wanted. The ship can wait a day. I'm going to go and see him."
+        ],
+        "journal": "I told his old partner he was wrong about the engine before anything else. She's going to go and see him."
+      }
     }
   ]
 }
