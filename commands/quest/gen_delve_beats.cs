@@ -3132,10 +3132,12 @@ namespace FrankyCLI
                 {
                     // The greeting and the completion (topic1) close with the beat's stage; a side question outlives it.
                     bool untilDone = sc == greet || sc.EditorID!.EndsWith("_topic1_scene");
+                    // A give's scene carries one more: its item gate (checked whole in the give block below).
+                    bool gated = bm.Gives.Any(g => g.beat == tbeat && sc.EditorID == $"{r.id}_talk{tbeat + 1}_topic{g.ex + 1}_scene");
                     var isId = sc.Conditions.FirstOrDefault()?.Data as IGetIsIDConditionDataGetter;
-                    fail += Check($"{who}: {sc.EditorID} is his and gated on the step" + (untilDone ? "" : " having opened"),
+                    fail += Check($"{who}: {sc.EditorID} is his and gated on the step" + (untilDone ? "" : " having opened") + (gated ? " and the give" : ""),
                                   $"{isId?.FirstParameter.Link.FormKey}, {sc.Conditions.Count} conditions, actor {sc.Actors.FirstOrDefault()?.ID}",
-                                  $"{tnpc}, {(untilDone ? tconds : tconds - 1)} conditions, actor {talias}");
+                                  $"{tnpc}, {(untilDone ? tconds : tconds - 1) + (gated ? 1 : 0)} conditions, actor {talias}");
                     if (sc != greet)
                         fail += Check($"{who}: {sc.EditorID} loops back to the menu (his 2026-10-19 ruling)",
                                       $"0x{(uint)(sc.Flags ?? 0):X8}", "0x00002814");
@@ -3155,8 +3157,12 @@ namespace FrankyCLI
                 string who = $"beat {gb + 1} (talk) exchange {gx + 1}";
                 var gi = q.DialogTopics.FirstOrDefault(d => d.EditorID == $"{r.id}_talk{gb + 1}_ask{gx + 1}")?.Responses.FirstOrDefault();
                 fail += Check($"{who}: the player's words open with the give tag", gi?.Responses.FirstOrDefault()?.ResponseText?.String ?? "missing", gwords);
-                var gc = gi?.Conditions.Select(c => (c, d: c.Data as IGetItemCountConditionDataGetter)).Where(p => p.d != null).ToList() ?? new();
-                fail += Check($"{who}: offered only while the player carries {gcount}",
+                // The gate is on the exchange's SCENE, the menu entry (his MB85a play, 2026-11-09: gated on the line, the entry
+                // showed "No Dialogue Action on Player in First Phase" and its reply passed the mission). The line carries none.
+                var gscene = q.Scenes.FirstOrDefault(s => s.EditorID == $"{r.id}_talk{gb + 1}_topic{gx + 1}_scene");
+                fail += Check($"{who}: the player's line carries no condition (the gate is the scene's)", (gi?.Conditions.Count ?? -1).ToString(), "0");
+                var gc = gscene?.Conditions.Select(c => (c, d: c.Data as IGetItemCountConditionDataGetter)).Where(p => p.d != null).ToList() ?? new();
+                fail += Check($"{who}: its scene is offered only while the player carries {gcount}",
                               string.Join("; ", gc.Select(p => $"{p.d!.FirstParameter.Link.FormKey} on {p.d.RunOnType} {p.d.Reference.FormKey} {p.c.CompareOperator} {(p.c as IConditionFloatGetter)?.ComparisonValue}")),
                               $"{gitem} on Reference {PlayerRef} GreaterThanOrEqualTo {gcount}");
                 var gsc = gi?.VirtualMachineAdapter?.Scripts.ToList() ?? new();

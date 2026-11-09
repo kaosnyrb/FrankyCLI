@@ -257,15 +257,22 @@ namespace FrankyCLI
                     var (pt, pi) = Line($"{tag}_ask{x + 1}", new List<string> { (gives ? TalkBeat.GiveTag(give.name, give.count) : "") + ex.prompt! }, false);
                     // A [Background] / [Skill] / [Trait] choice: vanilla's INFO.Perk on the PLAYER's line, no condition with it.
                     if (talkPerks.TryGetValue((b, x), out var perkKey)) pi.Perk.SetTo(perkKey);
-                    // A give (plan OT-34): vanilla's item check on the PLAYER's line, the line offered only while the player
-                    // carries the count (GetItemCount run on PlayerRef, Barrett's [Give Med Pack]), and duo_delve_give on the
-                    // same line takes it when the line ends. The tag is already in the words above.
+                    // A give (plan OT-34): the exchange offered only while the player carries the count (GetItemCount run on
+                    // PlayerRef, Barrett's [Give Med Pack]), and duo_delve_give on the player's line takes it when the line
+                    // ends. The tag is already in the words above.
+                    // ⛔ THE GATE IS ON THE SCENE, NOT THE PLAYER'S LINE (his play of MB85a, 2026-11-09 11:3x: "no medpack, this
+                    // option was available. Clicking passed the mission", the menu entry reading "No Dialogue Action on Player
+                    // in First Phase"). Vanilla gates the INFO because its choices are topics inside one PlayerDialogue action;
+                    // here the menu entry is the exchange's own Top Level scene, so an ungated scene with a failed player line
+                    // still showed, and its reply still set the stage. The scene's conditions are what hide an entry (the same
+                    // mechanism that hides the completion once done), so the gate goes there, once.
+                    ConditionFloat? itemGate = null;
                     if (gives)
                     {
                         var ic = new GetItemCountConditionData { RunOnType = Condition.RunOnType.Reference };
                         ic.Reference.SetTo(PlayerRef);
                         ic.FirstParameter = new FormLinkOrIndex<IPlaceableObjectGetter>(ic, give.item);
-                        pi.Conditions.Add(new ConditionFloat { Data = ic, CompareOperator = CompareOperator.GreaterThanOrEqualTo, ComparisonValue = give.count });
+                        itemGate = new ConditionFloat { Data = ic, CompareOperator = CompareOperator.GreaterThanOrEqualTo, ComparisonValue = give.count };
                         var gs2 = new ScriptEntry { Name = "duo_delve_give" };
                         gs2.Properties.Add(new ScriptObjectProperty { Name = "Item", Flags = ScriptProperty.Flag.Edited, Object = new FormLink<IStarfieldMajorRecordGetter>(give.item) });
                         gs2.Properties.Add(new ScriptIntProperty { Name = "ItemCount", Flags = ScriptProperty.Flag.Edited, Data = give.count });
@@ -277,6 +284,7 @@ namespace FrankyCLI
                     var (nt, ni) = Line($"{tag}_reply{x + 1}", ex.reply!, true);
                     if (x == 0) ni.SetParentQuestStage = new DialogSetParentQuestStage { OnEnd = (short)stage };
                     var sc = NewScene($"{tag}_topic{x + 1}_scene", 0x00002814u, x == 0);
+                    if (itemGate != null) sc.Conditions.Add(itemGate);
                     sc.Index = (uint)(x + 1);   // vanilla's numbering, from 1; NOT shown to be the menu's sort key (see above)
                     // SCPI orders the menu, highest first, and must not tie (vanilla never does: MQ101 90/80/50/30/20). The
                     // completion takes 100, the rest 50, 49, 48... in recipe order. Tied at 100, the completion showed last.
