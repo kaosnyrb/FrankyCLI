@@ -2015,8 +2015,11 @@ namespace FrankyCLI
                     Fatal("place.second.fill \"late\": the first beat is at the second place, so there is no step before it to fill on.");
                 if (r.place.second.who != null)
                     Fatal("place.second.fill \"late\" with place.second.who: the crowd is placed at the start, into an empty place.");
+                // A TALK's person is not refused (OT-96, MB93d): he is an alias CREATED at a marker inside the place, and the late
+                // fill already re-creates such an alias in its fragment (PlaceAtMe into the alias, LateDependents; the drop box on
+                // duo_delvetest_l1). An ending's person (placed on its own stage) and replace are placed at the start: refused.
                 for (int b = 0; b < r.beats.Count; b++)
-                    if (r.beats[b].PlaceIndex == 1 && (r.beats[b].person != null || r.beats[b].replace))
+                    if (r.beats[b].PlaceIndex == 1 && ((r.beats[b].person != null && r.beats[b].type != "talk") || r.beats[b].replace))
                         Fatal($"place.second.fill \"late\": beat {b + 1} is at the second place and has a person or replace, which "
                               + "the build places at the start; a late place is empty until the step before it is done.");
                 // Everything the player reads BEFORE the refill: the board card, the briefing and the title. The objectives

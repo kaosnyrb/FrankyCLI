@@ -13,7 +13,8 @@
     "LETTER d: THE GO-BETWEEN: two old partners who have not spoken in ten years. He sends: the ship is hers, and he was wrong about the engine. She answers that she'll fetch it herself. The player never goes back; the answer is the end.",
     "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93d.md): rework, findings 1-6 taken, 7 kept. Forced pick answered YES: he put the ship first on purpose so the apology arrived second, and she notices ('he puts it second'). Her close is a decision, not an errand: no 'tell him'.",
     "REWORK 2026-11-07 (his 'go' on my five): the player's part above; 'ten years' cut from five to two (title, her closer); his greeting no longer repeats the briefing; the knowing-generalisation perk prompt and 'Courier? Good.' cut; the salvage and 'no use for it' now pay off (stripping wrecks, his eyes, the engine that lost them a ship); _bio with wants on both.",
-    "LINT 2026-11-07: fails on place.second.fill 'late' with a person at the second place. The rule landed after this draft (OT-03, 870a40c); it failed before the rework too. A build question for Eliza, in the same letter."
+    "LINT 2026-11-07: fails on place.second.fill 'late' with a person at the second place. The rule landed after this draft (OT-03, 870a40c); it failed before the rework too. A build question for Eliza, in the same letter.",
+    "CLOSERS 2026-11-09 (Eliza): the apology-first ending is exchanges[1] with ends (its own journal, med pay), FrankyCLI 003d814. Late fill with Lena at the second place: the lint no longer refuses a TALK's person there (she is re-created in the fill's fragment, as l1's drop box); unproven in play for a person."
   ],
   "place": {
     "theme": {
@@ -128,6 +129,17 @@
           ]
         },
         {
+          "prompt": "He was wrong about the engine. And the ship's yours.",
+          "reply": [
+            "He said wrong, out loud? That's all I wanted. The ship can wait a day. I'm going to go and see him."
+          ],
+          "ends": {
+            "journal": "I told his old partner he was wrong about the engine before anything else. She's going to go and see him.",
+            "reward": "med"
+          },
+          "_ends": "Jessica's _choice, moved verbatim into the closer field by Eliza 2026-11-09 (FrankyCLI 003d814). The pay is the beat's med: hers to change."
+        },
+        {
           "prompt": "He sounded like he meant it.",
           "reply": [
             "He always does. That was never the problem."
@@ -143,15 +155,7 @@
       ],
       "place": "second",
       "reward": "med",
-      "_talk": "The HAND-BACK: her answer ends the job. The player never carries it back; the answer is the ending.",
-      "_choice": {
-        "_why": "Pending Eliza: a second exchange that also closes the talk, with its own journal. Same words as exchanges[0], the other order.",
-        "prompt": "He was wrong about the engine. And the ship's yours.",
-        "reply": [
-          "He said wrong, out loud? That's all I wanted. The ship can wait a day. I'm going to go and see him."
-        ],
-        "journal": "I told his old partner he was wrong about the engine before anything else. She's going to go and see him."
-      }
+      "_talk": "The HAND-BACK: her answer ends the job. The player never carries it back; the answer is the ending."
     }
   ]
 }
