@@ -2116,7 +2116,7 @@ namespace FrankyCLI
                 {
                     if (!Lingers(st)) WaitForLines(st);   // lingering, MissionComplete no longer shuts it down (ShutdownOnCompletion false)
                     // OT-30: the next link starts HERE, after the closing lines (the ask is in them) and BEFORE MissionComplete,
-                    // which shuts this quest down: a link that inherits this place fills from it, so it must still be held.
+                    // which shuts this quest down and can wait on the reward screen. The link fills its own site (a board request).
                     if (r.next != null)
                     {
                         string pad = "";
