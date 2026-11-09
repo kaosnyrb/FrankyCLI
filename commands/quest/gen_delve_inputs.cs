@@ -40,6 +40,8 @@ namespace FrankyCLI
             public readonly Dictionary<int, FightForms> Fights = new();
             /// <summary>By (beat, exchange): a talk exchange's perk.</summary>
             public readonly Dictionary<(int beat, int ex), FormKey> TalkPerks = new();
+            /// <summary>By (beat, exchange): a talk exchange's give, the item, its in-game name (the tag's words) and how many.</summary>
+            public readonly Dictionary<(int beat, int ex), (FormKey item, string name, int count)> TalkGives = new();
             /// <summary>By beat index, for a craft: the bench keyword and each ingredient with its count.</summary>
             public readonly Dictionary<int, (FormKey bench, List<(FormKey part, int count)> parts)> Crafts = new();
             /// <summary>By beat index, for a use with explosion: the Explosion placed at its object.</summary>
@@ -292,6 +294,14 @@ namespace FrankyCLI
                 if (tb.type != "talk" || tb.exchanges == null) continue;
                 for (int x = 0; x < tb.exchanges.Count; x++)
                 {
+                    if (tb.exchanges[x].give is Give gv)
+                    {
+                        // The grade has already refused an unresolved or nameless item; this is the same lookup, kept for its FormKey and name.
+                        var it = OwnOrMaster<IItemGetter>(myMod, env, gv.item!);
+                        string? nm = (it as Mutagen.Bethesda.Plugins.Aspects.ITranslatedNamedGetter)?.Name?.String;
+                        if (it == null || string.IsNullOrWhiteSpace(nm)) { Console.WriteLine($"REFUSED: beat {i + 1} exchanges[{x}].give.item '{gv.item}' is not a named item in {t.mod} or one of its masters."); fail++; continue; }
+                        inputs.TalkGives[(i, x)] = (it.FormKey, nm, gv.count);
+                    }
                     if (tb.exchanges[x].perk is not string pn) continue;
                     var pk = OwnOrMaster<IPerkGetter>(myMod, env, pn);
                     if (pk == null) { Console.WriteLine($"REFUSED: beat {i + 1} exchanges[{x}].perk '{pn}' is not a Perk in {t.mod} or one of its masters."); fail++; continue; }

@@ -450,7 +450,19 @@ namespace FrankyCLI
             /// tags the choice [Diplomat] and offers it only to a player with the perk (manual hub Inbox, 2026-10-14: 1,027
             /// vanilla lines, mostly with no condition). Never on exchanges[0]: a perk-less player could not finish.</summary>
             public string? perk { get; set; }
+            /// <summary>talk, optional (plan OT-34, his 2026-10-30 "[Give Med Pack]"): an item the player hands over. Vanilla's
+            /// shape, read off 544 item-gated lines in Starfield.esm 2026-11-09 (gen_inspect DialogTopic itemcheck): the
+            /// PLAYER's line is offered only while GetItemCount(item, run on the player) >= count, its words open with the
+            /// literal tag "[Give Med Pack] " ("[Give 3 Addichrone] " for more than one; Barrett's "[Give Med Pack] This will
+            /// help. No charge."), and the item is taken when the line ends, by duo_delve_give on that line (our copy of
+            /// DefaultTopicRemoveItem, whose MiscObject property cannot hold a med pack; his "own copy", 2026-11-09).
+            /// Allowed on exchanges[0], his "that's fine" (2026-11-09): a player without one cannot finish until he has
+            /// one, as Barrett's medic line works; the card says to bring it.</summary>
+            public Give? give { get; set; }
         }
+        /// <summary>talk: exchanges[x].give. item is an EditorID (any item a player can carry: Aid_MedPack is a Potion);
+        /// count is how many, 1 when absent as vanilla's ItemCountToRemove.</summary>
+        private sealed class Give { public string? item { get; set; } public int count { get; set; } = 1; }
         /// <summary>A FormList of actor bases (Overtime's duo_GangMembersList_Civ_* are the friendly ones) and a count range.</summary>
         private sealed class Company { public string? list { get; set; } public int min { get; set; } public int max { get; set; } }
         /// <summary>
@@ -923,8 +935,10 @@ namespace FrankyCLI
                         FromBase: args.Any(a => a.Equals("--from-base", StringComparison.OrdinalIgnoreCase)),
                         EmitDir: ei >= 0 && ei + 1 < args.Length ? args[ei + 1] : null,
                         DataDir: dataDir,
-                        Spread: spread);
+                        Spread: spread,
+                        VerifyEmit: args.Any(a => a.Equals("--verify", StringComparison.OrdinalIgnoreCase)));
                     if (opts.EmitDir != null && !dry) { Console.WriteLine("REFUSED: --emit is a dry-run output; add --dry."); return 1; }
+                    if (opts.VerifyEmit && opts.EmitDir == null) { Console.WriteLine("REFUSED: --verify reads the --emit plugin back; a real build always verifies, and a bare --dry writes nothing to read."); return 1; }
                     return WithRecipe(path, dataDir, templates, (r, t, env) => Build(r, t, env, dry, opts));
                 }
                 case "shell": return MakeShell(path, dataDir, templates);
@@ -2416,7 +2430,7 @@ namespace FrankyCLI
         /// <summary>FromBase: start from the base quest's clone even when the template has a shell (the A/B proof's A side;
         /// its exit is every template having a shell that has passed the A/B). EmitDir: with --dry, write the would-be
         /// plugin and the emitted model there instead of nowhere.</summary>
-        private sealed record BuildOptions(bool FromBase, string? EmitDir, string DataDir, bool Spread);
+        private sealed record BuildOptions(bool FromBase, string? EmitDir, string DataDir, bool Spread, bool VerifyEmit = false);
 
         /// <summary>
         /// THE RECIPE EMITS THE MODEL. Once every rule has run, the built quest is read into gen_questmodel's model (a
@@ -2753,7 +2767,15 @@ namespace FrankyCLI
                 string outEsm = Path.Combine(opts.EmitDir, t.mod + ".esm");
                 myMod.WriteToBinary(outEsm, gen_quest_main.BuildWriteParams());
                 Console.WriteLine($"\n  --dry --emit: wrote {outEsm} ({new FileInfo(outEsm).Length:N0} B) and the model; the live plugin is untouched.");
-                return 0;
+                // --verify (2026-11-09, OT-34): the real build's read-back, run on the emitted plugin, so a never-built recipe can
+                // be proven without writing the live plugin or spending on its voices. Off by default: the A/B's logs stay as they were.
+                if (!opts.VerifyEmit) return 0;
+                Console.WriteLine("  --verify : the build's read-back, on the emitted plugin");
+                int ve = IsSpace(t) ? VerifySpace(outEsm, readParams, r, t, madeBeats, mastersBefore)
+                                    : VerifyBeats(outEsm, readParams, r, t, madeBeats, mastersBefore);
+                ve += VerifyDeal(outEsm, readParams, r);
+                ve += VerifyChain(outEsm, readParams, r);
+                return ve == 0 ? 0 : 1;
             }
             if (dry) { Console.WriteLine("\n  --dry: nothing written."); return 0; }
 

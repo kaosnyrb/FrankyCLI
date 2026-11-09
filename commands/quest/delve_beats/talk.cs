@@ -30,6 +30,9 @@ namespace FrankyCLI
             /// <summary>person.hellos: one is picked each walk-up; MQ101's Lin carries 3, Heller 2.</summary>
             private const int TalkHellosMax = 4;
 
+            /// <summary>A give's tag, the literal words vanilla opens the player's line with: "[Give Med Pack] ", "[Give 3 Addichrone] ".</summary>
+            internal static string GiveTag(string name, int count) => count > 1 ? $"[Give {count} {name}] " : $"[Give {name}] ";
+
             /// <summary>The perk families vanilla tags a dialogue choice with (INFO.Perk census, 2026-10-14).</summary>
             private static readonly string[] CheckPerkFamilies = { "Background", "TRAIT_", "Skill_", "Faction" };
 
@@ -86,6 +89,24 @@ namespace FrankyCLI
                     {
                         Spoken($"exchanges[{x}].prompt", b.exchanges[x].prompt, TalkPromptMax);
                         SpokenAll($"exchanges[{x}].reply", b.exchanges[x].reply, TalkReplyMax);
+                        if (b.exchanges[x].give is Give gv)
+                        {
+                            // A rescue's talks are built by the ride path (RideBeat), which passes no gives: refused, never dropped.
+                            if (IsBoardSpace(t)) { Fatal($"{at} exchanges[{x}].give is on a rescue's talk, and the rescue build writes no give."); continue; }
+                            // Allowed on exchanges[0] (his ruling 2026-11-09), unlike a perk: the item can be fetched, a perk cannot.
+                            if (string.IsNullOrWhiteSpace(gv.item)) Fatal($"{at} exchanges[{x}].give has no item: nothing to hand over.");
+                            else if (gv.count < 1) Fatal($"{at} exchanges[{x}].give.count is {gv.count}; it is how many he hands over, 1 or more.");
+                            else
+                            {
+                                var allowedG = Allowed(env, t);
+                                var item = env.LoadOrder.PriorityOrder.WinningOverrides<IItemGetter>()
+                                    .FirstOrDefault(it => allowedG.Contains(it.FormKey.ModKey) && string.Equals(it.EditorID, gv.item, StringComparison.OrdinalIgnoreCase));
+                                string? nm = (item as Mutagen.Bethesda.Plugins.Aspects.ITranslatedNamedGetter)?.Name?.String;
+                                if (item == null) Fatal($"{at} exchanges[{x}].give.item '{gv.item}' is not an item in {t.mod} or one of its masters.");
+                                else if (string.IsNullOrWhiteSpace(nm)) Fatal($"{at} exchanges[{x}].give.item '{gv.item}' has no in-game name, and the [Give ...] tag is its name.");
+                                else Spoken($"exchanges[{x}].prompt with its tag", GiveTag(nm, gv.count) + b.exchanges[x].prompt, TalkPromptMax);
+                            }
+                        }
                         if (b.exchanges[x].perk is not string pn) continue;
                         if (x == 0)
                         {
@@ -130,7 +151,8 @@ namespace FrankyCLI
             {
                 build.talkAlias[b].CreateReferenceToObject!.Object.SetTo(build.npcOf[b]);
                 BuildTalk(build.myMod, build.clone, build.r, b, build.steps, build.beatStage, build.t.entryStage, build.slotOf[b].targetAlias, build.npcOf[b],
-                          build.myMod.Npcs.First(n => n.FormKey == build.npcOf[b]).Flags.HasFlag(Npc.Flag.Female), build.bm, build.inputs.TalkPerks);
+                          build.myMod.Npcs.First(n => n.FormKey == build.npcOf[b]).Flags.HasFlag(Npc.Flag.Female), build.bm, build.inputs.TalkPerks,
+                          build.inputs.TalkGives);
             }
 
             /// <summary>
@@ -156,7 +178,8 @@ namespace FrankyCLI
             /// </summary>
             internal static void BuildTalk(StarfieldMod myMod, Quest clone, Recipe r, int b, List<Step> steps,
                                           Dictionary<int, int> beatStage, int entryStage, int personAlias, FormKey npc, bool female, BeatsMade bm,
-                                          Dictionary<(int beat, int ex), FormKey> talkPerks)
+                                          Dictionary<(int beat, int ex), FormKey> talkPerks,
+                                          Dictionary<(int beat, int ex), (FormKey item, string name, int count)> talkGives)
             {
                 var tb = r.beats[b];
                 int stage = beatStage[b];
@@ -230,9 +253,27 @@ namespace FrankyCLI
                 for (int x = 0; x < tb.exchanges!.Count; x++)
                 {
                     var ex = tb.exchanges[x];
-                    var (pt, pi) = Line($"{tag}_ask{x + 1}", new List<string> { ex.prompt! }, false);
+                    bool gives = talkGives.TryGetValue((b, x), out var give);
+                    var (pt, pi) = Line($"{tag}_ask{x + 1}", new List<string> { (gives ? TalkBeat.GiveTag(give.name, give.count) : "") + ex.prompt! }, false);
                     // A [Background] / [Skill] / [Trait] choice: vanilla's INFO.Perk on the PLAYER's line, no condition with it.
                     if (talkPerks.TryGetValue((b, x), out var perkKey)) pi.Perk.SetTo(perkKey);
+                    // A give (plan OT-34): vanilla's item check on the PLAYER's line, the line offered only while the player
+                    // carries the count (GetItemCount run on PlayerRef, Barrett's [Give Med Pack]), and duo_delve_give on the
+                    // same line takes it when the line ends. The tag is already in the words above.
+                    if (gives)
+                    {
+                        var ic = new GetItemCountConditionData { RunOnType = Condition.RunOnType.Reference };
+                        ic.Reference.SetTo(PlayerRef);
+                        ic.FirstParameter = new FormLinkOrIndex<IPlaceableObjectGetter>(ic, give.item);
+                        pi.Conditions.Add(new ConditionFloat { Data = ic, CompareOperator = CompareOperator.GreaterThanOrEqualTo, ComparisonValue = give.count });
+                        var gs2 = new ScriptEntry { Name = "duo_delve_give" };
+                        gs2.Properties.Add(new ScriptObjectProperty { Name = "Item", Flags = ScriptProperty.Flag.Edited, Object = new FormLink<IStarfieldMajorRecordGetter>(give.item) });
+                        gs2.Properties.Add(new ScriptIntProperty { Name = "ItemCount", Flags = ScriptProperty.Flag.Edited, Data = give.count });
+                        var va = new DialogResponsesAdapter { Version = 6, ObjectFormat = 2 };   // vanilla's, on all 11 DefaultTopicRemoveItem lines (itemcheck)
+                        va.Scripts.Add(gs2);
+                        pi.VirtualMachineAdapter = va;
+                        bm.Gives.Add((b, x, give.item, give.count, TalkBeat.GiveTag(give.name, give.count) + ex.prompt!));
+                    }
                     var (nt, ni) = Line($"{tag}_reply{x + 1}", ex.reply!, true);
                     if (x == 0) ni.SetParentQuestStage = new DialogSetParentQuestStage { OnEnd = (short)stage };
                     var sc = NewScene($"{tag}_topic{x + 1}_scene", 0x00002814u, x == 0);
@@ -248,7 +289,7 @@ namespace FrankyCLI
                     na.Topic.SetTo(nt.FormKey);
                     sc.Actions = new Noggog.ExtendedList<ASceneAction> { pa, na };
                     Console.WriteLine($"  +talk    : {sc.EditorID} \"{ex.prompt}\"" + (x == 0 ? $"  (sets {stage} when the reply ends, loops to the menu)" : "  (loops to the menu, askable after the completion)")
-                                      + (ex.perk != null ? $"  [{ex.perk}]" : ""));
+                                      + (ex.perk != null ? $"  [{ex.perk}]" : "") + (gives ? $"  gives {give.count} x {give.item} ({give.name}), offered only while carried" : ""));
                 }
                 bm.Talks.Add((b, stage, personAlias, npc, tb.exchanges.Count, enter > 0 ? 3 : 2));   // the greeting's and the completion's; a side question has one fewer
 

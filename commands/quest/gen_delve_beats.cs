@@ -777,6 +777,7 @@ namespace FrankyCLI
             public List<(int on, int to)> PersonApproach = new();   // each ending person's hook: its object, measuring to the player
             public List<(uint wem, string text, string voice, string elevenlabs, bool female)> TalkLines = new();   // a talk person's voiced lines (female picks the face actor)
             public List<(int beat, int stage, int alias, FormKey npc, int exchanges, int conditions)> Talks = new();   // each talk beat, for the verify
+            public List<(int beat, int ex, FormKey item, int count, string words)> Gives = new();   // each talk exchange's give (OT-34), for the verify
             public int Linger = -1;   // the stage that stops a quest ending on a talk, once its person unloads; -1 = none
             public int LingerFrom;    // the completing stage it waits behind (the last step's DoneStage)
             public (int beat, int passengers, int marker, int arrived, int done)? Ride;   // a ride beat's pieces, for the verify
@@ -3147,6 +3148,27 @@ namespace FrankyCLI
                                .SelectMany(d => d.Responses).Count(x => x.SetParentQuestStage != null);
                 fail += Check($"{who}: no other line sets a stage", setters.ToString(), "1");
             }
+            // A give (plan OT-34), read back: the player's line opens with its tag, is offered only while he carries the
+            // count (GetItemCount run on PlayerRef), and carries one duo_delve_give naming the same item and count.
+            foreach (var (gb, gx, gitem, gcount, gwords) in bm.Gives)
+            {
+                string who = $"beat {gb + 1} (talk) exchange {gx + 1}";
+                var gi = q.DialogTopics.FirstOrDefault(d => d.EditorID == $"{r.id}_talk{gb + 1}_ask{gx + 1}")?.Responses.FirstOrDefault();
+                fail += Check($"{who}: the player's words open with the give tag", gi?.Responses.FirstOrDefault()?.ResponseText?.String ?? "missing", gwords);
+                var gc = gi?.Conditions.Select(c => (c, d: c.Data as IGetItemCountConditionDataGetter)).Where(p => p.d != null).ToList() ?? new();
+                fail += Check($"{who}: offered only while the player carries {gcount}",
+                              string.Join("; ", gc.Select(p => $"{p.d!.FirstParameter.Link.FormKey} on {p.d.RunOnType} {p.d.Reference.FormKey} {p.c.CompareOperator} {(p.c as IConditionFloatGetter)?.ComparisonValue}")),
+                              $"{gitem} on Reference {PlayerRef} GreaterThanOrEqualTo {gcount}");
+                var gsc = gi?.VirtualMachineAdapter?.Scripts.ToList() ?? new();
+                var gItem = gsc.FirstOrDefault()?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == "Item")?.Object.FormKey;
+                var gCount = gsc.FirstOrDefault()?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == "ItemCount")?.Data;
+                fail += Check($"{who}: takes it with duo_delve_give when the line ends",
+                              $"{string.Join("+", gsc.Select(s => s.Name))}, Item {gItem}, ItemCount {gCount}, v{gi?.VirtualMachineAdapter?.Version}/of{gi?.VirtualMachineAdapter?.ObjectFormat}",
+                              $"duo_delve_give, Item {gitem}, ItemCount {gcount}, v6/of2");
+            }
+            int giveLines = q.DialogTopics.SelectMany(d => d.Responses)
+                             .Count(x => x.VirtualMachineAdapter?.Scripts.Any(s => s.Name == "duo_delve_give") == true);
+            fail += Check("no line takes an item but a give", giveLines.ToString(), bm.Gives.Count.ToString());
             if (bm.Linger >= 0)
             {
                 // Ending on a talk: the completing stage completes and does not stop; the shutdown stage stops; a board's

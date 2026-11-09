@@ -270,6 +270,11 @@ namespace FrankyCLI
             ["GetDistanceGalacticParsec"] = new(typeof(IGetDistanceGalacticParsecConditionDataGetter), () => new GetDistanceGalacticParsecConditionData(),
                 (g, m) => { var x = (IGetDistanceGalacticParsecConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
                 (d, m) => { var x = (GetDistanceGalacticParsecConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
+            // GetItemCount (2026-11-09, plan OT-34): a talk exchange's give, the player's line offered only while he
+            // carries the item. Run on PlayerRef (RunOnType and Reference are the generic half, written above).
+            ["GetItemCount"] = new(typeof(IGetItemCountConditionDataGetter), () => new GetItemCountConditionData(),
+                (g, m) => { var x = (IGetItemCountConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
+                (d, m) => { var x = (GetItemCountConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
             ["GetIsID"] = new(typeof(IGetIsIDConditionDataGetter), () => new GetIsIDConditionData(),
                 (g, m) => { var x = (IGetIsIDConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
                 (d, m) => { var x = (GetIsIDConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),

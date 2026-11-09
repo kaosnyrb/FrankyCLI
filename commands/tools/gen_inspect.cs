@@ -453,6 +453,47 @@ namespace FrankyCLI
                                 }
                         break;
                     }
+                    if (search.Equals("itemcheck", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Lines gated on carrying something (plan OT-34, his 2026-10-30 "[Give Med Pack]" item check):
+                        // every INFO with a GetItemCount / GetKeywordItemCount condition, with the player's prompt, the
+                        // words, every condition, and the INFO's own script and fragments, because taking the item is
+                        // suspected to live in a fragment rather than a field. condtally counts these; this names them.
+                        static string Vm(object? vma)
+                        {
+                            if (vma == null) return "no script";
+                            var bits = new List<string>();
+                            foreach (var p in vma.GetType().GetProperties())
+                            {
+                                object? v; try { v = p.GetValue(vma); } catch { continue; }
+                                if (v == null) continue;
+                                IEnumerable<object> items = v is System.Collections.IEnumerable e and not string ? e.Cast<object>() : new[] { v };
+                                foreach (var it in items)
+                                {
+                                    var names = it.GetType().GetProperties()
+                                        .Where(q => q.Name is "Name" or "ScriptName" or "FragmentName")
+                                        .Select(q => { try { return q.GetValue(it)?.ToString(); } catch { return null; } })
+                                        .Where(s => !string.IsNullOrEmpty(s));
+                                    string n = string.Join("/", names);
+                                    if (n.Length > 0) bits.Add($"{p.Name}:{n}");
+                                }
+                            }
+                            string ver = $"v{vma.GetType().GetProperty("Version")?.GetValue(vma)}/of{vma.GetType().GetProperty("ObjectFormat")?.GetValue(vma)}";
+                            return (bits.Count == 0 ? "script (unnamed)" : string.Join(" ", bits)) + " " + ver;
+                        }
+                        foreach (var quest in mod.Quests)
+                            foreach (var topic in quest.DialogTopics)
+                                foreach (var resp in topic.Responses)
+                                {
+                                    if (!resp.Conditions.Any(c => c.Data.GetType().Name.Contains("ItemCount"))) continue;
+                                    var first = resp.Responses.FirstOrDefault();
+                                    Console.WriteLine($"ITEMCHECK\t{quest.EditorID}\t{topic.Subtype}\t{resp.FormKey}\tflags {resp.Flags?.Flags}"
+                                        + $"\tprompt \"{resp.Prompt}\"\tsays \"{first?.ResponseText}\"\t{string.Join(" & ", resp.Conditions.Select(DescribeCondition))}"
+                                        + $"\tstage {resp.SetParentQuestStage?.OnBegin}/{resp.SetParentQuestStage?.OnEnd}\t{Vm(resp.VirtualMachineAdapter)}");
+                                    found++;
+                                }
+                        break;
+                    }
                     if (search.Equals("fieldtally", StringComparison.OrdinalIgnoreCase))
                     {
                         // Every property SET on any dialogue response (and on its topic), counted, by reflection: finds

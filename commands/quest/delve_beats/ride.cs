@@ -232,7 +232,8 @@ namespace FrankyCLI
                 var stages = new Dictionary<int, int> { [1] = CheckedInStage, [3] = t.completeStage };
                 foreach (int b in new[] { 1, 3 })
                     TalkBeat.BuildTalk(myMod, clone, r, b, steps, stages, t.entryStage, (int)pa.ID, npc.FormKey,
-                                       npc.Flags.HasFlag(Npc.Flag.Female), bm, new Dictionary<(int beat, int ex), FormKey>());
+                                       npc.Flags.HasFlag(Npc.Flag.Female), bm, new Dictionary<(int beat, int ex), FormKey>(),
+                                       new Dictionary<(int beat, int ex), (FormKey item, string name, int count)>());
                 clone.Data!.Priority = TalkQuestPriority;
 
                 vma.Scripts.Add(PassengerEntry(clone.FormKey, (int)cid, (int)loc.ID, (int)mk.ID, RescueArrivedStage, OffShipStage));

@@ -129,7 +129,18 @@ namespace FrankyCLI
         public short? SetStageOnBegin { get; set; }
         public short? SetStageOnEnd { get; set; }
         public List<QCondition>? Conditions { get; set; }
+        /// The line's own scripts (DialogResponsesAdapter), first written by a talk exchange's give (duo_delve_give, plan
+        /// OT-34). Script fragments on a line are NOT held: the read refuses them, so none can be dropped silently.
+        public QInfoVmad? Vmad { get; set; }
         public List<QLine> Lines { get; set; } = new();
+    }
+
+    /// An INFO's script adapter: the version pair and its scripts. No fragments (see QInfo.Vmad).
+    public sealed class QInfoVmad
+    {
+        public short Version { get; set; }
+        public ushort ObjectFormat { get; set; }
+        public List<QScript> Scripts { get; set; } = new();
     }
 
     /// One line of a response (Mutagen: DialogResponse): the text, its .wem number and the text hash.
@@ -257,6 +268,12 @@ namespace FrankyCLI
                     SetStageOnBegin = r.SetParentQuestStage?.OnBegin, SetStageOnEnd = r.SetParentQuestStage?.OnEnd,
                     Conditions = r.Conditions == null ? null : Conditions(r.Conditions, path + ".Conditions"),
                 };
+                if (r.VirtualMachineAdapter is { } va)
+                {
+                    m.Vmad = new QInfoVmad { Version = va.Version, ObjectFormat = va.ObjectFormat };
+                    for (int i = 0; i < va.Scripts.Count; i++) m.Vmad.Scripts.Add(Script(va.Scripts[i], $"{path}.VMAD.Scripts[{i}]"));
+                    Guard(va, typeof(IDialogResponsesAdapterGetter), path + ".VMAD", "Version", "ObjectFormat", "Scripts");
+                }
                 if (r.Flags != null) Guard(r.Flags, typeof(IDialogResponseFlagsGetter), path + ".Flags", "Flags", "ResetHours");
                 if (r.SetParentQuestStage != null) Guard(r.SetParentQuestStage, typeof(IDialogSetParentQuestStageGetter), path + ".SetParentQuestStage", "OnBegin", "OnEnd");
                 for (int i = 0; i < r.Responses.Count; i++)
@@ -271,7 +288,7 @@ namespace FrankyCLI
                 }
                 Guard(r, typeof(IDialogResponsesGetter), path, "Flags", "TPIC", "INTV", "SharedDialog", "DialogGroup", "Prompt", "Speaker", "StartScene",
                       "StartScenePhase", "ResetGlobal", "SubtitlePriority", "COCT", "AffinityEvent", "SpeechChallenge", "Perk", "SetParentQuestStage",
-                      "Conditions", "Responses");
+                      "Conditions", "VirtualMachineAdapter", "Responses");
                 return m;
             }
         }
@@ -392,6 +409,12 @@ namespace FrankyCLI
             Link(r.SharedDialog, m.SharedDialog); Link(r.DialogGroup, m.DialogGroup); Link(r.Speaker, m.Speaker); Link(r.StartScene, m.StartScene);
             Link(r.ResetGlobal, m.ResetGlobal); Link(r.AffinityEvent, m.AffinityEvent); Link(r.SpeechChallenge, m.SpeechChallenge); Link(r.Perk, m.Perk);
             if (m.SetStageOnBegin != null) r.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = m.SetStageOnBegin.Value, OnEnd = m.SetStageOnEnd ?? 0 };
+            if (m.Vmad != null)
+            {
+                var a = new DialogResponsesAdapter { Version = m.Vmad.Version, ObjectFormat = m.Vmad.ObjectFormat };
+                a.Scripts.AddRange(m.Vmad.Scripts.Select(WriteScript));
+                r.VirtualMachineAdapter = a;
+            }
             foreach (var l in m.Lines)
             {
                 var line = new DialogResponse { WEMFile = l.WEMFile, EmotionOut = l.EmotionOut, ScriptNotes = l.ScriptNotes!, Edits = l.Edits!, AlternateLipText = l.AlternateLipText! };
