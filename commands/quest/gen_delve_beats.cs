@@ -819,6 +819,7 @@ namespace FrankyCLI
             public int LingerFrom;    // the completing stage it waits behind (the last step's DoneStage)
             public List<(int ex, int stage)> TalkEnds = new();   // a talk with more than one closer: each closing exchange and its ending stage (TalkEndings); empty = one closer
             public int TalkSilent = -1;   // that talk's silent CompleteStage, which the linger hook arms on; -1 = none
+            public FormKey? PaidTierGlobal;   // a board's RewardAmountGlobal: the last paid tier's creds global, for the verify
             public (int beat, int passengers, int marker, int arrived, int done)? Ride;   // a ride beat's pieces, for the verify
             public List<(int beat, FormKey npc, int lines)> Hellos = new();   // a talk person's walk-up lines, for the verify
             public List<(int place, int anchor, FormKey global)> Leashes = new();   // each place's GetDistance: the alias it measures from, under which global
@@ -908,7 +909,7 @@ namespace FrankyCLI
         {
             var b = new BeatsBuild(myMod, clone, t, r, markers, made, bm, inputs);
             foreach (var section in new Func<int>[] { b.NoDriver, b.Slots, b.Stages, b.Fills, b.Items, b.Counters,
-                                                      b.Objectives, b.Messages, b.Hooks, b.Fragment })
+                                                      b.Objectives, b.Messages, b.Hooks, b.Fragment, b.RewardGlobal })
             {
                 int f = section();
                 if (f != 0) return f;
@@ -1510,20 +1511,21 @@ namespace FrankyCLI
                 if (t.questScript != null)
                 {
                     // A board mission's tier goes on the stage like any other (below): OT-9K, proven by his plays of
-                    // duo_delvetest_c1, 2026-11-04. These globals are kept in step because MissionParent's completion
-                    // message reads RewardAmountGlobalActual; they do not pay and the card does not read them.
+                    // duo_delvetest_c1, 2026-11-04. RewardAmountGlobal follows the tier, because the script reads it for the
+                    // amount MissionParent's completion message shows; it does not pay and the card does not read it.
+                    // RewardAmountGlobalActual is the quest's OWN writable global, which the script writes at start
+                    // (RewardActual: pointed at the constant tier, every board Delve logged an error as it started).
                     var qs = vma.Scripts.First(s => s.Name == t.questScript);
+                    ScriptObjectProperty Prop(string pn) => qs.Properties.OfType<ScriptObjectProperty>().FirstOrDefault(p => p.Name == pn)!;
+                    foreach (var pn in new[] { "RewardAmountGlobal", "RewardAmountGlobalActual" })
+                        if (Prop(pn) == null) { Console.WriteLine($"REFUSED: {t.questScript} carries no {pn} to pay through."); return 1; }
                     foreach (var (tier, _) in paid)
                     {
                         var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{tier}");
                         if (cg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{tier}."); return 1; }
-                        foreach (var pn in new[] { "RewardAmountGlobal", "RewardAmountGlobalActual" })
-                        {
-                            var rp = qs.Properties.OfType<ScriptObjectProperty>().FirstOrDefault(p => p.Name == pn);
-                            if (rp == null) { Console.WriteLine($"REFUSED: {t.questScript} carries no {pn} to pay through."); return 1; }
-                            rp.Object.SetTo(cg.FormKey);
-                        }
-                        Console.WriteLine($"  reward   : the board's globals follow {cg.EditorID} (RewardAmountGlobal and its Actual)");
+                        Prop("RewardAmountGlobal").Object.SetTo(cg.FormKey);
+                        bm.PaidTierGlobal = cg.FormKey;
+                        Console.WriteLine($"  reward   : the board's RewardAmountGlobal follows {cg.EditorID}");
                     }
                 }
                 foreach (var (tier, stage) in paid)
@@ -1610,6 +1612,20 @@ namespace FrankyCLI
                     Console.WriteLine($"  +recipe  : {co.EditorID} {co.FormKey} makes item {i + 1} at {CraftBenches[c.bench!]}, live from stage {start} until {beatStage[i]}; "
                                       + string.Join(", ", ReadIngredients(c).Select(x => $"{x.count} {x.key}")) + $" (clone of {CraftCobjSource})");
                 }
+                return 0;
+            }
+
+            // --- 11. the board's reward-actual global (RewardActual), made LAST so it is the last record allocated: every
+            // record a build made before it keeps its id, and the change is one added global (2026-11-09) ---------------
+            internal int RewardGlobal()
+            {
+                if (t.questScript == null) return 0;
+                var qs = vma.Scripts.First(s => s.Name == t.questScript);
+                var rp = qs.Properties.OfType<ScriptObjectProperty>().FirstOrDefault(p => p.Name == "RewardAmountGlobalActual");
+                if (rp == null) { Console.WriteLine($"REFUSED: {t.questScript} carries no RewardAmountGlobalActual."); return 1; }
+                var actual = RewardActual(myMod, clone, r);
+                if (actual == null) return 1;
+                rp.Object.SetTo(actual.FormKey);
                 return 0;
             }
 
@@ -2635,6 +2651,50 @@ namespace FrankyCLI
         /// <summary>A cloned counter starts at zero whatever the global it was cloned from holds.</summary>
         private static void SetGlobalZero(Global g) => g.Data = 0f;
 
+        /// <summary>
+        /// THE BOARD'S ACTUAL-REWARD GLOBAL, one per board quest (2026-11-09, his "I would like the mod to have 0 errors on the
+        /// happy path"). MissionQuestScript.OnQuestStarted WRITES the amount shown into RewardAmountGlobalActual (line 118:
+        /// SetValue(GetActualReward()), then UpdateCurrentInstanceGlobal), so it must be a WRITABLE global of the quest's
+        /// own, on its text-display globals: vanilla's shape, read off MB_Bounty05_UC (MissionBoardBounty05RewardActual, value
+        /// 0, not Constant, the one entry in its TextDisplayGlobals) and MB_Bounty01. Pointed at the CONSTANT tier global, as
+        /// both board builds did from OT-9K (and the shipped base duo_MB28a points at duo_reward_creds_easy), every board
+        /// Delve logged "Cannot set the value of a constant GlobalVariable" as it started: 15 in one session. The pay never
+        /// came from it (it is on the stage), so RewardAmountGlobal stays the tier: the script only READS that one.
+        /// Returns the new global, or null having said why.
+        /// </summary>
+        private static Global? RewardActual(StarfieldMod myMod, Quest clone, Recipe r)
+        {
+            string id = RewardActualId(r);
+            RemovePrevious(myMod.Globals, e => e == id);
+            var src = myMod.Globals.FirstOrDefault(g => g.EditorID == "duo_reward_xp_easy");
+            if (src == null) { Console.WriteLine("REFUSED: no duo_reward_xp_easy to shape the board's reward-actual global on."); return null; }
+            var g = (Global)myMod.Globals.DuplicateInAsNewRecord(src);
+            g.EditorID = id;
+            SetGlobalZero(g);
+            g.MajorFlags &= ~Global.MajorFlag.Constant;   // the board script SETS it
+            clone.TextDisplayGlobals.Add(g.ToLink<IGlobalGetter>());   // init-only on Quest: append, never assign
+            Console.WriteLine($"  +global  : {g.EditorID} {g.FormKey}, writable, on the text-display globals: the board script's RewardAmountGlobalActual");
+            return g;
+        }
+        private static string RewardActualId(Recipe r) => r.id + "_rewardactual";
+
+        /// <summary>The read-back of RewardActual, shared by both board builds: Actual is this quest's own writable global,
+        /// zero, on its text-display globals; RewardAmountGlobal is the tier's constant.</summary>
+        private static int VerifyRewardActual(IStarfieldModGetter m, IQuestGetter q, IScriptEntryGetter? qs, Recipe r, FormKey? tier)
+        {
+            int fail = 0;
+            var act = qs?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == "RewardAmountGlobalActual")?.Object.FormKey;
+            var g = act is FormKey ak ? m.Globals.FirstOrDefault(x => x.FormKey == ak) : null;
+            fail += Check("the board script's RewardAmountGlobalActual is this quest's own writable global, zero, on its text-display globals",
+                          g == null ? $"{act} (not a global of this plugin)"
+                          : $"{g.EditorID}, constant {g.MajorFlags.HasFlag(Global.MajorFlag.Constant)}, value {g.Data}, listed {q.TextDisplayGlobals?.Any(x => x.FormKey == g.FormKey) ?? false}",
+                          $"{RewardActualId(r)}, constant False, value 0, listed True");
+            if (tier is FormKey tk)
+                fail += Check("the board script's RewardAmountGlobal is the tier (read only)",
+                              qs?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == "RewardAmountGlobal")?.Object.FormKey.ToString() ?? "missing", tk.ToString());
+            return fail;
+        }
+
         /// <summary>FrankyCLI/papyrus, found from the data directory's repo root.</summary>
         private static string PapyrusDir()
         {
@@ -2877,6 +2937,7 @@ namespace FrankyCLI
                 fail += Check($"{t.questScript} carries the driver's board properties" + (bm.Linger >= 0 ? " and ShutdownOnCompletion" : "") + (closers ? " and CompleteStage" : ""),
                               string.Join(",", (qs?.Properties.Select(p => p.Name) ?? Enumerable.Empty<string>()).OrderBy(n => n)),
                               string.Join(",", keeps.OrderBy(n => n)));
+                fail += VerifyRewardActual(m, q, qs, r, bm.PaidTierGlobal);
                 foreach (var pn in new[] { "MissionParent", "PrimaryRef", "TargetLocation" })
                 {
                     var op = qs?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == pn);

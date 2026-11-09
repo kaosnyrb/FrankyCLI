@@ -747,21 +747,21 @@ namespace FrankyCLI
                             $"{t.questScript} kmyQuest = __temp as {t.questScript}",
                             "kmyQuest.MissionComplete()",
                         });
-                // THE PAY is the stage's, as everywhere (OT-9K, his plays of duo_delvetest_c1, 2026-11-04). The script's globals
-                // follow it, because MissionParent's completion message reads RewardAmountGlobalActual.
+                // THE PAY is the stage's, as everywhere (OT-9K, his plays of duo_delvetest_c1, 2026-11-04). RewardAmountGlobal
+                // follows the tier, because the script reads it for the amount MissionParent's completion message shows.
+                // RewardAmountGlobalActual is the quest's OWN writable global, made for EVERY board quest whatever carries its
+                // tier (an ask's tiers are on its answers): the script writes it at start (RewardActual, 2026-11-09).
+                var qsR = vma.Scripts.First(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase));
+                ScriptObjectProperty? Prop(string pn) => qsR.Properties.OfType<ScriptObjectProperty>().FirstOrDefault(p => p.Name == pn);
+                foreach (var pn in new[] { "RewardAmountGlobal", "RewardAmountGlobalActual" })
+                    if (Prop(pn) == null) { Console.WriteLine($"REFUSED: {t.questScript} carries no {pn} to pay through."); return 1; }
                 if ((two || rescue ? r.beats[^1] : beat).reward is string tier)
                 {
                     var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{tier}");
                     if (cg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{tier}."); return 1; }
-                    var qs = vma.Scripts.First(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase));
-                    foreach (var pn in new[] { "RewardAmountGlobal", "RewardAmountGlobalActual" })
-                    {
-                        var rp = qs.Properties.OfType<ScriptObjectProperty>().FirstOrDefault(p => p.Name == pn);
-                        if (rp == null) { Console.WriteLine($"REFUSED: {t.questScript} carries no {pn} to pay through."); return 1; }
-                        rp.Object.SetTo(cg.FormKey);
-                    }
+                    Prop("RewardAmountGlobal")!.Object.SetTo(cg.FormKey);
                     bm.PaidGlobal = cg.FormKey;
-                    Console.WriteLine($"  reward   : the board's globals follow {cg.EditorID} (RewardAmountGlobal and its Actual)");
+                    Console.WriteLine($"  reward   : the board's RewardAmountGlobal follows {cg.EditorID}");
                     if (PayOnStage(myMod, clone, t, t.completeStage, tier, bm) != 0) return 1;
                 }
             }
@@ -819,6 +819,17 @@ namespace FrankyCLI
             Console.WriteLine($"  fragments: {name} on stages [{string.Join(", ", code.Keys)}]; source {bm.PscPath}");
 
             Console.WriteLine("  set      : " + SetOf(clone.Aliases!));
+            // The board's reward-actual global (RewardActual, 2026-11-09), made LAST so it is the last record allocated and
+            // every record above keeps its id. slatespace has no board script and makes none.
+            if (t.questScript != null)
+            {
+                var qsA = vma.Scripts.First(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase));
+                var rpA = qsA.Properties.OfType<ScriptObjectProperty>().FirstOrDefault(p => p.Name == "RewardAmountGlobalActual");
+                if (rpA == null) { Console.WriteLine($"REFUSED: {t.questScript} carries no RewardAmountGlobalActual."); return 1; }
+                var actual = RewardActual(myMod, clone, r);
+                if (actual == null) return 1;
+                rpA.Object.SetTo(actual.FormKey);
+            }
             return 0;
         }
 
@@ -1255,13 +1266,10 @@ namespace FrankyCLI
                                    && (bm.ClosingLine == null || done.IndexOf($"{bm.ClosingLine}.IsPlaying()") < done.IndexOf("kmyQuest.MissionComplete()"))).ToString(), "True");
                 fail += Check($"{t.questScript}.ShutdownOnCompletion is as shipped (unset, so true)",
                               vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase))?.Properties.Any(p => p.Name == "ShutdownOnCompletion").ToString() ?? "no script", "False");
-                if (bm.PaidGlobal is FormKey paid)
-                {
-                    var qs = vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase));
-                    foreach (var pn in new[] { "RewardAmountGlobal", "RewardAmountGlobalActual" })
-                        fail += Check($"{t.questScript}.{pn} is the beat's tier",
-                                      qs?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == pn)?.Object.FormKey.ToString() ?? "missing", paid.ToString());
-                }
+                // RewardAmountGlobal the tier (when the beat carries one), RewardAmountGlobalActual the quest's own writable
+                // global, on EVERY board quest (RewardActual, 2026-11-09).
+                fail += VerifyRewardActual(m, q, vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase)),
+                                           r, bm.PaidGlobal);
                 fail += Check($"the beat's objective {slot.objective} shows on arrival stage {bm.ArriveStage}",
                               (src.Split($"Function {FragmentFunction(bm.ArriveStage)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0].Contains($"SetObjectiveDisplayed({slot.objective})") == true).ToString(), "True");
             }

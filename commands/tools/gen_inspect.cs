@@ -2783,6 +2783,12 @@ namespace FrankyCLI
             if (q.Keywords != null)
                 foreach (var kw in q.Keywords)
                     Console.WriteLine($"      {ResolveName(kw.FormKey, allMods)}");
+            // Claimed in QuestPropsRendered since it was written and never printed, so the coverage line vouched for a hidden
+            // field (found 2026-11-09 asking whether MB_Bounty05_UC lists its RewardActual here).
+            Console.WriteLine($"    TextDisplayGlobals [{q.TextDisplayGlobals?.Count ?? 0}]:");
+            if (q.TextDisplayGlobals != null)
+                foreach (var g in q.TextDisplayGlobals)
+                    Console.WriteLine($"      {ResolveName(g.FormKey, allMods)}");
             Console.WriteLine();
 
             // ---- Stages, with their log text -------------------------------------------------
