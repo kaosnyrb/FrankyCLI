@@ -1,0 +1,54 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_ch1",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node: he takes this one from the board like any board Delve.",
+  "author": "eliza",
+  "source": "his 2026-11-09 08:22 \"yup let's do OT-30\". The probe for next, deal chain and place.inherit (plan OT-30), before MB50a and its link 2.",
+  "_note": [
+    "THE CHAIN PROBE, LINK 1 of 2. Spec: home-office office/projects/delves/chains.md. Silent on purpose: no speaker, no say,",
+    "no voice spent. via slate, so the ask rides a message box; the mechanism is the same for talk and radio (the",
+    "completing stage starts the next link before this one pays and shuts down).",
+    "WHAT HIS PLAY ANSWERS: does ch2 appear in the quest log ALREADY ACCEPTED (its own MissionAccepted on stage 5), at",
+    "THIS site (ExternalAliasLocation off this quest's TargetLocation), with its crate where this terminal was, and does",
+    "each pay once. The terminal vanishes on use so the two never stand on one spot."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A quiet site, so nothing shoots and the probe is only the hand-off."
+  },
+  "prose": {
+    "name": "Hauling: Chain Probe One on <Planet>",
+    "briefing": "A test job. Log a reading at the terminal at the <Place> on <Planet>.",
+    "card": "Local Contract. Log a reading at the terminal at the <Place> on <Planet>. Payment on completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "vanish": true,
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Survey Terminal",
+      "objective": "Log a reading at the terminal at the <Place>",
+      "message": {
+        "title": "Survey Terminal",
+        "text": "Reading logged. A note is pinned to the screen: a crate here wants collecting. Same site."
+      },
+      "journal": "I logged the reading at the <Place>. Someone left a note about a crate on the same site.",
+      "reward": "easy"
+    }
+  ],
+  "next": {
+    "id": "duo_delvetest_ch2",
+    "via": "slate"
+  }
+}

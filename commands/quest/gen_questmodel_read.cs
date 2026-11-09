@@ -271,9 +271,15 @@ namespace FrankyCLI
                             };
                             Guard(alps, typeof(IQuestLocationAliasALPSGetter), path + ".ALPS", "Conditions", "PcmTypeKeyword");
                         }
+                        // OT-30: a chain link's place, filled from another quest's place alias. The ref kind's External, same shape.
+                        if (l.ExternalAliasLocation is { } x)
+                        {
+                            m.External = new QExternal { Quest = Fk(x.Quest), AliasID = x.AliasID };
+                            Guard(x, typeof(IExternalAliasLocationGetter), path + ".ExternalAliasLocation", "Quest", "AliasID");
+                        }
                         Guard(l, typeof(IQuestLocationAliasGetter), path, "ID", "Name", "Flags", "ALFG", "AliasIDToForceIntoWhenFilled",
                               "ClosestToAlias", "DisplayName", "SpecificLocation", "LocationTypeKeyword", "SystemLocationAliasID",
-                              "ParentSystemLocationAliasID", "Conditions", "ALPS");
+                              "ParentSystemLocationAliasID", "Conditions", "ALPS", "ExternalAliasLocation");
                         return m;
                     }
                     case IQuestCollectionAliasGetter c:

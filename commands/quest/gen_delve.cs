@@ -368,6 +368,28 @@ namespace FrankyCLI
             /// delves to the existing story nodes" / "yeah go". A new optional field, so schema stays 1.
             /// </summary>
             public string? deal { get; set; }
+            /// <summary>
+            /// OPTIONAL, board only (OT-30, chains): the Delve finishing this one starts. His 2026-10-29: "we can start quests via
+            /// scripts, on stages etc. Conversations seem a good linking point" ("I completed the mission. Ah can you go and do
+            /// this now."). The completing stage starts it BEFORE this mission pays and shuts down, so a link that inherits this
+            /// one's place fills while the place is still held. The target is a built chain link (deal "chain"). Spec: home-office
+            /// office/projects/delves/chains.md. A new optional field, so schema stays 2.
+            /// </summary>
+            public Next? next { get; set; }
+        }
+        /// <summary>
+        /// OT-30: the next link. `via` is WHICH LINE CARRIES THE ASK, and the lint checks that line exists: talk = the closing
+        /// conversation (the last step is a talk), slate = a found lead (the last beat shows a message box), radio = the speaker
+        /// (a closing say). The mechanism is the same for all three: the completing stage starts the next quest.
+        /// </summary>
+        private sealed class Next
+        {
+            /// <summary>The next link's recipe id (its EditorID). It must be built, and must be deal "chain".</summary>
+            public string? id { get; set; }
+            /// <summary>talk, slate or radio.</summary>
+            public string? via { get; set; }
+            /// <summary>1 to 100, default 100. Below 100 the thread is an ESCALATION: a common job that sometimes leads on.</summary>
+            public int chance { get; set; } = 100;
         }
         /// <summary>The voice of a Delve's spoken lines.</summary>
         private sealed class Speaker
@@ -446,6 +468,13 @@ namespace FrankyCLI
             /// down to duo_shortdrivedistance". The main place's own limit (from the player) is not this field.
             /// </summary>
             public string? reach { get; set; }
+            /// <summary>
+            /// OPTIONAL, main place of a chain link only (OT-30): the recipe id of the link before, whose main place this one
+            /// IS. The link's TargetLocation is filled from that quest's TargetLocation (ExternalAliasLocation, vanilla's own
+            /// alias-from-another-quest fill), so no condition, theme or request picks it. The link before must name this one
+            /// in its next, and every marker this link's main-place beats stand on must be one the link before stood on.
+            /// </summary>
+            public string? inherit { get; set; }
             /// <summary>The second POI's own theme, for beats with place "second". Absent = no theme.</summary>
             public Place? second { get; set; }
             /// <summary>The third POI's own theme, for beats with place "third". Absent = no theme.</summary>
@@ -891,7 +920,7 @@ namespace FrankyCLI
                 case "models": return ModelCheck(dataDir, templates, args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "lint":
                     if (args.Any(a => a.Equals("--all", StringComparison.OrdinalIgnoreCase))) return LintAll(dataDir, templates);
-                    return WithRecipe(path, dataDir, templates, (r, t, env) => Grade(r, t, env, null, spread) ? 0 : 1);
+                    return WithRecipe(path, dataDir, templates, (r, t, env) => Grade(r, t, env, null, spread, dataDir) ? 0 : 1);
                 case "build":
                 {
                     int ei = Array.FindIndex(args, a => a.Equals("--emit", StringComparison.OrdinalIgnoreCase));
@@ -1336,7 +1365,7 @@ namespace FrankyCLI
                     r = LoadRecipe(f, dataDir, templates, out var t);
                     // Never --spread here: each recipe's log is swallowed to one verdict line, so the figures would cost the
                     // placed-ref index and print nowhere.
-                    ok = r != null && t != null && Grade(r, t, env, null, false);
+                    ok = r != null && t != null && Grade(r, t, env, null, false, dataDir);
                 }
                 finally { Console.SetOut(real); }
                 string log = sw.ToString();
@@ -1499,6 +1528,107 @@ namespace FrankyCLI
             return false;
         }
 
+        // ------------------------------------------------------------------ chains (OT-30)
+
+        /// <summary>The deal value of a chain link: in no node, started only by the link before's next.</summary>
+        private const string ChainDeal = "chain";
+        /// <summary>MissionQuestScript's ReadyStage default, set by its OnQuestStarted: where a chain link accepts itself.</summary>
+        private const int ChainReadyStage = 5;
+        /// <summary>The fragment script's property holding the next link (OT-30). One name, read by the build and the verify.</summary>
+        private const string ChainNextProperty = "NextLink";
+        private static bool IsChain(Recipe r) => string.Equals(r.deal, ChainDeal, StringComparison.Ordinal);
+        /// <summary>Another recipe, parsed only (no unknown-key check, no lint): for the chain fields, which read their neighbours.</summary>
+        private static Recipe? LoadSiblingRecipe(string dataDir, string id)
+        {
+            string f = Path.Combine(dataDir, "recipes", id + ".json");
+            if (!File.Exists(f)) return null;
+            try { return JsonSerializer.Deserialize<Recipe>(File.ReadAllText(f), JsonOpts); } catch (JsonException) { return null; }
+        }
+        /// <summary>The board-description field's text: the card, or on a chain link (which has none) the briefing.</summary>
+        private static string CardOf(Recipe r) => r.prose.card ?? r.prose.briefing!;
+
+        /// <summary>
+        /// The chain half of the lint (OT-30): next, deal "chain" and place.inherit, which are the only fields that read OTHER
+        /// recipes, so it needs the data folder. What it can refuse from the recipes alone it refuses here; whether the target
+        /// is BUILT, and the FormKeys the links carry, are the build's (BuildChain) and the verify's (VerifyChain).
+        /// </summary>
+        private static void GradeChain(Recipe r, Template t, string? dataDir, Action<string> Fatal)
+        {
+            bool chain = IsChain(r);
+            if (r.next == null && !chain && r.place.inherit == null) return;
+            if (dataDir == null) { Fatal("next, deal \"chain\" and place.inherit read other recipes, and this lint was given no data folder."); return; }
+            Recipe? Sibling(string id) => LoadSiblingRecipe(dataDir, id);
+            // MissionQuestScript is what accepts a chain link without the board and what pays it; no other template has it.
+            if ((r.next != null || chain) && !IsBoard(t))
+                Fatal($"next and deal \"chain\" are built on the board template (MissionQuestScript's accept and pay); this is '{t.id}'.");
+            if (r.next != null)
+            {
+                var n = r.next;
+                if (string.IsNullOrWhiteSpace(n.id)) Fatal("next has no id.");
+                else if (n.id == r.id) Fatal("next names this recipe itself.");
+                else
+                {
+                    var target = Sibling(n.id);
+                    if (target == null) Fatal($"next names '{n.id}', which is no recipe in recipes/: write that link (and build it) first.");
+                    else if (!IsChain(target))
+                        Fatal($"next names '{n.id}', whose deal is '{target.deal ?? "(none)"}'; a link a chain starts must be deal \"chain\", or a board would deal it too and list it unaccepted.");
+                    else Console.WriteLine($"  next     : {n.id} via {n.via}, chance {n.chance}");
+                }
+                if (n.chance < 1 || n.chance > 100) Fatal($"next.chance is {n.chance}; 1 to 100.");
+                var last = r.beats.Count > 0 ? r.beats[^1] : null;
+                switch (n.via)
+                {
+                    case "talk":
+                        if (last?.type != "talk" || last.group != null)
+                            Fatal("next.via \"talk\": the ask rides the closing conversation, so the last step must be a single talk beat.");
+                        break;
+                    case "slate":
+                        if (last?.message == null) Fatal("next.via \"slate\": the lead is a found note, so the last beat must show a message box.");
+                        break;
+                    case "radio":
+                        if (r.speaker == null || (last?.say == null && r.recapSay == null))
+                            Fatal("next.via \"radio\": the speaker asks, so the recipe needs a speaker and a closing say (the last beat's say, or recapSay).");
+                        break;
+                    default: Fatal($"next.via is '{n.via ?? "(none)"}'; one of talk, slate, radio."); break;
+                }
+                if (r.beats.Any(b => b.choose != null))
+                    Fatal("next on a choose ending is the fork, which is not built: next sits on the recipe, so both endings would start the same link.");
+            }
+            if (chain)
+            {
+                // A chain link nothing starts is a quest nobody can ever see; two starters would mean two places to inherit.
+                var starters = Directory.GetFiles(Path.Combine(dataDir, "recipes"), "*.json")
+                    .Select(Path.GetFileNameWithoutExtension).Where(id => id != r.id)
+                    .Select(id => Sibling(id!)).Where(s => s?.next?.id == r.id).Select(s => s!.id).ToList();
+                if (starters.Count == 0) Fatal("deal \"chain\": no recipe's next names this link, so nothing would ever start it.");
+                else if (starters.Count > 1) Fatal($"deal \"chain\": {starters.Count} recipes start this link ({string.Join(", ", starters)}); a link has one link before it.");
+                else Console.WriteLine($"  chain    : started by {starters[0]}'s next");
+            }
+            if (r.place.inherit != null)
+            {
+                if (!chain) Fatal("place.inherit is a chain link's: deal must be \"chain\" (a board-dealt quest has no link before it).");
+                if (r.place.remote == true) Fatal("place.inherit and place.remote both pick the main place; one.");
+                if (r.place.theme.require.Count > 0 || r.place.theme.exclude.Count > 0)
+                    Fatal("place.inherit: the main place is the link before's, so a main-place theme would pick nothing; remove it.");
+                if (r.place.leash != null) Fatal("place.inherit: the main place is already chosen, so a leash on it would pick nothing; remove it.");
+                var prev = Sibling(r.place.inherit);
+                if (prev == null) Fatal($"place.inherit names '{r.place.inherit}', which is no recipe in recipes/.");
+                else
+                {
+                    if (prev.next?.id != r.id)
+                        Fatal($"place.inherit names '{r.place.inherit}', whose next is '{prev.next?.id ?? "(none)"}', not this link: a place is passed only from the quest that starts this one.");
+                    // The place was chosen to carry the link before's markers, and nothing else. Every marker this link stands on
+                    // there must be one of them, or the inherited site may simply not have it, and the quest will not start.
+                    var had = prev.beats.Where(b => b.PlaceIndex == 0).Select(b => b.at).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                    var need = r.beats.Where(b => b.PlaceIndex == 0).Select(b => b.at).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                    var missing = need.Where(m => !had.Contains(m)).ToList();
+                    if (missing.Count > 0)
+                        Fatal($"place.inherit: this link's main-place beats stand on {string.Join(", ", missing)}, which {r.place.inherit}'s place was never chosen to carry (it stood on {string.Join(", ", had)}).");
+                    else Console.WriteLine($"  inherit  : the main place is {r.place.inherit}'s; {string.Join(", ", need)} all stood on there");
+                }
+            }
+        }
+
         // ------------------------------------------------------------------ the lint
 
         /// <summary>
@@ -1506,7 +1636,7 @@ namespace FrankyCLI
         /// a lint that only speaks when it is unhappy cannot be told from one that did not run.
         /// </summary>
         private static bool Grade(Recipe r, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env,
-                                  Dictionary<string, FormKey>? markersOut, bool spread)
+                                  Dictionary<string, FormKey>? markersOut, bool spread, string? dataDir)
         {
             var issues = new List<Issue>();
             void Fatal(string s) => issues.Add(new Issue(true, s));
@@ -1536,7 +1666,8 @@ namespace FrankyCLI
                         Fatal($"beat {i + 1} is a '{r.beats[i].type}' and template '{t.id}' builds only {string.Join(", ", t.allows)}. What it cannot do: {string.Join("; ", t.cannot)}");
                 if (r.place.remote != null)
                     Fatal($"place.remote is set; a board mission's place is ALWAYS a request (template '{t.id}'s base carries one), so leave it out.");
-                if (string.IsNullOrWhiteSpace(r.prose.card))
+                // A chain link is never on a board, so nobody reads a card for it; the field carries the briefing (CardOf).
+                if (string.IsNullOrWhiteSpace(r.prose.card) && !IsChain(r))
                     Fatal("prose.card is required on a board mission: it is the board's description, the card he reads before taking the job.");
                 if (!BoardTypes.ContainsKey(TitleType(r) ?? ""))
                     Fatal($"prose.name's type is '{TitleType(r) ?? "(none: no colon)"}'; a board mission's label is derived from it (OT-05), and the types mapped are {string.Join(", ", BoardTypes.Keys)}.");
@@ -1578,7 +1709,9 @@ namespace FrankyCLI
             // --- deal: which slate pool hands this Delve out (2026-10-11) ------------------------------------
             // Only a node in the template's OWN mod: the build appends to it, and appending to a master's node
             // would write an override of somebody else's record.
-            if (r.deal != null)
+            // ⛔ "chain" is no node: a chain link is started only by the link before (OT-30), never dealt.
+            GradeChain(r, t, dataDir, Fatal);
+            if (r.deal != null && !IsChain(r))
             {
                 var own = ModKey.FromNameAndExtension(t.mod + ".esm");
                 var node = OwnOrMaster<IStoryManagerQuestNodeGetter>(new HashSet<ModKey> { own }, env, r.deal);
@@ -2473,7 +2606,7 @@ namespace FrankyCLI
                 return 1;
             }
             var markers = new Dictionary<string, FormKey>(StringComparer.OrdinalIgnoreCase);
-            if (!Grade(r, t, env, markers, opts.Spread))
+            if (!Grade(r, t, env, markers, opts.Spread, opts.DataDir))
             { Console.WriteLine("\n=== lint failed. NOTHING WRITTEN. ==="); return 1; }
 
             Console.WriteLine();
@@ -2571,7 +2704,8 @@ namespace FrankyCLI
                 unpooled += drop.Count;
             }
             if (unpooled > 0) Console.WriteLine($"  unpooled : {unpooled} entr{(unpooled == 1 ? "y" : "ies")} for the previous {r.id}");
-            if (r.deal != null)
+            if (IsChain(r)) Console.WriteLine($"  dealt    : nowhere: {r.id} is a chain link, started only by the link before (OT-30)");
+            else if (r.deal != null)
             {
                 var pool = myMod.StoryManagerQuestNodes.FirstOrDefault(n => string.Equals(n.EditorID, r.deal, StringComparison.OrdinalIgnoreCase));
                 if (pool == null) { Console.WriteLine($"REFUSED: no Story Manager quest node '{r.deal}' in {t.mod}."); return 1; }
@@ -2596,6 +2730,20 @@ namespace FrankyCLI
             int repointed = gen_delvegatetest.RepointSelfLinks(clone.VirtualMachineAdapter, sourceKey, clone.FormKey);
             Console.WriteLine("  clone    : " + r.id + " " + clone.FormKey + "  self-links repointed: " + repointed);
             if (repointed == 0) { Console.WriteLine("REFUSED: expected at least one self-reference and found none."); return 1; }
+            // OT-30: and the links INTO this quest from other quests. A rebuild allocates a new FormKey (new Quest(myMod)), so
+            // the link before's next and the link after's inherited place still name the previous build's, and dangle silently.
+            var chainTouched = new HashSet<FormKey>();   // other quests this build edits: their models are re-emitted after this one's
+            int crossed = RepointChainLinks(myMod, clone, stale, chainTouched);
+            if (crossed > 0) Console.WriteLine($"  chain    : {crossed} link(s) from other quests repointed from the previous {r.id} to {clone.FormKey}");
+            // ...and the link before writes the hand-off: the next link's inherited place is filled from THIS quest (InheritPlace).
+            if (r.next?.id is string nid && LoadSiblingRecipe(opts.DataDir, nid)?.place.inherit == r.id)
+            {
+                var nq = myMod.Quests.FirstOrDefault(q => q.EditorID == nid);
+                var nla = nq?.Aliases.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)t.placeAlias);
+                if (nla == null) { Console.WriteLine($"REFUSED: {nid} inherits this quest's place and has no built place alias {t.placeAlias}; build {nid} first."); return 1; }
+                if (FillInheritedPlace(nla, clone, t, r.id) > 0) return 1;
+                chainTouched.Add(nq!.FormKey);
+            }
             // ⛔ AND EVERY OTHER LINK TO THE BASE, not only the scripts'. A condition is a link too: MB28a's stage 100 picks
             // its completing log entry on GetStageDone(<itself>, 10), and the copy kept testing MB28a, which never runs, so
             // the boss died, stage 100 took the entry that completes nothing, and the board mission never finished (his
@@ -2614,6 +2762,16 @@ namespace FrankyCLI
             SortStages(clone);
             fail += OrderAliases(clone);
             if (fail == 0) fail += EmitModel(myMod, ref clone, r, opts, dry);
+            // OT-30: a quest this build EDITED (a chain neighbour) is written from the plugin, so its model must follow, or the
+            // models check reads drift and that quest's next build writes from a model without the link (delve_reserve's shape).
+            foreach (var k in fail == 0 && !dry ? chainTouched : Enumerable.Empty<FormKey>())
+            {
+                var other = myMod.Quests.First(q => q.FormKey == k);
+                var om = gen_questmodel.ReadModel(other, out var orefs);
+                if (orefs.Count > 0) { foreach (var x in orefs) Console.WriteLine($"REFUSED: {other.EditorID}'s model cannot hold: {x}"); fail += orefs.Count; continue; }
+                File.WriteAllText(Path.Combine(opts.DataDir, "models", other.EditorID + ".json"), gen_questmodel.ToJson(om));
+                Console.WriteLine($"  model    : {other.EditorID} re-emitted (this build edited its chain link)");
+            }
             if (fail > 0) { Console.WriteLine("\n=== " + fail + " problem(s). NOTHING WRITTEN. ==="); return 1; }
 
             // R6 BEFORE THE WRITE: every required alias accounted for, off the quest about to be written (his frame, 2026-10-22:
@@ -2645,6 +2803,7 @@ namespace FrankyCLI
             int v = IsSpace(t) ? VerifySpace(modFile, readParams, r, t, madeBeats, mastersBefore)
                                : VerifyBeats(modFile, readParams, r, t, madeBeats, mastersBefore);
             v += VerifyDeal(modFile, readParams, r);
+            v += VerifyChain(modFile, readParams, r);
             lap.Mark("voice");
             // The audio last, and only over a verified plugin: its file names are the written topics' ids.
             return v == 0 ? DeployVoice(r, t, madeBeats) : v;
@@ -2692,6 +2851,7 @@ namespace FrankyCLI
                 if (fail > 0) break;
                 if (pi == 2 && IsOrbit(r)) continue;   // an orbit's conditions are CreateOrbitPlace's, not a theme's
                 if (pi == 1 && secondCity) continue;   // a pinned city carries no conditions (MakePlaceSettlement)
+                if (pi == 0 && r.place.inherit != null) { fail += InheritPlace(myMod, clone, t, r.place.inherit); continue; }   // OT-30: the link before's place
                 var theme = ThemeOf(r, pi);
                 fail += WritePlaceConditions(clone, PlaceAliasOf(t, pi, made4.ThirdPlaceAlias), MarkersAt(r, markers, pi),
                                              ResolveKeywords(env, theme.require, _ => { }),
@@ -2777,6 +2937,71 @@ namespace FrankyCLI
         /// The pools, re-read OFF DISK: the quest sits in exactly the node it names (once) or in none, and no node
         /// in the plugin points at a quest of the plugin's own that no longer exists (the class a rebuild creates).
         /// </summary>
+        /// <summary>
+        /// OT-30: every script object property (quest script, its scripts, its alias scripts) and every inherited place on ANOTHER
+        /// quest of this mod that names a previous build of this one is repointed at the new build. Returns how many.
+        /// </summary>
+        private static int RepointChainLinks(StarfieldMod myMod, Quest clone, List<FormKey> stale, HashSet<FormKey> touched)
+        {
+            if (stale.Count == 0) return 0;
+            var old = stale.ToHashSet();
+            int n = 0;
+            foreach (var q in myMod.Quests)
+            {
+                if (q.FormKey == clone.FormKey) continue;
+                if (q.VirtualMachineAdapter is { } vma)
+                {
+                    var entries = vma.Scripts.Concat(vma.Script != null ? new[] { vma.Script } : Array.Empty<ScriptEntry>())
+                                     .Concat(vma.Aliases.SelectMany(a => a.Scripts));
+                    foreach (var p in entries.SelectMany(s => s.Properties).OfType<ScriptObjectProperty>())
+                        if (old.Contains(p.Object.FormKey)) { p.Object.SetTo(clone.FormKey); n++; touched.Add(q.FormKey); }
+                }
+                foreach (var la in q.Aliases.OfType<QuestLocationAlias>())
+                    if (la.ExternalAliasLocation is { } ext && old.Contains(ext.Quest.FormKey)) { ext.Quest.SetTo(clone.FormKey); n++; touched.Add(q.FormKey); }
+            }
+            return n;
+        }
+
+        /// <summary>
+        /// OT-30, re-read OFF DISK: this quest's own chain links are the ones the recipe names, and NO quest in the plugin holds a
+        /// next link or an inherited place pointing at a quest of the plugin's own that no longer exists (what a rebuild of one
+        /// end would leave, if RepointChainLinks ever missed a field).
+        /// </summary>
+        private static int VerifyChain(string modFile, Mutagen.Bethesda.Plugins.Binary.Parameters.BinaryReadParameters readParams, Recipe r)
+        {
+            var reread = StarfieldMod.CreateFromBinaryOverlay(modFile, StarfieldRelease.Starfield, readParams);
+            var byKey = reread.Quests.ToDictionary(x => x.FormKey, x => x.EditorID ?? "");
+            var q = reread.Quests.FirstOrDefault(x => x.EditorID == r.id);
+            if (q == null) return 0;   // Verify has already failed on this
+            int fail = 0;
+            // Only a key in THIS plugin can be gone: a link into a master (a vanilla quest's alias) is named, never called missing.
+            string Name(FormKey k) => byKey.TryGetValue(k, out var e) ? e : k.ModKey == reread.ModKey ? $"MISSING {k}" : k.ToString();
+            string? NextOf(IQuestGetter x) => x.VirtualMachineAdapter?.Script?.Properties.OfType<IScriptObjectPropertyGetter>()
+                .FirstOrDefault(p => p.Name == ChainNextProperty) is { } p ? Name(p.Object.FormKey) : null;
+            string? InheritOf(IQuestGetter x, out int alias)
+            {
+                alias = -1;
+                var ext = x.Aliases.OfType<IQuestLocationAliasGetter>().Select(a => (a.ID, a.ExternalAliasLocation)).FirstOrDefault(a => a.ExternalAliasLocation != null);
+                if (ext.ExternalAliasLocation == null) return null;
+                alias = ext.ExternalAliasLocation.AliasID ?? -1;
+                return Name(ext.ExternalAliasLocation.Quest.FormKey);
+            }
+            if (r.next != null || NextOf(q) != null) fail += Check("the next link is the recipe's", NextOf(q) ?? "(none)", r.next?.id ?? "(none)");
+            // A link whose link before is not built yet WAITS (InheritPlace): the expected fill is none until that build writes it.
+            string? wantInherit = r.place.inherit != null && reread.Quests.Any(x => x.EditorID == r.place.inherit) ? r.place.inherit : null;
+            if (r.place.inherit != null || InheritOf(q, out _) != null)
+                fail += Check(wantInherit == null && r.place.inherit != null ? $"the inherited place waits for {r.place.inherit}'s build" : "the inherited place is the recipe's link before's",
+                              InheritOf(q, out _) ?? "(none)", wantInherit ?? "(none)");
+            var dangling = new List<string>();
+            foreach (var x in reread.Quests)
+            {
+                if (NextOf(x) is string n && n.StartsWith("MISSING")) dangling.Add($"{x.EditorID} next -> {n}");
+                if (InheritOf(x, out _) is string i && i.StartsWith("MISSING")) dangling.Add($"{x.EditorID} place <- {i}");
+            }
+            fail += Check("no chain link in the plugin names a quest that is gone", dangling.Count == 0 ? "none" : string.Join("; ", dangling), "none");
+            return fail;
+        }
+
         private static int VerifyDeal(string modFile, Mutagen.Bethesda.Plugins.Binary.Parameters.BinaryReadParameters readParams, Recipe r)
         {
             var reread = StarfieldMod.CreateFromBinaryOverlay(modFile, StarfieldRelease.Starfield, readParams);
@@ -2786,7 +3011,7 @@ namespace FrankyCLI
                 .Select(n => (n.EditorID, count: n.Quests.Count(e => e.Quest.FormKey == q.FormKey))).Where(x => x.count > 0).ToList();
             int fail = Check("the quest is dealt from exactly the node the recipe names",
                              holding.Count == 0 ? "(none)" : string.Join(", ", holding.Select(h => h.count == 1 ? h.EditorID : $"{h.EditorID} x{h.count}")),
-                             r.deal ?? "(none)");
+                             IsChain(r) ? "(none)" : r.deal ?? "(none)");
             if (string.Equals(r.deal, BoardTestNode, StringComparison.OrdinalIgnoreCase))
             {
                 var node = reread.StoryManagerQuestNodes.FirstOrDefault(n => n.EditorID == BoardTestNode);
@@ -3162,6 +3387,48 @@ namespace FrankyCLI
             var c = from.DeepCopy(); c.ID = (uint)sp.id; c.Name = sp.name; c.ParentSystemLocationAliasID = t.secondPlaceAlias;
             clone.Aliases.Add(c);
             Console.WriteLine($"  +planet  : alias {sp.id} {sp.name}, the planet of the second place (alias {t.secondPlaceAlias}), a copy of {from.Name}");
+            return 0;
+        }
+
+        /// <summary>
+        /// OT-30, place.inherit: a chain link's main place IS the link before's. Its place alias stops being a request (no ALPS,
+        /// no type keyword, no conditions) and is filled from the link before's place alias of the same ID, by vanilla's own
+        /// alias-from-another-quest fill (ExternalAliasLocation). Everything the board base fills FROM the place (PrimaryRef,
+        /// the map marker, the planet, the system) follows it unchanged. The link before is still running when it starts this
+        /// one (its next fires before MissionComplete), which is what the fill needs.
+        /// ⚠ AllowReserved is set because the link before RESERVES that site (2026-10-28) and an alias without the bit cannot
+        /// take a reserved location; whether an external fill is subject to that at all is UNREAD, so the bit is cheap insurance
+        /// and the probe pair (duo_delvetest_ch1/ch2) is the proof of the fill, not this comment.
+        /// </summary>
+        /// ⭐ THE LINK BEFORE WRITES THE HAND-OFF (Outlaws' order: each setup is handed the quest after it). Its next needs this
+        /// link's FormKey and this link's place needs its FormKey, so neither could be built first. So this link, built while
+        /// the link before is not, leaves its place WAITING (no fill at all: it cannot start, and nothing starts it yet), and the
+        /// link before's build fills it (FillInheritedPlace, from Build). Built after, it fills here.
+        private static int InheritPlace(StarfieldMod myMod, Quest clone, Template t, string fromId)
+        {
+            var la = clone.Aliases!.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)t.placeAlias);
+            if (la == null) { Console.WriteLine($"REFUSED: the clone has no place alias {t.placeAlias} to fill from {fromId}."); return 1; }
+            la.ALPS = null;
+            la.LocationTypeKeyword.Clear();
+            la.SpecificLocation.Clear();
+            la.Conditions.Clear();
+            la.Flags = (la.Flags ?? 0) | QuestLocationAlias.Flag.AllowReserved;
+            var prev = myMod.Quests.FirstOrDefault(q => q.EditorID == fromId);
+            if (prev == null)
+            {
+                Console.WriteLine($"  inherit  : alias {la.ID} {la.Name} WAITS for {fromId}'s build, which fills it (the link before writes the hand-off)");
+                return 0;
+            }
+            return FillInheritedPlace(la, prev, t, fromId);
+        }
+
+        /// <summary>OT-30: point a chain link's place alias at the link before's place alias of the same ID.</summary>
+        private static int FillInheritedPlace(QuestLocationAlias la, IQuestGetter prev, Template t, string fromId)
+        {
+            if (!prev.Aliases.OfType<IQuestLocationAliasGetter>().Any(a => a.ID == (uint)t.placeAlias))
+            { Console.WriteLine($"REFUSED: {fromId} has no location alias {t.placeAlias} to hand on."); return 1; }
+            la.ExternalAliasLocation = new ExternalAliasLocation { Quest = prev.ToNullableLink<IQuestGetter>(), AliasID = (int)t.placeAlias };
+            Console.WriteLine($"  inherit  : alias {la.ID} {la.Name} filled from {fromId} [{prev.FormKey}] alias {t.placeAlias} (ExternalAliasLocation), AllowReserved; no request, no conditions");
             return 0;
         }
 
@@ -3773,8 +4040,8 @@ namespace FrankyCLI
             Console.WriteLine("  prose    : name + briefing at stage " + t.briefingStage);
             if (IsBoard(t) || IsBoardSpace(t))
             {
-                clone.MissionBoardDescription = Expand(r.prose.card!, t);
-                Console.WriteLine("  card     : the board's description");
+                clone.MissionBoardDescription = Expand(CardOf(r), t);
+                Console.WriteLine(r.prose.card != null ? "  card     : the board's description" : "  card     : none (a chain link); the field carries the briefing");
                 // The label (OT-05): the title's type onto vanilla's, on the record's type field AND its keyword list, where
                 // the shell carries the base's Bounty too. Every type keyword in the table leaves the list first.
                 var (kw, label) = BoardTypes[TitleType(r)!];

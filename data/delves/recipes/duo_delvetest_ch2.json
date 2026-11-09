@@ -1,0 +1,34 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_ch2",
+  "template": "board",
+  "deal": "chain",
+  "_deal": "Never on a board: started only by duo_delvetest_ch1's next, and accepts itself (OT-30).",
+  "author": "eliza",
+  "source": "his 2026-11-09 08:22 \"yup let's do OT-30\". The probe's second link.",
+  "_note": [
+    "THE CHAIN PROBE, LINK 2 of 2. One pickup at the inherited place, where ch1's terminal stood (it vanished on use).",
+    "If it does not appear, Papyrus.0.log carries [chain] ... could not start: the external fill did not take, and the",
+    "fallback is OT-03's late fill (the place forced by script)."
+  ],
+  "place": {
+    "inherit": "duo_delvetest_ch1",
+    "_inherit": "ch1's own site, by ExternalAliasLocation."
+  },
+  "prose": {
+    "name": "Hauling: Chain Probe Two on <Planet>",
+    "briefing": "The note at the <Place> on <Planet> asked for a crate on the same site to be collected."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "RECenterLocRef",
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "name": "Supply Crate",
+      "item": "Supply Crate",
+      "objective": "Collect the crate at the <Place>",
+      "journal": "I collected the crate at the <Place>. Two jobs, one site.",
+      "reward": "easy"
+    }
+  ]
+}

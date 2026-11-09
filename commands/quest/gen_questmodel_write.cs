@@ -190,6 +190,13 @@ namespace FrankyCLI
                     Link(ap.PcmTypeKeyword, alps.PcmTypeKeyword);
                     l.ALPS = ap;
                 }
+                // OT-30: a chain link's place, filled from the link before's place alias (the ref kind's External, same shape).
+                if (a.External is { } x)
+                {
+                    var ex = new ExternalAliasLocation { AliasID = x.AliasID };
+                    Link(ex.Quest, x.Quest);
+                    l.ExternalAliasLocation = ex;
+                }
                 return l;
             }
             if (a.Kind == "coll")

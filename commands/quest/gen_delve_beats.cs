@@ -1858,6 +1858,29 @@ namespace FrankyCLI
                 props = new List<(string type, string pname, FormKey key, int alias)>();   // alias -1 = a plain form
                 code = new SortedDictionary<int, List<string>>();
 
+                // OT-30, a CHAIN LINK ACCEPTS ITSELF. A board quest started by a script is only LISTED: MissionQuestScript's
+                // OnQuestStarted sets ReadyStage (5), and AcceptStage (10, this template's entry) comes only from the board's
+                // accept (manual 04 Inbox, 2026-10-30, his "can't call startquest on a missionboard missin"). Its public
+                // MissionAccepted(True) is that accept without the board's confirm box: PlayerAcceptedQuest, stage 10, the
+                // accepted event. On ReadyStage, so it runs after OnQuestStarted has set the reward; and MissionComplete pays
+                // only if PlayerAcceptedQuest, so without it the link would be played for nothing.
+                if (IsChain(r))
+                {
+                    if (clone.Stages.All(s => s.Index != ChainReadyStage))
+                    { Console.WriteLine($"REFUSED: a chain link accepts itself on stage {ChainReadyStage} (MissionQuestScript's ReadyStage), and this quest has no such stage."); return 1; }
+                    Add(ChainReadyStage, "Quest __temp = Self as Quest");
+                    Add(ChainReadyStage, $"{t.questScript} kmyQuest = __temp as {t.questScript}");
+                    Add(ChainReadyStage, "kmyQuest.MissionAccepted(True)   ; a chain link: no board, so it accepts itself (OT-30)");
+                }
+                // OT-30, NEXT: the link this one starts, read off the plugin. A chain is built backwards (Outlaws' way): the link
+                // must exist before the quest that names it, because the property carries its FormKey.
+                if (r.next != null)
+                {
+                    var nq = myMod.Quests.FirstOrDefault(q => q.EditorID == r.next.id);
+                    if (nq == null) { Console.WriteLine($"REFUSED: next names {r.next.id}, which is not built in {t.mod}; build the link first (a chain is built backwards)."); return 1; }
+                    props.Add(("Quest", ChainNextProperty, nq.FormKey, -1));
+                }
+
                 foreach (var kv in counterOf)
                 {
                     string p = $"Counter{kv.Key + 1}";
@@ -2081,6 +2104,17 @@ namespace FrankyCLI
                 void CompleteMission(int st)
                 {
                     if (!Lingers(st)) WaitForLines(st);   // lingering, MissionComplete no longer shuts it down (ShutdownOnCompletion false)
+                    // OT-30: the next link starts HERE, after the closing lines (the ask is in them) and BEFORE MissionComplete,
+                    // which shuts this quest down: a link that inherits this place fills from it, so it must still be held.
+                    if (r.next != null)
+                    {
+                        string pad = "";
+                        if (r.next.chance < 100) { Add(st, $"If Utility.RandomInt(1, 100) <= {r.next.chance}   ; an escalation: {r.next.chance}%"); pad = "    "; }
+                        Add(st, $"{pad}If !{ChainNextProperty}.Start()");
+                        Add(st, $"{pad}    Debug.Trace(\"[chain] \" + Self + \" could not start \" + {ChainNextProperty})");
+                        Add(st, $"{pad}EndIf");
+                        if (r.next.chance < 100) Add(st, "EndIf");
+                    }
                     Add(st, "Quest __temp = Self as Quest");
                     Add(st, $"{t.questScript} kmyQuest = __temp as {t.questScript}");
                     Add(st, "kmyQuest.MissionComplete()");
@@ -2743,7 +2777,7 @@ namespace FrankyCLI
                               vma.Aliases.Any(a => a.Property.Alias == t.markerSource && a.Scripts.Any(s => !bm.Hooks.Any(h => h.alias == t.markerSource && h.script == s.Name))).ToString(), "False");
                 foreach (int da in bm.DroppedDriverAliases)
                     fail += Check($"driver alias {da} is gone", q.Aliases.OfType<IQuestReferenceAliasGetter>().Any(a => a.ID == (uint)da) ? "PRESENT" : "gone", "gone");
-                fail += Check("the board's card is the recipe's", q.MissionBoardDescription?.String ?? "none", Expand(r.prose.card!, t));
+                fail += Check("the board's card is the recipe's", q.MissionBoardDescription?.String ?? "none", Expand(CardOf(r), t));
                 fail += CheckBoardLabel(q, r);
                 // The pay and the shutdown are in the generated SOURCE: a fragment the compiler has not seen yet.
                 string src = File.ReadAllText(bm.PscPath);
@@ -2764,8 +2798,12 @@ namespace FrankyCLI
                 // spawn and objective live on the entry stage's fragment.
                 fail += Check("no stage runs on start (the quest starts at the board refresh)",
                               q.Stages.Any(s => s.Flags.HasFlag(QuestStage.Flag.RunOnStart)).ToString(), "False");
-                fail += Check($"no fragment on stages below the entry stage {t.entryStage}",
-                              string.Join(",", vma.Fragments.Where(f => f.Stage < t.entryStage).Select(f => f.Stage)), "");
+                // ...except a chain link's self-accept (OT-30): it has no board refresh, its ReadyStage runs when the link before
+                // starts it, and that fragment does nothing but accept. Exact, not loosened: that one stage and no other.
+                fail += Check(IsChain(r) ? $"below the entry stage {t.entryStage}, only the chain link's self-accept on {ChainReadyStage}"
+                                         : $"no fragment on stages below the entry stage {t.entryStage}",
+                              string.Join(",", vma.Fragments.Where(f => f.Stage < t.entryStage).Select(f => f.Stage)),
+                              IsChain(r) ? ChainReadyStage.ToString() : "");
                 fail += Check($"step one begins on entry stage {t.entryStage}",
                               bm.FragStages.Contains(t.entryStage).ToString(), "True");
             }
@@ -3161,7 +3199,8 @@ namespace FrankyCLI
                 // A board quest is never started by hand (his correction 2026-10-30, OT-03: "can't call startquest on a
                 // missionboard missin"); this line offered startquest for every template and sent a probe to no board at all.
                 Console.WriteLine(!IsBoard(t) ? $"  BUILD VERIFIED. Compile the fragment script, then startquest {r.id}:"
-                    : r.deal != null ? $"  BUILD VERIFIED. Compile the fragment script, then take it from the board ({r.deal}); a board quest is never started by hand:"
+                    : IsChain(r) ? "  BUILD VERIFIED. Compile the fragment script; a chain link is on no board and starts when the link before completes (OT-30):"
+                    : r.deal != null ?$"  BUILD VERIFIED. Compile the fragment script, then take it from the board ({r.deal}); a board quest is never started by hand:"
                     : "  BUILD VERIFIED, AND ON NO BOARD: no deal, so nothing can list it and a board quest is never started by hand. Set deal (a probe: _duo_MB_MissionNode_test). Compile:");
                 Console.WriteLine($"    python papyrus/compile.py C:/modding/DU_Overtime/Data {bm.Script}");
             }
