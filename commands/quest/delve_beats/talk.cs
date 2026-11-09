@@ -260,12 +260,15 @@ namespace FrankyCLI
                     // A give (plan OT-34): the exchange offered only while the player carries the count (GetItemCount run on
                     // PlayerRef, Barrett's [Give Med Pack]), and duo_delve_give on the player's line takes it when the line
                     // ends. The tag is already in the words above.
-                    // ⛔ THE GATE IS ON THE SCENE, NOT THE PLAYER'S LINE (his play of MB85a, 2026-11-09 11:3x: "no medpack, this
-                    // option was available. Clicking passed the mission", the menu entry reading "No Dialogue Action on Player
-                    // in First Phase"). Vanilla gates the INFO because its choices are topics inside one PlayerDialogue action;
-                    // here the menu entry is the exchange's own Top Level scene, so an ungated scene with a failed player line
-                    // still showed, and its reply still set the stage. The scene's conditions are what hide an entry (the same
-                    // mechanism that hides the completion once done), so the gate goes there, once.
+                    // ⛔ THE GATE IS ON THE SCENE AND THE PLAYER'S LINE BOTH (his plays of MB85a, 2026-11-09). On the line alone
+                    // (vanilla's place, Barrett): with no pack the entry still showed, "No Dialogue Action on Player in First
+                    // Phase", and picking it passed the mission, because our menu entry is the exchange's own Top Level scene.
+                    // On the scene alone, the line left with no condition: the board NEVER DEALT the quest, on two builds (the
+                    // item gate, then a harmless dummy in its place), while a rebuild of the line-only shape dealt and played,
+                    // so a rebuild is not the cause. Both places: dealt, the entry gone with no pack and there with one, his
+                    // "yup works as expected" (13:2x). So the 4th scene condition is fine, and what stopped the board starting the
+                    // quest was the player's line carrying duo_delve_give with NO condition. Why, the records cannot say; a
+                    // board quest that fails to start writes nothing to the Papyrus log. Keep the two together.
                     ConditionFloat? itemGate = null;
                     if (gives)
                     {
@@ -284,7 +287,7 @@ namespace FrankyCLI
                     var (nt, ni) = Line($"{tag}_reply{x + 1}", ex.reply!, true);
                     if (x == 0) ni.SetParentQuestStage = new DialogSetParentQuestStage { OnEnd = (short)stage };
                     var sc = NewScene($"{tag}_topic{x + 1}_scene", 0x00002814u, x == 0);
-                    if (itemGate != null) sc.Conditions.Add(itemGate);
+                    if (itemGate != null) { sc.Conditions.Add(itemGate); pi.Conditions.Add(itemGate.DeepCopy()); }
                     sc.Index = (uint)(x + 1);   // vanilla's numbering, from 1; NOT shown to be the menu's sort key (see above)
                     // SCPI orders the menu, highest first, and must not tie (vanilla never does: MQ101 90/80/50/30/20). The
                     // completion takes 100, the rest 50, 49, 48... in recipe order. Tied at 100, the completion showed last.

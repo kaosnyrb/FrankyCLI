@@ -3157,10 +3157,13 @@ namespace FrankyCLI
                 string who = $"beat {gb + 1} (talk) exchange {gx + 1}";
                 var gi = q.DialogTopics.FirstOrDefault(d => d.EditorID == $"{r.id}_talk{gb + 1}_ask{gx + 1}")?.Responses.FirstOrDefault();
                 fail += Check($"{who}: the player's words open with the give tag", gi?.Responses.FirstOrDefault()?.ResponseText?.String ?? "missing", gwords);
-                // The gate is on the exchange's SCENE, the menu entry (his MB85a play, 2026-11-09: gated on the line, the entry
-                // showed "No Dialogue Action on Player in First Phase" and its reply passed the mission). The line carries none.
+                // The gate is on BOTH the exchange's scene (the menu entry) and the player's line (2026-11-09, his plays of MB85a;
+                // see BuildTalk): the line alone showed an empty entry that passed the mission, the scene alone was never dealt.
                 var gscene = q.Scenes.FirstOrDefault(s => s.EditorID == $"{r.id}_talk{gb + 1}_topic{gx + 1}_scene");
-                fail += Check($"{who}: the player's line carries no condition (the gate is the scene's)", (gi?.Conditions.Count ?? -1).ToString(), "0");
+                var gl = gi?.Conditions.Select(c => (c, d: c.Data as IGetItemCountConditionDataGetter)).Where(p => p.d != null).ToList() ?? new();
+                fail += Check($"{who}: the player's line is offered only while the player carries {gcount}",
+                              $"{gi?.Conditions.Count} condition(s): " + string.Join("; ", gl.Select(p => $"{p.d!.FirstParameter.Link.FormKey} on {p.d.RunOnType} {p.d.Reference.FormKey} {p.c.CompareOperator} {(p.c as IConditionFloatGetter)?.ComparisonValue}")),
+                              $"1 condition(s): {gitem} on Reference {PlayerRef} GreaterThanOrEqualTo {gcount}");
                 var gc = gscene?.Conditions.Select(c => (c, d: c.Data as IGetItemCountConditionDataGetter)).Where(p => p.d != null).ToList() ?? new();
                 fail += Check($"{who}: its scene is offered only while the player carries {gcount}",
                               string.Join("; ", gc.Select(p => $"{p.d!.FirstParameter.Link.FormKey} on {p.d.RunOnType} {p.d.Reference.FormKey} {p.c.CompareOperator} {(p.c as IConditionFloatGetter)?.ComparisonValue}")),

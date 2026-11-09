@@ -383,6 +383,27 @@ namespace FrankyCLI
                         { DumpBook(rec, allMods ?? new List<IStarfieldModGetter> { mod }); found++; }
                     break;
                 case "scene":
+                    if (search.Equals("condtally", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Every condition on a scene's OWN record (DumpScene does not print them), counted by function and
+                        // run-on type, and every scene with a condition run on a Reference listed whole. Plan OT-34, 2026-11-09:
+                        // a GetItemCount run on PlayerRef on a Top Level scene stopped MB85a being dealt by the board.
+                        var st = new Dictionary<string, int>();
+                        foreach (var quest in mod.Quests)
+                            foreach (var scene in quest.Scenes)
+                                foreach (var c in scene.Conditions)
+                                {
+                                    string fn = c.Data.GetType().Name.Replace("ConditionDataBinaryOverlay", "").Replace("ConditionData", "");
+                                    string k = $"{fn} on {c.Data.RunOnType}";
+                                    st[k] = st.GetValueOrDefault(k) + 1;
+                                    if (c.Data.RunOnType == Condition.RunOnType.Reference || fn.Contains("ItemCount"))
+                                        Console.WriteLine($"SCENECOND\t{quest.EditorID}\t{scene.EditorID}\t0x{(uint)(scene.Flags ?? 0):X8}\t{DescribeCondition(c)}");
+                                }
+                        foreach (var kv in st.OrderByDescending(kv => kv.Value))
+                            Console.WriteLine($"TALLY\t{mod.ModKey}\t{kv.Value}\t{kv.Key}");
+                        found += st.Count;
+                        break;
+                    }
                     // Scenes are SCEN sub-records inside Quest records
                     foreach (var quest in mod.Quests)
                     {
