@@ -1868,9 +1868,20 @@ namespace FrankyCLI
                 {
                     if (clone.Stages.All(s => s.Index != ChainReadyStage))
                     { Console.WriteLine($"REFUSED: a chain link accepts itself on stage {ChainReadyStage} (MissionQuestScript's ReadyStage), and this quest has no such stage."); return 1; }
+                    // Every alias as it IS on the ready stage, so a link that will not start names its empty alias (his plays of
+                    // duo_delvetest_ch2, 2026-11-09: Start() false twice, and no other line said why). Read off the quest's own
+                    // alias list, never typed, so none is left out.
+                    var shown = clone.Aliases!.Select(a => a switch
+                    {
+                        QuestLocationAlias l => $"\" {l.ID} {l.Name}=\" + (GetAlias({l.ID}) as LocationAlias).GetLocation()",
+                        QuestReferenceAlias x => $"\" {x.ID} {x.Name}=\" + (GetAlias({x.ID}) as ReferenceAlias).GetRef()",
+                        _ => null,
+                    }).Where(s => s != null).ToList();
+                    Add(ChainReadyStage, $"Debug.Trace(\"[chain] \" + Self + \" ready:\" + {string.Join(" + ", shown)})");
                     Add(ChainReadyStage, "Quest __temp = Self as Quest");
                     Add(ChainReadyStage, $"{t.questScript} kmyQuest = __temp as {t.questScript}");
                     Add(ChainReadyStage, "kmyQuest.MissionAccepted(True)   ; a chain link: no board, so it accepts itself (OT-30)");
+                    Add(ChainReadyStage, "Debug.Trace(\"[chain] \" + Self + \" accepted itself, stage \" + GetStage() + \", running \" + IsRunning())");
                 }
                 // OT-30, NEXT: the link this one starts, read off the plugin. A chain is built backwards (Outlaws' way): the link
                 // must exist before the quest that names it, because the property carries its FormKey.
@@ -2110,8 +2121,14 @@ namespace FrankyCLI
                     {
                         string pad = "";
                         if (r.next.chance < 100) { Add(st, $"If Utility.RandomInt(1, 100) <= {r.next.chance}   ; an escalation: {r.next.chance}%"); pad = "    "; }
+                        // The state on both sides of the call, so a failed start says whether the link was already up, half up, or
+                        // never reached (his plays of the probe, 2026-11-09: Start() false and nothing else).
+                        string state = $"\" running \" + {ChainNextProperty}.IsRunning() + \" starting \" + {ChainNextProperty}.IsStarting() + \" stopping \" + {ChainNextProperty}.IsStopping()";
+                        Add(st, $"{pad}Debug.Trace(\"[chain] \" + Self + \" handing on, my place \" + (GetAlias({t.placeAlias}) as LocationAlias).GetLocation() + \"; next\" + {state})");
                         Add(st, $"{pad}If !{ChainNextProperty}.Start()");
-                        Add(st, $"{pad}    Debug.Trace(\"[chain] \" + Self + \" could not start \" + {ChainNextProperty})");
+                        Add(st, $"{pad}    Debug.Trace(\"[chain] \" + Self + \" could not start \" + {ChainNextProperty} + \";\" + {state})");
+                        Add(st, $"{pad}Else");
+                        Add(st, $"{pad}    Debug.Trace(\"[chain] \" + Self + \" started \" + {ChainNextProperty} + \"; stage \" + {ChainNextProperty}.GetStage())");
                         Add(st, $"{pad}EndIf");
                         if (r.next.chance < 100) Add(st, "EndIf");
                     }
