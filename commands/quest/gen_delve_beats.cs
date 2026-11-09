@@ -183,6 +183,26 @@ namespace FrankyCLI
                ? steps[^1].Beats[0] : -1;
 
         /// <summary>
+        /// The stages the talk that ends the Delve can end on (MB93d, Jessica's 2026-11-07 letter): exchanges[0] on the
+        /// completing stage, then every exchange carrying "ends", in recipe order, on a copy of it 10 apart (110, 120: the
+        /// choose endings' numbering). EMPTY when no exchange carries ends, so a talk with one closer builds exactly as it did.
+        /// Pure, so the lint and the build agree by construction.
+        /// </summary>
+        private static List<(int ex, int stage)> TalkEndings(Recipe r, List<Step> steps, int complete)
+        {
+            int b = HandBackTalk(r, steps);
+            var ex = b < 0 ? null : r.beats[b].exchanges;
+            if (ex == null || !ex.Skip(1).Any(e => e.ends != null)) return new();
+            var list = new List<(int ex, int stage)> { (0, complete) };
+            for (int x = 1; x < ex.Count; x++)
+                if (ex[x].ends != null) list.Add((x, complete + 10 * list.Count));
+            return list;
+        }
+        /// <summary>A talk with more than one closer sets the board's CompleteStage here, a silent stage of its own (see Stages).
+        /// 9, as OT-9J's AskCompleteOffset: under the next closer's 110.</summary>
+        private const int TalkCompleteOffset = 9;
+
+        /// <summary>
         /// The pickups that give NO item (plan OT-08, his 2026-11-02 "yeah don't give at all"): a pickup in the LAST step whose
         /// item nothing takes (no deliver after it, no hand-back talk, no choose ending). Its item would arrive in the same
         /// moment the job pays and stay in his inventory for good (the Survey Data Drive on MB43a), so it is never made: the
@@ -423,6 +443,23 @@ namespace FrankyCLI
             }
             if (r.reward != null && (steps.Count == 0 || !steps[^1].IsGroup))
                 Fatal("the recipe sets a top-level reward and does not end on a group, so it would be silently ignored; the tier goes on the ending beat.");
+            // A TALK WITH MORE THAN ONE CLOSER (MB93d): "ends" on an exchange of the talk that is the whole last step, on a ground
+            // board. Anywhere else its stage would end nothing, so it is refused by name rather than built and ignored.
+            int endsOn = HandBackTalk(r, steps);
+            for (int i = 0; i < r.beats.Count; i++)
+                for (int x = 0; x < (r.beats[i].exchanges?.Count ?? 0); x++)
+                {
+                    if (r.beats[i].exchanges![x].ends is not ExchangeEnd en) continue;
+                    string at = $"beat {i + 1} exchanges[{x}].ends";
+                    if (x == 0) { Fatal($"{at}: exchanges[0] already ends the Delve, with the beat's journal and reward; ends is for a further closer."); continue; }
+                    if (i != endsOn) Fatal($"{at}: beat {i + 1} is not the talk that ends the Delve (a talk that is the whole last step), so this ending's stage would end nothing.");
+                    if (t.questScript == null || IsBoardSpace(t))
+                        Fatal($"{at}: a talk with more than one closer is built on a ground board only (its MissionComplete() sets a silent CompleteStage, which is what keeps two endings apart); this template is '{t.id}'.");
+                    if (r.next != null) Fatal($"{at}: next on a talk with more than one closer is the fork, which is not built: every ending would start the same link.");
+                    if (string.IsNullOrWhiteSpace(en.journal)) Fatal($"{at}.journal is required: it is the line the player reads at this ending.");
+                    if (string.IsNullOrWhiteSpace(en.reward)) Fatal($"{at}.reward is required: every ending sets its pay (easy / med / hard).");
+                    else TierExists($"{at}.reward", en.reward);
+                }
             void TierExists(string at, string tier)
             {
                 foreach (var kind in new[] { "creds", "xp" })
@@ -780,6 +817,8 @@ namespace FrankyCLI
             public List<(int beat, int ex, FormKey item, int count, string words)> Gives = new();   // each talk exchange's give (OT-34), for the verify
             public int Linger = -1;   // the stage that stops a quest ending on a talk, once its person unloads; -1 = none
             public int LingerFrom;    // the completing stage it waits behind (the last step's DoneStage)
+            public List<(int ex, int stage)> TalkEnds = new();   // a talk with more than one closer: each closing exchange and its ending stage (TalkEndings); empty = one closer
+            public int TalkSilent = -1;   // that talk's silent CompleteStage, which the linger hook arms on; -1 = none
             public (int beat, int passengers, int marker, int arrived, int done)? Ride;   // a ride beat's pieces, for the verify
             public List<(int beat, FormKey npc, int lines)> Hellos = new();   // a talk person's walk-up lines, for the verify
             public List<(int place, int anchor, FormKey global)> Leashes = new();   // each place's GetDistance: the alias it measures from, under which global
@@ -1301,6 +1340,41 @@ namespace FrankyCLI
                         clone.Stages.Add(copy);
                         Console.WriteLine($"  +stage   : {st} (ending {j + 1} of choose '{cs.Choose}', a copy of completing stage {t.completeStage})");
                     }
+                // A TALK WITH MORE THAN ONE CLOSER (MB93d, Jessica's 2026-11-07 letter: "your ask on a use, moved onto a talk").
+                // Each further closer ends on its own COPY of the completing stage, with its own journal line (its pay is
+                // written below, with the rest). ⛔ And the board's CompleteStage moves to a silent stage of its own, because
+                // MissionComplete() always ends in SetStage(CompleteStage): with the shipped 100 a second ending would run 100
+                // too and write the first closer's journal over its own (OT-9J's AskCompleteOffset, played on
+                // duo_delvetest_c1 2026-11-04, carried here). The linger hook arms on that silent stage, which every ending sets.
+                bm.TalkEnds = TalkEndings(r, steps, t.completeStage);
+                if (bm.TalkEnds.Count > 0)
+                {
+                    // The board's 100 carries TWO entries (shells/board.json): [0] completes and pays, gated GetStageDone(10) == 1,
+                    // the accepted mission; [1] is vanilla's silent never-accepted line, gated == 0, no flag, no pay. A closer is
+                    // only reachable after the accept, so the whole stage is copied (copy a working record, never compose one)
+                    // and only [0] takes the closer's journal. Refused if [0] is not the completing entry or another one is.
+                    var done = clone.Stages!.FirstOrDefault(x => x.Index == t.completeStage);
+                    if (done == null || done.LogEntries.Count < 1 || done.LogEntries[0].Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest) != true
+                        || done.LogEntries.Skip(1).Any(e => e.Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest) == true))
+                    { Console.WriteLine($"REFUSED: stage {t.completeStage}'s first log entry is not its one completing entry, so there is no ending to copy a closer's from."); return 1; }
+                    int silent = t.completeStage + TalkCompleteOffset;
+                    foreach (var st in bm.TalkEnds.Skip(1).Select(e => e.stage).Append(silent))
+                        if (clone.Stages.Any(x => x.Index == st)) { Console.WriteLine($"REFUSED: stage {st} already exists on this base; a closer's stages must be its own."); return 1; }
+                    var talkBeat = r.beats[steps[^1].Beats[0]];
+                    foreach (var (ex, st) in bm.TalkEnds.Skip(1))
+                    {
+                        var copy = done.DeepCopy();
+                        copy.Index = (ushort)st;
+                        copy.LogEntries[0].Entry = Expand(talkBeat.exchanges![ex].ends!.journal!, t);
+                        clone.Stages.Add(copy);
+                        Console.WriteLine($"  +stage   : {st} (closer exchanges[{ex}]'s ending, a copy of completing stage {t.completeStage}, its own journal)");
+                    }
+                    var ns = CloneStage(clone, silent);
+                    if (ns == null) return 1;
+                    clone.Stages.Add(ns);
+                    bm.TalkSilent = silent;
+                    Console.WriteLine($"  +stage   : {silent}, silent, the board's CompleteStage (every closer's MissionComplete() sets it)");
+                }
                 // A Delve that ENDS on a talk outlives its completion (his 2026-10-19, 15a: "Think we need to have the quest
                 // run for a little while after so you can speak to her"). Every topic loops back to the menu, and a stopped
                 // quest takes its scenes, so the completing stage does not Stop(): this stage does, set by vanilla's
@@ -1430,6 +1504,9 @@ namespace FrankyCLI
                             ? Enumerable.Empty<int>() : new[] { steps[^1].Beats[0] })
                     .Select(b => (tier: r.beats[b].reward!, stage: beatStage[b])).ToList();
                 if (steps[^1].IsGroup && r.reward != null) paid.Add((r.reward, steps[^1].DoneStage));
+                // A talk's further closers: each pays its own tier on its own stage (exchanges[0]'s is the beat's, above).
+                if (bm.TalkEnds.Count > 0)
+                    paid.AddRange(bm.TalkEnds.Skip(1).Select(e => (tier: r.beats[steps[^1].Beats[0]].exchanges![e.ex].ends!.reward!, stage: e.stage)));
                 if (t.questScript != null)
                 {
                     // A board mission's tier goes on the stage like any other (below): OT-9K, proven by his plays of
@@ -1822,7 +1899,8 @@ namespace FrankyCLI
                 // so it is turned off and the shutdown stage calls MissionShutdown() instead.
                 if (bm.Linger >= 0)
                 {
-                    int done = steps[^1].DoneStage;
+                    // Behind the completing stage; with more than one closer, behind the silent CompleteStage every closer sets.
+                    int done = bm.TalkSilent >= 0 ? bm.TalkSilent : steps[^1].DoneStage;
                     foreach (var b in steps[^1].Beats.Where(b => r.beats[b].type == "talk"))
                     {
                         int pa = (int)talkAlias[b].ID;
@@ -1837,6 +1915,12 @@ namespace FrankyCLI
                         qs.Properties.RemoveAll(p => p.Name == "ShutdownOnCompletion");
                         qs.Properties.Add(new ScriptBoolProperty { Name = "ShutdownOnCompletion", Data = false, Flags = ScriptProperty.Flag.Edited });
                         Console.WriteLine($"  linger   : {t.questScript}.ShutdownOnCompletion false; stage {bm.Linger} calls MissionShutdown()");
+                        if (bm.TalkSilent >= 0)
+                        {
+                            if (qs.Properties.Any(p => p.Name == "CompleteStage")) { Console.WriteLine($"REFUSED: {t.questScript} already sets CompleteStage on the base."); return 1; }
+                            qs.Properties.Add(new ScriptIntProperty { Name = "CompleteStage", Data = bm.TalkSilent, Flags = ScriptProperty.Flag.Edited });
+                            Console.WriteLine($"  closers  : {t.questScript}.CompleteStage {bm.TalkSilent}, silent, so no closer runs another's ending");
+                        }
                     }
                 }
 
@@ -2103,7 +2187,7 @@ namespace FrankyCLI
                 // completing one, so the conversation can go on after it (his 2026-10-19). A 10-19 morning version waited
                 // on IsInDialogueWithPlayer instead, and his play of 15a ended the talk the moment a side question was
                 // picked: the reading went false between topics and the quest stopped under him.
-                bool Lingers(int st) => bm.Linger >= 0 && st == steps[^1].DoneStage;
+                bool Lingers(int st) => bm.Linger >= 0 && (st == steps[^1].DoneStage || bm.TalkEnds.Any(e => e.stage == st));
                 void StopQuest(int st)
                 {
                     if (Lingers(st)) { Add(bm.Linger, "Stop()   ; the person unloaded after the completion (DefaultAliasOnUnload)"); return; }
@@ -2136,7 +2220,9 @@ namespace FrankyCLI
                     Add(st, "Quest __temp = Self as Quest");
                     Add(st, $"{t.questScript} kmyQuest = __temp as {t.questScript}");
                     Add(st, "kmyQuest.MissionComplete()");
-                    if (Lingers(st))
+                    // The shutdown stage's lines once, from the completing stage: a talk's further closers call this too, and a
+                    // second copy would declare __temp twice in one fragment.
+                    if (Lingers(st) && st == steps[^1].DoneStage)
                     {
                         Add(bm.Linger, "Quest __temp = Self as Quest");
                         Add(bm.Linger, $"{t.questScript} kmyQuest = __temp as {t.questScript}");
@@ -2206,6 +2292,14 @@ namespace FrankyCLI
                     {
                         if (!s.IsChoose && t.questScript != null) CompleteMission(done);
                         else if (!s.IsChoose) { Add(done, "CompleteQuest()"); StopQuest(done); }
+                        // A talk's further closers (MB93d): each ending does what the completing stage does, on its own stage.
+                        // Their journal and pay are on the stage record (Stages); the lint holds them to a board's talk.
+                        foreach (var (_, est) in bm.TalkEnds.Skip(1))
+                        {
+                            if (bm.HandBack is (int, List<string> hl)) foreach (var line in hl) Add(est, line);
+                            Add(est, $"SetObjectiveCompleted({s.Objective})");
+                            CompleteMission(est);
+                        }
                     }
                     else Enter(k + 1, done);
                 }
@@ -2776,8 +2870,11 @@ namespace FrankyCLI
                               t.questScript + (bm.Ride != null ? ",DefaultPassengerQuestScript" : ""));
                 var qs = vma.Scripts.FirstOrDefault(s => s.Name == t.questScript);
                 // Ending on a talk adds exactly one: ShutdownOnCompletion, off (graded below with the linger).
-                var keeps = t.questScriptKeeps.Concat(bm.Linger >= 0 ? new[] { "ShutdownOnCompletion" } : Array.Empty<string>());
-                fail += Check($"{t.questScript} carries the driver's board properties" + (bm.Linger >= 0 ? " and ShutdownOnCompletion" : ""),
+                // A talk with more than one closer also sets CompleteStage (the silent stage), from the recipe's own endings.
+                bool closers = TalkEndings(r, StepsOf(r), t.completeStage).Count > 0;
+                var keeps = t.questScriptKeeps.Concat(bm.Linger >= 0 ? new[] { "ShutdownOnCompletion" } : Array.Empty<string>())
+                                              .Concat(closers ? new[] { "CompleteStage" } : Array.Empty<string>());
+                fail += Check($"{t.questScript} carries the driver's board properties" + (bm.Linger >= 0 ? " and ShutdownOnCompletion" : "") + (closers ? " and CompleteStage" : ""),
                               string.Join(",", (qs?.Properties.Select(p => p.Name) ?? Enumerable.Empty<string>()).OrderBy(n => n)),
                               string.Join(",", keeps.OrderBy(n => n)));
                 foreach (var pn in new[] { "MissionParent", "PrimaryRef", "TargetLocation" })
@@ -3128,16 +3225,26 @@ namespace FrankyCLI
                 fail += Check($"{who}: a greeting and one scene per exchange", mine.Count.ToString(), (1 + nex).ToString());
                 var greet = mine.FirstOrDefault(x => x.EditorID!.EndsWith("_greet_scene"));
                 fail += Check($"{who}: the greeting is a Greeting scene", greet == null ? "missing" : $"0x{(uint)(greet.Flags ?? 0):X8}", "0x00001834");
+                // The closers, from the RECIPE (never from what the build printed): exchanges[0], and on the talk that ends
+                // the Delve every exchange carrying ends (MB93d).
+                var ends = tbeat == HandBackTalk(r, StepsOf(r)) ? TalkEndings(r, StepsOf(r), t.completeStage) : new();
+                var closesAt = ends.Count > 0 ? ends.ToDictionary(e => e.ex, e => e.stage) : new Dictionary<int, int> { [0] = tstage };
                 foreach (var sc in mine)
                 {
-                    // The greeting and the completion (topic1) close with the beat's stage; a side question outlives it.
-                    bool untilDone = sc == greet || sc.EditorID!.EndsWith("_topic1_scene");
+                    // The greeting and every closer close with the endings (one StageDone each); a side question outlives them.
+                    bool untilDone = sc == greet || closesAt.Keys.Any(cx => sc.EditorID == $"{r.id}_talk{tbeat + 1}_topic{cx + 1}_scene");
                     // A give's scene carries one more: its item gate (checked whole in the give block below).
                     bool gated = bm.Gives.Any(g => g.beat == tbeat && sc.EditorID == $"{r.id}_talk{tbeat + 1}_topic{g.ex + 1}_scene");
                     var isId = sc.Conditions.FirstOrDefault()?.Data as IGetIsIDConditionDataGetter;
-                    fail += Check($"{who}: {sc.EditorID} is his and gated on the step" + (untilDone ? "" : " having opened") + (gated ? " and the give" : ""),
+                    fail += Check($"{who}: {sc.EditorID} is his and gated on the step" + (untilDone ? (closesAt.Count > 1 ? $" and on none of its {closesAt.Count} endings done" : "") : " having opened") + (gated ? " and the give" : ""),
                                   $"{isId?.FirstParameter.Link.FormKey}, {sc.Conditions.Count} conditions, actor {sc.Actors.FirstOrDefault()?.ID}",
-                                  $"{tnpc}, {(untilDone ? tconds : tconds - 1) + (gated ? 1 : 0)} conditions, actor {talias}");
+                                  $"{tnpc}, {(untilDone ? tconds - 1 + closesAt.Count : tconds - 1) + (gated ? 1 : 0)} conditions, actor {talias}");
+                    if (untilDone && closesAt.Count > 1)
+                    {
+                        var undone = sc.Conditions.Select(c => c.Data).OfType<IGetStageDoneConditionDataGetter>()
+                                       .Where(d => closesAt.Values.Contains(d.SecondParameter)).Select(d => d.SecondParameter).OrderBy(v => v);
+                        fail += Check($"{who}: {sc.EditorID} goes when ANY ending is done", string.Join("/", undone), string.Join("/", closesAt.Values.OrderBy(v => v)));
+                    }
                     if (sc != greet)
                         fail += Check($"{who}: {sc.EditorID} loops back to the menu (his 2026-10-19 ruling)",
                                       $"0x{(uint)(sc.Flags ?? 0):X8}", "0x00002814");
@@ -3146,9 +3253,64 @@ namespace FrankyCLI
                 fail += Check($"{who}: the first reply ends the talk by setting {tstage}",
                               closer?.SetParentQuestStage == null ? "none" : $"OnEnd {closer.SetParentQuestStage.OnEnd}, speaker {closer.Speaker.FormKey}",
                               $"OnEnd {tstage}, speaker {tnpc}");
+                foreach (var (cx, cst) in closesAt.Where(kv => kv.Key > 0))
+                {
+                    var cr = q.DialogTopics.FirstOrDefault(d => d.EditorID == $"{r.id}_talk{tbeat + 1}_reply{cx + 1}")?.Responses.FirstOrDefault();
+                    fail += Check($"{who}: reply {cx + 1} is a closer too, setting its own ending {cst}",
+                                  cr?.SetParentQuestStage == null ? "none" : $"OnEnd {cr.SetParentQuestStage.OnEnd}, speaker {cr.Speaker.FormKey}",
+                                  $"OnEnd {cst}, speaker {tnpc}");
+                    // The menu: every closer above every side question, and no two scenes tied (SCPI, his glass 2026-10-14).
+                    var cs = q.Scenes.FirstOrDefault(s => s.EditorID == $"{r.id}_talk{tbeat + 1}_topic{cx + 1}_scene");
+                    int cscpi = cs?.SCPI is { Length: >= 2 } b1 ? b1[0] | (b1[1] << 8) : -1;
+                    fail += Check($"{who}: closer {cx + 1} sits at the top of the menu, under the completion", (cscpi > 51 && cscpi < 100).ToString(), "True");
+                }
+                var scpis = mine.Where(s => s != greet).Select(s => s.SCPI is { Length: >= 2 } bs ? bs[0] | (bs[1] << 8) : -1).ToList();
+                fail += Check($"{who}: no two of its questions tie in the menu order", (scpis.Distinct().Count() == scpis.Count).ToString(), "True");
                 int setters = q.DialogTopics.Where(d => d.EditorID != null && d.EditorID.StartsWith($"{r.id}_talk{tbeat + 1}_"))
                                .SelectMany(d => d.Responses).Count(x => x.SetParentQuestStage != null);
-                fail += Check($"{who}: no other line sets a stage", setters.ToString(), "1");
+                fail += Check($"{who}: no other line sets a stage", setters.ToString(), closesAt.Count.ToString());
+            }
+            // A talk with more than one closer (MB93d), read back: each further ending a completing copy carrying its own
+            // journal and pay, its fragment doing what the completing stage's does, and the board's CompleteStage silent.
+            var tEnds = TalkEndings(r, StepsOf(r), t.completeStage);
+            if (tEnds.Count > 0)
+            {
+                var tb = r.beats[HandBackTalk(r, StepsOf(r))];
+                int silent = t.completeStage + TalkCompleteOffset;
+                string FragBody(int st)
+                {
+                    string head = $"Function {FragmentFunction(st)}()";
+                    int i = fsrc.IndexOf(head);
+                    if (i < 0) return "";
+                    int j = fsrc.IndexOf("EndFunction", i);
+                    return j < 0 ? "" : fsrc[i..j];
+                }
+                foreach (var (ex, st) in tEnds.Skip(1))
+                {
+                    var en = tb.exchanges![ex].ends!;
+                    var stg = q.Stages.FirstOrDefault(s => s.Index == st);
+                    var le = stg?.LogEntries.FirstOrDefault();
+                    fail += Check($"closer exchanges[{ex}]: stage {st} completes the quest with its own journal",
+                                  le == null ? "missing" : $"{le.Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest)} \"{le.Entry?.String}\"",
+                                  $"True \"{Expand(en.journal!, t)}\"");
+                    var rd = le?.StageCompleteDatas.SelectMany(c => c.RewardDatas).ToList();
+                    var cg = m.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{en.reward}");
+                    var xg = m.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_xp_{en.reward}");
+                    fail += Check($"closer exchanges[{ex}]: stage {st} pays {en.reward}",
+                                  rd == null || rd.Count != 1 ? $"{rd?.Count ?? 0} reward entries" : $"{rd[0].BonusCredits.FormKey} {rd[0].XpAwarded.FormKey}",
+                                  $"{cg?.FormKey} {xg?.FormKey}");
+                    string body = FragBody(st);
+                    var must = new List<string> { $"SetObjectiveCompleted(", "kmyQuest.MissionComplete()" };
+                    if (bm.HandBack is (int, List<string> hl)) must.AddRange(hl);
+                    fail += Check($"closer exchanges[{ex}]: stage {st}'s fragment completes the objective, takes what is carried and completes the mission, and does not stop",
+                                  body == "" ? "no fragment" : $"{must.Count(body.Contains)} of {must.Count}, stops {body.Contains("    Stop()") || body.Contains("MissionShutdown()")}",
+                                  $"{must.Count} of {must.Count}, stops False");
+                }
+                var qsv = vma.Scripts.FirstOrDefault(s => s.Name == t.questScript);
+                fail += Check($"{t.questScript}.CompleteStage is the silent stage {silent}, which exists and writes nothing",
+                              $"{qsv?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == "CompleteStage")?.Data.ToString() ?? "unset"}, "
+                              + $"{(q.Stages.FirstOrDefault(s => s.Index == silent) is { } ss ? (ss.LogEntries.All(e => e.Entry == null) ? "silent" : "WRITES") : "missing")}",
+                              $"{silent}, silent");
             }
             // A give (plan OT-34), read back: the player's line opens with its tag, is offered only while he carries the
             // count (GetItemCount run on PlayerRef), and carries one duo_delve_give naming the same item and count.

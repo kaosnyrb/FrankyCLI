@@ -1,0 +1,90 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_e1",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-09 13:40 \"MB93d next\"; Jessica's 2026-11-07 letter, ask 1: a talk with two closing exchanges",
+  "_note": [
+    "PROBE for exchanges[x].ends (a talk with more than one closer, MB93d's shape), on MB85a's person and words so every voiced line is already in the voice cache: only the silent player prompts and the unvoiced text differ.",
+    "Ending A is exchanges[0] (journal and pay on the beat, easy). Ending B is exchanges[1] (its own journal, pay med), so the two endings show and pay differently. exchanges[2] is a side question and stays askable after either.",
+    "No give and no perk here, so both closers show to any player."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet worked site."
+  },
+  "prose": {
+    "name": "Rescue: PROBE e1, Two Ways to Patch a Miner",
+    "briefing": "A miner at the <Place> hurt his hand and won't come in to the clinic. Someone has to take him a med pack.",
+    "card": "Settlement Contract. Bring a med pack to an injured miner at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "PROBE e1: talk to the injured miner at the <Place>",
+      "person": {
+        "name": "Bram Kessler",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericMale01",
+        "elevenlabs": "onwK4e9ZLuTAKqWW03F9",
+        "hellos": [
+          [
+            "If you're from the clinic, I'm fine."
+          ],
+          [
+            "It's a scratch. Mostly."
+          ]
+        ]
+      },
+      "greeting": [
+        "Don't fuss. It's a scratch. A big scratch. Did they send you with a med pack?"
+      ],
+      "exchanges": [
+        {
+          "prompt": "[A] Here's a med pack. Hold still.",
+          "reply": [
+            "Ow. Right. Thank you. I'd have walked in eventually. Probably."
+          ]
+        },
+        {
+          "prompt": "[B] That needs stitches, not just a pack.",
+          "reply": [
+            "Then stitch it. Quickly, before I look at it."
+          ],
+          "ends": {
+            "journal": "PROBE e1, ENDING B: I stitched up the miner at the <Place> instead. Paid med.",
+            "reward": "med"
+          }
+        },
+        {
+          "prompt": "How did it happen?",
+          "reply": [
+            "Arguing with a drill. The drill won."
+          ]
+        }
+      ],
+      "journal": "PROBE e1, ENDING A: I patched up the miner at the <Place> with a med pack. Paid easy.",
+      "reward": "easy"
+    }
+  ],
+  "speaker": {
+    "name": "Clinic Dispatcher",
+    "voice": "GenericFemale01",
+    "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
+  },
+  "broadcast": [
+    "The patient's a miner who won't come in. Bring a med pack and be patient with him. More patient than he is."
+  ],
+  "_speech": "The dispatcher: fond and exasperated. Bram: gruff, embarrassed. Stand-in voices; his ear decides."
+}

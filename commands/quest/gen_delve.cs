@@ -459,7 +459,14 @@ namespace FrankyCLI
             /// Allowed on exchanges[0], his "that's fine" (2026-11-09): a player without one cannot finish until he has
             /// one, as Barrett's medic line works; the card says to bring it.</summary>
             public Give? give { get; set; }
+            /// <summary>talk, optional (MB93d, Jessica's 2026-11-07 letter: "your ask on a use, moved onto a talk"): this
+            /// exchange ALSO ends the Delve, on its own stage with its own journal line and pay, as exchanges[0] does with the
+            /// beat's. Only on the talk that is the whole last step of a ground board Delve, never on exchanges[0]. Each ending
+            /// is a copy of the completing stage (the choose endings' and OT-9J's shape); see TalkEndings.</summary>
+            public ExchangeEnd? ends { get; set; }
         }
+        /// <summary>talk: exchanges[x].ends. journal is the ending's log line, reward its pay tier (easy / med / hard).</summary>
+        private sealed class ExchangeEnd { public string? journal { get; set; } public string? reward { get; set; } }
         /// <summary>talk: exchanges[x].give. item is an EditorID (any item a player can carry: Aid_MedPack is a Potion);
         /// count is how many, 1 when absent as vanilla's ItemCountToRemove.</summary>
         private sealed class Give { public string? item { get; set; } public int count { get; set; } = 1; }

@@ -13,7 +13,8 @@ namespace FrankyCLI
     {
         /// <summary>
         /// talk: a person who stands at the beat's marker from quest start, a greeting, and the questions the player can
-        /// ask. exchanges[0] closes the conversation and sets the beat's stage. It has no object, no box and no radio line:
+        /// ask. exchanges[0] closes the conversation and sets the beat's stage; on the talk that ends a ground board Delve, an
+        /// exchange carrying "ends" closes it too, on an ending of its own (MB93d, TalkEndings). It has no object, no box and no radio line:
         /// the person is the object and his voice is the line (his "either or").
         ///
         /// Moved here from GradeTalk, Slots' talk branch and BuildTalk (split step (d4), 2026-10-15), unchanged. What stays
@@ -188,6 +189,10 @@ namespace FrankyCLI
                 string tag = $"{r.id}_talk{b + 1}";
                 var who = tb.person ?? r.beats[tb.rider!.Value - 1].person!;   // a rescue's goodbye is the check-in's person again
                 string vt = who.voice!, vid = who.elevenlabs!;
+                // The closers: exchanges[0] on the beat's stage, and on the talk that ends the Delve every exchange carrying
+                // "ends" on its own ending stage (MB93d; TalkEndings, written in Stages). One closer is the shape as it was.
+                var closes = HandBackTalk(r, steps) == b && bm.TalkEnds.Count > 0
+                    ? bm.TalkEnds.ToDictionary(e => e.ex, e => e.stage) : new Dictionary<int, int> { [0] = stage };
 
                 ConditionFloat IsHim()
                 {
@@ -234,7 +239,8 @@ namespace FrankyCLI
                     };
                     sc.Quest.SetTo(clone.FormKey);
                     sc.Conditions.Add(IsHim());
-                    if (untilDone) sc.Conditions.Add(StageDone(stage, 0f));
+                    // Until ANY ending is done: with two closers, either one takes the greeting and both closers away.
+                    if (untilDone) foreach (var end in closes.Values) sc.Conditions.Add(StageDone(end, 0f));
                     if (enter > 0) sc.Conditions.Add(StageDone(enter, 1f));
                     sc.Actors.Add(new SceneActor { ID = (uint)personAlias, BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
                     sc.Actors.Add(new SceneActor { ID = unchecked((uint)-2), BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
@@ -285,13 +291,15 @@ namespace FrankyCLI
                         bm.Gives.Add((b, x, give.item, give.count, TalkBeat.GiveTag(give.name, give.count) + ex.prompt!));
                     }
                     var (nt, ni) = Line($"{tag}_reply{x + 1}", ex.reply!, true);
-                    if (x == 0) ni.SetParentQuestStage = new DialogSetParentQuestStage { OnEnd = (short)stage };
-                    var sc = NewScene($"{tag}_topic{x + 1}_scene", 0x00002814u, x == 0);
+                    bool closer = closes.TryGetValue(x, out int endStage);
+                    if (closer) ni.SetParentQuestStage = new DialogSetParentQuestStage { OnEnd = (short)endStage };
+                    var sc = NewScene($"{tag}_topic{x + 1}_scene", 0x00002814u, closer);
                     if (itemGate != null) { sc.Conditions.Add(itemGate); pi.Conditions.Add(itemGate.DeepCopy()); }
                     sc.Index = (uint)(x + 1);   // vanilla's numbering, from 1; NOT shown to be the menu's sort key (see above)
                     // SCPI orders the menu, highest first, and must not tie (vanilla never does: MQ101 90/80/50/30/20). The
                     // completion takes 100, the rest 50, 49, 48... in recipe order. Tied at 100, the completion showed last.
-                    sc.SCPI = BitConverter.GetBytes((ushort)(x == 0 ? 100 : 51 - x));
+                    // A further closer (MB93d) sits with the completion at the top, under it in recipe order: 99, 98...
+                    sc.SCPI = BitConverter.GetBytes((ushort)(x == 0 ? 100 : closer ? 100 - closes.Keys.Count(k => k > 0 && k <= x) : 51 - x));
                     sc.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
                     sc.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
                     var pa = new DialogueSceneAction { Index = 3, AliasID = -2, StartPhase = 0, EndPhase = 0 };
@@ -299,7 +307,7 @@ namespace FrankyCLI
                     var na = new DialogueSceneAction { Index = 4, AliasID = personAlias, StartPhase = 1, EndPhase = 1 };
                     na.Topic.SetTo(nt.FormKey);
                     sc.Actions = new Noggog.ExtendedList<ASceneAction> { pa, na };
-                    Console.WriteLine($"  +talk    : {sc.EditorID} \"{ex.prompt}\"" + (x == 0 ? $"  (sets {stage} when the reply ends, loops to the menu)" : "  (loops to the menu, askable after the completion)")
+                    Console.WriteLine($"  +talk    : {sc.EditorID} \"{ex.prompt}\"" + (closer ? $"  (sets {endStage} when the reply ends, loops to the menu)" : "  (loops to the menu, askable after the completion)")
                                       + (ex.perk != null ? $"  [{ex.perk}]" : "") + (gives ? $"  gives {give.count} x {give.item} ({give.name}), offered only while carried" : ""));
                 }
                 bm.Talks.Add((b, stage, personAlias, npc, tb.exchanges.Count, enter > 0 ? 3 : 2));   // the greeting's and the completion's; a side question has one fewer
