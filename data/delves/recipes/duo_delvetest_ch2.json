@@ -7,17 +7,25 @@
   "author": "eliza",
   "source": "his 2026-11-09 08:22 \"yup let's do OT-30\". The probe's second link.",
   "_note": [
-    "THE CHAIN PROBE, LINK 2 of 2. One pickup at the inherited place, where ch1's terminal stood (it vanished on use).",
+    "THE CHAIN PROBE, LINK 2 of 2. One pickup at a site of its own (the board's request), started by ch1's next.",
     "If it does not appear, Papyrus.0.log carries [chain] ... could not start: the external fill did not take, and the",
     "fallback is OT-03's late fill (the place forced by script)."
   ],
   "place": {
-    "inherit": "duo_delvetest_ch1",
-    "_inherit": "ch1's own site, by ExternalAliasLocation."
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "The board's own request, a new site, guaranteed to be put down. His 2026-11-09 09:3x: 'If we need it always to run it should be using remote sites and making gaurnteed stuff'. place.inherit (ch1's found site by ExternalAliasLocation) failed to start twice."
   },
   "prose": {
     "name": "Hauling: Chain Probe Two on <Planet>",
-    "briefing": "The note at the <Place> on <Planet> asked for a crate on the same site to be collected."
+    "briefing": "The note at the terminal asked for a crate to be collected from the <Place> on <Planet>."
   },
   "beats": [
     {
@@ -27,7 +35,7 @@
       "name": "Supply Crate",
       "item": "Supply Crate",
       "objective": "Collect the crate at the <Place>",
-      "journal": "I collected the crate at the <Place>. Two jobs, one site.",
+      "journal": "I collected the crate at the <Place>. The job the note handed on.",
       "reward": "easy"
     }
   ]

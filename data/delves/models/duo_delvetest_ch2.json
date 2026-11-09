@@ -1,5 +1,5 @@
 {
-  "FormKey": "004AC7:du_overtime.esm",
+  "FormKey": "004ACC:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E2670:Starfield.esm",
-  "MissionBoardDescription": "The note at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E asked for a crate on the same site to be collected.",
+  "MissionBoardDescription": "The note at the terminal asked for a crate to be collected from the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [
@@ -78,7 +78,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "The note at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E asked for a crate on the same site to be collected.",
+          "Entry": "The note at the terminal asked for a crate to be collected from the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E.",
           "Note": "Mission Accepted",
           "Conditions": [],
           "StageCompleteDatas": [
@@ -101,7 +101,7 @@
       "LogEntries": [
         {
           "Flags": 1,
-          "Entry": "I collected the crate at the \u003CAlias=TargetLocation\u003E. Two jobs, one site.",
+          "Entry": "I collected the crate at the \u003CAlias=TargetLocation\u003E. The job the note handed on.",
           "Note": "Mission Complete",
           "Conditions": [
             {
@@ -116,7 +116,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "004AC7:du_overtime.esm",
+              "FirstLink": "004ACC:du_overtime.esm",
               "SecondParameter": 10
             }
           ],
@@ -153,7 +153,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "004AC7:du_overtime.esm",
+              "FirstLink": "004ACC:du_overtime.esm",
               "SecondParameter": 10
             }
           ],
@@ -223,12 +223,88 @@
       "Kind": "loc",
       "ID": 5,
       "Name": "TargetLocation",
-      "Flags": 9437953,
+      "Flags": 8388865,
       "ALFG": 0,
-      "Conditions": [],
-      "External": {
-        "Quest": "004AC9:du_overtime.esm",
-        "AliasID": 5
+      "Conditions": [
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "05F198:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "02271F:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "027050:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 0,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "27B45C:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 0,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "2235B6:Starfield.esm",
+          "SecondParameter": 0
+        }
+      ],
+      "LocationTypeKeyword": "070A54:Starfield.esm",
+      "Alps": {
+        "Conditions": []
       }
     },
     {
@@ -321,7 +397,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "004AC8:du_overtime.esm",
+        "Object": "004ACD:du_overtime.esm",
         "AliasID": 20,
         "Create": 0,
         "Level": 0
@@ -343,7 +419,7 @@
           "Name": "Alias_Beat1Target",
           "Flags": 1,
           "Object": {
-            "Form": "004AC7:du_overtime.esm",
+            "Form": "004ACC:du_overtime.esm",
             "Alias": 21,
             "Unused": 0
           }
@@ -416,7 +492,7 @@
             "Name": "PlayerStarSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "004AC7:du_overtime.esm",
+              "Form": "004ACC:du_overtime.esm",
               "Alias": 0,
               "Unused": 0
             }
@@ -426,7 +502,7 @@
             "Name": "TargetSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "004AC7:du_overtime.esm",
+              "Form": "004ACC:du_overtime.esm",
               "Alias": 8,
               "Unused": 0
             }
@@ -436,7 +512,7 @@
             "Name": "TargetPlanetLocation",
             "Flags": 1,
             "Object": {
-              "Form": "004AC7:du_overtime.esm",
+              "Form": "004ACC:du_overtime.esm",
               "Alias": 2,
               "Unused": 0
             }
@@ -446,7 +522,7 @@
             "Name": "TargetLocation",
             "Flags": 1,
             "Object": {
-              "Form": "004AC7:du_overtime.esm",
+              "Form": "004ACC:du_overtime.esm",
               "Alias": 5,
               "Unused": 0
             }
@@ -456,7 +532,7 @@
             "Name": "PrimaryRef",
             "Flags": 1,
             "Object": {
-              "Form": "004AC7:du_overtime.esm",
+              "Form": "004ACC:du_overtime.esm",
               "Alias": 3,
               "Unused": 0
             }
@@ -466,7 +542,7 @@
             "Name": "PlayerShip",
             "Flags": 1,
             "Object": {
-              "Form": "004AC7:du_overtime.esm",
+              "Form": "004ACC:du_overtime.esm",
               "Alias": 9,
               "Unused": 0
             }
@@ -489,7 +565,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "004AC7:du_overtime.esm",
+            "Form": "004ACC:du_overtime.esm",
             "Alias": 11,
             "Unused": 0
           }
@@ -523,7 +599,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "004AC7:du_overtime.esm",
+            "Form": "004ACC:du_overtime.esm",
             "Alias": 21,
             "Unused": 0
           }
