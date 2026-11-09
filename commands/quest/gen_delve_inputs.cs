@@ -42,6 +42,8 @@ namespace FrankyCLI
             public readonly Dictionary<(int beat, int ex), FormKey> TalkPerks = new();
             /// <summary>By (beat, exchange): a talk exchange's give, the item, its in-game name (the tag's words) and how many.</summary>
             public readonly Dictionary<(int beat, int ex), (FormKey item, string name, int count)> TalkGives = new();
+            /// <summary>By beat index: a deliver's bring, the item, its in-game name (the short box's words) and how many (OT-31).</summary>
+            public readonly Dictionary<int, (FormKey item, string name, int count)> Brings = new();
             /// <summary>By beat index, for a craft: the bench keyword and each ingredient with its count.</summary>
             public readonly Dictionary<int, (FormKey bench, List<(FormKey part, int count)> parts)> Crafts = new();
             /// <summary>By beat index, for a use with explosion: the Explosion placed at its object.</summary>
@@ -286,6 +288,15 @@ namespace FrankyCLI
                         { Console.WriteLine($"REFUSED: the member gate ({g.faction}, {g.row} -> {g.instead}) does not resolve."); fail++; }
                     }
                 }
+            }
+            // A deliver's bring (OT-31): the same lookup as a give's, kept for its FormKey and name.
+            for (int i = 0; i < r.beats.Count && fail == 0; i++)
+            {
+                if (r.beats[i].bring is not Bring br) continue;
+                var it = OwnOrMaster<IItemGetter>(myMod, env, br.item!);
+                string? nm = (it as Mutagen.Bethesda.Plugins.Aspects.ITranslatedNamedGetter)?.Name?.String;
+                if (it == null || string.IsNullOrWhiteSpace(nm)) { Console.WriteLine($"REFUSED: beat {i + 1} bring.item '{br.item}' is not a named item in {t.mod} or one of its masters."); fail++; continue; }
+                inputs.Brings[i] = (it.FormKey, nm, br.count);
             }
             // A talk exchange's perk (a [Background] / [Skill] / [Trait] choice), own-or-master as every other form here.
             for (int i = 0; i < r.beats.Count && fail == 0; i++)

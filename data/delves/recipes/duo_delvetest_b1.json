@@ -1,0 +1,46 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_b1",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-09 16:02 \"go on b and probe\" (plan OT-31, capability E): a deliver that takes what the player BRINGS, Red Tape's shape",
+  "_note": [
+    "BRING PROBE B1 (plan OT-31): one deliver, three iron, silent, placeholder words. Not a mission; MB68a is the first real one.",
+    "Reading it, in order: take it with NO iron: the objective reads (0/3). Pick up or buy one: (1/3). Use the drop with one: a box says you need 3 and nothing else happens, the prompt stays. Get to three or more: (3/3), never past 3. Drop one: back to (2/3). Use the drop with three: the iron goes from your pack (only 3 of them if you held more), the job completes and pays.",
+    "Iron is the MiscItem InorgCommonIron, what Red Tape counts. Only the player's own pack counts, never the ship's hold.",
+    "Any fault is the bring, not the place: MB42a's footlocker on RECenterLocRef at a quiet site. Unbuilt once a real bring has played."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet worked site, e1's: nothing to fight on the way to the drop."
+  },
+  "prose": {
+    "name": "Requisition: PROBE b1, Three Iron",
+    "briefing": "Test mission. The crew at the <Place> need three iron. Bought, mined or looted, all count.",
+    "card": "Test contract. Deliver three iron to the <Place> on <Planet>. Payment on delivery."
+  },
+  "beats": [
+    {
+      "type": "deliver",
+      "at": "RECenterLocRef",
+      "objective": "PROBE b1: deliver iron to the drop at the <Place>",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Supply Drop",
+      "bring": {
+        "item": "InorgCommonIron",
+        "count": 3
+      },
+      "journal": "Test journal: I brought three iron to the drop at the <Place>.",
+      "reward": "easy"
+    }
+  ]
+}

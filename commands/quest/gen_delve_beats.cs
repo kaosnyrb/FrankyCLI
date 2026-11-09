@@ -217,7 +217,7 @@ namespace FrankyCLI
             {
                 if (i == handBack) carried.Clear();
                 else if (Carries(r.beats[i])) carried.Add(i);
-                else if (r.beats[i].type == "deliver")
+                else if (r.beats[i].type == "deliver" && r.beats[i].bring == null)   // a bring takes only its own (OT-31)
                 {
                     if (r.beats[i].choose != null) return new HashSet<int>();   // an ending takes them
                     carried.Clear();
@@ -225,6 +225,44 @@ namespace FrankyCLI
             }
             var last = steps.Count > 0 ? steps[^1].Beats : new List<int>();
             return carried.Where(i => r.beats[i].type == "pickup" && last.Contains(i)).ToHashSet();
+        }
+
+        /// <summary>
+        /// A deliver's bring (plan OT-31): a step of its own on a ground template, one per Delve, and an item the player can
+        /// CARRY. Refused rather than dropped wherever the build would not write it.
+        /// </summary>
+        private static void GradeBring(Recipe r, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Beat b, Bring br, int i,
+                                       Action<string> Fatal, Action<string> Warn)
+        {
+            string at = $"beat {i + 1}";
+            if (b.type != "deliver") { Fatal($"{at} sets bring and is a {b.type}; only a deliver takes what the player brings, so it would be silently ignored."); return; }
+            // The space build (delve_space.cs) writes its own hooks and none of this; refused, never dropped.
+            if (IsSpace(t)) { Fatal($"{at} sets bring on a space template; the space build writes no bring (yet)."); return; }
+            if (t.playerAlias < 0) { Fatal($"{at} sets bring and template '{t.id}' names no playerAlias for the counter (duo_delve_bring)."); return; }
+            if (b.choose != null || b.returnTo != null)
+                Fatal($"{at} sets bring and is {(b.choose != null ? $"an ending of choose '{b.choose}'" : "a return")}; a bring is a step of its own, with its own counted objective.");
+            if (r.beats.FindIndex(x => x.bring != null) != i)
+                Fatal($"{at} is a second bring; the player's alias carries duo_delve_bring once, so one bring per Delve.");
+            if (string.IsNullOrWhiteSpace(br.item)) Fatal($"{at} bring has no item: nothing to count.");
+            else if (br.count < 1) Fatal($"{at} bring.count is {br.count}; it is how many he brings, 1 or more.");
+            else
+            {
+                var allowed = Allowed(env, t);
+                var item = env.LoadOrder.PriorityOrder.WinningOverrides<IItemGetter>()
+                    .FirstOrDefault(it => allowed.Contains(it.FormKey.ModKey) && string.Equals(it.EditorID, br.item, StringComparison.OrdinalIgnoreCase));
+                string? nm = (item as Mutagen.Bethesda.Plugins.Aspects.ITranslatedNamedGetter)?.Name?.String;
+                if (item == null)
+                {
+                    // The trap Jessica's drafts name ("resource": "Tungsten"): a Res* form is what recipes and outposts count,
+                    // and nothing in a pack is one. Said, with where the carried twin is.
+                    bool res = env.LoadOrder.PriorityOrder.Resource().WinningOverrides().Any(x => string.Equals(x.EditorID, br.item, StringComparison.OrdinalIgnoreCase));
+                    Fatal(res ? $"{at} bring.item '{br.item}' is a Resource record (what recipes and outposts count); the player carries a MiscItem, e.g. InorgUncommonTungsten, not ResInorgUncommonTungsten."
+                              : $"{at} bring.item '{br.item}' is not an item in {t.mod} or one of its masters (an EditorID, as a give's).");
+                }
+                else if (string.IsNullOrWhiteSpace(nm)) Fatal($"{at} bring.item '{br.item}' has no in-game name, and the short box names it.");
+            }
+            if (b.objective?.Contains('(') == true)
+                Warn($"{at}'s objective has a bracket; the build appends the counter \"(n/{br.count})\" itself.");
         }
 
         /// <summary>The lint's beats-only half. Called from Grade; Fatal/Warn are Grade's.</summary>
@@ -280,6 +318,7 @@ namespace FrankyCLI
                     Fatal($"beat {i + 1} sets waves, size, defend, stuck, style, reveal, revealObjective or creatures and is not a hold, so they would be silently ignored.");
                 if (b.outside != null && b.type != "recover")
                     Fatal($"beat {i + 1} sets outside and is a {b.type}; only a recover places its holder out on open ground (so far), so it would be silently ignored.");
+                if (b.bring is Bring br) GradeBring(r, t, env, b, br, i, Fatal, Warn);
                 KindOf(b)?.GradeBeat(b, i, t, env, Fatal, Warn);
                 // A hold's `defend` names an earlier beat, so it is a rule BETWEEN beats and stays here, after the kind's
                 // own rules, where it always printed.
@@ -563,7 +602,9 @@ namespace FrankyCLI
             {
                 if (i == handBack) carried = 0;   // the talk that ends the Delve takes what is carried
                 else if (Carries(r.beats[i])) carried++;
-                else if (r.beats[i].type == "deliver")
+                // A bring (OT-31) takes what the player brings, not what was handed him, so it neither needs a carried item nor
+                // takes one: an earlier pickup is still carried to a later plain deliver.
+                else if (r.beats[i].type == "deliver" && r.beats[i].bring == null)
                 {
                     if (carried == 0) Fatal($"beat {i + 1} is a deliver with nothing picked up or recovered before it, so there is nothing to hand over.");
                     if (r.beats[i].choose == null) carried = 0;   // every ending takes the same things
@@ -723,6 +764,12 @@ namespace FrankyCLI
         /// <summary>A pickup beat's hook: duo_delve_use that gives ItemToGive before it sets the stage (papyrus/duo_delve_pickup.psc);
         /// our copy of DefaultAliasOnActivateGiveItem, which gave only after the stage's fragment returned (OT-93).</summary>
         private const string PickupScript = "duo_delve_pickup";
+        /// <summary>A deliver with bring (OT-31): duo_delve_use that refuses with a box until the player carries the count, then
+        /// takes it before it sets the stage (papyrus/duo_delve_bring_use.psc); his drop-off's and Red Tape's check.</summary>
+        private const string BringUseScript = "duo_delve_bring_use";
+        /// <summary>The bring's counter, on the PLAYER's alias (papyrus/duo_delve_bring.psc): Red Tape's inventory filter and
+        /// recount into the step's counter global. Not a stage hook (it sets no stage), so it is recorded in bm.Brings.</summary>
+        private const string BringScript = "duo_delve_bring";
         /// <summary>Vanilla's map marker alias script, MB01's values on an orbit's map marker (Discovered, type 47, visibility 1).</summary>
         private const string MapMarkerScript = "DefaultAliasMapMarkerScript";
         /// <summary>MapMarkerLinkedRefNameOverride: the keyword a map marker links its target by, so the star map names it.</summary>
@@ -815,6 +862,9 @@ namespace FrankyCLI
             public List<(uint wem, string text, string voice, string elevenlabs, bool female)> TalkLines = new();   // a talk person's voiced lines (female picks the face actor)
             public List<(int beat, int stage, int alias, FormKey npc, int exchanges, int conditions)> Talks = new();   // each talk beat, for the verify
             public List<(int beat, int ex, FormKey item, int count, string words)> Gives = new();   // each talk exchange's give (OT-34), for the verify
+            // each deliver's bring (OT-31), for the verify: the object's alias, the item and count, its short box, the step's
+            // counter global and objective, and the stages the player's counter is armed between
+            public List<(int beat, int objAlias, FormKey item, int count, FormKey shortMsg, FormKey counter, int objective, int arm, int done)> Brings = new();
             public int Linger = -1;   // the stage that stops a quest ending on a talk, once its person unloads; -1 = none
             public int LingerFrom;    // the completing stage it waits behind (the last step's DoneStage)
             public List<(int ex, int stage)> TalkEnds = new();   // a talk with more than one closer: each closing exchange and its ending stage (TalkEndings); empty = one closer
@@ -991,6 +1041,8 @@ namespace FrankyCLI
             internal Dictionary<int, (FormKey key, string edid)> counterOf = null!;
             /// <summary>Beat index to its message box. Set in section 8; read in 10.</summary>
             internal Dictionary<int, FormKey> msgOf = null!;
+            /// <summary>Beat index to its bring's short box (OT-31). Set in section 8; read in 9.</summary>
+            internal Dictionary<int, FormKey> shortOf = null!;
             /// <summary>The offer's message box. Set in section 8; read in 10.</summary>
             internal FormKey offerMsg;
             /// <summary>A beat's person to its cloned NPC. Set in section 8; read in 10.</summary>
@@ -1136,6 +1188,35 @@ namespace FrankyCLI
                 Console.WriteLine($"  +landing : beat {b + 1} support landing marker alias {alias} {LandingScript} ({r.beats[b].support!.land}): a ship called down when the player is near");
             }
 
+            /// <summary>
+            /// A bring's counter (OT-31) on the PLAYER's alias: BringScript, told the item and count, the step's counter global and
+            /// objective, and the stages it counts between (armed by the step's prereq, done on the beat's own stage). Not a stage
+            /// hook: it sets no stage, so it is recorded in bm.Brings for the verify, never in Hooks. Non-zero refuses.
+            /// </summary>
+            internal int Bring(int b, int objAlias, int arm)
+            {
+                int k = steps.FindIndex(s => s.Beats.Contains(b));
+                var (item, _, count) = inputs.Brings[b];
+                var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == t.playerAlias) ?? NewAliasEntry(vma, clone.FormKey, t.playerAlias);
+                if (entry.Scripts.Any(s => s.Name == BringScript)) { Console.WriteLine($"REFUSED: the player alias {t.playerAlias} already carries {BringScript}; one bring per Delve."); return 1; }
+                var sc = new ScriptEntry { Name = BringScript };
+                var ip = new ScriptObjectProperty { Name = "Item", Flags = ScriptProperty.Flag.Edited };
+                ip.Object.SetTo(item);
+                sc.Properties.Add(ip);
+                sc.Properties.Add(new ScriptIntProperty { Name = "Total", Data = count, Flags = ScriptProperty.Flag.Edited });
+                var cp = new ScriptObjectProperty { Name = "Counter", Flags = ScriptProperty.Flag.Edited };
+                cp.Object.SetTo(counterOf[k].key);
+                sc.Properties.Add(cp);
+                sc.Properties.Add(new ScriptIntProperty { Name = "Objective", Data = steps[k].Objective, Flags = ScriptProperty.Flag.Edited });
+                sc.Properties.Add(new ScriptIntProperty { Name = "ArmStage", Data = arm, Flags = ScriptProperty.Flag.Edited });
+                sc.Properties.Add(new ScriptIntProperty { Name = "DoneStage", Data = beatStage[b], Flags = ScriptProperty.Flag.Edited });
+                entry.Scripts.Add(sc);
+                bm.Brings.Add((b, objAlias, item, count, shortOf[b], counterOf[k].key, steps[k].Objective, arm, beatStage[b]));
+                Console.WriteLine($"  +bring   : beat {b + 1} counts {count} of {item} on the player (alias {t.playerAlias}) {BringScript}, "
+                                  + $"into {counterOf[k].edid} for objective {steps[k].Objective}, from stage {arm} until {beatStage[b]}");
+                return 0;
+            }
+
             internal void SpawnNear(int b, int alias)
             {
                 var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == alias) ?? NewAliasEntry(vma, clone.FormKey, alias);
@@ -1144,6 +1225,9 @@ namespace FrankyCLI
                 Console.WriteLine($"  +near    : beat {b + 1} (recover, outside) holder alias {alias} {SpawnNearScript}: a spot at range, him spawned there when its ground loads");
             }
 
+
+            /// <summary>A step that is one deliver with a bring (OT-31): the lint holds a bring to a step of its own.</summary>
+            private bool IsBringStep(int k) => steps[k].Beats.Count == 1 && r.beats[steps[k].Beats[0]].bring != null;
 
             /// <summary>A beat's objective index: a choose step's beats take one each, ten apart; any other step shares one.
             /// Used by sections 7 and 10 (a local function of section 7 until they became methods).</summary>
@@ -1637,7 +1721,8 @@ namespace FrankyCLI
                 counterOf = new Dictionary<int, (FormKey key, string edid)>();   // step index -> counter
                 for (int k = 0; k < steps.Count; k++)
                 {
-                    if (!steps[k].IsGroup && !steps[k].IsHold) continue;
+                    // A bring's step counts what the player carries (OT-31): duo_delve_bring sets it, the fragment resets it at entry.
+                    if (!steps[k].IsGroup && !steps[k].IsHold && !IsBringStep(k)) continue;
                     if (globalSrc == null) { Console.WriteLine($"REFUSED: no global duo_reward_xp_easy in {t.mod} to clone a counter from."); return 1; }
                     var g = (Global)myMod.Globals.DuplicateInAsNewRecord(globalSrc);
                     g.EditorID = $"{r.id}_count{k + 1}";
@@ -1726,6 +1811,7 @@ namespace FrankyCLI
                     string text = Expand(r.beats[s.Beats[0]].objective!, t);
                     if (s.IsGroup) text += $" (<Global={counterOf[k].edid}>/{s.Beats.Count})";
                     if (s.IsHold) text += $" (<Global={counterOf[k].edid}>/{s.Waves})";
+                    if (IsBringStep(k)) text += $" (<Global={counterOf[k].edid}>/{r.beats[s.Beats[0]].bring!.count})";
                     ob.DisplayText = text;
                     bm.ObjectiveText[s.Objective] = text;
                     Console.WriteLine($"  objective: {s.Objective} \"{text}\" -> alias(es) {string.Join(", ", s.Beats.Select(b => slotOf[b].siteAlias >= 0 ? $"{slotOf[b].ObjectiveTarget} + site {slotOf[b].siteAlias}" : $"{slotOf[b].ObjectiveTarget}"))}");
@@ -1814,6 +1900,20 @@ namespace FrankyCLI
                     msg.OwnerQuest.SetTo(clone.FormKey);
                     msgOf[i] = msg.FormKey;
                     Console.WriteLine($"  +message : {msg.EditorID} {msg.FormKey}  \"{msg.Name}\"");
+                }
+                // A bring's box when he is short (OT-31): his drop-off's FailMessage. Titled as the object, its words the
+                // recipe's `short` or a plain line naming the count and the item.
+                shortOf = new Dictionary<int, FormKey>();
+                foreach (var (i, br) in inputs.Brings.OrderBy(x => x.Key))
+                {
+                    if (msgSrc == null) { Console.WriteLine($"REFUSED: no message template '{MessageTemplate}' in {t.mod}."); return 1; }
+                    var sm = myMod.Messages.DuplicateInAsNewRecord(msgSrc);
+                    sm.EditorID = $"{r.id}_msgShort{i + 1}";
+                    sm.Name = Expand(r.beats[i].name ?? br.name, t);
+                    sm.Description = Expand(r.beats[i].bring!.@short ?? $"I need {br.count} {br.name} for this.", t);
+                    sm.OwnerQuest.SetTo(clone.FormKey);
+                    shortOf[i] = sm.FormKey;
+                    Console.WriteLine($"  +message : {sm.EditorID} {sm.FormKey}  \"{sm.Name}\" (beat {i + 1}'s bring, when short)");
                 }
 
                 offerMsg = default;
@@ -2100,6 +2200,13 @@ namespace FrankyCLI
                     for (int rank = 0; rank <= 2; rank++)
                         foreach (var b in steps[k].Beats.Where(b => KindOf(r.beats[b])?.EnterRank == rank))
                             KindOf(r.beats[b])!.Enter(this, b, stage);
+                    // A bring (OT-31): the first count is what he already carries, set BEFORE the objective shows, after the
+                    // entry stage's counter reset (the counters' lines are added ahead of every Enter).
+                    if (IsBringStep(k))
+                    {
+                        props.Add(("ReferenceAlias", "Alias_BringPlayer", clone.FormKey, t.playerAlias));
+                        Add(stage, $"(Alias_BringPlayer as {BringScript}).Begin()");
+                    }
                     if (steps[k].IsChoose)
                     {
                         if (!offerMsg.IsNull) { props.Add(("Message", "OfferMessage", offerMsg, -1)); Add(stage, "OfferMessage.Show()"); }
@@ -2268,7 +2375,8 @@ namespace FrankyCLI
                         int st = beatStage[b];
                         if (msgOf.ContainsKey(b)) { props.Add(("Message", $"Beat{b + 1}Message", msgOf[b], -1)); Add(st, $"Beat{b + 1}Message.Show()"); }
                         if (Carries(r.beats[b])) held.Add(b);
-                        if (r.beats[b].type == "deliver" || b == handBack)
+                        // A bring's hook took its own items (duo_delve_bring_use), and it takes nothing that was handed over.
+                        if ((r.beats[b].type == "deliver" && r.beats[b].bring == null) || b == handBack)
                         {
                             foreach (var h in held)
                             {
@@ -3003,6 +3111,41 @@ namespace FrankyCLI
             foreach (var a in bm.SpawnNear)
                 fail += Check($"outside holder alias {a} carries {SpawnNearScript} (spawned when the spot's ground loads)",
                               (vma.Aliases.FirstOrDefault(x => x.Property.Alias == a)?.Scripts.Any(s => s.Name == SpawnNearScript) ?? false).ToString(), "True");
+            // A bring (OT-31): the object's check-and-take, the player's counter, the short box, and the first count, each off disk.
+            foreach (var br in bm.Brings)
+            {
+                string Props(int alias, string script)
+                {
+                    var s = vma.Aliases.FirstOrDefault(x => x.Property.Alias == alias)?.Scripts.FirstOrDefault(x => x.Name == script);
+                    if (s == null) return "missing";
+                    return string.Join(" ", s.Properties.OrderBy(p => p.Name).Select(p => p switch
+                    {
+                        IScriptObjectPropertyGetter o => $"{p.Name}={o.Object.FormKey}",
+                        IScriptIntPropertyGetter n => $"{p.Name}={n.Data}",
+                        IScriptBoolPropertyGetter bo => $"{p.Name}={bo.Data}",
+                        _ => $"{p.Name}=?"
+                    }));
+                }
+                fail += Check($"beat {br.beat + 1}'s object (alias {br.objAlias}) {BringUseScript} takes {br.count} and shows the short box",
+                              Props(br.objAlias, BringUseScript),
+                              $"HideAfterUse=True Item={br.item} ItemCount={br.count} PrereqStage={br.arm} ShortMessage={br.shortMsg} StageToSet={br.done}");
+                fail += Check($"the player (alias {t.playerAlias}) {BringScript} counts beat {br.beat + 1}'s item into its objective",
+                              Props(t.playerAlias, BringScript),
+                              $"ArmStage={br.arm} Counter={br.counter} DoneStage={br.done} Item={br.item} Objective={br.objective} Total={br.count}");
+                var sm = m.Messages.FirstOrDefault(x => x.FormKey == br.shortMsg);
+                fail += Check($"beat {br.beat + 1}'s short box is in the plugin, owned by the quest",
+                              sm == null ? "missing" : $"{sm.OwnerQuest.FormKey == q.FormKey}, \"{sm.Description?.String}\"",
+                              $"True, \"{sm?.Description?.String}\"");
+                fail += Check($"beat {br.beat + 1}'s counter is one of the quest's text-display globals",
+                              (q.TextDisplayGlobals?.Any(x => x.FormKey == br.counter) ?? false).ToString(), "True");
+                fail += Check($"objective {br.objective} shows the count \"(n/{br.count})\"",
+                              (q.Objectives?.FirstOrDefault(o => o.Index == br.objective)?.DisplayText?.String?.EndsWith($">/{br.count})") ?? false).ToString(), "True");
+                // The first count runs in the arming stage's fragment, before its objective is shown.
+                string arm = File.ReadAllText(bm.PscPath).Split($"Function {FragmentFunction(br.arm)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
+                int begin = arm.IndexOf($"(Alias_BringPlayer as {BringScript}).Begin()"), shown = arm.IndexOf($"SetObjectiveDisplayed({br.objective})");
+                fail += Check($"stage {br.arm}'s fragment counts what he carries before it shows objective {br.objective}",
+                              begin < 0 ? "no Begin()" : shown < 0 ? "objective not shown there" : (begin < shown).ToString(), "True");
+            }
             // An alias carries a script ONCE (2026-10-22: missionboard01a's spawn hook landed beside the arrival's stock copy,
             // and only this file's read-back of the first copy showed it). Every alias, every script, not only ours.
             var twice = vma.Aliases.SelectMany(a => a.Scripts.GroupBy(s => s.Name).Where(g => g.Count() > 1).Select(g => $"alias {a.Property.Alias} {g.Key}")).ToList();

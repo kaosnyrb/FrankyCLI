@@ -470,6 +470,10 @@ namespace FrankyCLI
         /// <summary>talk: exchanges[x].give. item is an EditorID (any item a player can carry: Aid_MedPack is a Potion);
         /// count is how many, 1 when absent as vanilla's ItemCountToRemove.</summary>
         private sealed class Give { public string? item { get; set; } public int count { get; set; } = 1; }
+        /// <summary>beats, a deliver: bring. item is an EditorID of what sits in the player's INVENTORY (tungsten is the MiscItem
+        /// InorgUncommonTungsten, never the Resource ResInorgUncommonTungsten: Red Tape counts the MiscItem); count is how many,
+        /// 1 or more. short, OPTIONAL: the box's text when he is short; absent = "I need <count> <name> for this."</summary>
+        private sealed class Bring { public string? item { get; set; } public int count { get; set; } public string? @short { get; set; } }
         /// <summary>A FormList of actor bases (Overtime's duo_GangMembersList_Civ_* are the friendly ones) and a count range.</summary>
         private sealed class Company { public string? list { get; set; } public int min { get; set; } public int max { get; set; } }
         /// <summary>
@@ -703,6 +707,14 @@ namespace FrankyCLI
             public string? group { get; set; }
             /// <summary>beats, pickup only: the inventory name of what this beat hands the player (a cloned item).</summary>
             public string? item { get; set; }
+            /// <summary>
+            /// beats, a deliver only, OPTIONAL (plan OT-31, capability E, his "go on b and probe" 2026-11-09): the object takes
+            /// `count` of an item the PLAYER brings, bought, mined, crafted or looted, rather than an item the Delve gave him.
+            /// Vanilla's Red Tape shape: the step's objective counts what he carries, "(3/10)", and the object refuses until
+            /// he has them all (duo_delve_bring on the player's alias, duo_delve_bring_use on the object). Absent = a plain
+            /// deliver, which takes what earlier pickups and recovers handed over.
+            /// </summary>
+            public Bring? bring { get; set; }
             /// <summary>beats, craft only: where the item is made and what it costs (a quest-only COBJ, live while the step shows).</summary>
             public Craft? craft { get; set; }
             /// <summary>beats, OPTIONAL: the NIF this beat's object wears, and its activate prompt. Absent = the base's.</summary>

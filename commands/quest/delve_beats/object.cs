@@ -103,10 +103,27 @@ namespace FrankyCLI
                 else
                 {
                     hookAlias = build.slotOf[b].activatorAlias;
-                    script = Destroys ? "DefaultAliasOnDestroyed" : CarriesItem && build.itemOf.ContainsKey(b) ? PickupScript : UseScript;
+                    script = Destroys ? "DefaultAliasOnDestroyed" : CarriesItem && build.itemOf.ContainsKey(b) ? PickupScript
+                           : beat.bring != null ? BringUseScript : UseScript;
                 }
                 var sc = StageHook(script, build.beatStage[b], prereq);
                 if (Destroys) { }   // no prompt to hide: the entry stage blocked activation
+                else if (beat.bring != null)
+                {
+                    // OT-31: the object refuses with a box until he carries the count, then takes it and hides (never a return,
+                    // the lint holds that, so nothing comes back to it). The counter goes on the player (Bring).
+                    var (item, _, count) = build.inputs.Brings[b];
+                    sc.Properties.Add(new ScriptBoolProperty { Name = "HideAfterUse", Data = true, Flags = ScriptProperty.Flag.Edited });
+                    var ip = new ScriptObjectProperty { Name = "Item", Flags = ScriptProperty.Flag.Edited };
+                    ip.Object.SetTo(item);
+                    sc.Properties.Add(ip);
+                    sc.Properties.Add(new ScriptIntProperty { Name = "ItemCount", Data = count, Flags = ScriptProperty.Flag.Edited });
+                    var mp = new ScriptObjectProperty { Name = "ShortMessage", Flags = ScriptProperty.Flag.Edited };
+                    mp.Object.SetTo(build.shortOf[b]);
+                    sc.Properties.Add(mp);
+                    int f = build.AttachBeatHook(b, hookAlias, script, sc, prereq);
+                    return f != 0 ? f : build.Bring(b, hookAlias, prereq);
+                }
                 else if (CarriesItem && !build.itemOf.ContainsKey(b))
                     // OT-08: the last step's pickup that nothing takes gives nothing (Items made none). The plain use hook
                     // hides and sets; the stage's first line still disables the object, as any pickup's does (StageLines).
