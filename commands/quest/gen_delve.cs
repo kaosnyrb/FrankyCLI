@@ -3428,7 +3428,11 @@ namespace FrankyCLI
             if (!prev.Aliases.OfType<IQuestLocationAliasGetter>().Any(a => a.ID == (uint)t.placeAlias))
             { Console.WriteLine($"REFUSED: {fromId} has no location alias {t.placeAlias} to hand on."); return 1; }
             la.ExternalAliasLocation = new ExternalAliasLocation { Quest = prev.ToNullableLink<IQuestGetter>(), AliasID = (int)t.placeAlias };
-            Console.WriteLine($"  inherit  : alias {la.ID} {la.Name} filled from {fromId} [{prev.FormKey}] alias {t.placeAlias} (ExternalAliasLocation), AllowReserved; no request, no conditions");
+            // ⛔ AND THE FLAG THAT SAYS SO. The one external fill this plugin already carries, vanilla's PlayerShip (from
+            // SQ_PlayerShip alias 16), has ExternalAliasLinked (0x100000) set beside it. The first probe build had the fill
+            // without the flag and ch2 failed to start, 624 OnQuestStarted retries in 35 s (his play, 2026-11-09 09:20).
+            la.Flags = (la.Flags ?? 0) | QuestLocationAlias.Flag.ExternalAliasLinked;
+            Console.WriteLine($"  inherit  : alias {la.ID} {la.Name} filled from {fromId} [{prev.FormKey}] alias {t.placeAlias} (ExternalAliasLocation, ExternalAliasLinked), AllowReserved; no request, no conditions");
             return 0;
         }
 
