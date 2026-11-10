@@ -8,10 +8,9 @@
   "source": "his 2026-10-30 07:49 \"I like the idea of medic missions to, going out to help people\", then 07:51 \"yup\"",
   "_note": [
     "THE MEDIC FAMILY, 5: FIELD TRIAGE. Plan: home-office office/projects/delves/medic-family.md.",
+    "THE PLAYER'S PART: you bring the med packs and spend them. Each treatment is offered only while you carry one, so three people means three packs, and the warden's order (worst first) is the triage.",
     "Register: the warm common job. You are the one who turns up.",
-    "After a raid, wounded settlers are down round the site. Treat each, in any order. 30a's group with message boxes.",
-    "STAND-INS: place.wounded (three placed, down, alive) and a treat use on each that takes a med pack (the item check",
-    "again). Eliza's. Pay: med."
+    "REWORKED 2026-11-10 on OT-9A (Eliza's letter 2026-11-10-eliza-jessica-wounded-and-captives-are-people-now.md, his 'B, it matches vanilla'): the three message boxes became three wounded people in three talks, in a fixed order because talks do not group. The details kept: the cut arm, the burnt hands that say almost nothing, the knock to the head. Voices borrowed until his ear casts them. Pay: med."
   ],
   "place": {
     "theme": {
@@ -22,11 +21,7 @@
         "LocTypeOE_ThemeCaveKeyword"
       ]
     },
-    "_theme": "A quiet site just raided.",
-    "wounded": {
-      "count": 3,
-      "_wounded": "STAND-IN: three settlers placed down and wounded, one at each marker. Eliza's."
-    }
+    "_theme": "A quiet site just raided."
   },
   "prose": {
     "name": "Rescue: Field Triage at the <Place> on <Planet>",
@@ -35,44 +30,144 @@
   },
   "beats": [
     {
-      "type": "use",
-      "group": "wounded",
+      "type": "talk",
       "at": "RECenterLocRef",
-      "model": "WOUNDED SETTLER, UNPICKED",
-      "name": "Wounded Settler",
-      "_use": "STAND-IN: treating takes one Aid_MedPack (the item check). Eliza's.",
-      "objective": "Treat the wounded settlers at the <Place>",
-      "message": {
-        "title": "Wounded Settler",
-        "text": "A cut along the arm, deep but clean. The med pack does its work and the breathing slows."
+      "objective": "Treat the bleeding settler at the <Place>",
+      "person": {
+        "name": "Tamsin Rowe",
+        "template": "UC_NA_MASTWorkerFemale03",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta",
+        "hellos": [
+          [
+            "Over here. I'm the one bleeding."
+          ]
+        ],
+        "wounded": true,
+        "_bio": {
+          "age": "thirties (authored 2026-11-10)",
+          "from": "one of the settlement's own (her lines)",
+          "why_there": "cut when the raiders came through at first light (her lines)",
+          "wants": "the others seen to; she has been holding her own arm shut since (her lines)"
+        }
       },
-      "journal": "This one had a deep cut along the arm. It's dressed."
+      "greeting": [
+        "It's my arm. I've been holding it shut since they left, and my hand's gone numb from doing it."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Let go of it. I've got a med pack.",
+          "give": {
+            "item": "Aid_MedPack",
+            "count": 1
+          },
+          "reply": [
+            "That stings worse than the cut did. Go on, see to the others. I'll keep."
+          ]
+        },
+        {
+          "prompt": "What happened here?",
+          "reply": [
+            "They came in shooting at first light, took what they could carry, and left us lying where we fell."
+          ]
+        }
+      ],
+      "journal": "I closed a deep cut on a settler's arm. Next, the one with burnt hands."
     },
     {
-      "type": "use",
-      "group": "wounded",
+      "type": "talk",
       "at": "REMarkerMediumLocRef",
-      "model": "WOUNDED SETTLER, UNPICKED",
-      "name": "Wounded Settler",
-      "_use": "STAND-IN: treating takes one Aid_MedPack (the item check). Eliza's.",
-      "message": {
-        "title": "Wounded Settler",
-        "text": "A burn across the hands. They watch you work and say nothing at all."
+      "objective": "Treat the settler with burnt hands",
+      "person": {
+        "name": "Corin Vale",
+        "template": "UC_NA_MASTWorkerMale02",
+        "outfit": "Outfit_Clothes_Farmer_01_with_Hat",
+        "voice": "GenericMale01",
+        "elevenlabs": "dgkKQcJqyy5AP0dqleUU",
+        "wounded": true,
+        "_bio": {
+          "age": "fifties (authored 2026-11-10)",
+          "from": "the settlement's grower (his lines: the seed stock)",
+          "why_there": "went into a burning store after the seed stock (his lines)",
+          "wants": "the seed stock saved; he says almost nothing about himself (his lines)"
+        }
       },
-      "journal": "This one had burnt hands, and didn't say a word."
+      "greeting": [
+        "My hands. The seed stock."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Hold them out. This will cool them.",
+          "give": {
+            "item": "Aid_MedPack",
+            "count": 1
+          },
+          "reply": [
+            "Better."
+          ]
+        },
+        {
+          "prompt": "How did you burn them?",
+          "reply": [
+            "They set the store going. I went in."
+          ]
+        },
+        {
+          "prompt": "Did you save any of it?",
+          "reply": [
+            "Some."
+          ]
+        }
+      ],
+      "journal": "I dressed a settler's burnt hands. He barely said a word. Next, the one who took a knock to the head."
     },
     {
-      "type": "use",
-      "group": "wounded",
+      "type": "talk",
       "at": "REContainerLocRef",
-      "model": "WOUNDED SETTLER, UNPICKED",
-      "name": "Wounded Settler",
-      "_use": "STAND-IN: treating takes one Aid_MedPack (the item check). Eliza's.",
-      "message": {
-        "title": "Wounded Settler",
-        "text": "A knock to the head, and a lot of questions about what day it is."
+      "objective": "Check on the settler who took a knock",
+      "person": {
+        "name": "Rory Dunne",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericMale01",
+        "elevenlabs": "CsbTapRVtZdcBs3vBbQe",
+        "hellos": [
+          [
+            "Is it still morning? It feels like it should be morning."
+          ]
+        ],
+        "wounded": true,
+        "_bio": {
+          "age": "early twenties (authored 2026-11-10)",
+          "from": "one of the settlement's own (his lines)",
+          "why_there": "knocked down in the raid and never quite got up (his lines)",
+          "wants": "to know what day it is, and to be told he did fine (his lines)"
+        }
       },
-      "journal": "This one took a knock to the head and kept asking what day it was."
+      "greeting": [
+        "Someone hit me with something. Or I hit something. What day is it? Don't tell me, I'll get it."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Sit still and look at me. Med pack.",
+          "give": {
+            "item": "Aid_MedPack",
+            "count": 1
+          },
+          "reply": [
+            "Oh, that's better, the ground's stopped moving. It's Tuesday. Is it Tuesday? I'm going with Tuesday."
+          ]
+        },
+        {
+          "prompt": "How many fingers am I holding up?",
+          "reply": [
+            "Four. Five? You keep moving them about."
+          ]
+        }
+      ],
+      "journal": "Raiders left three people wounded at the <Place>. I treated all three, worst first.",
+      "reward": "med"
     }
   ],
   "speaker": {
@@ -81,11 +176,7 @@
     "elevenlabs": "7QTeMqXOsYj1AQaKLcrf"
   },
   "broadcast": [
-    "They hit us at first light and they're gone now. Three of ours are down. We've nobody who knows what they're doing. Please."
+    "They hit us at first light. Three of ours are down. Start with the one who's bleeding, then the hands. The lad who took the knock can wait, he's talking."
   ],
-  "_speech": "Shaken, holding it together. A stand-in voice; his ear decides.",
-  "recap": "Raiders left three people wounded at the <Place>. I treated all three.",
-  "recapSay": [
-    "That's all three. Thank you. We'll manage from here."
-  ]
+  "_speech": "Shaken, holding it together. A stand-in voice; his ear decides."
 }

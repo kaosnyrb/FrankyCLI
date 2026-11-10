@@ -8,7 +8,8 @@
   "source": "his 2026-11-02 06:27: \"write anotger 3 missions with droppods in them, they are cool\"",
   "_note": [
     "DROP PODS, 3 of 3. The fight, then the care: clear the pod crews, then treat the three people they hurt. MB87a's triage on the back of a drop, so the fight carries a feeling (the gap in the 11-02 feelings chart: combat closes on 'done').",
-    "ELIZA: the three wounded are MB87a's stand-in (placed down at quest start) and the pods land round RECenterLocRef, where the first one lies. Same question as MB95a: are placed friendlies safe from the drop, or does the first wounded move to a marker away from the centre?",
+    "THE PLAYER'S PART: the fight, then the spend: clear the drop, then one med pack each for three people, in the foreman's order.",
+    "REWORKED 2026-11-10 on OT-9A: the wounded are people in talks now, in a fixed order (talks do not group), placed away from RECenterLocRef where the pods land; wounded people sit in CaptiveFaction, so the crews leave them be (Eliza's manual). The details kept: the stitches counted to four, the ribs who asks after the others, the ankle who wants to know if you saw the pods.",
     "Ruth Pargeter's register on the speaker: level, counting, not warm; the care is in the accuracy. Voice borrowed until his ear casts it. No names, places, factions or currency in any voiced line.",
     "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB96a.md): rework, findings 1-5 taken, 6 kept, 7 is the stand-in wounded (Eliza's, already asked). Forced pick answered NO: the foreman's last line is a count and nothing else."
   ],
@@ -22,11 +23,7 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "A quiet site under a pod raid, open sky at the centre.",
-    "wounded": {
-      "count": 3,
-      "_wounded": "STAND-IN, MB87a's: three settlers placed down and wounded, one at each marker. Eliza's."
-    }
+    "_theme": "A quiet site under a pod raid, open sky at the centre."
   },
   "prose": {
     "name": "Rescue: After the Drop at the <Place> on <Planet>",
@@ -42,10 +39,6 @@
     "They're dropping on us again, second time this week. Three of ours are still down from the last one. Crews first, please, and then the three."
   ],
   "_speech": "Ruth's counts: the second time, the three. No line names how anyone feels.",
-  "recap": "Pods came down on the <Place> again. I cleared the crews and treated the three hurt in the drop before.",
-  "recapSay": [
-    "Three down, three treated."
-  ],
   "beats": [
     {
       "type": "clear",
@@ -60,50 +53,139 @@
         }
       },
       "objective": "Clear the pod crews at the <Place>",
-      "journal": "I cleared the pod crews at the <Place>. Now I need to see to the three hurt in the last drop.",
+      "journal": "I cleared the pod crews at the <Place>. Now the three hurt in the last drop, starting with the shoulder.",
       "say": [
-        "That's the drop dealt with. Three of ours, three med packs. Any order you like."
+        "That's the drop dealt with. Three of ours, three med packs. The shoulder first, she's lost the most."
       ]
     },
     {
-      "type": "use",
-      "group": "wounded",
-      "at": "RECenterLocRef",
-      "model": "WOUNDED SETTLER, UNPICKED",
-      "name": "Wounded Settler",
-      "_use": "STAND-IN, MB87a's: treating takes one Aid_MedPack (the item check). Eliza's.",
-      "objective": "Treat the wounded settlers at the <Place>",
-      "message": {
-        "title": "Wounded Settler",
-        "text": "A gash from a stray round, high on the shoulder. They count the stitches out loud and lose track at four."
-      },
-      "journal": "I stitched a gash across one settler's shoulder."
-    },
-    {
-      "type": "use",
-      "group": "wounded",
+      "type": "talk",
       "at": "REMarkerMediumLocRef",
-      "model": "WOUNDED SETTLER, UNPICKED",
-      "name": "Wounded Settler",
-      "_use": "STAND-IN, MB87a's: treating takes one Aid_MedPack (the item check). Eliza's.",
-      "message": {
-        "title": "Wounded Settler",
-        "text": "Cracked ribs. They ask after the other two before they'll let you near them."
+      "objective": "Treat the settler with the shoulder wound",
+      "person": {
+        "name": "Morag Ellis",
+        "template": "UC_NA_MASTWorkerFemale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
+        "wounded": true,
+        "_bio": {
+          "age": "forties (authored 2026-11-10)",
+          "from": "the site's own, here for both drops (her lines)",
+          "why_there": "a stray round caught her on the way down (her lines)",
+          "wants": "it to be not as bad as it looks, and to stop counting (her lines)"
+        }
       },
-      "journal": "I saw to a settler with cracked ribs. They're breathing easier."
+      "greeting": [
+        "One of their rounds caught my shoulder on the way down. It's not deep. I've been telling myself it's not deep."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Let me see it. I've a med pack.",
+          "give": {
+            "item": "Aid_MedPack",
+            "count": 1
+          },
+          "reply": [
+            "One. Two. Three. Four. I've lost count, and I'm not starting again, so tell me that's done."
+          ]
+        },
+        {
+          "prompt": "Were you here for the first drop?",
+          "reply": [
+            "Both of them. The first time we hid. This time we didn't get the chance."
+          ]
+        }
+      ],
+      "journal": "I stitched a gash across one settler's shoulder. Next, the one with the ribs."
     },
     {
-      "type": "use",
-      "group": "wounded",
+      "type": "talk",
       "at": "REContainerLocRef",
-      "model": "WOUNDED SETTLER, UNPICKED",
-      "name": "Wounded Settler",
-      "_use": "STAND-IN, MB87a's: treating takes one Aid_MedPack (the item check). Eliza's.",
-      "message": {
-        "title": "Wounded Settler",
-        "text": "A sprained ankle from diving clear. They want to know if you saw the pods come down."
+      "objective": "Treat the settler with cracked ribs",
+      "person": {
+        "name": "Hollis Grant",
+        "template": "UC_NA_MASTWorkerMale02",
+        "outfit": "Outfit_Clothes_Mechanic_Brown",
+        "voice": "GenericMale01",
+        "elevenlabs": "JBFqnCBsd6RMkjVDRZzb",
+        "wounded": true,
+        "_bio": {
+          "age": "fifties (authored 2026-11-10)",
+          "from": "keeps the count of who still lives here (his lines)",
+          "why_there": "thrown down when a pod landed close (his lines)",
+          "wants": "the others seen to before him (his lines)"
+        }
       },
-      "journal": "I strapped the ankle of a settler who sprained it diving clear."
+      "greeting": [
+        "You've seen to her? And the young one? Him first, then. I'm only sore."
+      ],
+      "exchanges": [
+        {
+          "prompt": "You're more than sore. Hold still.",
+          "give": {
+            "item": "Aid_MedPack",
+            "count": 1
+          },
+          "reply": [
+            "Ribs. I heard them go when I landed. That's easier. I can breathe in the whole way now."
+          ]
+        },
+        {
+          "prompt": "How many of you live here?",
+          "reply": [
+            "Eleven. Fourteen last month. People leave after the first drop."
+          ]
+        }
+      ],
+      "journal": "I saw to a settler with cracked ribs. He's breathing easier. Last, the young one with the ankle."
+    },
+    {
+      "type": "talk",
+      "at": "RETravelB1LocRef",
+      "objective": "Treat the settler with the twisted ankle",
+      "person": {
+        "name": "Jory Marsh",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericMale01",
+        "elevenlabs": "bIHbv24MWmeRgasZH58o",
+        "hellos": [
+          [
+            "Did you see them come down? Did you?"
+          ]
+        ],
+        "wounded": true,
+        "_bio": {
+          "age": "late teens (authored 2026-11-10)",
+          "from": "the youngest on the site (Hollis's 'the young one')",
+          "why_there": "dived clear of a pod and landed badly (his lines)",
+          "wants": "someone to have seen the pods come down too (his lines)"
+        }
+      },
+      "greeting": [
+        "I dived clear and my ankle didn't come with me. Did you see the pods come in? Like falling stars, only they open."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Foot up. This will take the swelling down.",
+          "give": {
+            "item": "Aid_MedPack",
+            "count": 1
+          },
+          "reply": [
+            "That's better. I'm telling everyone you came down out of the sky as well. You didn't, but that's how I'm telling it."
+          ]
+        },
+        {
+          "prompt": "Weren't you scared?",
+          "reply": [
+            "After. Not while it was happening. Is that strange?"
+          ]
+        }
+      ],
+      "journal": "Pods came down on the <Place> again. I cleared the crews and treated the three hurt in the drop before.",
+      "reward": "med"
     }
   ]
 }

@@ -8,10 +8,9 @@
   "source": "his 2026-10-29 22:08 \"ok now lets look at eve combat missions\", then 22:09 \"yup\"",
   "_note": [
     "THE COMBAT FAMILY, 10: THE HOSTAGES. Plan: home-office office/projects/delves/combat-family.md.",
-    "EVE's rescue missions. Free the captives, walk them out.",
-    "they are clear). Eliza's. Pay: hard.",
-    "REWORKED 2026-10-30, his ruling: no escort (\"yeah escort missions are meh, don't want them\", confirming 10-24",
-    "\"missions should not rely on NPCs doing stuff correctly\"). The captives stay put; he holds the cell. Plan OT-70."
+    "THE PLAYER'S PART: get in, cut three people loose, then hold the ground round them until help comes.",
+    "REWORKED 2026-10-30, his ruling: no escort (\"yeah escort missions are meh, don't want them\", confirming 10-24 \"missions should not rely on NPCs doing stuff correctly\"). The captives stay put; he holds the ground. Plan OT-70.",
+    "REWORKED 2026-11-10 on OT-9A: three kneeling captives, each a talk; Set Free or the closing line frees them. A captive may never be spoken to, so nothing the mission needs lives only in their lines: the broadcast and the journal carry it. Fixed order (talks do not group). ASKED of Eliza: the freed captives stay ignored by the attackers through the hold (a dial), since nothing fails if they die. Pay: hard."
   ],
   "place": {
     "theme": {
@@ -21,12 +20,7 @@
         "LocTypeOE_ThemeCaveKeyword"
       ]
     },
-    "_theme": "A built site a crew holds.",
-    "captives": {
-      "count": 3,
-      "at": "RECenterLocRef",
-      "_captives": "STAND-IN: three captives placed, held. Eliza's."
-    }
+    "_theme": "A built site a crew holds."
   },
   "prose": {
     "name": "Rescue: Captives at the <Place> on <Planet>",
@@ -35,16 +29,97 @@
   },
   "beats": [
     {
-      "type": "use",
+      "type": "talk",
+      "at": "REMarkerMediumLocRef",
+      "objective": "Free the first captive at the <Place>",
+      "person": {
+        "name": "Edith Carr",
+        "template": "UC_NA_MASTWorkerFemale02",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "hpp4J3VqNfWAUOO0d1Us",
+        "captive": true,
+        "_bio": {
+          "age": "sixties (authored 2026-11-10)",
+          "from": "the nearby settlement (the elder's 'three of ours')",
+          "why_there": "taken by the crew (the briefing)",
+          "wants": "her hands back, and the other two out (her lines)"
+        }
+      },
+      "greeting": [
+        "You're not one of them. Untie me and I'll forgive you for taking so long."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Hold still, I'll cut you loose.",
+          "reply": [
+            "My hands. I'd stopped feeling them. Go and get the other two. I'm not going anywhere."
+          ]
+        }
+      ],
+      "journal": "I freed the first captive. Two more are held at the <Place>."
+    },
+    {
+      "type": "talk",
+      "at": "REContainerLocRef",
+      "objective": "Free the second captive at the <Place>",
+      "person": {
+        "name": "Owen Garrow",
+        "template": "UC_NA_MASTWorkerMale02",
+        "outfit": "Outfit_Clothes_Mechanic_Gray",
+        "voice": "GenericMale01",
+        "elevenlabs": "iP95p4xoKVk53GoZ742B",
+        "captive": true,
+        "_bio": {
+          "age": "forties (authored 2026-11-10)",
+          "from": "the nearby settlement; a wife and a daughter there (his lines)",
+          "why_there": "taken by the crew (the briefing)",
+          "wants": "to know who paid, and to go home (his lines)"
+        }
+      },
+      "greeting": [
+        "They said nobody would pay to have us back. Who's paying?"
+      ],
+      "exchanges": [
+        {
+          "prompt": "Your families are. Let's get these off you.",
+          "reply": [
+            "My wife and my daughter, then. They'll have sold something for this. I don't care what."
+          ]
+        }
+      ],
+      "journal": "I freed the second captive. One more is held at the <Place>."
+    },
+    {
+      "type": "talk",
       "at": "RECenterLocRef",
-      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
-      "_model": "A cell lock or door panel if one fits.",
-      "name": "Cell Lock",
-      "objective": "Free the captives at the <Place>",
-      "journal": "The captives are free. I need to hold the cell until help arrives.",
-      "say": [
-        "That's them out. Now keep them that way."
-      ]
+      "objective": "Free the last captive at the <Place>",
+      "person": {
+        "name": "Nell Hartley",
+        "template": "UC_NA_MASTWorkerFemale03",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "E393dkE75hqtz1LO2aEJ",
+        "captive": true,
+        "_bio": {
+          "age": "early twenties (authored 2026-11-10)",
+          "from": "the nearby settlement (the elder's 'three of ours')",
+          "why_there": "taken by the crew three days ago (her lines)",
+          "wants": "it to be over (her lines)"
+        }
+      },
+      "greeting": [
+        "Is it over? Are they gone?"
+      ],
+      "exchanges": [
+        {
+          "prompt": "Not yet. Stay down, stay quiet.",
+          "reply": [
+            "I can do quiet. I've been doing quiet for three days."
+          ]
+        }
+      ],
+      "journal": "All three captives are free. I need to hold the ground round them until help arrives."
     },
     {
       "type": "hold",
@@ -59,7 +134,7 @@
         "horde"
       ],
       "objective": "Protect the captives until help arrives",
-      "journal": "I freed three captives at the <Place> and held the cell until their captors gave up.",
+      "journal": "I freed three captives at the <Place> and held the ground round them until their captors gave up.",
       "say": [
         "That's the last of them. Stay with them. Our people are nearly there."
       ],
@@ -72,7 +147,7 @@
     "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
-    "They've got three of ours at that site. Get them out of that cell and keep them alive. We're sending people, but not fast."
+    "They've got three of ours tied up at that site. Cut them loose and keep them alive. We're sending people, but not fast."
   ],
   "_speech": "Steady for their sake. A stand-in voice; his ear decides."
 }
