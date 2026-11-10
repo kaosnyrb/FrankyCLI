@@ -1240,6 +1240,31 @@ namespace FrankyCLI
                                   (rideSrc.IndexOf($"Function {FragmentFunction(PickupStage)}()") < rideSrc.IndexOf($"Function {FragmentFunction(50)}()")
                                    && rideSrc.IndexOf(".AddPassenger(") > rideSrc.IndexOf($"Function {FragmentFunction(50)}()")).ToString(), "True");
                 }
+                else if (SpaceDestroy(r, t))
+                {
+                    // A DESTROY in orbit (OT-9I): no script on the object and no use hook (it is shot, never pressed); the stock
+                    // death hook sets the completing stage after the accept; the health is MB14a's, read off THAT record, never
+                    // off what this build wrote; the fragment blocks the prompt on the accept and disables the wreck first.
+                    fail += Check($"{r.id}_b1 carries no script (the stock destroy hook on its alias completes it)",
+                                  (objAct?.VirtualMachineAdapter?.Scripts.Count ?? 0).ToString(), "0");
+                    var hooks = vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts;
+                    fail += Check($"the object carries no {UseScript} (it is never pressed)",
+                                  (hooks?.Any(s => s.Name == UseScript) ?? false).ToString(), "False");
+                    var dh = hooks?.FirstOrDefault(s => s.Name == "DefaultAliasOnDestroyed");
+                    int Prop(string n) => dh?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == n)?.Data ?? -1;
+                    fail += Check("DefaultAliasOnDestroyed on the object sets the completing stage after the accept",
+                                  dh == null ? "no hook" : $"{Prop("StageToSet")} after {Prop("PrereqStage")}", $"{t.completeStage} after {t.entryStage}");
+                    var mb14 = m.Activators.FirstOrDefault(a => a.EditorID == SpaceDestroyTemplate);
+                    fail += Check($"the object's health is {SpaceDestroyTemplate}'s",
+                                  objAct?.Destructible?.Data?.Health.ToString() ?? "no Destructible",
+                                  mb14?.Destructible?.Data?.Health.ToString() ?? $"no {SpaceDestroyTemplate} Destructible");
+                    string frag = File.ReadAllText(bm.PscPath);
+                    int f10 = frag.IndexOf($"Function {FragmentFunction(t.entryStage)}()"), f100 = frag.IndexOf($"Function {FragmentFunction(t.completeStage)}()");
+                    fail += Check("the accept blocks the object's prompt",
+                                  (f10 >= 0 && frag.IndexOf("Alias_Beat1Target.GetRef().BlockActivation(True, True)", f10) is int b && b > f10 && (f100 < 0 || b < f100)).ToString(), "True");
+                    fail += Check("the completing stage disables the wreck as its first line",
+                                  (f100 >= 0 && frag.IndexOf('\n', f100) is int nl && frag.Substring(nl + 1).TrimStart().StartsWith("Alias_Beat1Target.GetRef().Disable()")).ToString(), "True");
+                }
                 else
                 {
                     // A plain board (MB104a): no kit, no repair messages, no attackers; our hook on the alias is graded by the
