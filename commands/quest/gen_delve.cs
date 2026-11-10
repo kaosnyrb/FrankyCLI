@@ -1014,6 +1014,8 @@ namespace FrankyCLI
                 case "infogroup": return DelveInfoGroup.Run(args, dataDir, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList(), dry);
                 // a board Delve's TargetLocation reserved, in place: commands/quest/delve_reserve.cs
                 case "reserve": return DelveReserve.Run(args, dataDir, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList(), dry);
+                // a built board Delve's card rewritten from its recipe, in place: commands/quest/delve_card.cs
+                case "card": return Card(args, dataDir, templates, dry);
                 default:
                     Console.WriteLine("Usage: gen_delve templates");
                     Console.WriteLine("       gen_delve lint  <recipe.json | recipeId> [--spread]   --spread adds the beat-separation figures (~30 s more)");
@@ -1033,6 +1035,7 @@ namespace FrankyCLI
                     Console.WriteLine("       gen_delve move <delveId> <fromNode> <toNode> [--dry]   a built Delve changes pool (a list edit, never a rebuild)");
                     Console.WriteLine("       gen_delve infogroup <delveId>[,...] [--clear] [--dry]   set the InfoGroup header on its walk-up groups in place, proven at the bytes");
                     Console.WriteLine("       gen_delve reserve <delveId>[,...] [--dry]   reserve a board Delve's TargetLocation in place (no POI encounter takes it), proven at the bytes");
+                    Console.WriteLine("       gen_delve card <delveId>[,...] | --all [--dry]   write a built board Delve's card from its recipe in place (no rebuild), proven record by record");
                     Console.WriteLine("       gen_delve pcmpool <pcmBranchNode> [refType ...]   what a PCM request under that node can place, and which carry the ref types");
                     Console.WriteLine("       gen_delve faces [--dry]   write data/delves/faces.json and faces.md off Starfield.esm: every baked human a person can wear");
                     Console.WriteLine("       gen_delve fauna [--dry]   write data/delves/fauna.json off Starfield.esm: every planet and moon with life, its location, biomes and named creatures (place.planet reads it)");

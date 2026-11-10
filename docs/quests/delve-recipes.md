@@ -159,6 +159,19 @@ places its own). Then all twelve board Delves the same way. **The board shell ca
 new or rebuilt board Delve reserves by construction and this pass is for none. The space boards (`boardspace`, his
 MB01a) already reserve their orbit's planet (0x109). **And the build refuses a place that does not reserve** (his *"can we add it to the linter"*, the same day): after the place conditions are written, every place the recipe uses is checked on the clone and printed (`reserve  : place (alias 5, TargetLocation) reserves its location`); one that does not is `REFUSED`, naming the shell to fix. It runs on `--dry`, so `build --dry` is the gate; it is in the BUILD and not the recipe lint because only the build knows which alias each place became (a shell's, a borrowed one, a remote request, a created third, an orbit), and a lint re-deriving that would be a second mapping. A named city is exempt (shared with every quest). Bitten: the board shell with the bit removed refuses 53a by name. The space templates build elsewhere (`delve_space.cs`) and are not checked; their shells reserve (0x109).
 
+**A built board Delve's card, in place: `gen_delve card <delveId>[,...] | --all [--dry]`** (2026-11-10, his *"can we make
+a tool to just change that field"*, after Jessica's `46e61d3` rewrote 105 cards as postings). Writes the quest's
+`MissionBoardDescription` from its recipe with no rebuild: the text a build would write (`Expand(CardOf(r))`, so a chain
+link gets its briefing), refused if an unexpanded `<Token>` is left. `--all` takes every built Delve with a recipe and skips
+the ones not on a board. A rebuild would re-mint every FormID and re-copy every line's audio to change one string. **The
+proof is structural, because new text changes the size:** every record in the written plugin `Equals` its live twin except
+the named quests; each named quest with its old card put back `Equals` its old self, so the card is the only field that
+moved; each reads back with the recipe's card; and the file moved by exactly the strings' UTF-8 byte delta. Bitten on its
+first day: a second field planted on MB98a and an edit on an unnamed quest (MB01a) failed four checks, the untouched MB96a
+stayed OK. ⚠ The first version saved its before-copy under another file name, and since a mod's FormKeys take their
+ModKey from the file name, every comparison compared nothing: the copy keeps the plugin's name in its own folder. Snapshot
+first; the models are re-emitted after a real write. First dry run over `--all`: 23 to change, 16 already the recipe's.
+
 **Taking a build back out: `dotnet run -- gen_delve unbuild <builtId> [--dry]`** (2026-10-12). Removes every
 record whose EditorID is the id or starts with the id plus `_` (the build's own naming; nested topics and scenes
 go with the quest), and the id's Story Manager pool entries, behind `removerecord`'s inbound guard; re-reads the
