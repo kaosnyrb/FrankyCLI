@@ -86,6 +86,10 @@ namespace FrankyCLI
             // A DESTROY IN ORBIT (plan OT-9I): shot from the ship, never pressed, so nothing that rides on a press is built.
             if (r.beats.Any(b => b.type == "destroy") && !SpaceDestroy(r, t))
                 Fatal("a beat is a destroy and this is not a one-beat board; only a one-beat boardspace destroy is built in orbit.");
+            if (r.beats.Any(b => b.guards != null) && !SpaceDestroy(r, t))
+                Fatal("a beat sets guards and is not a one-beat boardspace destroy; only a guarded target is built (his ccs_activatedestroyguarded).");
+            if (r.beats.Any(b => b.guards != null && !b.guards.StartsWith("LShip_", StringComparison.Ordinal)))
+                Fatal("guards names a levelled ship list, LShip_* (his guarded boards use LShip_CrimsonFleet_Combat and LShip_Spacer_Combat_A).");
             if (SpaceDestroy(r, t) && (r.beats[0].repair || r.beats[0].ask != null))
                 Fatal($"beat 1 is a destroy and sets {(r.beats[0].repair ? "repair" : "ask")}; it is shot, not used, so that would be silently ignored.");
             if (IsBoardSpace(t) && r.beats.Count >= 2 && !two && !rescue)
@@ -233,6 +237,13 @@ namespace FrankyCLI
         /// </summary>
         private static bool SpaceDestroy(Recipe r, Template t)
             => PlainBoard(r, t) && r.beats[0].type == "destroy";
+
+        /// <summary>
+        /// A guarded destroy's guard stage (OT-9I's twin): set by DefaultAliasOnLoad on the object after the accept, so the
+        /// ships come when the target loads round him, as his ccs_activatedestroyguarded's OnLoad does. 60: 30 is the
+        /// arrival, 40 the pickup and the ask, 50 the rescue's check-in.
+        /// </summary>
+        private const int GuardStage = 60;
 
         /// <summary>A two-beat board's stages and objective: the pickup's own stage, and the deliver's objective beside the
         /// shell's 20. Neither exists on his MB01a (the build refuses if one does). 40, not 30: the broadcast's arrival is
@@ -552,6 +563,13 @@ namespace FrankyCLI
                 if (AttachHook(vma, clone.FormKey, (int)target.ID, h, HookEntry.FindOrCreate, true, bm, t.completeStage, t.entryStage) == Hooked.AlreadyCarries)
                 { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnDestroyed."); return 1; }
                 Console.WriteLine($"  +hook    : alias {target.ID} DefaultAliasOnDestroyed sets {t.completeStage} after {t.entryStage}; shot, never pressed");
+                if (beat.guards != null)
+                {
+                    var gh = StageHook("DefaultAliasOnLoad", GuardStage, t.entryStage);
+                    if (AttachHook(vma, clone.FormKey, (int)target.ID, gh, HookEntry.FindOrCreate, true, bm, GuardStage, t.entryStage) == Hooked.AlreadyCarries)
+                    { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnLoad."); return 1; }
+                    Console.WriteLine($"  +hook    : alias {target.ID} DefaultAliasOnLoad sets {GuardStage} after {t.entryStage}; the guards come when it loads");
+                }
             }
             else if (PlainBoard(r, t) || rescue)
             {
@@ -608,6 +626,34 @@ namespace FrankyCLI
                     extraProps.Add(("ReferenceAlias", "Alias_Beat1Target", clone.FormKey, (int)target.ID));
                     code[t.entryStage].Add("Alias_Beat1Target.GetRef().BlockActivation(True, True)");
                     code[t.completeStage].Insert(0, "Alias_Beat1Target.GetRef().Disable()");
+                    if (beat.guards is string gname)
+                    {
+                        // THE GUARDS (OT-9I's twin): his ccs_activatedestroyguarded's OnLoad loop, verbatim but for the trace.
+                        var ships = OwnOrMaster<ILeveledBaseFormGetter>(myMod, env, gname);
+                        if (ships == null) { Console.WriteLine($"REFUSED: guards '{gname}' is not a levelled list (LShip_*) in {myMod.ModKey.FileName} or its masters."); return 1; }
+                        if (clone.Stages!.Any(s => s.Index == GuardStage)) { Console.WriteLine($"REFUSED: the shell already has a stage {GuardStage}; the guard stage must be its own."); return 1; }
+                        var gs = CloneStage(clone, GuardStage);
+                        if (gs == null) return 1;
+                        clone.Stages.Add(gs);
+                        if (gs.LogEntries.FirstOrDefault() is QuestLogEntry gle) gle.Entry = null;
+                        SortStages(clone);
+                        extraProps.Add(("Form", "GuardShips", ships.FormKey, -1));
+                        code[GuardStage] = new()
+                        {
+                            "SpaceshipReference playerShip = Game.GetPlayer().GetCurrentShipRef()",
+                            "Float[] placePosition = new Float[3]",
+                            "Int n = Utility.RandomInt(1, 3)",
+                            "Debug.Trace(\"[guards] \" + Self + \" stage " + GuardStage + ": \" + n + \" ship(s) round \" + playerShip)",
+                            "While n > 0",
+                            "    placePosition[0] = Utility.RandomFloat(-3000, 3000)",
+                            "    placePosition[1] = Utility.RandomFloat(-750, 750)",
+                            "    placePosition[2] = Utility.RandomFloat(-3000, 3000)",
+                            "    playerShip.PlaceShipAtMe(GuardShips, 4, True, False, False, True, placePosition, None, None, True)",
+                            "    n -= 1",
+                            "EndWhile",
+                        };
+                        Console.WriteLine($"  +stage   : {GuardStage}, the guards: 1 to 3 of {gname} {ships.FormKey} round his ship");
+                    }
                 }
 
                 if (two)
@@ -1264,6 +1310,21 @@ namespace FrankyCLI
                                   (f10 >= 0 && frag.IndexOf("Alias_Beat1Target.GetRef().BlockActivation(True, True)", f10) is int b && b > f10 && (f100 < 0 || b < f100)).ToString(), "True");
                     fail += Check("the completing stage disables the wreck as its first line",
                                   (f100 >= 0 && frag.IndexOf('\n', f100) is int nl && frag.Substring(nl + 1).TrimStart().StartsWith("Alias_Beat1Target.GetRef().Disable()")).ToString(), "True");
+                    // THE GUARDS (the twin): only checked when the recipe asks; an unguarded target must carry none of it.
+                    var lh = hooks?.FirstOrDefault(s => s.Name == "DefaultAliasOnLoad");
+                    int LProp(string n) => lh?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == n)?.Data ?? -1;
+                    // The fragment's properties are on the adapter's own fragment Script, not in its Scripts list (the first
+                    // version of this check read Scripts and reported "no property" over a correct build, 2026-11-10).
+                    var gprop = vma.Script?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == "GuardShips");
+                    bool guarded = r.beats[0].guards != null;
+                    fail += Check("DefaultAliasOnLoad on the object (the guards' trigger)",
+                                  lh == null ? "no hook" : $"sets {LProp("StageToSet")} after {LProp("PrereqStage")}",
+                                  guarded ? $"sets {GuardStage} after {t.entryStage}" : "no hook");
+                    int f60 = frag.IndexOf($"Function {FragmentFunction(GuardStage)}()");
+                    fail += Check($"stage {GuardStage} places the guards from GuardShips round his ship",
+                                  (q.Stages.Any(s => s.Index == GuardStage) && f60 >= 0 && frag.IndexOf("playerShip.PlaceShipAtMe(GuardShips,", f60) > f60).ToString(), guarded.ToString());
+                    fail += Check("the fragment's GuardShips names a list",
+                                  gprop == null ? "no property" : gprop.Object.FormKey.IsNull ? "null" : "set", guarded ? "set" : "no property");
                 }
                 else
                 {

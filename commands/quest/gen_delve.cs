@@ -773,6 +773,15 @@ namespace FrankyCLI
             /// </summary>
             public bool repair { get; set; }
             /// <summary>
+            /// beats, a ONE-BEAT boardspace destroy only, OPTIONAL (plan OT-9I's guarded twin, his 2026-11-10 "yeah guarded
+            /// twin"): the EditorID of a levelled ship list (LShip_*, e.g. "LShip_Spacer_Combat_A") that guards the target. When
+            /// the object loads after the accept, 1 to 3 ships from it are placed round the player's ship, his
+            /// ccs_activatedestroyguarded's own loop (PlaceShipAtMe, X and Z +-3000, Y +-750). Destroying the object still
+            /// completes the mission; the guards are the danger, not the goal, and nothing removes them (his never did).
+            /// Absent = an unguarded target.
+            /// </summary>
+            public string? guards { get; set; }
+            /// <summary>
             /// beats, a plain one-beat boardspace use, OPTIONAL: activating the object shows a box with a BUTTON per answer, and
             /// each answer is its own ending, with its own journal line (plan OT-9J, Jessica's choose at an object). The beat's
             /// journal and say are refused beside it, because the answers own the ending. Absent = the use just completes.

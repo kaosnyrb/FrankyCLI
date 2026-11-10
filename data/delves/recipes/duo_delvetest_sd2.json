@@ -1,0 +1,36 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_sd2",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-10 10:18 \"yeah guarded twin\" (plan OT-9I), after sd1 played: the same destroy with his ccs_activatedestroyguarded's guards",
+  "_note": [
+    "GUARDED DESTROY PROBE SD2 (plan OT-9I's twin): sd1's asteroid, now guarded. Silent, placeholder words. Not a mission.",
+    "Reading it: fly to the asteroid. As it loads, 1 to 3 Spacer ships appear within about 3 km of your ship and come for you. Shoot the asteroid: it goes and the mission completes and pays, whether or not the guards are dead.",
+    "Papyrus.0.log should hold a [guards] line naming how many came. The ships come from LShip_Spacer_Combat_A, his MB02a/MB03b/MB03d list.",
+    "Unbuilt once a real guarded destroy has played."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "c1's and MB104a's."
+  },
+  "prose": {
+    "name": "Sabotage: Guarded Probe over <Planet>",
+    "briefing": "Test mission. A dangerous asteroid is drifting over <Planet>, and someone is guarding it. Shoot it to pieces.",
+    "card": "Test contract. Destroy the guarded asteroid over <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "destroy",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Destroy the guarded asteroid over <Planet>",
+      "journal": "Test journal: I shot the guarded asteroid over <Planet> to pieces.",
+      "model": "Meshes\\Landscape\\Rocks\\asteroids\\RockAsteroidRoughLarge01.nif",
+      "name": "Dangerous Asteroid",
+      "reward": "easy",
+      "guards": "LShip_Spacer_Combat_A"
+    }
+  ]
+}
