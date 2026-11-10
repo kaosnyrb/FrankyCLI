@@ -1,0 +1,191 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_m96",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica, as Ruth Pargeter",
+  "source": "his 2026-11-10 13:54 \"don't see MB96a on the board\": MB96a failed TargetLocation 42 times, never passed; a bisect probe, one thing changed",
+  "_note": [
+    "BISECT PROBE M96 (MB96a never dealt, 42 failed fills on TargetLocation): MB96a whole, Jessica's words, with ONE change: Jory moves off RETravelB1LocRef onto REMarkerSmallLocRef (66 sites either way by the census).",
+    "Reading it: it LISTS = the B1 marker (or its pairing with this place set) is what MB96a's request could not meet; it does NOT list = the cause is elsewhere (the clear beat next).",
+    "Same words, so every line is a cache hit. Unbuilt once read."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A quiet site under a pod raid, open sky at the centre."
+  },
+  "prose": {
+    "name": "Rescue: After the Drop at the <Place> on <Planet>",
+    "briefing": "Raiders are dropping onto the <Place> by pod for the second time this week. Three of its people were hurt in the last drop, and nobody can reach them until the pods are dealt with.",
+    "card": "Settlement Contract. Clear a drop pod raid at the <Place> on <Planet>, then treat the wounded. Bring med packs. Payment on contract completion."
+  },
+  "speaker": {
+    "name": "Site Foreman",
+    "voice": "GenericMale01",
+    "elevenlabs": "cjVigY5qzO86Huf0OWal"
+  },
+  "broadcast": [
+    "They're dropping on us again, second time this week. Three of ours are still down from the last one. Crews first, please, and then the three."
+  ],
+  "_speech": "Ruth's counts: the second time, the three. No line names how anyone feels.",
+  "beats": [
+    {
+      "type": "clear",
+      "at": "RECenterLocRef",
+      "_at": "The open middle of the site, for the pods' sky.",
+      "enemies": {
+        "list": "duo_GangMembersList_Spacer",
+        "species": "mix",
+        "pods": {
+          "count": 3,
+          "per": 3
+        }
+      },
+      "objective": "Clear the pod crews at the <Place>",
+      "journal": "I cleared the pod crews at the <Place>. Now the three hurt in the last drop: the shoulder first, then the young one, then the ribs.",
+      "say": [
+        "That's the drop dealt with. Three of ours, three med packs. The shoulder first, she's lost the most. Then the young one, then the ribs."
+      ]
+    },
+    {
+      "type": "talk",
+      "at": "REMarkerMediumLocRef",
+      "objective": "Treat the settler with the shoulder wound",
+      "person": {
+        "name": "Morag Ellis",
+        "template": "UC_NA_MASTWorkerFemale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
+        "wounded": true,
+        "_bio": {
+          "age": "forties (authored 2026-11-10)",
+          "from": "the site's own, here for both drops (her lines)",
+          "why_there": "a stray round caught her on the way down (her lines)",
+          "wants": "it to be not as bad as it looks, and to stop counting (her lines)"
+        }
+      },
+      "greeting": [
+        "One of their rounds caught my shoulder on the way down. It's not deep. I've been telling myself it's not deep."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Let me see it. I've a med pack.",
+          "give": {
+            "item": "Aid_MedPack",
+            "count": 1
+          },
+          "reply": [
+            "One. Two. Three. Four. I've lost count, and I'm not starting again, so tell me that's done."
+          ]
+        },
+        {
+          "prompt": "Were you here for the first drop?",
+          "reply": [
+            "Both of them. The first one I didn't see coming. This one I hid from."
+          ]
+        }
+      ],
+      "journal": "I stitched a gash across one settler's shoulder. Next, the young one with the ankle."
+    },
+    {
+      "type": "talk",
+      "at": "REMarkerSmallLocRef",
+      "objective": "Treat the settler with the twisted ankle",
+      "person": {
+        "name": "Jory Marsh",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericMale01",
+        "elevenlabs": "bIHbv24MWmeRgasZH58o",
+        "hellos": [
+          [
+            "Did you see them come down? Did you?"
+          ]
+        ],
+        "wounded": true,
+        "_bio": {
+          "age": "late teens (authored 2026-11-10)",
+          "from": "the youngest on the site (Hollis's 'the young one')",
+          "why_there": "dived clear of a pod and landed badly (his lines)",
+          "wants": "someone to have seen the pods come down too (his lines)"
+        }
+      },
+      "greeting": [
+        "I dived clear and my ankle didn't come with me. They come in like falling stars, only they open."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Foot up. This will take the swelling down.",
+          "give": {
+            "item": "Aid_MedPack",
+            "count": 1
+          },
+          "reply": [
+            "That's better. I'm telling everyone you came down out of the sky as well. You didn't, but that's how I'm telling it."
+          ]
+        },
+        {
+          "prompt": "Weren't you scared?",
+          "reply": [
+            "After. Not while it was happening. Is that strange?"
+          ]
+        }
+      ],
+      "journal": "I strapped the ankle of a settler who sprained it diving clear. Last, the one with the ribs."
+    },
+    {
+      "type": "talk",
+      "at": "REContainerLocRef",
+      "replace": true,
+      "_replace": "REContainerLocRef is the box itself: his MB87a play, 2026-11-10, \"Rory was sat in a chest tho\". The box goes at the accept.",
+      "objective": "Treat the settler with cracked ribs",
+      "person": {
+        "name": "Hollis Grant",
+        "template": "UC_NA_MASTWorkerMale02",
+        "outfit": "Outfit_Clothes_Mechanic_Brown",
+        "voice": "GenericMale01",
+        "elevenlabs": "JBFqnCBsd6RMkjVDRZzb",
+        "wounded": true,
+        "_bio": {
+          "age": "fifties (authored 2026-11-10)",
+          "from": "keeps the count of who still lives here (his lines)",
+          "why_there": "thrown down when a pod landed close (his lines)",
+          "wants": "the others seen to before him, and the count kept (his lines)"
+        }
+      },
+      "greeting": [
+        "You've seen to her? And the young one? Then I'm last, which is right. I'm only sore."
+      ],
+      "exchanges": [
+        {
+          "prompt": "You're more than sore. Hold still.",
+          "give": {
+            "item": "Aid_MedPack",
+            "count": 1
+          },
+          "reply": [
+            "Ribs. I heard them go when I hit the ground. That's easier. Three down, three treated."
+          ]
+        },
+        {
+          "prompt": "How many of you live here?",
+          "reply": [
+            "Fewer than last month. People leave after the first drop."
+          ]
+        }
+      ],
+      "journal": "Pods came down on the <Place> again. I cleared the crews and treated the three hurt in the drop before.",
+      "reward": "med"
+    }
+  ]
+}
