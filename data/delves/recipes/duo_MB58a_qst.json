@@ -11,7 +11,8 @@
     "EVE's moon extraction in miniature: break it open, then collect. A use with an explosion and vanish (52a's own",
     "fields) on a rock face, then a pickup of the core where it stood.",
     "STAND-INS: the explosion (a blast, not 52a's incendiary; it must resolve or the lint refuses it) and both models.",
-    "Pay: med, placeholder."
+    "Pay: med, placeholder.",
+    "FIXED 2026-11-10 (OT-36): the blast is fragGrenadeExplosion (his pod pick, Starfield.esm E574F); the core lands on REMarkerMediumLocRef (median 24 m from the face, gen_delve spread), so the words say the blast threw it clear."
   ],
   "place": {
     "theme": {
@@ -34,28 +35,27 @@
     {
       "type": "use",
       "at": "RECenterLocRef",
-      "explosion": "BLAST EXPLOSION, UNPICKED",
-      "_explosion": "A frag or mining-charge explosion EditorID that resolves; Eliza's to find.",
+      "explosion": "fragGrenadeExplosion",
       "vanish": true,
       "model": "ROCK FACE, UNPICKED",
       "_model": "A rock or ore-vein static that reads as a face to blast, his or Kim's pick.",
       "name": "Rock Face",
       "objective": "Set the charge on the rock face at the <Place>",
-      "journal": "The charge took the rock face apart. I need to pick the ore core out of the blast.",
+      "journal": "The charge took the rock face apart and threw the ore core clear. I need to find where it landed.",
       "say": [
         "That's a good noise."
       ]
     },
     {
       "type": "pickup",
-      "at": "RECenterLocRef",
+      "at": "REMarkerMediumLocRef",
       "model": "ORE CORE, UNPICKED",
       "name": "Ore Core",
       "item": "Ore Core",
-      "objective": "Recover the ore core from the blast",
+      "objective": "Find the ore core the blast threw clear",
       "message": {
         "title": "Ore Core",
-        "text": "A fist-sized lump, heavier than rock should be, with a seam of metal through it."
+        "text": "Blown clear across the site, still warm. A fist-sized lump, heavier than rock should be, with a seam of metal through it."
       },
       "journal": "I blew open a rock face at the <Place> and brought out the ore core behind it.",
       "say": [

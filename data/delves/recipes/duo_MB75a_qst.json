@@ -9,7 +9,8 @@
   "_note": [
     "THE COMBAT FAMILY, 3: TURN THE STRUCTURE. Plan: home-office office/projects/delves/combat-family.md.",
     "EVE's retrieve-the-goods-from-a-structure: break the crew's stash open, take the shipment. A destroy, then a",
-    "pickup where it stood (MB58a's shape). STAND-IN: the explosion (a blast that resolves). Pay: med."
+    "pickup where it stood (MB58a's shape). STAND-IN: the explosion (a blast that resolves). Pay: med.",
+    "FIXED 2026-11-10 (OT-36): the stash breaks to fragGrenadeExplosion and sits on REContainerLocRef; it is EMPTY, and the shipment is under a tarp at RECenterLocRef (median 24 m, gen_delve spread). A small find-by-looking, which is a player's part of its own."
   ],
   "place": {
     "theme": {
@@ -36,13 +37,13 @@
   "beats": [
     {
       "type": "destroy",
-      "at": "RECenterLocRef",
-      "explosion": "BLAST EXPLOSION, UNPICKED",
+      "at": "REContainerLocRef",
+      "explosion": "fragGrenadeExplosion",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "_model": "A heavy locked strongbox if one fits.",
       "name": "Locked Stash",
       "objective": "Break open the crew's stash at the <Place>",
-      "journal": "The stash at the <Place> is open. I need to take back the stolen shipment."
+      "journal": "The stash at the <Place> was empty. They've moved the shipment somewhere on the site, and I need to find it."
     },
     {
       "type": "pickup",
@@ -50,12 +51,16 @@
       "model": "Meshes\\ccs\\wreckcargocrate01.nif",
       "name": "Stolen Shipment",
       "item": "Stolen Shipment",
-      "objective": "Recover the stolen shipment",
+      "objective": "Find the stolen shipment at the <Place>",
       "journal": "I broke open a crew's stash at the <Place> and took back the shipment they stole.",
       "say": [
         "That's ours. The claim's closed."
       ],
-      "reward": "med"
+      "reward": "med",
+      "message": {
+        "title": "Stolen Shipment",
+        "text": "Stacked under a tarp where nobody would look twice, still sealed."
+      }
     }
   ],
   "speaker": {

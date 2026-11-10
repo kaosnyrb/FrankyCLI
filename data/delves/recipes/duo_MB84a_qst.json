@@ -10,7 +10,8 @@
     "THE MEDIC FAMILY, 2: THE CLINIC. Plan: home-office office/projects/delves/medic-family.md.",
     "Register: the warm common job. You are the one who turns up.",
     "A medic working on a patient in a field treatment bay; people outside want what's in her cabinet. Talk, then",
-    "hold. MB55a's shape with a person. Buildable today (the bay model is a stand-in). Pay: med."
+    "hold. MB55a's shape with a person. Buildable today (the bay model is a stand-in). Pay: med.",
+    "FIXED 2026-11-10: 'defend: 1' pointed at the talk, which leaves no object to defend; dropped, so the hold holds the bay (defending a person is not a part, and his rule: missions must not rely on NPCs). Her greeting no longer opens on the 'X? Good.' tic; her hello asks if you're the help, the greeting answers it. _bio added. Her voice line changed: one revoice."
   ],
   "place": {
     "theme": {
@@ -44,10 +45,16 @@
           [
             "Not now. Unless you're the help. Are you the help?"
           ]
-        ]
+        ],
+        "_bio": {
+          "age": "fifties (authored 2026-11-10)",
+          "from": "the site's medic (her lines)",
+          "why_there": "mid-operation when the raiders came for her painkillers (her lines, the briefing)",
+          "wants": "her patient stable, and the door held (her lines)"
+        }
       },
       "greeting": [
-        "You answered? Good. I've got a patient open on the table and people outside who want what's in my cabinet. Keep them out of this bay until I'm done."
+        "Then listen. I've got a patient open on the table and people outside who want what's in my cabinet. Keep them out of this bay until I'm done."
       ],
       "exchanges": [
         {
@@ -85,7 +92,6 @@
         "squad",
         "horde"
       ],
-      "defend": 1,
       "objective": "Hold the treatment bay until the patient is stable",
       "journal": "I held the medic's treatment bay at the <Place> until her patient was stable.",
       "say": [
