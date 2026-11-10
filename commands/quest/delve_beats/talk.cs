@@ -191,6 +191,8 @@ namespace FrankyCLI
                 // OT-9A: a wounded person is healed by the closer's stage (Fragment's HealActor), as vanilla's two wounded
                 // quests take a med pack and then heal. So the closer hands something over, and there is ONE closer.
                 // A captive is freed the same way (FreePrisoner on the closer's stage, MB_Rescue01's stage 100) and needs no give.
+                if (b.person?.ignored == true && !b.person.captive)
+                    Fatal($"{at} person.ignored is set and he is not a captive; it keeps a FREED captive in CaptiveFaction, so it would be silently ignored.");
                 if (b.person?.wounded == true && b.person.captive)
                     Fatal($"{at} person is both wounded and captive; vanilla's own scripts refuse that pair (DefaultCaptiveAlias: \"Dual use ... is not currently supported\").");
                 else if (HeldOf(b.person) is Held h)
@@ -242,6 +244,9 @@ namespace FrankyCLI
                     // (talk only); ours is the other vanilla setting of the same property. Wounded stays -1: no prompt heals.
                     if (held == CaptiveHeld)
                         hs.Properties.Add(new ScriptIntProperty { Name = "StageToSetWhenFreed", Flags = ScriptProperty.Flag.Edited, Data = build.beatStage[i] });
+                    // person.ignored (Jessica's dial for MB82a): freed, he keeps CaptiveFaction, so the hold's waves leave him be.
+                    if (held == CaptiveHeld && build.r.beats[i].person!.ignored)
+                        hs.Properties.OfType<ScriptBoolProperty>().Single(p => p.Name == "AlsoRemoveFromCaptiveFaction").Data = false;
                     entry.Scripts.Add(hs);
                 }
                 build.clone.Aliases.Add(tp);

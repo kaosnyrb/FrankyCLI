@@ -444,6 +444,14 @@ namespace FrankyCLI
             /// with `wounded` (vanilla's scripts refuse the pair).
             /// </summary>
             public bool captive { get; set; }
+            /// <summary>
+            /// talk, a CAPTIVE only, OPTIONAL (Jessica's 2026-11-10 ask for MB82a: "The freed captives should stay out of the
+            /// attackers' sights through the hold, as a dial"): true = once freed he STAYS in CaptiveFaction, the faction
+            /// hostiles do not aggro on, until his alias unloads or the quest shuts down (DefaultCaptiveAlias.ClearFactions).
+            /// It writes AlsoRemoveFromCaptiveFaction false, vanilla's declared default; MB_Rescue01 (and an unset dial) sets
+            /// true, and FreePrisoner removes the faction only then. Absent = false: freed, he can be shot.
+            /// </summary>
+            public bool ignored { get; set; }
             /// <summary>OPTIONAL: nameless friendly NPCs placed around this person. Absent = they stand alone.</summary>
             public Company? company { get; set; }
             /// <summary>talk, REQUIRED there: the VoiceType EditorID his lines are filed under (GenericMale01 / GenericFemale01).</summary>

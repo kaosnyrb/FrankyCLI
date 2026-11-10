@@ -44,7 +44,9 @@
           "from": "the nearby settlement (the elder's 'three of ours')",
           "why_there": "taken by the crew (the briefing)",
           "wants": "her hands back, and the other two out (her lines)"
-        }
+        },
+        "ignored": true,
+        "_ignored": "Jessica's 2026-11-10 ask: freed, the captives stay out of the hold's sights (DefaultCaptiveAlias keeps CaptiveFaction). On all three."
       },
       "greeting": [
         "You're not one of them. Untie me and I'll forgive you for taking so long."
@@ -75,7 +77,8 @@
           "from": "the nearby settlement; a wife and a daughter there (his lines)",
           "why_there": "taken by the crew (the briefing)",
           "wants": "to know who paid, and to go home (his lines)"
-        }
+        },
+        "ignored": true
       },
       "greeting": [
         "They said nobody would pay to have us back. Who's paying?"
@@ -106,7 +109,8 @@
           "from": "the nearby settlement (the elder's 'three of ours')",
           "why_there": "taken by the crew three days ago (her lines)",
           "wants": "it to be over (her lines)"
-        }
+        },
+        "ignored": true
       },
       "greeting": [
         "Is it over? Are they gone?"

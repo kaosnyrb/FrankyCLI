@@ -3492,6 +3492,11 @@ namespace FrankyCLI
                     // call only runs while he is still bound (so a prompt-freed captive is not freed, and thanked, twice).
                     var sw = ws?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == "StageToSetWhenFreed");
                     fail += Check($"{who}: the stock Set Free prompt sets the beat's own stage (StageToSetWhenFreed)", sw?.Data.ToString() ?? "unset", wst.ToString());
+                    // person.ignored (Jessica's dial, 2026-11-10): freed, he stays in CaptiveFaction only when the flag is false.
+                    var ar = ws?.Properties.OfType<IScriptBoolPropertyGetter>().FirstOrDefault(p => p.Name == "AlsoRemoveFromCaptiveFaction");
+                    fail += Check($"{who}: freed, he {(r.beats[wb].person?.ignored == true ? "stays ignored (keeps" : "can be shot (leaves")} CaptiveFaction",
+                                  $"AlsoRemoveFromCaptiveFaction {ar?.Data.ToString() ?? "unset"}",
+                                  $"AlsoRemoveFromCaptiveFaction {(r.beats[wb].person?.ignored != true)}");
                     // By line ORDER, not whitespace: the psc writer prefixes every line, so an indent-exact needle would miss.
                     var bl = body.Split('\n').Select(s => s.Trim()).ToList();
                     int gi = bl.FindIndex(s => s.StartsWith("If ") && s.EndsWith("IsInFaction(BoundFaction)"));
