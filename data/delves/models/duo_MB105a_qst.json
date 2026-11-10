@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E266F:Starfield.esm",
-  "MissionBoardDescription": "Private Contract. Return a jettisoned crew container to its freighter over \u003CAlias=TargetPlanetLocation\u003E. Payment on contract completion.",
+  "MissionBoardDescription": "We dumped our hold over \u003CAlias=TargetPlanetLocation\u003E to outrun raiders. The company\u0027s salvagers can have the freight. One container is the crew\u0027s. Bring it back.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

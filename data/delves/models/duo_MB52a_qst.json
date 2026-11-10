@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E2671:Starfield.esm",
-  "MissionBoardDescription": "Administrative Contract. Destroy the prohibited texts at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E. An armed crew holds the site. Do not copy them. Payment on contract completion.",
+  "MissionBoardDescription": "Banned texts at the \u003CAlias=TargetLocation\u003E, the third cache this year. To be burned, not read. An armed crew is holding them.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

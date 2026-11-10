@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E2671:Starfield.esm",
-  "MissionBoardDescription": "Settlement Contract. Help the outpost at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E hold against the Ashta. Payment on contract completion.",
+  "MissionBoardDescription": "Our outpost at the \u003CAlias=TargetLocation\u003E sits in Ashta country, and a pack has been testing it for a week. The Rangers have their hands full.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [
@@ -662,7 +662,7 @@
           "Name": "GateFaction",
           "Flags": 1,
           "Object": {
-            "Form": "010B30:starfield.esm",
+            "Form": "010B30:Starfield.esm",
             "Alias": -1,
             "Unused": 0
           }

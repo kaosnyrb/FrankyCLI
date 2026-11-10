@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E2671:Starfield.esm",
-  "MissionBoardDescription": "Private Contract. Close the three open vents at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E. Payment on contract completion.",
+  "MissionBoardDescription": "Three vents are leaking at the \u003CAlias=TargetLocation\u003E, and nobody will go in to close them while it\u0027s full of gas.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

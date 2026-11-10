@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E2671:Starfield.esm",
-  "MissionBoardDescription": "Tracker\u0027s Alliance Contract. Crimson Fleet raiders hold the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E. Remove their leader. Payment on contract completion.",
+  "MissionBoardDescription": "Crimson Fleet are stripping the \u003CAlias=TargetLocation\u003E for parts. Their leader keeps them there. Take the leader down and the rest won\u0027t hold it.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

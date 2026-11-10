@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "000885:du_overtime.esm",
-  "MissionBoardDescription": "Private Contract. Restore the navigation satellite over \u003CAlias=TargetPlanetLocation\u003E. Payment on contract completion.",
+  "MissionBoardDescription": "The navigation satellite over \u003CAlias=TargetPlanetLocation\u003E has stopped broadcasting, and ships coming through are flying blind. Get it running again.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E2671:Starfield.esm",
-  "MissionBoardDescription": "Settlement Contract. A survey detail is pinned down at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E, one wounded. Reach them. Payment on contract completion.",
+  "MissionBoardDescription": "Our survey detail walked into the \u003CAlias=TargetLocation\u003E thinking it was empty. It wasn\u0027t. Two got out. One is still inside, wounded.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

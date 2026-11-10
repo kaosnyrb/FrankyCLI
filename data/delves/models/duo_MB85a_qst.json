@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "14C1B3:Starfield.esm",
-  "MissionBoardDescription": "Settlement Contract. Bring a med pack to an injured miner at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E. Payment on contract completion.",
+  "MissionBoardDescription": "A miner at the \u003CAlias=TargetLocation\u003E hurt himself and won\u0027t come in to the clinic. Take him a med pack.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

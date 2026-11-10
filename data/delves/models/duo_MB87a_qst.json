@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "14C1B3:Starfield.esm",
-  "MissionBoardDescription": "Settlement Contract. Treat the wounded settlers at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E. Bring three med packs. Payment on contract completion.",
+  "MissionBoardDescription": "Raiders hit the \u003CAlias=TargetLocation\u003E and left three of our people wounded. We have nobody who knows what they\u0027re doing. Bring three med packs.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E2671:Starfield.esm",
-  "MissionBoardDescription": "Private Contract. Raiders at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E hold our belongings. Recover a brass compass and return it to \u003CAlias=FinalLocation\u003E. Payment on contract completion.",
+  "MissionBoardDescription": "Raiders took our hold to the \u003CAlias=TargetLocation\u003E. Keep the rest. We want one thing: a brass compass from Earth. Bring it to the \u003CAlias=FinalLocation\u003E.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

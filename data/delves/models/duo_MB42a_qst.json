@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E2671:Starfield.esm",
-  "MissionBoardDescription": "Shipping Firm Contract. Recover our crate from the wreck at the \u003CAlias=TargetLocation\u003E and deliver it to the \u003CAlias=FinalLocation\u003E. Spacers present. Payment on delivery.",
+  "MissionBoardDescription": "Our freighter came down at the \u003CAlias=TargetLocation\u003E with a crate aboard, and Spacers got to the wreck first. Get the crate to the \u003CAlias=FinalLocation\u003E.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E2671:Starfield.esm",
-  "MissionBoardDescription": "Private Contract. Build a pressure regulator for the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E and deliver it by hand. Payment on delivery.",
+  "MissionBoardDescription": "Our water reclaimer at the \u003CAlias=TargetLocation\u003E lost its pressure regulator, and nobody out here can make one. We\u0027ve been rationing water since. Build one.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

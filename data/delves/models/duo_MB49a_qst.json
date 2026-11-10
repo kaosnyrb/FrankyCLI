@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E2671:Starfield.esm",
-  "MissionBoardDescription": "Private Contract. Restart the air scrubbers at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E. Creatures have settled round the controls. Payment on contract completion.",
+  "MissionBoardDescription": "Something has settled round the controls at the \u003CAlias=TargetLocation\u003E, and the crew pulled back. Restart the air scrubbers. They\u0027ve been off since.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

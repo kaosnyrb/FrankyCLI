@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E2671:Starfield.esm",
-  "MissionBoardDescription": "Settlement Contract. One of our pilots is held at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E. Recover her alive. Payment on contract completion.",
+  "MissionBoardDescription": "One of our pilots set down near the \u003CAlias=TargetLocation\u003E to fix a fault, and whoever holds it took her inside. She\u0027s alive. Bring her out.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

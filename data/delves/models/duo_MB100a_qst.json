@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "3514C4:Starfield.esm",
-  "MissionBoardDescription": "Settlement Contract. Hunt the Elder Ashta at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E. Payment on contract completion.",
+  "MissionBoardDescription": "An Elder Ashta has made the \u003CAlias=TargetLocation\u003E its ground, and it doesn\u0027t run. Bigger and older than the rest. We want it put down.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

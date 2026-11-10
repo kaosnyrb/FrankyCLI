@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E2671:Starfield.esm",
-  "MissionBoardDescription": "Private Contract. Clear the predators from the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E. Payment on contract completion.",
+  "MissionBoardDescription": "The \u003CAlias=TargetLocation\u003E went quiet three days ago. Its neighbours hear animals there at night. Clear them out.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

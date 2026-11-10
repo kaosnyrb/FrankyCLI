@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E266F:Starfield.esm",
-  "MissionBoardDescription": "Private Contract. Recover the satellite part from the freighter wreckage over \u003CAlias=TargetPlanetLocation\u003E and fit it. Payment on contract completion.",
+  "MissionBoardDescription": "The freighter bringing a part for the navigation satellite over \u003CAlias=TargetPlanetLocation\u003E broke up in orbit. Find the part in the wreckage and fit it.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

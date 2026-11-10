@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "3514C2:Starfield.esm",
-  "MissionBoardDescription": "Private Contract. Shut down the runaway plant at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E. Payment on contract completion.",
+  "MissionBoardDescription": "Our crew fled the \u003CAlias=TargetLocation\u003E and somebody else moved in. The plant\u0027s still running and won\u0027t last much longer. Shut it down.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [
@@ -646,7 +646,7 @@
           "Name": "GateFaction",
           "Flags": 1,
           "Object": {
-            "Form": "010B30:starfield.esm",
+            "Form": "010B30:Starfield.esm",
             "Alias": -1,
             "Unused": 0
           }

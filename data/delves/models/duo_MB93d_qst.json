@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E2670:Starfield.esm",
-  "MissionBoardDescription": "Private Contract. Take a message from the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E to someone in the same system. Payment on completion.",
+  "MissionBoardDescription": "An old salvager at the \u003CAlias=TargetLocation\u003E wants a message carried to his former partner in this system. They haven\u0027t spoken in years.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

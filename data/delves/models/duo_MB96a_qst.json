@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "14C1B3:Starfield.esm",
-  "MissionBoardDescription": "Settlement Contract. Clear a drop pod raid at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E, then treat the wounded. Bring med packs. Payment on contract completion.",
+  "MissionBoardDescription": "Pods are dropping on the \u003CAlias=TargetLocation\u003E again, second time this week. Three of ours are hurt from the last. Clear the crews, then the three.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

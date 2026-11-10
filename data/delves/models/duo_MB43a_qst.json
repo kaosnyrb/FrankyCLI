@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E2671:Starfield.esm",
-  "MissionBoardDescription": "Private Contract. Recover the survey data from the evacuated \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E. Payment on contract completion.",
+  "MissionBoardDescription": "We left the \u003CAlias=TargetLocation\u003E in a hurry and a season\u0027s survey data is locked on the site terminal. The code is written down somewhere there.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [

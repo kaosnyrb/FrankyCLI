@@ -16,7 +16,7 @@
   },
   "QuestType": "1E2D30:Starfield.esm",
   "MissionTypeKeyword": "1E2671:Starfield.esm",
-  "MissionBoardDescription": "Private Contract. Destroy the Ecliptic scanner array at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E. Payment on completion.",
+  "MissionBoardDescription": "The Ecliptic scanner array at the \u003CAlias=TargetLocation\u003E is running, logging every hauler we load. It needs to stop running. All of it.",
   "Timestamp": 0,
   "Unknown": 0,
   "Keywords": [
