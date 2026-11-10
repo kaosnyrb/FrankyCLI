@@ -10,7 +10,8 @@
     "THE FACTION AND PEN-NAME TEST ON THE RUNAWAY PLANT, b OF b TO d. The same job, beats and numbers as MB55a; the site is pinned to one faction (Ecliptic, the mercenaries) and the plant's voice is written from one pen name. Letter variants, so if one works it is a real replay copy.",
     "PEN NAME: home-office office/pennames/vance-okonkwo-reyes.json. Her heat checks do not apply; her voice does. Plant Control in Vance's register: a system that gives orders in full sentences and puts the authority in what it sets (cleared, hold, stand down). No irony; its one long sentence is a list of steps.",
     "Words name the occupiers by role, never by faction name (his ruling: thugs, mercenaries, never the proper name). Journals are the player's record, first person, per Frances on MB55a (2026-10-29).",
-    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB55b.md): ship, all five findings taken. Forced pick answered YES: the plant tells the guards itself, as protocol it will not break, which keeps MB55a's machine-that-tells-everyone without the irony Vance forbids."
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB55b.md): ship, all five findings taken. Forced pick answered YES: the plant tells the guards itself, as protocol it will not break, which keeps MB55a's machine-that-tells-everyone without the irony Vance forbids.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Shut down the runaway plant at the <Place> on <Planet>, held by mercenaries. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -28,7 +29,7 @@
   "prose": {
     "name": "Repairs: Runaway Plant on <Planet>",
     "briefing": "The <Place> has been running since its crew fled, and the mercenaries guarding it now are paid to keep it that way. Its owners say it won't last much longer.",
-    "card": "Private Contract. Shut down the runaway plant at the <Place> on <Planet>, held by mercenaries. Payment on contract completion."
+    "card": "Mercenaries are paid to keep the <Place> running since our crew fled. It won't last much longer. Shut the plant down."
   },
   "beats": [
     {

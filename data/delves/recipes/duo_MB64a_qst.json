@@ -9,7 +9,8 @@
   "_note": [
     "THE MINING FAMILY, 9: THE RIGGED CLAIM. Plan: home-office office/projects/delves/mining-family.md.",
     "EVE's booby-trapped asteroids, as mines on the approach. One use at the beacon with mines placed round it.",
-    "STAND-IN: place.mines (count, radius round the beacon). Vanilla's own frag mines; Eliza's field. Pay: med."
+    "STAND-IN: place.mines (count, radius round the beacon). Vanilla's own frag mines; Eliza's field. Pay: med.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Administrative Contract. Reset the claim beacon at the <Place> on <Planet>. The approach is mined. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -30,7 +31,7 @@
   "prose": {
     "name": "Danger: Rigged Claim at the <Place> on <Planet>",
     "briefing": "Whoever held the claim at the <Place> mined the approach on the way out. The registrar wants its claim beacon reset.",
-    "card": "Administrative Contract. Reset the claim beacon at the <Place> on <Planet>. The approach is mined. Payment on contract completion."
+    "card": "Whoever held the claim at the <Place> mined the approach on the way out. The claim beacon needs resetting."
   },
   "beats": [
     {

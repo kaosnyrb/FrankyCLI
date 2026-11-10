@@ -10,7 +10,8 @@
     "THE COMBAT FAMILY, 5: WORLDS COLLIDE. Plan: home-office office/projects/delves/combat-family.md.",
     "EVE's Worlds Collide: two factions already fighting when you arrive, and you pick a side by whose boss you kill.",
     "STAND-INS: place.feud (two lists spawned hostile to each other) and the second boss; choose endings on a board",
-    "are Eliza's to confirm. Voiced lines name neither faction. Pay: hard."
+    "are Eliza's to confirm. Voiced lines name neither faction. Pay: hard.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Two crews are fighting over the <Place> on <Planet>. End it. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -32,7 +33,7 @@
   "prose": {
     "name": "Strike: Feud at the <Place> on <Planet>",
     "briefing": "Two crews are fighting over the <Place>. The settlement nearby doesn't care who wins, as long as it ends.",
-    "card": "Private Contract. Two crews are fighting over the <Place> on <Planet>. End it. Payment on contract completion."
+    "card": "Two crews are fighting over the <Place>. We don't care who wins, as long as it ends."
   },
   "beats": [
     {

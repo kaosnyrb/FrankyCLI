@@ -9,7 +9,8 @@
   "_note": [
     "PLAYER'S PART (2026-11-04, his ask, beats written on his 'sounds good, write the beats'): clear the workings: the crew pulled out when creatures moved into the dig, and the ore crate is in among them. 32a's clear, the predator list, then the haul.",
     "THE MINING FAMILY, 3: THE ORE RUN. Plan: home-office office/projects/delves/mining-family.md.",
-    "EVE's courier mission with ore in the crate: 41a's haul, dig to refinery. Buildable today. Pay: easy."
+    "EVE's courier mission with ore in the crate: 41a's haul, dig to refinery. Buildable today. Pay: easy.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Clear the creatures out of the <Place> and deliver its raw ore to the <SecondPlace>. Payment on delivery.\""
   ],
   "place": {
     "theme": {
@@ -36,7 +37,7 @@
   "prose": {
     "name": "Hauling: Raw Ore on <Planet>",
     "briefing": "The crew at the <Place> pulled out when creatures moved into the workings, and left a crate of raw ore behind. The refinery at the <SecondPlace> has been idle without it.",
-    "card": "Private Contract. Clear the creatures out of the <Place> and deliver its raw ore to the <SecondPlace>. Payment on delivery."
+    "card": "Creatures drove the crew out of the <Place>, and they left a crate of raw ore. Our refinery at the <SecondPlace> is idle without it."
   },
   "beats": [
     {

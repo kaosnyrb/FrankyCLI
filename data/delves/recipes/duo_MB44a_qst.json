@@ -19,7 +19,8 @@
     "Pay: med on the hand-over (README rule 3, capped at med).",
     "Voices: not yet heard in game; his ear decides. No names or places in any voiced line.",
     "2026-10-23 (Eliza): place.second.settlement now builds on a board (city01a played first), so the WHAT DOES NOT BUILD",
-    "lines above are history. The talk is at New Atlantis's AutofillGeneric01; see the beat's _at."
+    "lines above are history. The talk is at New Atlantis's AutofillGeneric01; see the beat's _at.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Raiders at the <Place> on <Planet> hold our belongings. Recover a brass compass and return it to <SecondPlace>. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -39,7 +40,7 @@
   "prose": {
     "name": "Recovery: Family Compass on <Planet>",
     "briefing": "Raiders hit a freighter carrying a family's belongings to <SecondPlace> and took the hold to the <Place>. The family only wants one thing back: a brass compass that came from Earth.",
-    "card": "Private Contract. Raiders at the <Place> on <Planet> hold our belongings. Recover a brass compass and return it to <SecondPlace>. Payment on contract completion."
+    "card": "Raiders took our hold to the <Place>. Keep the rest. We want one thing: a brass compass from Earth. Bring it to the <SecondPlace>."
   },
   "beats": [
     {

@@ -14,7 +14,8 @@
     "and keep the occupiers off it while it winds down. The verb is STOP.",
     "Industrial dungeons (LocTypeDungeon_ThemeIndustrial, 20 per Eliza's count), vanilla interiors that carry the",
     "delve markers today. Every word holds in any of them: nothing names the site, the faction or what the plant",
-    "made; everything a line points at is placed. Pay: med, capped."
+    "made; everything a line points at is placed. Pay: med, capped.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Shut down the runaway plant at the <Place> on <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -30,7 +31,7 @@
   "prose": {
     "name": "Repairs: Runaway Plant on <Planet>",
     "briefing": "The <Place> has been running since its crew fled and somebody else moved in, and its owners say it won't last much longer.",
-    "card": "Private Contract. Shut down the runaway plant at the <Place> on <Planet>. Payment on contract completion."
+    "card": "Our crew fled the <Place> and somebody else moved in. The plant's still running and won't last much longer. Shut it down."
   },
   "beats": [
     {

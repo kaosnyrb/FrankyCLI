@@ -10,7 +10,8 @@
     "THE MEDIC FAMILY, 1: THE SHIP'S DOCTOR. Plan: home-office office/projects/delves/medic-family.md.",
     "Register: the warm common job. You are the one who turns up.",
     "A ship in orbit with a sick crew; a supply drop nearby. Take the drop across. 39a's shape (pickup, deliver) in",
-    "orbit. STAND-IN: the ship model (39a's shuttle ask). Nearly buildable today. Pay: med."
+    "orbit. STAND-IN: the ship model (39a's shuttle ask). Nearly buildable today. Pay: med.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Deliver a medical supply drop to a ship in orbit over <Planet>. Payment on delivery.\""
   ],
   "place": {
     "altitude": 32.0
@@ -18,7 +19,7 @@
   "prose": {
     "name": "Rescue: Sick Crew over <Planet>",
     "briefing": "A ship in orbit over <Planet> has half its crew down sick and nothing left in its medical locker. There's a supply drop nearby.",
-    "card": "Settlement Contract. Deliver a medical supply drop to a ship in orbit over <Planet>. Payment on delivery."
+    "card": "Half our crew are down sick in orbit over <Planet>, and our medical locker is empty. There's a supply drop nearby. Please bring it."
   },
   "beats": [
     {

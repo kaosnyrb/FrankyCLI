@@ -10,7 +10,8 @@
     "THE MEET-UP: a new board family, his idea. The job is turning up; the story is who is there and what they want. Talks at a placed person are built, so most letters need nothing new.",
     "Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
     "LETTER c: THE WRONG PERSON: her brother is there instead. She got the job she wanted for six years and shipped out this morning, and sent him because she had promised.",
-    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93c.md): ship, findings 1-4 and 6 taken, 5 kept. Forced pick answered YES: the letter can be drawn again, so the brother no longer dates her leaving ('this morning' is gone)."
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93c.md): ship, findings 1-4 and 6 taken, 5 kept. Forced pick answered YES: the letter can be drawn again, so the brother no longer dates her leaving ('this morning' is gone).",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Meet a contact at the <Place> on <Planet> and collect a parcel from her. Payment on completion.\""
   ],
   "place": {
     "theme": {
@@ -26,7 +27,7 @@
   "prose": {
     "name": "Recovery: Rhona's Parcel",
     "briefing": "A contact called Rhona arranged to meet at the <Place> and hand over a parcel.",
-    "card": "Private Contract. Meet a contact at the <Place> on <Planet> and collect a parcel from her. Payment on completion."
+    "card": "A contact called Rhona will meet you at the <Place> with a parcel. Collect it from her."
   },
   "beats": [
     {

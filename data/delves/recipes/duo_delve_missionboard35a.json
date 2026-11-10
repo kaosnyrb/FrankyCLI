@@ -15,7 +15,8 @@
     "ONE THING NOT BUILT, Eliza's: a pickup whose item is an AUDIO BOOK (today a pickup clones a MiscItem). Stand-in:",
     "beats[0].slate.audio, four entries. The Delves' speech already builds the same radio-scene shape (AliasID -4).",
     "IT PLAYS WHEN OPENED, vanilla's way (his 2026-10-27 05:50: \"it should play when you open it\"). Never on pickup.",
-    "Not narrow, so roles only aloud: no names, places, factions or currency. Pay: med, capped."
+    "Not narrow, so roles only aloud: no names, places, factions or currency. Pay: med, capped.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover a prospector's diary from the <Place> and bring it to the <SecondPlace>. Payment on delivery.\""
   ],
   "place": {
     "theme": {
@@ -44,7 +45,7 @@
   "prose": {
     "name": "Recovery: Prospector's Diary on <Planet>",
     "briefing": "A prospector ran from her claim at the <Place> when strangers turned up, and left her diary behind. She's at the <SecondPlace> now, and she'd like it back.",
-    "card": "Private Contract. Recover a prospector's diary from the <Place> and bring it to the <SecondPlace>. Payment on delivery."
+    "card": "I ran from my claim at the <Place> when strangers turned up, and left my diary. I'm at the <SecondPlace> now. I'd like it back."
   },
   "beats": [
     {

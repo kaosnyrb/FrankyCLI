@@ -10,7 +10,8 @@
     "THE MINING FAMILY, 7: CLAIM JUMPERS. Plan: home-office office/projects/delves/mining-family.md.",
     "EVE's guarded asteroid: the fight is the toll for the ore. A clear, then MB56a's counted bring. Cobalt, mid-rarity.",
     "Same two stand-ins as MB56a. Pay: hard, placeholder.",
-    "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): bring.item is InorgUncommonCobalt; the objective is short, no place and no count (the build appends (n/N)); pinned to Akila, which carries cobalt."
+    "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): bring.item is InorgUncommonCobalt; the objective is short, no place and no count (the build appends (n/N)); pinned to Akila, which carries cobalt.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Clear the claim jumpers from the <Place> on <Planet>, then deliver ten units of cobalt. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -27,7 +28,7 @@
   "prose": {
     "name": "Strike: Claim Jumpers on <Planet>",
     "briefing": "Claim jumpers are sitting on a cobalt claim at the <Place>. Its holder wants them gone and ten units of cobalt delivered.",
-    "card": "Private Contract. Clear the claim jumpers from the <Place> on <Planet>, then deliver ten units of cobalt. Payment on contract completion."
+    "card": "Claim jumpers are sitting on my cobalt claim at the <Place>. Clear them off, then bring me ten units of cobalt."
   },
   "beats": [
     {

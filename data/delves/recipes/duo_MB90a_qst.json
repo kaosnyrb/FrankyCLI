@@ -12,7 +12,8 @@
     "PARTS IT USES: place.second remote + fill late + system same (Eliza's OT-03, proven on duo_delvetest_l1), so the card and first journal never name the second site. Fitting is a deliver with replace and a placed model, MB65a's shape.",
     "⛔ PART IT NEEDS, NOT BUILT: the SAME person talking twice (beats 3 and 5 are Ivo). No recipe does it today. Written here as the same person object on both talks; how it is spelled is Eliza's. Letter 2026-10-31.",
     "Voices borrowed until his ear casts them. No names or places in any voiced line. Pay: med on the return talk.",
-    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB90a.md): rework, findings 1-5 and 7 taken (the mast is half dead: it sends, it cannot hear, which is what an amplifier fixes; the light became a hum because the model's light is unverified); 6 kept as she allowed. Forced pick answered YES: the player tells him the relay heard him, so his return line 'I'll tell her myself, now I can' pays her nights of listening."
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB90a.md): rework, findings 1-5 and 7 taken (the mast is half dead: it sends, it cannot hear, which is what an amplifier fixes; the light became a hum because the model's light is unverified); 6 kept as she allowed. Forced pick answered YES: the player tells him the relay heard him, so his return line 'I'll tell her myself, now I can' pays her nights of listening.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Take a signal amplifier from the <Place> on <Planet> and fit it at a site in the same system. Payment on completion.\""
   ],
   "place": {
     "theme": {
@@ -46,7 +47,7 @@
   "prose": {
     "name": "Repairs: Signal Amplifier on <Planet>",
     "briefing": "A relay station at the <Place> is being stripped for parts, and its keeper wants her last good signal amplifier fitted at a site in this system whose comms have been failing for weeks.",
-    "card": "Private Contract. Take a signal amplifier from the <Place> on <Planet> and fit it at a site in the same system. Payment on completion."
+    "card": "My relay at the <Place> is being stripped. My last good signal amplifier should go to a site in this system whose comms keep failing."
   },
   "beats": [
     {

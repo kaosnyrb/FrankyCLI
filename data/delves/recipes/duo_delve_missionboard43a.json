@@ -15,7 +15,8 @@
     "Letters are the replay lever that exists: a b and c later, same job, other words, live side by side.",
     "A HOLD ALONE, no machine to start first: four drafts already open on 'start a machine, then hold' (09a, 16a, 19a, 22a)",
     "and that shape should not be the only way a fight arrives. Unproven: whether a board hold can be beat 1 with nothing",
-    "before it; the lint is the first test. Residents alive, defended. Pay: med."
+    "before it; the lint is the first test. Residents alive, defended. Pay: med.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Hold the <Place> on <Planet> against raiders. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -31,7 +32,7 @@
   "prose": {
     "name": "Defense: Raiders at the <Place> on <Planet>",
     "briefing": "Raiders have hit the <Place> twice this month and they're due back. The people there would like someone with a gun.",
-    "card": "Settlement Contract. Hold the <Place> on <Planet> against raiders. Payment on contract completion."
+    "card": "Raiders have hit the <Place> twice this month, and they're due back. We'd like someone with a gun."
   },
   "beats": [
     {

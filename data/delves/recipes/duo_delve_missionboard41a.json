@@ -15,7 +15,8 @@
     "vibes', and his Goods Package (localcargo_qst09a) is the specimen. No pay promised in a voiced line (10-27).",
     "Letters are the replay lever that exists: a b and c later, same job, other words, live side by side.",
     "MB42a's shape without the guards: a pickup on the site's own storage spot (REContainerLocRef, replace, his",
-    "10-27 'make it a better marker'), a deliver at a second place, which on a board is a request. Pay: easy."
+    "10-27 'make it a better marker'), a deliver at a second place, which on a board is a request. Pay: easy.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Gather a split crate of spare parts at the <Place> and deliver them to the <SecondPlace>. Payment on delivery.\""
   ],
   "place": {
     "theme": {
@@ -42,7 +43,7 @@
   "prose": {
     "name": "Hauling: Spare Parts on <Planet>",
     "briefing": "A crate of spare parts split open when it was dropped at the <Place>, and the <SecondPlace> has been short of them for a week.",
-    "card": "Private Contract. Gather a split crate of spare parts at the <Place> and deliver them to the <SecondPlace>. Payment on delivery."
+    "card": "A crate of spare parts split open when it was dropped at the <Place>. Gather them up. The <SecondPlace> has been short a week."
   },
   "beats": [
     {

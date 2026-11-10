@@ -11,7 +11,8 @@
     "SPACE CARGO 3: THE TOLL. A crew is stopping haulers and taking one container from each. Destroy the ship, recover",
     "what it took. THE HOOK: the radio is a hauler who has paid them twice, and his own container is in their hold.",
     "NEEDS 28a's UNBUILT PIECES: a hostile SHIP as a defeat target, and recover on a board. Eliza's to price, once for both.",
-    "Every space Delve before these was a satellite (5 of 7); these are about CARGO, his ask. Markers: General01/06/02 and TravelB02 are 51a's and 30a's; which a cell offers is Eliza's. No names, places, factions or currency in a voiced line. Pay: med, capped, placeholder."
+    "Every space Delve before these was a satellite (5 of 7); these are about CARGO, his ask. Markers: General01/06/02 and TravelB02 are 51a's and 30a's; which a cell offers is Eliza's. No names, places, factions or currency in a voiced line. Pay: med, capped, placeholder.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Destroy the toll ship over <Planet> and recover the cargo it took. Payment on contract completion.\""
   ],
   "place": {
     "altitude": 32.0,
@@ -20,7 +21,7 @@
   "prose": {
     "name": "Strike: Toll Ship over <Planet>",
     "briefing": "A crew in orbit over <Planet> has been stopping haulers and taking one container from each as a toll. They keep everything they've taken in their own hold.",
-    "card": "Private Contract. Destroy the toll ship over <Planet> and recover the cargo it took. Payment on contract completion."
+    "card": "A crew over <Planet> takes one container from every hauler as a toll. Destroy their ship and bring our cargo back."
   },
   "beats": [
     {

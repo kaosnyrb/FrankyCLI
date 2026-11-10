@@ -10,7 +10,8 @@
     "PLAYER'S PART (2026-11-04, his ask, beats written on his 'sounds good, write the beats'): get the core out of a site somebody else holds: the site's own guards first (as MB54a's dungeon), then lifting the core sets off the alarm and their friends come for it, two waves held at the core.",
     "THE INDUSTRY FAMILY, 2: THE DATA CORE. Plan: home-office office/projects/delves/industry-family.md.",
     "EVE's relic hacking that feeds invention: a research core out of a hostile site, to a lab. Buildable today",
-    "(pickup, deliver at a second place). Pay: med."
+    "(pickup, deliver at a second place). Pay: med.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover a data core from the <Place> and deliver it to the lab at the <SecondPlace>. Payment on delivery.\""
   ],
   "place": {
     "theme": {
@@ -36,7 +37,7 @@
   "prose": {
     "name": "Recovery: Data Core on <Planet>",
     "briefing": "A lab at the <SecondPlace> wants a data core recovered from the <Place>, unread.",
-    "card": "Private Contract. Recover a data core from the <Place> and deliver it to the lab at the <SecondPlace>. Payment on delivery."
+    "card": "We want a data core recovered from the <Place> and brought to our lab at the <SecondPlace>. Do not read it."
   },
   "beats": [
     {

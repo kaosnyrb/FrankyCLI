@@ -20,7 +20,8 @@
     "(2) beats[0].bring: a deliver that takes N of a resource the PLAYER brings, not an item the mission gave him.",
     "His MB11 to MB13 finish on an item put into a container at the site: the prior art for the handover.",
     "Not narrow, so roles only aloud. The ore's name is an item, not a place or faction, so the voice may say it. Pay: med, placeholder.",
-    "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): bring.item is InorgUncommonTungsten; the objective is short, no place and no count (the build appends (n/N)); pinned to Bolivar I, which carries tungsten."
+    "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): bring.item is InorgUncommonTungsten; the objective is short, no place and no count (the build appends (n/N)); pinned to Bolivar I, which carries tungsten.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Deliver ten units of tungsten to the <Place> on <Planet>. Payment on delivery.\""
   ],
   "place": {
     "theme": {
@@ -38,7 +39,7 @@
   "prose": {
     "name": "Requisition: Tungsten for the <Place> on <Planet>",
     "briefing": "The crew at the <Place> are builders, not miners, and they've run out of tungsten. There's tungsten on <Planet>, and they don't mind if I dig it or buy it.",
-    "card": "Private Contract. Deliver ten units of tungsten to the <Place> on <Planet>. Payment on delivery."
+    "card": "We're builders, not miners, and we've run out of tungsten. There's tungsten on <Planet>. Dig it or buy it, we don't mind. Ten units."
   },
   "beats": [
     {

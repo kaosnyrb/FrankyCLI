@@ -11,7 +11,8 @@
     "Register: the warm common job. You are the one who turns up.",
     "A medic working on a patient in a field treatment bay; people outside want what's in her cabinet. Talk, then",
     "hold. MB55a's shape with a person. Buildable today (the bay model is a stand-in). Pay: med.",
-    "FIXED 2026-11-10: 'defend: 1' pointed at the talk, which leaves no object to defend; dropped, so the hold holds the bay (defending a person is not a part, and his rule: missions must not rely on NPCs). Her greeting no longer opens on the 'X? Good.' tic; her hello asks if you're the help, the greeting answers it. _bio added. Her voice line changed: one revoice."
+    "FIXED 2026-11-10: 'defend: 1' pointed at the talk, which leaves no object to defend; dropped, so the hold holds the bay (defending a person is not a part, and his rule: missions must not rely on NPCs). Her greeting no longer opens on the 'X? Good.' tic; her hello asks if you're the help, the greeting answers it. _bio added. Her voice line changed: one revoice.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Protect the medic's treatment bay at the <Place> on <Planet> until her patient is stable. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -28,7 +29,7 @@
   "prose": {
     "name": "Defense: Treatment Bay at the <Place> on <Planet>",
     "briefing": "A medic at the <Place> is mid-operation in a field treatment bay, and someone outside wants the painkillers in her cabinet.",
-    "card": "Settlement Contract. Protect the medic's treatment bay at the <Place> on <Planet> until her patient is stable. Payment on contract completion."
+    "card": "I'm mid-operation at the <Place>, and people outside want the painkillers in my cabinet. Keep them out until my patient is stable."
   },
   "beats": [
     {

@@ -11,7 +11,8 @@
     "Register: the warm common job. You are the one who turns up.",
     "One patient: a miner who won't come in. The med pack IS the job: the closing prompt takes one from him.",
     "old Overtime's 'Deliver 3 Med Pack' did. Pay: easy.",
-    "GIVE BUILT 2026-11-10 (OT-34, Eliza 11-09): the build prefixes '[Give Med Pack] ', so the prompt is trimmed to 'Hold still.' (silent player line, no revoice). A player with no med pack cannot finish, so the broadcast says to bring one. Pay: easy."
+    "GIVE BUILT 2026-11-10 (OT-34, Eliza 11-09): the build prefixes '[Give Med Pack] ', so the prompt is trimmed to 'Hold still.' (silent player line, no revoice). A player with no med pack cannot finish, so the broadcast says to bring one. Pay: easy.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Bring a med pack to an injured miner at the <Place> on <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -27,7 +28,7 @@
   "prose": {
     "name": "Rescue: House Call at the <Place> on <Planet>",
     "briefing": "A miner at the <Place> hurt his hand and won't come in to the clinic. Someone has to take him a med pack.",
-    "card": "Settlement Contract. Bring a med pack to an injured miner at the <Place> on <Planet>. Payment on contract completion."
+    "card": "A miner at the <Place> hurt himself and won't come in to the clinic. Take him a med pack."
   },
   "beats": [
     {

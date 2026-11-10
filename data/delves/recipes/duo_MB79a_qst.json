@@ -9,7 +9,8 @@
   "_note": [
     "THE COMBAT FAMILY, 7: THE BURNER. Plan: home-office office/projects/delves/combat-family.md.",
     "EVE's burner missions: one elite enemy, alone, better than you. A duel, not a gang. A defeat with no gang.",
-    "STAND-IN: the target and its level offset (beats[0].level). Pay: hard."
+    "STAND-IN: the target and its level offset (beats[0].level). Pay: hard.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Tracker's Alliance Contract. Eliminate a lone, highly dangerous fighter at the <Place> on <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -24,7 +25,7 @@
   "prose": {
     "name": "Bounty: The Lone Gun at the <Place> on <Planet>",
     "briefing": "One fighter at the <Place>, alone, and better than most who've tried. The bounty office wants them gone.",
-    "card": "Tracker's Alliance Contract. Eliminate a lone, highly dangerous fighter at the <Place> on <Planet>. Payment on contract completion."
+    "card": "One fighter at the <Place>, alone, and better than everyone who's tried so far."
   },
   "beats": [
     {

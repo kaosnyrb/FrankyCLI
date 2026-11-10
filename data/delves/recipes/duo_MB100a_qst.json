@@ -13,7 +13,8 @@
     "WORDS, Jessica 2026-11-02 on Eliza's hand-off: the name 'Elder Ashta' kept (it reads as a rank among Ashta, and stays clear of vanilla's Alpha). The build makes it ONE size step up (small to normal), so the words say bigger and older than the rest, never giant.",
     "NARROW, as MB98a: pinned to Akila, so Ashta and the Rangers are said aloud (his exemption, 2026-10-26).",
     "NAMED 2026-11-02 on his \"give e1 and e2 proper numbers\": duo_delvetest_e2 moved to a draft id, then gen_delve name. The two are one family (the Elder Ashta), so e1 took e2's number with the next letter.",
-    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB100a.md): rework, findings 1-4 taken, 5-6 kept. Forced pick answered YES: it lives at the site (the defeat places it there at any hour), so the call says it walked in at midday and hasn't left. The close keeps the night lore instead of saying the night is safer."
+    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB100a.md): rework, findings 1-4 taken, 5-6 kept. Forced pick answered YES: it lives at the site (the defeat places it there at any hour), so the call says it walked in at midday and hasn't left. The close keeps the night lore instead of saying the night is safer.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Hunt the Elder Ashta at the <Place> on <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -30,7 +31,7 @@
   "prose": {
     "name": "Hunt: Elder Ashta at the <Place> on <Planet>",
     "briefing": "An Ashta bigger and older than the rest has made the <Place> its ground, and it doesn't run from anyone. The Rangers want it put down.",
-    "card": "Settlement Contract. Hunt the Elder Ashta at the <Place> on <Planet>. Payment on contract completion."
+    "card": "An Elder Ashta has made the <Place> its ground, and it doesn't run. Bigger and older than the rest. We want it put down."
   },
   "beats": [
     {

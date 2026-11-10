@@ -10,7 +10,8 @@
     "THE MINING FAMILY, 5: THE CREW UNDER ATTACK. Plan: home-office office/projects/delves/mining-family.md.",
     "EVE's mining fleet with its support, turned round: here the miners are the support. A hold with allies (43a's field).",
     "STAND-IN: allies.list. Civ_StrongArm are the Strong Arm company's workers (his 10-29); whether a worker list",
-    "fights as allies, or an armed list stands in, is Eliza's. Pay: med."
+    "fights as allies, or an armed list stands in, is Eliza's. Pay: med.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Help the mining crew at the <Place> on <Planet> hold off an attack. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -26,7 +27,7 @@
   "prose": {
     "name": "Defense: Mining Crew at the <Place> on <Planet>",
     "briefing": "The mining crew at the <Place> are about to be attacked and want someone who fights for a living to stand with them.",
-    "card": "Settlement Contract. Help the mining crew at the <Place> on <Planet> hold off an attack. Payment on contract completion."
+    "card": "We're a mining crew at the <Place>, and we're about to be attacked. We want someone who fights for a living to stand with us."
   },
   "beats": [
     {

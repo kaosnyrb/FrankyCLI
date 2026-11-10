@@ -10,7 +10,8 @@
     "THE FACTION AND PEN-NAME TEST ON THE RUNAWAY PLANT, c OF b TO d. The same job, beats and numbers as MB55a; the site is pinned to one faction (CrimsonFleet, the pirates) and the plant's voice is written from one pen name. Letter variants, so if one works it is a real replay copy.",
     "PEN NAME: home-office office/pennames/ruth-pargeter.json. Her heat checks do not apply; her voice does. Plant Control in Ruth's register: level, dry, a record with counts in it. It reports and never decides; the joke is the count, and the voice never says what the count means.",
     "Words name the occupiers by role, never by faction name (his ruling: thugs, mercenaries, never the proper name). Journals are the player's record, first person, per Frances on MB55a (2026-10-29).",
-    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB55c.md): rework, all four findings taken. Forced pick answered NO: the three variants are different plants, not one model sharing firmware, so this one has its own opener, estimate and day count (55a 31, 55b 19, 55c 26, 55d 44)."
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB55c.md): rework, all four findings taken. Forced pick answered NO: the three variants are different plants, not one model sharing firmware, so this one has its own opener, estimate and day count (55a 31, 55b 19, 55c 26, 55d 44).",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Shut down the runaway plant at the <Place> on <Planet>, held by pirates. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -28,7 +29,7 @@
   "prose": {
     "name": "Repairs: Runaway Plant on <Planet>",
     "briefing": "The <Place> has been running since its crew fled and pirates moved in, and they keep cancelling the shutdown. Its owners say it won't last much longer.",
-    "card": "Private Contract. Shut down the runaway plant at the <Place> on <Planet>, held by pirates. Payment on contract completion."
+    "card": "Pirates moved into the <Place> after our crew fled, and they keep cancelling the shutdown. It won't last much longer. Shut it down."
   },
   "beats": [
     {

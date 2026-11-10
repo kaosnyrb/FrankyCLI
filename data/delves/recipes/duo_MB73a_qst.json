@@ -8,7 +8,8 @@
   "source": "his 2026-10-29 22:08 \"ok now lets look at eve combat missions\", then 22:09 \"yup\"",
   "_note": [
     "THE COMBAT FAMILY, 1: THE CALL FOR HELP. Plan: home-office office/projects/delves/combat-family.md.",
-    "EVE's trigger ship: the kill you came for starts the real fight. A defeat, then a hold. Buildable today. Pay: hard."
+    "EVE's trigger ship: the kill you came for starts the real fight. A defeat, then a hold. Buildable today. Pay: hard.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Tracker's Alliance Contract. Eliminate the crew boss at the <Place> on <Planet>. Expect reinforcements. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -23,7 +24,7 @@
   "prose": {
     "name": "Bounty: Crew Boss at the <Place> on <Planet>",
     "briefing": "A crew boss at the <Place> has a price on their head, and their crew will call for help the moment the boss goes down.",
-    "card": "Tracker's Alliance Contract. Eliminate the crew boss at the <Place> on <Planet>. Expect reinforcements. Payment on contract completion."
+    "card": "A crew boss at the <Place> has a price on their head. Their crew will call for help the moment the boss goes down."
   },
   "beats": [
     {

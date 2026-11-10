@@ -10,7 +10,8 @@
     "THE INDUSTRY FAMILY, 7: THE RESEARCH JOB. Plan: home-office office/projects/delves/industry-family.md.",
     "EVE's research and invention. Complete a research project at a lab (his outpost's or anyone's), then upload it.",
     "STAND-IN: beat type 'research' (done when a named project completes). Whether a condition exists for it is",
-    "Eliza's first question. The upload is a use at the site, so the call plays on arrival. Pay: med."
+    "Eliza's first question. The upload is a use at the site, so the call plays on arrival. Pay: med.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Complete a research project and upload the results at the <Place> on <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -26,7 +27,7 @@
   "prose": {
     "name": "Requisition: Research for the <Place> on <Planet>",
     "briefing": "The lab at the <Place> is behind on a research project and will pay someone with a research lab to finish it.",
-    "card": "Private Contract. Complete a research project and upload the results at the <Place> on <Planet>. Payment on contract completion."
+    "card": "Our lab at the <Place> is behind on a research project. If you have a research lab, finish it and upload the results."
   },
   "beats": [
     {

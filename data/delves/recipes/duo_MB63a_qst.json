@@ -10,7 +10,8 @@
     "THE MINING FAMILY, 8: THE BAD ORE. Plan: home-office office/projects/delves/mining-family.md.",
     "EVE's mercoxit, which poisons the space round it when mined. The best seam sits in a hazard zone.",
     "His 21:51: \"we can place hazard zones\". STAND-IN: place.hazard (kind, radius at the seam). Eliza's to name.",
-    "Pay: med."
+    "Pay: med.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover a sample from the toxic seam at the <Place> on <Planet>. Suit up. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -33,7 +34,7 @@
   "prose": {
     "name": "Danger: Toxic Seam at the <Place> on <Planet>",
     "briefing": "The richest seam at the <Place> sits in a pocket of something toxic. An assayer wants a sample from it anyway.",
-    "card": "Private Contract. Recover a sample from the toxic seam at the <Place> on <Planet>. Suit up. Payment on contract completion."
+    "card": "The richest seam at the <Place> sits in something toxic. I want a sample from it anyway. Suit up."
   },
   "beats": [
     {

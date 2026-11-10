@@ -11,7 +11,8 @@
     "NARROW, as MB98a: pinned to Akila, so Ashta, Akila and the Rangers are said aloud (his exemption, 2026-10-26).",
     "JAEGER: the words use Akila's lore (planets/akila.md and planets.json): never enough Rangers for the ground; the crew got out. No interiority for the animals (the July Jaeger fix): nobody says what the Elder wants, only what it does.",
     "Named persons are Essential since 11-02, so the Ranger cannot die. A different Ranger from 100b's Tamar Hesketh, and no line refers to her: Overtime is single-encounter.",
-    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB100c.md): ship, findings 2, 3, 5 taken, 4, 6, 7 kept. Forced pick answered YES: residents may stand at a built site (abandoned-only drew 4 sites in the whole corpus), so the crew went: the pack has 'moved in', and the crew prompt became his memory of an old one out past the walls. The radio sends him to the middle."
+    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB100c.md): ship, findings 2, 3, 5 taken, 4, 6, 7 kept. Forced pick answered YES: residents may stand at a built site (abandoned-only drew 4 sites in the whole corpus), so the crew went: the pack has 'moved in', and the crew prompt became his memory of an old one out past the walls. The radio sends him to the middle.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Clear the Ashta pack and its Elder from the <Place> on <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -29,7 +30,7 @@
   "prose": {
     "name": "Hunt: Elder Ashta and Its Pack at the <Place> on <Planet>",
     "briefing": "An Elder Ashta and its pack have moved into the <Place>. A Ranger is waiting on the edge of the site for whoever answers.",
-    "card": "Settlement Contract. Clear the Ashta pack and its Elder from the <Place> on <Planet>. Payment on contract completion."
+    "card": "An Elder Ashta and its pack have moved into the <Place>. A Ranger is waiting on the edge of the site."
   },
   "speaker": {
     "name": "Silas Brannock",

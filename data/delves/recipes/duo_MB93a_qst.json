@@ -10,7 +10,8 @@
     "THE MEET-UP: a new board family, his idea. The job is turning up; the story is who is there and what they want. Talks at a placed person are built, so most letters need nothing new.",
     "Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
     "LETTER a: THE HANDOVER: the contact hands over a sealed case with a condition the client was never told; the client's one line on delivery is that it is lighter than promised. TIE Fighter's second briefing, done through a person.",
-    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93a.md): rework, findings 1-4 taken, 5 and 6 kept. Forced pick answered NO: the client learns it is short, never why; the contact refuses to send word, so the player makes no promise the job cannot keep."
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93a.md): rework, findings 1-4 taken, 5 and 6 kept. Forced pick answered NO: the client learns it is short, never why; the contact refuses to send word, so the player makes no promise the job cannot keep.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Meet a contact at the <Place> on <Planet> and take what they hand over to a drop in the same system. Payment on delivery.\""
   ],
   "place": {
     "theme": {
@@ -40,7 +41,7 @@
   "prose": {
     "name": "Hauling: Sealed Case to the Client",
     "briefing": "A client wants something collected from a contact at the <Place> and left at a drop in the same system.",
-    "card": "Private Contract. Meet a contact at the <Place> on <Planet> and take what they hand over to a drop in the same system. Payment on delivery."
+    "card": "A contact at the <Place> has something for me. Collect it and leave it at the drop in this system."
   },
   "beats": [
     {

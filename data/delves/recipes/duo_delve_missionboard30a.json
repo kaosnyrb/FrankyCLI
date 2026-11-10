@@ -19,7 +19,8 @@
     "'contraband' and 'an armed crew'. 'Their base' and 'their ships' are only said because both are placed.",
     "The broadcast plays at 1500 m (the template's). Closing line on the radio, on the last container. Pay: med, capped.",
     "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, its own note: med, capped.",
-    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, its own note: med, capped."
+    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, its own note: med, capped.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Destroy the contraband containers in orbit over <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "dressing": [
@@ -38,7 +39,7 @@
   "prose": {
     "name": "Strike: Contraband Stockpile over <Planet>",
     "briefing": "An armed crew is sitting on a stockpile of contraband in cargo containers beside their base over <Planet>. Station security doesn't want it sold.",
-    "card": "Private Contract. Destroy the contraband containers in orbit over <Planet>. Payment on contract completion."
+    "card": "An armed crew is sitting on contraband in containers beside their base over <Planet>. We don't want it sold. Destroy the containers."
   },
   "beats": [
     {

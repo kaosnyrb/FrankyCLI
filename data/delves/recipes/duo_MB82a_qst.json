@@ -12,7 +12,8 @@
     "REWORKED 2026-10-30, his ruling: no escort (\"yeah escort missions are meh, don't want them\", confirming 10-24 \"missions should not rely on NPCs doing stuff correctly\"). The captives stay put; he holds the ground. Plan OT-70.",
     "REWORKED 2026-11-10 on OT-9A: three kneeling captives, each a talk; Set Free or the closing line frees them. A captive may never be spoken to, so nothing the mission needs lives only in their lines: the broadcast and the journal carry it. Fixed order (talks do not group). ASKED of Eliza: the freed captives stay ignored by the attackers through the hold (a dial), since nothing fails if they die. Pay: hard.",
     "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB82a.md): ship, findings 1-4 taken, 5-7 kept. Forced pick answered YES: the waves are the crew coming back for the three. Her step-3 radio warning cannot sit on a talk (a talk carries no say), so it moved into the Elder's call with the families: every player hears both before the first captive.",
-    "REWRITE 2026-11-10 on his play ('worked as expected, needs a slight rewrite tho in that the last line makes it sound like you should stay', via Eliza): the hold's close dropped 'Stay with them.' and now hands the job back: 'We'll bring them home from here.' One line to revoice."
+    "REWRITE 2026-11-10 on his play ('worked as expected, needs a slight rewrite tho in that the last line makes it sound like you should stay', via Eliza): the hold's close dropped 'Stay with them.' and now hands the job back: 'We'll bring them home from here.' One line to revoice.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Free the captives held at the <Place> on <Planet> and protect them until help arrives. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -27,7 +28,7 @@
   "prose": {
     "name": "Rescue: Captives at the <Place> on <Planet>",
     "briefing": "A crew at the <Place> is holding three people from a nearby settlement. Their families want them home.",
-    "card": "Settlement Contract. Free the captives held at the <Place> on <Planet> and protect them until help arrives. Payment on contract completion."
+    "card": "A crew at the <Place> is holding three of ours, and their families want them home. Free them and keep them alive until we arrive."
   },
   "beats": [
     {

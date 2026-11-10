@@ -10,7 +10,8 @@
     "THE COMBAT FAMILY, 6: THE COMMANDER. Plan: home-office office/projects/delves/combat-family.md.",
     "EVE's commander spawn: a small chance a named commander joins and drops better loot. NOTHING in the words",
     "mentions it, so every line holds whether he comes or not: the surprise is the game's, never the writer's.",
-    "STAND-IN: enemies.commander (chance, target, loot). Pay: med."
+    "STAND-IN: enemies.commander (chance, target, loot). Pay: med.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Clear the gang dug in at the <Place> on <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -25,7 +26,7 @@
   "prose": {
     "name": "Strike: Dug-In Gang at the <Place> on <Planet>",
     "briefing": "A gang has dug in at the <Place>. The watch wants them cleared out.",
-    "card": "Private Contract. Clear the gang dug in at the <Place> on <Planet>. Payment on contract completion."
+    "card": "A gang has dug in at the <Place>. Clear them out."
   },
   "beats": [
     {

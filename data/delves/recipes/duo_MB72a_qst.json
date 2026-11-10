@@ -12,7 +12,8 @@
     "EVE's career line ends with you building your own frigate. A bulk load that needs a bigger hold than most:",
     "fit one at a shipyard and come back. The most ambitious of the family.",
     "STAND-IN: beats[0].ship.cargoMin (the pickup waits until his ship's hold is at least that big). Eliza's.",
-    "Pay: hard, placeholder."
+    "Pay: hard, placeholder.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Haul a bulk load from the <Place> to the <SecondPlace>. Large cargo hold required. Payment on delivery.\""
   ],
   "place": {
     "theme": {
@@ -39,7 +40,7 @@
   "prose": {
     "name": "Hauling: Bulk Load on <Planet>",
     "briefing": "A bulk load at the <Place> is too big for most holds. The dispatcher wants it at the <SecondPlace> and doesn't mind waiting while I refit.",
-    "card": "Private Contract. Haul a bulk load from the <Place> to the <SecondPlace>. Large cargo hold required. Payment on delivery."
+    "card": "A bulk load at the <Place> is too big for most holds. We want it at the <SecondPlace>. We can wait while you refit."
   },
   "beats": [
     {

@@ -15,7 +15,8 @@
     "are the danger, not a set piece.",
     "Industrial dungeons (LocTypeDungeon_ThemeIndustrial, 20 per Eliza's count), vanilla interiors that carry the",
     "delve markers today. Every word holds in any of them: nothing names the site, the faction or what the plant",
-    "made; everything a line points at is placed. Pay: med, capped."
+    "made; everything a line points at is placed. Pay: med, capped.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Close the three open vents at the <Place> on <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -31,7 +32,7 @@
   "prose": {
     "name": "Repairs: Gas Leak on <Planet>",
     "briefing": "The <Place> is leaking from three vents, and nobody will go in to close them while it's full of gas.",
-    "card": "Private Contract. Close the three open vents at the <Place> on <Planet>. Payment on contract completion."
+    "card": "Three vents are leaking at the <Place>, and nobody will go in to close them while it's full of gas."
   },
   "beats": [
     {

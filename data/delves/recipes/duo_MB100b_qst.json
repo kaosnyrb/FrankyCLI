@@ -16,7 +16,8 @@
     "THE RANGER IN PERSON, his 14:37: she stands on the outskirts (RETravelA1) and briefs him in a talk; the broadcast went, since she says it to his face. Named persons are Essential since 11-02 (bc14c45), so the hunt cannot kill her.",
     "NARROWER, his 14:39: 'Tamar Hesketh knows this is an Ashta den. She knows what planet shes on.' So she names the den, Akila, Akila City and the crangon it hunts (Elk Crangon, Akila's prey in fauna.md). The lore (fandom): Ashta hunt at night, and a miner once came back to Akila City swearing a house-sized one killed his crew; she tells it as a city rumour, so nothing promises this one is that big (the build makes it one size step up). Five prompts, so her count is not the four his ear caught as formulaic.",
     "NAMED 2026-11-02 on his \"give e1 and e2 proper numbers\": duo_delvetest_e1 moved to a draft id, then gen_delve name. The two are one family (the Elder Ashta), so e1 took e2's number with the next letter.",
-    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB100b.md): ship, findings 1-5 taken, 7-8 kept. Forced pick answered YES: the same Tamar briefs every draw, so 'every few years' became 'now and then'. No line gives the animal a feeling; the walls are now voiced."
+    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB100b.md): ship, findings 1-5 taken, 7-8 kept. Forced pick answered YES: the same Tamar briefs every draw, so 'every few years' became 'now and then'. No line gives the animal a feeling; the walls are now voiced.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Hunt the Elder Ashta at the <Place> on <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -34,7 +35,7 @@
   "prose": {
     "name": "Hunt: Elder Ashta at the <Place> on <Planet>",
     "briefing": "An Ashta bigger and older than the rest has taken the <Place> for its den, out past Akila City's walls. The Rangers want it put down before it starts coming in.",
-    "card": "Settlement Contract. Hunt the Elder Ashta at the <Place> on <Planet>. Payment on contract completion."
+    "card": "An Elder Ashta has denned at the <Place>, out past the city walls. Put it down before it starts coming in."
   },
   "beats": [
     {

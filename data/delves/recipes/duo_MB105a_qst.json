@@ -12,7 +12,8 @@
     "abandon ship, and it went out with the cargo. FITTED TO boardspace (pickup then deliver, its two-beat limit):",
     "the captain sends you for the crew's container only; the company's salvagers can fetch the freight.",
     "NEEDS ONE NEW OBJECT: a ship or station static to DELIVER to in orbit (every orbit deliver so far is a satellite). One ask covers 36a, 37a and 39a; the model string is a stand-in (the lint does not catch it), picked by him or Kim.",
-    "Every space Delve before these was a satellite (5 of 7); these are about CARGO, his ask. Markers: General01/06/02 and TravelB02 are 51a's and 30a's; which a cell offers is Eliza's. No names, places, factions or currency in a voiced line. Pay: med, capped, placeholder."
+    "Every space Delve before these was a satellite (5 of 7); these are about CARGO, his ask. Markers: General01/06/02 and TravelB02 are 51a's and 30a's; which a cell offers is Eliza's. No names, places, factions or currency in a voiced line. Pay: med, capped, placeholder.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Return a jettisoned crew container to its freighter over <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "altitude": 32.0,
@@ -21,7 +22,7 @@
   "prose": {
     "name": "Recovery: Jettisoned Hold over <Planet>",
     "briefing": "A freighter dumped her hold in orbit over <Planet> to outrun raiders. Her captain is leaving the freight to the company's salvagers and wants one container back, the one that belongs to the crew.",
-    "card": "Private Contract. Return a jettisoned crew container to its freighter over <Planet>. Payment on contract completion."
+    "card": "We dumped our hold over <Planet> to outrun raiders. The company's salvagers can have the freight. One container is the crew's. Bring it back."
   },
   "beats": [
     {
@@ -43,7 +44,6 @@
       "objective": "Return the crew's container to the freighter",
       "journal": "A freighter over <Planet> dumped her hold to outrun raiders, and the crew's own belongings went with it. I brought their container home.",
       "model": "Meshes\\ccs\\stroudfreighter01.nif",
-      "_model": "Eliza, 2026-11-03, his 'ok 36a': vanilla's Stroud freighter (Freighter_B_Stroud_Venture02_Template, 02C1CA) converted whole by ship_kitbash.py, collision base-only (one body, his ship passes through the rest), about 31 x 56 x 13.5 m. Source: Overtime kitbash/ships/stroudfreighter01/. The first converted ship placed in game: his look is the probe.",
       "_model": "A freighter static in orbit, not boardable. His or Kim's pick.",
       "name": "Damaged Freighter",
       "message": {

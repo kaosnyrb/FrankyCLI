@@ -12,7 +12,8 @@
     "medicine, and it's still there. Pull her manifest (a use on her data beacon, the satellite model as remote_qst20a's",
     "medicine, and it's still there. FITTED TO boardspace: take the crate, hand it to the colony's shuttle; the manifest",
     "reveal rides on the pickup's journal and say.",
-    "Every space Delve before these was a satellite (5 of 7); these are about CARGO, his ask. Markers: General01/06/02 and TravelB02 are 51a's and 30a's; which a cell offers is Eliza's. No names, places, factions or currency in a voiced line. Pay: med, capped, placeholder."
+    "Every space Delve before these was a satellite (5 of 7); these are about CARGO, his ask. Markers: General01/06/02 and TravelB02 are 51a's and 30a's; which a cell offers is Eliza's. No names, places, factions or currency in a voiced line. Pay: med, capped, placeholder.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover the cargo from the derelict freighter over <Planet> for the colony below. Payment on contract completion.\""
   ],
   "place": {
     "altitude": 32.0,
@@ -21,7 +22,7 @@
   "prose": {
     "name": "Recovery: Ghost Freighter over <Planet>",
     "briefing": "A freighter has been drifting dark in orbit over <Planet> for months. Nobody ever came back for her, and the colony below would like to know why.",
-    "card": "Private Contract. Recover the cargo from the derelict freighter over <Planet> for the colony below. Payment on contract completion."
+    "card": "A freighter has drifted dark over <Planet> for months, and nobody came back for her. Bring her cargo down. We'd like to know why."
   },
   "beats": [
     {

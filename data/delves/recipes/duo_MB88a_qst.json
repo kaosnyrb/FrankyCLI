@@ -9,7 +9,8 @@
   "_note": [
     "THE MEDIC FAMILY, 6: MEDEVAC. Plan: home-office office/projects/delves/medic-family.md.",
     "Register: the warm common job. You are the one who turns up.",
-    "REWORKED 2026-10-30, his ruling: no escort. He is splinted where he lies and the ship comes to him. Plan OT-70."
+    "REWORKED 2026-10-30, his ruling: no escort. He is splinted where he lies and the ship comes to him. Plan OT-70.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Treat an injured worker at the <Place> on <Planet> and call in a medevac. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -25,7 +26,7 @@
   "prose": {
     "name": "Rescue: Medevac at the <Place> on <Planet>",
     "briefing": "A worker at the <Place> broke his leg and needs a medevac. The crew can't spare anyone.",
-    "card": "Settlement Contract. Treat an injured worker at the <Place> on <Planet> and call in a medevac. Payment on contract completion."
+    "card": "A worker at the <Place> broke his leg and needs a medevac, and the crew can't spare anyone. See to him and call it in."
   },
   "beats": [
     {

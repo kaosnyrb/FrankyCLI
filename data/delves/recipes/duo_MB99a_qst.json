@@ -11,7 +11,8 @@
     "Target PCM_Cheyenne_Akila_Mossgnath (Starfield.esm 23CAE8, Unaggressive in the record; a defeat spawns its target at Aggression 2, so it will charge).",
     "No farm theme is known to the office, so no line points at crops on screen: the planting is spoken of, never shown.",
     "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB99a.md): ship, findings 1-2 taken, 3-5 kept. Forced pick answered NO: the defeat places the Mossgnath alone, so 'the big one' went.",
-    "JAEGER PASS 2026-11-02, his 'If we know exactly where and what we can get sexy with it': the words use the planet's own lore (fandom, read the same day). Frances's 11-02 findings are kept; only lines were added."
+    "JAEGER PASS 2026-11-02, his 'If we know exactly where and what we can get sexy with it': the words use the planet's own lore (fandom, read the same day). Frances's 11-02 findings are kept; only lines were added.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Put down the Mossgnath at the <Place> on <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -30,7 +31,7 @@
   "prose": {
     "name": "Hunt: Mossgnath at the <Place> on <Planet>",
     "briefing": "A Mossgnath has wandered in off the plains at the <Place> and won't be driven back out. On Akila, a grazer that size near a homestead brings the Ashta after it. The homesteader wants it put down before it eats the rest of the season's planting.",
-    "card": "Settlement Contract. Put down the Mossgnath at the <Place> on <Planet>. Payment on contract completion."
+    "card": "A Mossgnath has wandered in at the <Place> and won't be driven off. A grazer that size brings the Ashta after it. Put it down."
   },
   "speaker": {
     "name": "Homesteader",

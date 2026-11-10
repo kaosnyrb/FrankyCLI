@@ -11,7 +11,8 @@
     "THE MEET-UP: a new board family, his idea. The job is turning up; the story is who is there and what they want. Talks at a placed person are built, so most letters need nothing new.",
     "Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
     "LETTER b: THE NO-SHOW: nobody is there. Her kit is, with a note: her sister's having a baby and she has the only ship. Nothing hostile, nothing explained further.",
-    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93b.md): ship, findings 1-3 taken (the initial dropped, so a repeat draw is not the same person twice); 4 holds because the objective marker is the kit itself. Forced pick answered NO: the broker learns of the absence as the player did."
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93b.md): ship, findings 1-3 taken (the initial dropped, so a repeat draw is not the same person twice); 4 holds because the objective marker is the kit itself. Forced pick answered NO: the broker learns of the absence as the player did.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Meet a contact at the <Place> on <Planet> and collect the kit she is bringing. Payment on completion.\""
   ],
   "place": {
     "theme": {
@@ -27,7 +28,7 @@
   "prose": {
     "name": "Recovery: The Contact's Kit",
     "briefing": "A broker has arranged a meeting with a contact at the <Place>, who is bringing a kit for the client.",
-    "card": "Private Contract. Meet a contact at the <Place> on <Planet> and collect the kit she is bringing. Payment on completion."
+    "card": "I've arranged a meeting at the <Place>. The contact is bringing a kit for my client. Collect it."
   },
   "beats": [
     {

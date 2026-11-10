@@ -14,7 +14,8 @@
     "NEEDS A SECOND ORBIT: the station is over another planet. boardspace has one orbit today, so the deliver sits in the",
     "same cell until Eliza prices a second (her 'an ORBIT third place may sit beside a second request').",
     "NEEDS ONE NEW OBJECT: a ship or station static to DELIVER to in orbit (every orbit deliver so far is a satellite). One ask covers 36a, 37a and 39a; the model string is a stand-in (the lint does not catch it), picked by him or Kim.",
-    "Every space Delve before these was a satellite (5 of 7); these are about CARGO, his ask. Markers: General01/06/02 and TravelB02 are 51a's and 30a's; which a cell offers is Eliza's. No names, places, factions or currency in a voiced line. Pay: med, capped, placeholder."
+    "Every space Delve before these was a satellite (5 of 7); these are about CARGO, his ask. Markers: General01/06/02 and TravelB02 are 51a's and 30a's; which a cell offers is Eliza's. No names, places, factions or currency in a voiced line. Pay: med, capped, placeholder.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Deliver a sealed container over <Planet> to the receiving station unopened. Payment on contract completion.\""
   ],
   "place": {
     "altitude": 32.0,
@@ -23,7 +24,7 @@
   "prose": {
     "name": "Hauling: Sealed Container over <Planet>",
     "briefing": "A sealed container is waiting in orbit over <Planet> for a courier who won't ask what's in it. The receiving end is a station.",
-    "card": "Private Contract. Deliver a sealed container over <Planet> to the receiving station unopened. Payment on contract completion."
+    "card": "A sealed container is waiting in orbit over <Planet> for a courier who won't ask what's in it. Take it to the station unopened."
   },
   "beats": [
     {

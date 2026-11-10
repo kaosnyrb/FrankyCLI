@@ -12,7 +12,8 @@
     "any order, and hold the room while the system bleeds. The verb is FIX.",
     "Industrial dungeons (LocTypeDungeon_ThemeIndustrial, 20 per Eliza's count), vanilla interiors that carry the",
     "delve markers today. Every word holds in any of them: nothing names the site, the faction or what the plant",
-    "made; everything a line points at is placed. Pay: med, capped."
+    "made; everything a line points at is placed. Pay: med, capped.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Repair the two coolant pumps at the <Place> on <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -28,7 +29,7 @@
   "prose": {
     "name": "Repairs: Coolant Pumps on <Planet>",
     "briefing": "The <Place> can't restart until its coolant pumps are fixed. The engineer has sent me her toolbox.",
-    "card": "Private Contract. Repair the two coolant pumps at the <Place> on <Planet>. Payment on contract completion."
+    "card": "The <Place> can't restart until its two coolant pumps are fixed. I've sent my toolbox."
   },
   "beats": [
     {

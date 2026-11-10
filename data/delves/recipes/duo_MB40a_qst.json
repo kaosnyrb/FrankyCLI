@@ -2,7 +2,10 @@
   "schema": 2,
   "id": "duo_MB40a_qst",
   "template": "board",
-  "_note": "PROOF RECIPE for the board template (his 2026-10-14: 'full sep missionboard template', clone duo_MB28a_qst, deal into _duo_MB_MissionNode_test, 'yeah that remote05a'). The GAMEPLAY and every word are duo_artifact_remote_planet_qst24a's, Jessica's since 2026-10-14 11:0x; the CARD is Jessica's since 2026-10-14 14:2x, in the board's issuer voice (bethesda 33 section 4: a posting, 'we' and 'ours' never 'I', short, the stock closer 'Payment on contract completion.'): the site's operator posting the job. The place is the board base's own request, so place.remote is absent; the theme is 05a's (infrastructure), so the build drops MB28a's NonHostile_Civilian requirement and says so.",
+  "_note": [
+    "PROOF RECIPE for the board template (his 2026-10-14: 'full sep missionboard template', clone duo_MB28a_qst, deal into _duo_MB_MissionNode_test, 'yeah that remote05a'). The GAMEPLAY and every word are duo_artifact_remote_planet_qst24a's, Jessica's since 2026-10-14 11:0x; the CARD is Jessica's since 2026-10-14 14:2x, in the board's issuer voice (bethesda 33 section 4: a posting, 'we' and 'ours' never 'I', short, the stock closer 'Payment on contract completion.'): the site's operator posting the job. The place is the board base's own request, so place.remote is absent; the theme is 05a's (infrastructure), so the build drops MB28a's NonHostile_Civilian requirement and says so.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Tracker's Alliance Contract. Crimson Fleet raiders hold the <Place> on <Planet>. Remove their leader. Payment on contract completion.\""
+  ],
   "author": "eliza",
   "source": "duo_artifact_remote_planet_qst24a (gameplay and words); duo_MB28a_qst (the board base)",
   "place": {
@@ -18,7 +21,7 @@
   "prose": {
     "name": "Bounty: Crimson Fleet Raiders on <Planet>",
     "briefing": "Crimson Fleet have moved in on the <Place> and are stripping its machinery for parts. Their leader is the one keeping them there. If I take the leader down, the rest won't hold the site for long.",
-    "card": "Tracker's Alliance Contract. Crimson Fleet raiders hold the <Place> on <Planet>. Remove their leader. Payment on contract completion."
+    "card": "Crimson Fleet are stripping the <Place> for parts. Their leader keeps them there. Take the leader down and the rest won't hold it."
   },
   "speaker": {
     "name": "Site Crew",

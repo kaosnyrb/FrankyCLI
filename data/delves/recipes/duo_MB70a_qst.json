@@ -10,7 +10,8 @@
     "THE INDUSTRY FAMILY, 6: LAUNCH TO ORBIT. Plan: home-office office/projects/delves/industry-family.md.",
     "EVE's planetary industry, which ships goods off the surface through customs offices. An abandoned extractor",
     "full of product: take it, deliver it to a shuttle in orbit.",
-    "STAND-IN: place.third.orbit on a board (29a's proposed field, Eliza's). Pay: med."
+    "STAND-IN: place.third.orbit on a board (29a's proposed field, Eliza's). Pay: med.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover the output from the abandoned extractor at the <Place> on <Planet> and deliver it to orbit. Payment on delivery.\""
   ],
   "place": {
     "theme": {
@@ -31,7 +32,7 @@
   "prose": {
     "name": "Hauling: Extractor Output on <Planet>",
     "briefing": "An extractor at the <Place> kept running after its crew left, and nobody has emptied it since. A shipping agent wants the output brought up to orbit.",
-    "card": "Private Contract. Recover the output from the abandoned extractor at the <Place> on <Planet> and deliver it to orbit. Payment on delivery."
+    "card": "The extractor at the <Place> kept running after its crew left. Nobody has emptied it. Bring the output up to orbit."
   },
   "beats": [
     {

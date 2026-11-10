@@ -15,7 +15,8 @@
     "Written to the delve marker set (outside entrance, centre, item markers, boss, wounded) on his ruling, so the",
     "lint pool is EMPTY on military sites until the markers are on them (missionboard06a's note says why).",
     "Every word holds at any military site: nothing names the site, the faction or the weather; everything the lines",
-    "point at is placed. Pay: med, capped."
+    "point at is placed. Pay: med, capped.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover a soldier's discharge papers from the <Place> on <Planet>. Discretion appreciated. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -31,7 +32,7 @@
   "prose": {
     "name": "Recovery: Deserter's Papers on <Planet>",
     "briefing": "A soldier walked out of the <Place> and won't go back in. Her discharge papers are still in there.",
-    "card": "Private Contract. Recover a soldier's discharge papers from the <Place> on <Planet>. Discretion appreciated. Payment on contract completion."
+    "card": "I walked out of the <Place> and I'm not going back in. My discharge papers are still there. Quietly, please."
   },
   "beats": [
     {

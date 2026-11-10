@@ -12,7 +12,8 @@
     "REWRITTEN 2026-10-26 after his play: every site in the pool has residents, and on his idea they now die when the first",
     "call plays (place.residents \"dead\"). So the people are already dead when he arrives, and the predators are among them.",
     "The client is a neighbour who lost contact, not a resident going home. Restrained on purpose: nobody describes the bodies.",
-    "One species, as a Hunt. Pay: med, capped."
+    "One species, as a Hunt. Pay: med, capped.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Clear the predators from the <Place> on <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "habitability": true,
@@ -33,7 +34,7 @@
   "prose": {
     "name": "Infestation: Predators at the <Place> on <Planet>",
     "briefing": "The <Place> went quiet three days ago. Its neighbours have heard animals there at night since.",
-    "card": "Private Contract. Clear the predators from the <Place> on <Planet>. Payment on contract completion."
+    "card": "The <Place> went quiet three days ago. Its neighbours hear animals there at night. Clear them out."
   },
   "beats": [
     {

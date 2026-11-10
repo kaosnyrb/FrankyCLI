@@ -13,7 +13,8 @@
     "owed to, and the foreman is the last thing you meet. The talk is at the entrance, so he is never inside.",
     "Industrial dungeons (LocTypeDungeon_ThemeIndustrial, 20 per Eliza's count), vanilla interiors that carry the",
     "delve markers today. Every word holds in any of them: nothing names the site, the faction or what the plant",
-    "made; everything a line points at is placed. Pay: med, capped."
+    "made; everything a line points at is placed. Pay: med, capped.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover the workers' payroll from the <Place> on <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -29,7 +30,7 @@
   "prose": {
     "name": "Recovery: Workers' Payroll on <Planet>",
     "briefing": "When the occupiers took the <Place>, they took the workers' payroll with it. The foreman is waiting outside.",
-    "card": "Private Contract. Recover the workers' payroll from the <Place> on <Planet>. Payment on contract completion."
+    "card": "The occupiers took the workers' payroll when they took the <Place>. I'm the foreman. I'll be waiting outside."
   },
   "beats": [
     {

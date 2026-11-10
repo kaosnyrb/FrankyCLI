@@ -10,7 +10,8 @@
     "THE COMBAT FAMILY, 9: THE TURRETS. Plan: home-office office/projects/delves/combat-family.md.",
     "EVE's stasis towers: defences that shoot first. Three turrets in any order, then whoever's left.",
     "STAND-IN: real firing turrets (the model is a placeholder; a destroy on a static does not shoot back). Same",
-    "family as MB64a's mines. Pay: hard."
+    "family as MB64a's mines. Pay: hard.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Destroy the turrets at the <Place> on <Planet> and clear the crew. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -25,7 +26,7 @@
   "prose": {
     "name": "Strike: Gun Emplacements at the <Place> on <Planet>",
     "briefing": "The crew at the <Place> has put up automated turrets. The watch wants the guns down and the crew cleared.",
-    "card": "Private Contract. Destroy the turrets at the <Place> on <Planet> and clear the crew. Payment on contract completion."
+    "card": "The crew at the <Place> has put up automated turrets. Take the guns down and clear the crew."
   },
   "beats": [
     {

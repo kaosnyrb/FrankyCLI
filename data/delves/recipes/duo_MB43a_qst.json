@@ -12,7 +12,8 @@
     "Step one is OUTSIDE on purpose: a board's broadcast plays when he comes within 250 m of step one's marker, and",
     "that distance check through a load door is unproven, so the call should not depend on it.",
     "No who: a dungeon brings its own occupants, and they are why the crew left. Pay med, under his cap.",
-    "Beat one is a box and no radio, beats two and three are radio and no box: his either-or."
+    "Beat one is a box and no radio, beats two and three are radio and no box: his either-or.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover the survey data from the evacuated <Place> on <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -29,7 +30,7 @@
   "prose": {
     "name": "Recovery: Survey Data on <Planet>",
     "briefing": "A survey crew pulled out of the <Place> in a hurry and left a season's data locked on their site terminal. The lead wrote the code down somewhere.",
-    "card": "Private Contract. Recover the survey data from the evacuated <Place> on <Planet>. Payment on contract completion."
+    "card": "We left the <Place> in a hurry and a season's survey data is locked on the site terminal. The code is written down somewhere there."
   },
   "beats": [
     {

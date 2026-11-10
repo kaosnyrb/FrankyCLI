@@ -21,7 +21,8 @@
     "TOKEN: <Planet> in the title, card, briefing and objective assumes the orbit's planet resolves. On a board the target",
     "planet resolves FROM PrimaryRef; here PrimaryRef is the satellite in the space cell. If <Planet> will not fill, Eliza says",
     "which token will and I reword.",
-    "Pay: med, capped (his 10-19 'for now')."
+    "Pay: med, capped (his 10-19 'for now').",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Restore the navigation satellite over <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "altitude": 27.673,
@@ -30,7 +31,7 @@
   "prose": {
     "name": "Repairs: Navigation Satellite over <Planet>",
     "briefing": "A navigation satellite over <Planet> has stopped broadcasting, and ships passing through have been flying blind.",
-    "card": "Private Contract. Restore the navigation satellite over <Planet>. Payment on contract completion."
+    "card": "The navigation satellite over <Planet> has stopped broadcasting, and ships coming through are flying blind. Get it running again."
   },
   "beats": [
     {

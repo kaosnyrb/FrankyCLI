@@ -20,7 +20,8 @@
     "⚠ The board's arrival hook measures to STEP ONE's marker, and step one here is a craft with no marker. The broadcast",
     "should play when he nears the person instead. Eliza's.",
     "Ingredients and pay RULED 2026-11-02 (his \"sounds fine\", plan OT-77): 4 Aluminum, 2 Copper, 2 Sealant; pay med, capped.",
-    "LINT 2026-10-26 without the craft stand-in: two fatals, both the craft step (recover on a board; no marker). The talk half and the place pass. talk_check: one ? (How have you managed?), set up by the card and radio's rationing, kept."
+    "LINT 2026-10-26 without the craft stand-in: two fatals, both the craft step (recover on a board; no marker). The talk half and the place pass. talk_check: one ? (How have you managed?), set up by the card and radio's rationing, kept.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Build a pressure regulator for the <Place> on <Planet> and deliver it by hand. Payment on delivery.\""
   ],
   "place": {
     "theme": {
@@ -36,7 +37,7 @@
   "prose": {
     "name": "Fabrication: Pressure Regulator for the <Place> on <Planet>",
     "briefing": "The water reclaimer at the <Place> lost its pressure regulator. Nobody out there can make another, and they've been rationing water since.",
-    "card": "Private Contract. Build a pressure regulator for the <Place> on <Planet> and deliver it by hand. Payment on delivery."
+    "card": "Our water reclaimer at the <Place> lost its pressure regulator, and nobody out here can make one. We've been rationing water since. Build one."
   },
   "beats": [
     {

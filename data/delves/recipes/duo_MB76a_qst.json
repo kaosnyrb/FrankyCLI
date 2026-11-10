@@ -10,7 +10,8 @@
     "THE COMBAT FAMILY, 4: ESCALATION. Plan: home-office office/projects/delves/combat-family.md.",
     "EVE's expeditions: finishing a site hands you a lead to a harder one. A plain clear whose close points onward.",
     "THE OUTFIT, link 1 of 2 (2026-11-10): next is MB108a via slate (the clear's message box is the slate). The derelict link and the boss's schematic in chains.md are NOT parts (boarding, a named boss); cut to two links that build today.",
-    "FRANCES 2026-11-10 (MB108a's review, read with this link): ', by the sound of it' cut (the captain heard nothing); the slate ends 'Bring the rest here to meet.' so the next link's 'meeting place' agrees with it."
+    "FRANCES 2026-11-10 (MB108a's review, read with this link): ', by the sound of it' cut (the captain heard nothing); the slate ends 'Bring the rest here to meet.' so the next link's 'meeting place' agrees with it.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Clear the gang from the <Place> on <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -25,7 +26,7 @@
   "prose": {
     "name": "Strike: Gang at the <Place> on <Planet>",
     "briefing": "A gang at the <Place> has been raiding the haulers. The watch wants them gone.",
-    "card": "Private Contract. Clear the gang from the <Place> on <Planet>. Payment on contract completion."
+    "card": "A gang at the <Place> has been raiding the haulers. Clear them out."
   },
   "beats": [
     {

@@ -10,7 +10,8 @@
     "THE COMBAT FAMILY, 2: THE TIMED RUN. Plan: home-office office/projects/delves/combat-family.md.",
     "Abyssal Deadspace's timer: clear the site and shut the reactor down before it fails. The deadline field exists",
     "(17a). The words stay replay-true; only the mechanic has a clock. The fail text claims no explosion nobody sees.",
-    "Pay: hard."
+    "Pay: hard.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Clear the <Place> on <Planet> and shut down its reactor before it fails. Time-critical. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -26,7 +27,7 @@
   "prose": {
     "name": "Danger: Failing Reactor at the <Place> on <Planet>",
     "briefing": "The reactor at the <Place> is failing, and the crew holding the site won't let anyone near the controls.",
-    "card": "Private Contract. Clear the <Place> on <Planet> and shut down its reactor before it fails. Time-critical. Payment on contract completion."
+    "card": "The reactor at the <Place> is failing, and the crew holding the site won't let anyone near the controls. Shut it down before it goes."
   },
   "beats": [
     {

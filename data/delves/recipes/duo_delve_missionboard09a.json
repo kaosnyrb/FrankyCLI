@@ -14,7 +14,8 @@
     "Written to the delve marker set (outside entrance, centre, item markers, boss, wounded) on his ruling, so the",
     "lint pool is EMPTY on military sites until the markers are on them (missionboard06a's note says why).",
     "Every word holds at any military site: nothing names the site, the faction or the weather; everything the lines",
-    "point at is placed. Pay: med, capped."
+    "point at is placed. Pay: med, capped.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Hold the <Place> on <Planet> while its terminal sends the unsent mail. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -30,7 +31,7 @@
   "prose": {
     "name": "Defense: Unsent Letters on <Planet>",
     "briefing": "The <Place> fell with its outbound mail still queued on the site terminal. The terminal can still send it, slowly, if someone holds the site.",
-    "card": "Settlement Contract. Hold the <Place> on <Planet> while its terminal sends the unsent mail. Payment on contract completion."
+    "card": "The <Place> fell with its mail still queued on the site terminal. It can still send, slowly, if someone holds the site."
   },
   "beats": [
     {

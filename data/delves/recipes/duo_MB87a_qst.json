@@ -11,7 +11,8 @@
     "THE PLAYER'S PART: you bring the med packs and spend them. Each treatment is offered only while you carry one, so three people means three packs, and the warden's order (worst first) is the triage.",
     "Register: the warm common job. You are the one who turns up.",
     "REWORKED 2026-11-10 on OT-9A (Eliza's letter 2026-11-10-eliza-jessica-wounded-and-captives-are-people-now.md, his 'B, it matches vanilla'): the three message boxes became three wounded people in three talks, in a fixed order because talks do not group. The details kept: the cut arm, the burnt hands that say almost nothing, the knock to the head. Voices borrowed until his ear casts them. Pay: med.",
-    "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB87a.md): ship, findings 2-5 taken, 6-7 kept. Forced pick answered YES: each give takes the med pack (OT-34 as built), so the triage spends three and every prompt stands; the card now says three."
+    "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB87a.md): ship, findings 2-5 taken, 6-7 kept. Forced pick answered YES: each give takes the med pack (OT-34 as built), so the triage spends three and every prompt stands; the card now says three.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Treat the wounded settlers at the <Place> on <Planet>. Bring three med packs. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -27,7 +28,7 @@
   "prose": {
     "name": "Rescue: Field Triage at the <Place> on <Planet>",
     "briefing": "Raiders hit the <Place> and left three of its people wounded. The settlement needs someone with med packs.",
-    "card": "Settlement Contract. Treat the wounded settlers at the <Place> on <Planet>. Bring three med packs. Payment on contract completion."
+    "card": "Raiders hit the <Place> and left three of our people wounded. We have nobody who knows what they're doing. Bring three med packs."
   },
   "beats": [
     {

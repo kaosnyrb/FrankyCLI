@@ -11,7 +11,8 @@
     "EVE's Entrepreneur mission: name the product, not the route. His MB22 to 25 (TerraBrew) are the bones: they ask",
     "for the goods with no word on how to get them. Buy, craft, loot: all count.",
     "NEEDS capability E (backport-map.md): beats[0].bring taking ANY item, not only a resource. MB56a's field widened.",
-    "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): bring.item is Mfg_Tier01_IsocenteredMagnet; the objective is short, no place and no count (the build appends (n/N)); no planet needed."
+    "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): bring.item is Mfg_Tier01_IsocenteredMagnet; the objective is short, no place and no count (the build appends (n/N)); no planet needed.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Deliver five isocentered magnets to the <Place> on <Planet>. Payment on delivery.\""
   ],
   "place": {
     "theme": {
@@ -27,7 +28,7 @@
   "prose": {
     "name": "Requisition: Magnets for the <Place> on <Planet>",
     "briefing": "The <Place> has been stopped for a week for want of five isocentered magnets, and doesn't care where they come from.",
-    "card": "Private Contract. Deliver five isocentered magnets to the <Place> on <Planet>. Payment on delivery."
+    "card": "The <Place> has been stopped a week for want of five isocentered magnets. We don't care where they come from."
   },
   "beats": [
     {

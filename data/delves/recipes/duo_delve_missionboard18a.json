@@ -13,7 +13,8 @@
     "client's client: the evidence says the owners set it.",
     "Industrial dungeons (LocTypeDungeon_ThemeIndustrial, 20 per Eliza's count), vanilla interiors that carry the",
     "delve markers today. Every word holds in any of them: nothing names the site, the faction or what the plant",
-    "made; everything a line points at is placed. Pay: med, capped."
+    "made; everything a line points at is placed. Pay: med, capped.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Insurance Contract. The owners of the <Place> on <Planet> claimed for a fire. Find the three places it started. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -29,7 +30,7 @@
   "prose": {
     "name": "Survey: Fire at the Works on <Planet>",
     "briefing": "The owners of the <Place> claimed for a fire. The insurer thinks somebody set it, and wants proof either way.",
-    "card": "Insurance Contract. The owners of the <Place> on <Planet> claimed for a fire. Find the three places it started. Payment on contract completion."
+    "card": "The owners of the <Place> claimed for a fire. We think somebody set it. Find where it started. We want proof either way."
   },
   "beats": [
     {

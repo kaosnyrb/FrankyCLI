@@ -16,7 +16,8 @@
     "THE PART COMES OFF THE WRECK, A RECOVER: 'takes item off whoever has it (loot, pick up, be handed it: all count)'.",
     "A destroyed ship drops its cargo to loot, which is the vanilla way. Recover is refused on a board today; hers.",
     "Boarding the ship instead of destroying it is the other way to 'get' it, and a bigger build; not written.",
-    "The broadcast plays at the ship, his 1500 m. Closing line on the radio. Pay: med, capped."
+    "The broadcast plays at the ship, his 1500 m. Closing line on the radio. Pay: med, capped.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover the stolen satellite part over <Planet> and fit it. Payment on contract completion.\""
   ],
   "place": {
     "orbit": "board",
@@ -25,7 +26,7 @@
   "prose": {
     "name": "Recovery: Stolen Part over <Planet>",
     "briefing": "A ship hit the supply run to the communications satellite over <Planet> and kept the replacement part. It hasn't left orbit.",
-    "card": "Private Contract. Recover the stolen satellite part over <Planet> and fit it. Payment on contract completion."
+    "card": "A ship hit our supply run to the comms satellite over <Planet> and kept the part. Get it back off them and fit it."
   },
   "beats": [
     {

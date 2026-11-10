@@ -10,7 +10,8 @@
     "THE INDUSTRY FAMILY, 5: THE WHOLE PIPELINE. Plan: home-office office/projects/delves/industry-family.md.",
     "EVE's Producer career track in one job: the ore, the bench, the delivery. A craft whose ingredients include a",
     "mid-rarity ore, then a deliver, at a site on a planet that carries it (MB56a's place.resource).",
-    "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): the tungsten ingredient is ResInorgUncommonTungsten (a craft takes the Resource record, the lint says so); pinned to Bolivar I."
+    "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): the tungsten ingredient is ResInorgUncommonTungsten (a craft takes the Resource record, the lint says so); pinned to Bolivar I.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Make a set of tungsten drill bits and deliver them to the <Place> on <Planet>. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -28,7 +29,7 @@
   "prose": {
     "name": "Fabrication: Drill Bits for the <Place> on <Planet>",
     "briefing": "The dig at the <Place> has worn through its last drill bits. They need a new set made with tungsten, and there's tungsten on <Planet>.",
-    "card": "Private Contract. Make a set of tungsten drill bits and deliver them to the <Place> on <Planet>. Payment on contract completion."
+    "card": "Our dig at the <Place> has worn through its last drill bits. We need a new set made with tungsten. There's tungsten on <Planet>."
   },
   "beats": [
     {

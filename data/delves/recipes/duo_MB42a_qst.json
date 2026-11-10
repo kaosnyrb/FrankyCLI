@@ -21,7 +21,8 @@
     "the mission always starts; the theme says WHICH kind of POI the board spawns, not which existing one it finds.",
     "The second place is local and leashed (built, as 08a): a POI near the wreck, where the cargo was bound.",
     "Message box on the pickup only, after the fight: a calm moment (his 2026-10-08 rule). Either or: no say there.",
-    "Pay: a guarded pickup; suggest med."
+    "Pay: a guarded pickup; suggest med.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Shipping Firm Contract. Recover our crate from the wreck at the <Place> and deliver it to the <SecondPlace>. Spacers present. Payment on delivery.\""
   ],
   "place": {
     "theme": {
@@ -56,7 +57,7 @@
   "prose": {
     "name": "Recovery: Crash Site Cargo on <Planet>",
     "briefing": "A freighter came down at the <Place> with a consignment still aboard. Spacers got to the wreck first. The shipping firm wants its crate delivered to the <SecondPlace>.",
-    "card": "Shipping Firm Contract. Recover our crate from the wreck at the <Place> and deliver it to the <SecondPlace>. Spacers present. Payment on delivery.",
+    "card": "Our freighter came down at the <Place> with a crate aboard, and Spacers got to the wreck first. Get the crate to the <SecondPlace>.",
     "_card": "Jessica's board.body verbatim, moved into the built field (ELIZA 2026-10-15). Style guide 33 s4: the issuer's we, payer on line one, flat, stock closer. Her board.title was prose.name already."
   },
   "beats": [

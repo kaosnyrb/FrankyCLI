@@ -20,7 +20,7 @@
   "prose": {
     "name": "Survey: Faint Signal on <Planet>",
     "briefing": "The comms office has picked up a faint signal from the <Place> and wants someone to go and find out what's sending it.",
-    "card": "Comms Office Contract. A faint signal is coming from the <Place> on <Planet>. Find its source. Payment on completion."
+    "card": "We've picked up a faint signal from the <Place>. Go and find out what's sending it."
   },
   "_note": [
     "PLAYER'S PART (2026-11-04, his ask; beats not yet changed, proposal in chat): answer the request: bring the beacon a coffee and close it (a deliver with bring, waits on OT-31). And the family's shared part: every Faint Signal might be 92d's bait.",
@@ -29,7 +29,8 @@
     "The source is a placed beacon (outpost beacon01, Overtime's own, on 7 recipes; Satellite_Beacon is ruled out on land). Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
     "LETTER c: COMEDY: a supply beacon that has asked for coffee, priority urgent, for years.",
     "FAMILY RULE, REFINED 2026-10-31 on the four verdicts: a broadcast may say what KIND of message it is (c's 'supply request', b's all-clear) but not what the source is; and a repeat player may recognise a letter by its call, which is answered by adding letters, not by blanking calls.",
-    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB92c.md): ship, findings 2-4 taken. Forced pick answered YES: a broadcast may say what kind of message it is, so 'Supply request' stands and the player imagines a hungry crew."
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB92c.md): ship, findings 2-4 taken. Forced pick answered YES: a broadcast may say what kind of message it is, so 'Supply request' stands and the player imagines a hungry crew.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Comms Office Contract. A faint signal is coming from the <Place> on <Planet>. Find its source. Payment on completion.\""
   ],
   "beats": [
     {

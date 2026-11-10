@@ -11,7 +11,8 @@
     "The traces are the raids' own leftovers: a trader's terminal where they hit her, still logging. The two reads are a group (any order), so no line says first or second; the base gets its marker only when both are done.",
     "The base is pinned to pirates at the accept (place.faction, plan OT-01), so its residents are the pirates the words name. Fleet members: his 10-31 check stops those missions starting.",
     "Vic Tarrant's register on the speaker (a convoy master): level, dry, unimpressed. Voice borrowed until his ear casts it. No names, places, factions or currency in any voiced line; 'pirates' is a role.",
-    "DOES NOT LINT YET, on purpose (2026-11-02): a board has main and a remote second only, no <ThirdPlace> token, and the Crimson pin is refused until the member gate exists. His 07:52: \"ask Eliza to look at N places. should be possible\". Letter: home-office office/correspondence/2026-11-02-jessica-eliza-n-places.md."
+    "DOES NOT LINT YET, on purpose (2026-11-02): a board has main and a remote second only, no <ThirdPlace> token, and the Crimson pin is refused until the member gate exists. His 07:52: \"ask Eliza to look at N places. should be possible\". Letter: home-office office/correspondence/2026-11-02-jessica-eliza-n-places.md.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Trace the pirates hitting traders in this system, then clear their base. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -55,7 +56,7 @@
   "prose": {
     "name": "Hunt: Signal Traces",
     "briefing": "Pirates have been hitting traders in this system. Two of the traders they hit left terminals logging at the <SecondPlace> and the <ThirdPlace>, and between them the logs should point at the base.",
-    "card": "Private Contract. Trace the pirates hitting traders in this system, then clear their base. Payment on contract completion."
+    "card": "Pirates are hitting traders in this system. Two of their victims left terminals logging, and between them they should point at the base. Clear it."
   },
   "speaker": {
     "name": "Convoy Master",

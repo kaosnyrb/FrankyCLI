@@ -10,7 +10,8 @@
     "THE MINING FAMILY, 6: THE FUEL RUN (MB56a's b letter). Plan: home-office office/projects/delves/mining-family.md.",
     "EVE's ice: fuel every structure burns forever, so the demand never stops. MB56a's shape with helium-3, Starfield's",
     "own ship fuel. Same two stand-ins as MB56a (place.resource, beats[0].bring). Pay: med.",
-    "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): bring.item is InorgCommonHelium3; the objective is short, no place and no count (the build appends (n/N)); pinned to Andromas III, which carries helium-3."
+    "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): bring.item is InorgCommonHelium3; the objective is short, no place and no count (the build appends (n/N)); pinned to Andromas III, which carries helium-3.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Deliver ten units of helium-3 to the <Place> on <Planet>. Payment on delivery.\""
   ],
   "place": {
     "theme": {
@@ -28,7 +29,7 @@
   "prose": {
     "name": "Requisition: Helium-3 for the <Place> on <Planet>",
     "briefing": "The <Place> is running its reactor on its last cells. There's helium-3 on <Planet>, and they don't mind if I extract it or buy it.",
-    "card": "Private Contract. Deliver ten units of helium-3 to the <Place> on <Planet>. Payment on delivery."
+    "card": "The reactor at the <Place> is on its last cells. There's helium-3 on <Planet>. Extract it or buy it. Ten units."
   },
   "beats": [
     {

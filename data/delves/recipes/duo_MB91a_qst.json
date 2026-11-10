@@ -13,7 +13,8 @@
     "⛔ PART IT NEEDS, NOT BUILT: a CHANCE that the deposit springs a pirate ambush. Prior art on the parts list: the trapped space object (Investigation_ActivatorSpace_Trapped.cs, duout_activator_spacetrap), written and never used by a template. What is missing is the roll and its odds; the odds are his. Spelled here as 'ambush' on the deliver beat, a placeholder for Eliza. Letter 2026-10-31.",
     "Voices borrowed until his ear casts them. No names, places or currency in any voiced line. Pay: med (it leaves the ground, README rule 3).",
     "The closing radio is about the box and stops: it cannot forecast the pirates, because on the loud run that says it for them and on the quiet run it is a threat the game never pays. 'Until somebody comes for it' is answered by the pirates when they come and by nobody when they do not.",
-    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB91a.md): rework, findings 1-5 taken, 6 and 7 kept as she allowed. Forced pick answered NO: no voiced line says or implies the ship came to harm; she believes it late and silent, and the pirates are the first to say what happened to it."
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB91a.md): rework, findings 1-5 taken, 6 and 7 kept as she allowed. Forced pick answered NO: no voiced line says or implies the ship came to harm; she believes it late and silent, and the pirates are the first to say what happened to it.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Research Contract. Take a sample from the <Place> on <Planet> up to the site's cargo dropbox in orbit. Payment on delivery.\""
   ],
   "place": {
     "theme": {
@@ -35,7 +36,7 @@
   "prose": {
     "name": "Hauling: Research Sample to Orbit",
     "briefing": "A research site at the <Place> has a sample that has to go up to its cargo dropbox in orbit, and the ship that collects from them every ten days didn't come.",
-    "card": "Research Contract. Take a sample from the <Place> on <Planet> up to the site's cargo dropbox in orbit. Payment on delivery."
+    "card": "Our sample at the <Place> has to go up to the cargo dropbox in orbit. The ship that collects every ten days didn't come."
   },
   "beats": [
     {

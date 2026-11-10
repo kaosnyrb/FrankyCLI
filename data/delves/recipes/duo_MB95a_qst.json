@@ -11,7 +11,8 @@
     "ELIZA: the person is placed at quest start and the pods land 15 to 25 m round RECenterLocRef while she stands at REMarkerMediumLocRef. Nothing relies on her surviving (his 10-24): her lines all come before the drop and the close is the speaker on the radio. But if a pod crew kills her the player sees it. Is a talk person protected, or should she be?",
     "The clear's near trigger may fire at once if he is already inside 250 after the talk (unmeasured, recipe doc). For a defence that is the wanted behaviour: they land as soon as the chat ends.",
     "Momo's register: genki, delighted by small logistics, never sad. Voice borrowed until his ear casts it. No names, places, factions or currency in any voiced line.",
-    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB95a.md): rework, findings 1-6 taken, 7 kept. Forced pick answered YES: the raiders are on her schedule today, so the walk-up says he is in time and the fight arrives when she said."
+    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB95a.md): rework, findings 1-6 taken, 7 kept. Forced pick answered YES: the raiders are on her schedule today, so the walk-up says he is in time and the fight arrives when she said.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Defend the <Place> on <Planet> from a drop pod raid. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -28,7 +29,7 @@
   "prose": {
     "name": "Defense: Drop Pods at the <Place> on <Planet>",
     "briefing": "Raiders keep dropping onto the <Place> by pod. The homesteader there has the timing worked out and wants someone standing in the open when they land.",
-    "card": "Settlement Contract. Defend the <Place> on <Planet> from a drop pod raid. Payment on contract completion."
+    "card": "Raiders keep dropping onto the <Place> by pod. I've got the timing worked out. I need someone standing in the open when they land."
   },
   "speaker": {
     "name": "Homesteader",

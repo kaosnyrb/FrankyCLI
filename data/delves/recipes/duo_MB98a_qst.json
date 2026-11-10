@@ -17,7 +17,8 @@
     "crashed 10a and 12a: it names a fixed planet and no alias. Whether Akila can take this site is his first play.",
     "(2) ASHTA WAVES: hold.creatures (plan OT-33), the only Ashta in the load order, VeryAggressive (SpawnCreatureWave).",
     "Pay: med, capped.",
-    "NARROW, SO IT NAMES THINGS, ALOUD TOO. His 11:33 (\"narrow quests which give you writing more bones\") and 11:36: \"yeah let's make them exempt. This is like something people will go 'Wait how the hell did they do that'\". So the audio says Ashta, Akila and the Rangers; the total-conversion rule (10-12) does not apply to a narrow Delve, his trade."
+    "NARROW, SO IT NAMES THINGS, ALOUD TOO. His 11:33 (\"narrow quests which give you writing more bones\") and 11:36: \"yeah let's make them exempt. This is like something people will go 'Wait how the hell did they do that'\". So the audio says Ashta, Akila and the Rangers; the total-conversion rule (10-12) does not apply to a narrow Delve, his trade.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Help the outpost at the <Place> on <Planet> hold against the Ashta. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -35,7 +36,7 @@
   "prose": {
     "name": "Defense: Ashta at the <Place> on <Planet>",
     "briefing": "The <Place> sits out past Akila City's walls, in Ashta country. A pack has been testing it for a week, and the Rangers have their hands full.",
-    "card": "Settlement Contract. Help the outpost at the <Place> on <Planet> hold against the Ashta. Payment on contract completion."
+    "card": "Our outpost at the <Place> sits in Ashta country, and a pack has been testing it for a week. The Rangers have their hands full."
   },
   "beats": [
     {

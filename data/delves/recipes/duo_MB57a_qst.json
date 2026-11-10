@@ -11,7 +11,8 @@
     "EVE's survey scanner as a job: three sample points in any order (30a's group), a claims office files on the result.",
     "Buildable today. Pay: med, placeholder.",
     "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, its own note: med.",
-    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, its own note: med."
+    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, its own note: med.",
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Take three core samples at the <Place> on <Planet> before the claim is filed. Payment on contract completion.\""
   ],
   "place": {
     "theme": {
@@ -28,7 +29,7 @@
   "prose": {
     "name": "Survey: Core Samples at the <Place> on <Planet>",
     "briefing": "A claims office wants three core samples from the <Place> before anyone files on it.",
-    "card": "Private Contract. Take three core samples at the <Place> on <Planet> before the claim is filed. Payment on contract completion."
+    "card": "We want three core samples from the <Place> before anyone files a claim on it."
   },
   "beats": [
     {

@@ -12,13 +12,14 @@ PER-LINE FAULTS (each fails the run):
   TYPE     the title's word before the colon is not on the closed list below. His board vocabulary
            (home-office office/projects/overtime/board-names.md) plus the Delve words he has kept. A new type
            is a ruling of his, added here in the same commit, never a word a recipe invents.
-  PAYER    RETIRED 2026-11-04, his: the payer label and the payment line are "redundant noise" (the board shows the
-           category above the card and the reward below it). A card is written in its issuer's pen name instead.
-           Not yet inverted to flag the stock lines: 111 cards still carry them, and this check is FATAL in the lint.
+  PAYER    INVERTED 2026-11-10: a card that opens on a payer label ("Private Contract.", "Tracker's Alliance
+           Contract."). His 2026-11-04: the payer label and the payment line are "redundant noise" (the board shows
+           the category above the card and the reward below it); a card is a posting by whoever set the job. Swept
+           2026-11-10 on his "we still have all those X Contract things", 118 cards to 0. Probes (duo_delvetest_) exempt.
   LOCAL    a board card opens "Local Contract.". His playtest 2026-10-30: "The missionboard description has like
            'Local Contract' in it, but that doesn't really make sense as it's sending you to a distant planet."
            Name the payer: Private, Settlement, Tracker's Alliance, Insurance, or the faction once dungeons carry one.
-  CLOSER   RETIRED 2026-11-04 with PAYER, same ruling.
+  CLOSER   INVERTED 2026-11-10 with PAYER: a card that ends on a stock payment line ("Payment on delivery.").
   CARD     a board card body is over 25 words. Vanilla's median is 9 and its longest 47; ours were 26 before.
   OBJ      an objective that does not open on a verb, ends in punctuation, or runs past 12 words (vanilla's max).
   NEXT     a mid-quest journal entry that never says what to do next ("I need to", "I have to", "I should").
@@ -123,9 +124,14 @@ def main():
         if card:
             if card.startswith("Local Contract.") and d.get("template") in ("board", "boardspace"):
                 flag(rid, "LOCAL", "card", card)
+            probe = rid.startswith("duo_delvetest_")
+            if PAYER.match(card) and not probe:
+                flag(rid, "PAYER", "card", card)
             body = PAYER.sub("", card, count=1)
             for c in CLOSERS:
                 if body.rstrip().endswith(c):
+                    if not probe:
+                        flag(rid, "CLOSER", "card", card)
                     body = body.rstrip()[: -len(c)]
             if words(body) > 25:
                 flag(rid, "CARD", "card", f"{words(body)} words: {card}")
@@ -206,7 +212,7 @@ def main():
     if journals:
         pct = 100 * first / journals
         print(f"\nRATES: journal first person {pct:.0f}% {'WARN, floor 75%' if pct < 75 else 'ok (floor 75%, vanilla 87%)'}")
-    print(f"\n{hits} flagged. TYPE, CARD, OBJ, NEXT, DASH, PEOPLE, NAME, SPEAKER and LOCAL (see the header).")
+    print(f"\n{hits} flagged. TYPE, PAYER, CLOSER, CARD, OBJ, NEXT, DASH, PEOPLE, NAME, SPEAKER and LOCAL (see the header).")
     print("\nBEFORE FRANCES, five questions no checker can answer (his 2026-11-06, Jessica's to ask):\n"
           "   CHEKHOV     everything placed or named pays off; nothing the words mention is missing from the world.\n"
           "   WANT        every person wants something, even a glass of water (Vonnegut), and the lines show it.\n"
