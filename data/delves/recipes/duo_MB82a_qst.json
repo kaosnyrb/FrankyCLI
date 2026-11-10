@@ -65,6 +65,8 @@
     {
       "type": "talk",
       "at": "REContainerLocRef",
+      "replace": true,
+      "_replace": "REContainerLocRef is the box itself: his MB87a play, 2026-11-10, \"Rory was sat in a chest tho\". The box goes at the accept.",
       "objective": "Free the second captive at the <Place>",
       "person": {
         "name": "Owen Garrow",

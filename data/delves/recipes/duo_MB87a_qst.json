@@ -126,6 +126,8 @@
     {
       "type": "talk",
       "at": "REContainerLocRef",
+      "replace": true,
+      "_replace": "REContainerLocRef is the box itself: his MB87a play, 2026-11-10, \"Rory was sat in a chest tho\". The box goes at the accept.",
       "objective": "Treat the settler who took a knock to the head",
       "person": {
         "name": "Rory Dunne",

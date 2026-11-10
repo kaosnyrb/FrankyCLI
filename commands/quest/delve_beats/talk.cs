@@ -108,10 +108,16 @@ namespace FrankyCLI
                                              Action<string> Fatal, Action<string> Warn)
             {
                 string at = $"beat {i + 1} (talk)";
-                if (b.model != null || b.name != null || b.replace || b.message != null || b.say != null || b.returnTo != null
+                if (b.model != null || b.name != null || b.message != null || b.say != null || b.returnTo != null
                     || b.group != null || b.choose != null)
-                    Fatal($"{at} sets model, name, replace, message, say, returnTo, group or choose; a talk beat has none of them "
+                    Fatal($"{at} sets model, name, message, say, returnTo, group or choose; a talk beat has none of them "
                           + "(the person is its object and his voice its line), so they would be silently ignored.");
+                // REContainerLocRef IS the container, a placed object (his duo_delve08 locker, 2026-10-09), so a person created
+                // there stands in the box: his play of MB87a, 2026-11-10, "Rory was sat in a chest tho". His "yeah sounds good":
+                // a talk there takes replace (the build's replace pass disables the box at the accept, his ccs_missioninfestation01
+                // way), and one without it is refused, so the next person cannot be put in a chest.
+                if (b.at == "REContainerLocRef" && !b.replace)
+                    Fatal($"{at} stands at REContainerLocRef, which IS the container (a placed box), so he would be created inside it; set replace: true (the box goes at the accept) or pick another marker.");
                 if (b.at.Length == 0 && !IsBoardSpace(t)) Fatal($"{at} has no at: the marker he stands on (only a rescue's talks happen aboard, with none).");
                 if (b.rider != null)
                 {
