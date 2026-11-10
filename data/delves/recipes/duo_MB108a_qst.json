@@ -1,0 +1,76 @@
+{
+  "schema": 2,
+  "id": "duo_MB108a_qst",
+  "template": "board",
+  "deal": "chain",
+  "author": "jessica",
+  "source": "chains.md, The Outfit; written 2026-11-10 on OT-30 to parts that exist",
+  "_note": [
+    "THE OUTFIT, LINK 2 of 2 (finale). Spec: home-office office/projects/delves/chains.md; combat family.",
+    "THE PLAYER'S PART: he calls them in himself. The slate said 'Bring the rest here'; the beacon is how they would be called, and switching it on is his choice to spring the trap. Then he holds.",
+    "CAUSE (rule 2): the slate off the gang at MB76a. SHAPE (rule 1): MB76a was a clear; this is use then hold.",
+    "CUT from chains.md's three links (derelict, boss, schematic): none of those is a part before the 19th. Pay: hard (rule 6)."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A built site the outfit uses as its meeting place. The board's own request, a new site (every link has a site of its own: place.inherit retired 2026-11-09, his 'If we need it always to run it should be using remote sites and making gaurnteed stuff')."
+  },
+  "prose": {
+    "name": "Strike: The Rest of the Outfit on <Planet>",
+    "briefing": "The slate off the gang I cleared named the <Place> as their meeting place. The rest of the outfit will come if they're called."
+  },
+  "speaker": {
+    "name": "Watch Captain",
+    "voice": "GenericFemale01",
+    "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta",
+    "_name": "MB76a's speaker: the same person on the radio."
+  },
+  "broadcast": [
+    "That slate names their meeting place. If you're standing there when they come, they're coming to you. Your call."
+  ],
+  "beats": [
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "_model": "A beacon or comms set if one fits.",
+      "name": "Outfit Beacon",
+      "objective": "Switch on the outfit's beacon at the <Place>",
+      "message": {
+        "title": "Outfit Beacon",
+        "text": "One switch, set to call every one of them here."
+      },
+      "journal": "I switched on the outfit's beacon at the <Place>. The rest of them are coming. I need to hold this place.",
+      "say": [
+        "You called them in yourself. All right. Hold that ground."
+      ]
+    },
+    {
+      "type": "hold",
+      "at": "RECenterLocRef",
+      "waves": 3,
+      "size": [
+        3,
+        5
+      ],
+      "style": [
+        "squad",
+        "squad",
+        "horde"
+      ],
+      "objective": "Hold the <Place> against the rest of the outfit",
+      "journal": "The slate led me to the outfit's meeting place. I called the rest of them in and held the <Place> until none were left.",
+      "say": [
+        "That's the whole outfit. The haulers can run again."
+      ],
+      "reward": "hard"
+    }
+  ]
+}

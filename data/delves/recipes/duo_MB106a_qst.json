@@ -1,0 +1,116 @@
+{
+  "schema": 2,
+  "id": "duo_MB106a_qst",
+  "template": "board",
+  "deal": "chain",
+  "_deal": "STAND-IN: never on the board. Started only by MB50a's closing talk (its next field). Eliza's.",
+  "author": "jessica",
+  "source": "his 2026-10-29 22:16 \"Conversations seem a good linking point\" (\"I completed the mission. Ah can you go and do this now.\"), then 22:20 \"yeah write that\"",
+  "_note": [
+    "THE OLD REGULATOR, LINK 2 of 2 (finale). Spec: home-office office/projects/delves/chains.md. Was duo_MB50a_link2_qst.",
+    "THE PLAYER'S PART: carrying the thing he replaced to the one person who values it, and the price is his to push (the Commerce line).",
+    "CAUSE (rule 2): MB50a's regulator replaced the old one; Noor sent the old one on with a hauler and asks him to meet it. The thing he carries is the thing his last job made spare.",
+    "REWRITTEN 2026-11-10 on place.inherit's retirement (Eliza 2026-11-09): no longer at Noor's site. The hauler's drop and the scrapper are both at this link's own site, so it is pickup (the drop) then talk (the scrapper): not MB50a's craft then talk (rule 1).",
+    "Chain-only (deal chain), so it may remember (rule 3). Noor stays on the radio: the same person, which is the point of a chain. Pay: med, the finale pays more than a coda would (rule 6).",
+    "FIXED 2026-11-10: Noor's closing radio line ('Keep a share, you've earned it') came off the talk, which cannot carry a say. Her last word in the chain is now the ask in MB50a."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A quiet site with a scrapper working it. The board's own request, a new site (every link has a site of its own: place.inherit retired 2026-11-09, his 'If we need it always to run it should be using remote sites and making gaurnteed stuff')."
+  },
+  "prose": {
+    "name": "Hauling: The Old Regulator on <Planet>",
+    "briefing": "The crew lead from the water reclaimer sent their old pressure regulator on with a hauler. It's waiting at the drop at the <Place>, where a scrapper wants it."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "REContainerLocRef",
+      "model": "OLD REGULATOR, UNPICKED",
+      "_model": "A worn machine part, his or Kim's pick.",
+      "name": "Old Regulator",
+      "item": "Old Pressure Regulator",
+      "objective": "Collect the old regulator from the hauler's drop",
+      "message": {
+        "title": "Old Regulator",
+        "text": "Heavier than the new one, and stamped with a maker's mark nobody uses any more."
+      },
+      "journal": "I've got the old pressure regulator from the hauler's drop. I need to find the scrapper at the <Place>.",
+      "say": [
+        "That's the one. Mind it, it's older than both of us."
+      ]
+    },
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Sell the old regulator to the scrapper at the <Place>",
+      "person": {
+        "name": "Oskar Lindqvist",
+        "template": "UC_NA_MASTWorkerMale01",
+        "voice": "GenericMale01",
+        "elevenlabs": "N2lVS1w4EtoT3dr4eOWO",
+        "hellos": [
+          [
+            "If it's broken, I'll look at it. If it's working, why are you here?"
+          ]
+        ],
+        "_bio": {
+          "age": "sixties (authored 2026-11-10)",
+          "from": "a scrapper who keeps old kit running (his lines)",
+          "why_there": "his yard; he buys what nobody else can make any more (his lines)",
+          "wants": "the old parts nobody makes, because somebody always needs one (his lines)"
+        }
+      },
+      "greeting": [
+        "Is that a reclaimer regulator? Let me see. They stopped making these before I was born."
+      ],
+      "exchanges": [
+        {
+          "prompt": "What's it worth?",
+          "reply": [
+            "More broken than most things are working. I'll pay the crew direct, and something for your trouble on top."
+          ]
+        },
+        {
+          "prompt": "Whatever you're about to offer, it's worth more.",
+          "reply": [
+            "It is. And you know what I'd say if you weren't standing there. Fine. A little more. Don't tell anyone I'm soft."
+          ],
+          "perk": "Skill_Commerce"
+        },
+        {
+          "prompt": "Why's it worth anything?",
+          "reply": [
+            "Nobody can make the parts inside it any more. Somebody always needs one, and I know who."
+          ]
+        },
+        {
+          "prompt": "What will you do with it?",
+          "reply": [
+            "Take it apart very slowly, and write down everything I find."
+          ]
+        }
+      ],
+      "journal": "I sold the water reclaimer crew's old regulator to the scrapper at the <Place>, for more than anyone expected.",
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Water Reclaimer Crew",
+    "_name": "Deliberately MB50a's speaker: the same person on the radio, which is the point of a chain.",
+    "voice": "GenericFemale01",
+    "elevenlabs": "r5iFzIytiA1rzjhWFCjW"
+  },
+  "broadcast": [
+    "It's the heavy one. Mind your back."
+  ],
+  "_speech": "Noor, MB50a's voice, carried on. The scrapper: dry, delighted by old machines; a stand-in voice, his ear decides."
+}

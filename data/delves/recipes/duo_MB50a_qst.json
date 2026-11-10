@@ -80,7 +80,13 @@
           [
             "I'd offer you a drink, but the water's off."
           ]
-        ]
+        ],
+        "_bio": {
+          "age": "thirties (authored 2026-11-10)",
+          "from": "crew lead at the water reclaimer (her lines)",
+          "why_there": "the reclaimer's old regulator stopped one morning (her lines)",
+          "wants": "running water again, and to be the first crew the new one outlasts (her lines)"
+        }
       },
       "greeting": [
         "You've got the regulator? Please say you've got the regulator. The old one was older than me. Nobody out here can make them."
@@ -89,7 +95,7 @@
         {
           "prompt": "Here's your regulator.",
           "reply": [
-            "That's exactly it. Give me an hour and we'll have running water again."
+            "That's exactly it. Give me an hour and we'll have running water again. The old one's gone on with a hauler to a scrapper who wants it. Would you meet it there?"
           ]
         },
         {
@@ -130,5 +136,10 @@
   "broadcast": [
     "You're close? Come and find me. We've been rationing water for a week. You're the best news we've had."
   ],
-  "_speech": "The same voice on the radio and in person (Noor), as 11a and 19a. Lucy (Friendly, Relaxed, Thoughtful), in two recipes; his ear decides. No names, places, factions or currency in a voiced line; her name is subtitle only."
+  "_speech": "The same voice on the radio and in person (Noor), as 11a and 19a. Lucy (Friendly, Relaxed, Thoughtful), in two recipes; his ear decides. No names, places, factions or currency in a voiced line; her name is subtitle only.",
+  "next": {
+    "id": "duo_MB106a_qst",
+    "via": "talk"
+  },
+  "_next": "THE OLD REGULATOR, link 1 of 2 (2026-11-10, Jessica; chains.md). Noor's closing reply carries the ask; accepting starts MB106a. ⚠ MB50a is LIVE: this changes one voiced line (a revoice) and needs a rebuild, both his go."
 }

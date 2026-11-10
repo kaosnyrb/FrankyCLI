@@ -1,0 +1,102 @@
+{
+  "schema": 2,
+  "id": "duo_MB107a_qst",
+  "template": "board",
+  "deal": "chain",
+  "author": "jessica",
+  "source": "his 2026-10-29 chains ('Ah can you go and do this now'), The Rounds in chains.md; written 2026-11-10 on OT-30 and OT-9A",
+  "_note": [
+    "THE ROUNDS, LINK 2 of 2 (finale). Spec: home-office office/projects/delves/chains.md; medic family.",
+    "THE PLAYER'S PART: finding him. The note on his door says where he went and when, and the date is the alarm. Then a med pack (a wounded talk, OT-9A).",
+    "CAUSE (rule 2): Rosa asked, because nobody has heard from him in days. Chain-only, so it may remember her (rule 3), but no voiced line names her (no names aloud).",
+    "SHAPE (rule 1): link 1 was pickup then talk; this is use (read the door) then a wounded talk.",
+    "Register: the warm common job, and a small fright. Pay: med, more than link 1's easy (rule 6)."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A quiet worked site, his. The board's own request, a new site (every link has a site of its own: place.inherit retired 2026-11-09, his 'If we need it always to run it should be using remote sites and making gaurnteed stuff')."
+  },
+  "prose": {
+    "name": "Hauling: The Old Miner on <Planet>",
+    "briefing": "A patient of the settlement medic asked me to look in on an old miner at the <Place>. Nobody has heard from him in days."
+  },
+  "speaker": {
+    "name": "Settlement Medic",
+    "voice": "GenericFemale01",
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w",
+    "_name": "MB86a's speaker: the same person on the radio, which is the point of a chain."
+  },
+  "broadcast": [
+    "She told me you're looking in on him. He won't have asked for anyone. Take a med pack, he'll say he doesn't need it."
+  ],
+  "beats": [
+    {
+      "type": "use",
+      "at": "REContainerLocRef",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "_model": "A note or a slate on a door if one fits; the terminal is the stand-in.",
+      "name": "Note on the Door",
+      "objective": "Look in on the old miner at the <Place>",
+      "message": {
+        "title": "Note on the Door",
+        "text": "Gone down the dig. Back by dark.\n\nThe date on it is four days old."
+      },
+      "journal": "His note says he went down his dig, back by dark. It's four days old. I need to find him."
+    },
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Find the old miner",
+      "person": {
+        "name": "Tobin Ferris",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_Miner_UtilitySuit_NoHardhat",
+        "voice": "GenericMale01",
+        "elevenlabs": "pqHfZKP75CvOlQylNhV4",
+        "wounded": true,
+        "hellos": [
+          [
+            "Who's that? If you're selling, I can't get up to say no."
+          ]
+        ],
+        "_bio": {
+          "age": "seventies (authored 2026-11-10)",
+          "from": "a miner who still works his own dig alone (his lines, the note)",
+          "why_there": "fell in his own dig four days ago (his lines)",
+          "wants": "to not have needed anyone, and to walk over and say so himself (his lines)"
+        }
+      },
+      "greeting": [
+        "Fell in my own dig. Four days I've been telling myself I'll get up in a minute. She sent you, didn't she."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Hold still.",
+          "give": {
+            "item": "Aid_MedPack",
+            "count": 1
+          },
+          "reply": [
+            "That's the leg back. I'll walk over on Sunday and tell her myself. She'll like that better than hearing it from you."
+          ]
+        },
+        {
+          "prompt": "Why didn't you call for help?",
+          "reply": [
+            "Pride, mostly. And the radio's in the house, and I'm not."
+          ]
+        }
+      ],
+      "journal": "A patient of the medic's sent me to look in on an old miner at the <Place>. He'd been down his own dig for four days. I patched him up.",
+      "reward": "med"
+    }
+  ]
+}

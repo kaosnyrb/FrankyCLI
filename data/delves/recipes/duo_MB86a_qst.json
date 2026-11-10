@@ -11,8 +11,7 @@
     "Register: the warm common job. You are the one who turns up.",
     "The warm chain (home-office office/projects/delves/chains.md): a settlement medic's rounds, one patient per link.",
     "Link 1: take the medicine case from the clinic to a patient at a second site. Her closing talk asks the next one.",
-    "STAND-IN: next (via talk) to an unwritten link 2 ('Ah, can you look in on the old miner up the ridge?'). The cause",
-    "rule holds: the patient has heard the medic is short-handed because the player is standing there. Pay: easy."
+    "THE ROUNDS, link 1 of 2 (2026-11-10): next is MB107a via talk; Rosa's closing reply carries the ask. CAUSE: she knows the medic is short-handed because the player came instead, so she asks him to look in on the one nobody has checked."
   ],
   "place": {
     "theme": {
@@ -70,7 +69,13 @@
           [
             "Is that my medicine? Oh, good."
           ]
-        ]
+        ],
+        "_bio": {
+          "age": "seventies (authored 2026-11-10)",
+          "from": "the medic's patient, on medicine for a cough that came back (her lines)",
+          "why_there": "home, waiting on her medicine (the briefing)",
+          "wants": "company, mostly; and someone to look in on the old miner (her lines)"
+        }
       },
       "greeting": [
         "You're not my medic. Is that my medicine? She's short-handed again, isn't she."
@@ -79,7 +84,7 @@
         {
           "prompt": "Your medicine. Two a day, she says.",
           "reply": [
-            "Two a day. I know. She tells me every time. Thank you, love."
+            "Two a day. I know. She tells me every time. Thank you, love. While you're doing her rounds, would you look in on the old miner? Nobody's heard from him in days."
           ]
         },
         {
@@ -110,7 +115,7 @@
   ],
   "_speech": "Overworked and grateful. A stand-in voice; his ear decides.",
   "next": {
-    "id": "MB86A LINK 2, UNWRITTEN",
+    "id": "duo_MB107a_qst",
     "via": "talk"
   },
   "_next": "STAND-IN: Rosa's closing reply gains the ask ('Ah, can you look in on the old miner up the ridge?') once next is real."

@@ -9,8 +9,7 @@
   "_note": [
     "THE COMBAT FAMILY, 4: ESCALATION. Plan: home-office office/projects/delves/combat-family.md.",
     "EVE's expeditions: finishing a site hands you a lead to a harder one. A plain clear whose close points onward.",
-    "STAND-IN: top-level next (the Delve dealt on completion, by slate). The biggest lever in the family: any Delve",
-    "could chain. The second Delve is unwritten until the field is real. Pay: med."
+    "THE OUTFIT, link 1 of 2 (2026-11-10): next is MB108a via slate (the clear's message box is the slate). The derelict link and the boss's schematic in chains.md are NOT parts (boarding, a named boss); cut to two links that build today."
   ],
   "place": {
     "theme": {
@@ -59,7 +58,7 @@
   ],
   "_speech": "Plain; she has a lot of these. A stand-in voice; his ear decides.",
   "next": {
-    "id": "MB76A LEAD, UNWRITTEN",
+    "id": "duo_MB108a_qst",
     "via": "slate"
   },
   "_next": "STAND-IN: on completion, deal the named Delve (a harder site, the rest of the outfit) by the slate. Eliza's field."
