@@ -102,7 +102,8 @@
     },
     {
       "type": "talk",
-      "at": "RETravelB1LocRef",
+      "at": "REMarkerSmallLocRef",
+      "_at": "Was RETravelB1LocRef: on a board request it never dealt (his play, 2026-11-10: 42 failed fills on TargetLocation; probe duo_delvetest_m96, this one change, dealt first refresh and played). Moved on his go.",
       "objective": "Treat the settler with the twisted ankle",
       "person": {
         "name": "Jory Marsh",
