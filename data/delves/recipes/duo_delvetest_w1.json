@@ -1,0 +1,85 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_w1",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-10 08:01 \"let's do OT-9A\", then 08:06 \"I think B, it matches vanilla\"",
+  "_note": [
+    "PROBE for person.wounded (plan OT-9A): MB85a's talk, word for word so every voiced line is already in the voice cache, with Bram lying wounded in vanilla's NPCWoundedLean (OE_BryanB_FamilyInNeed's shape).",
+    "What a play answers: (1) is he down in the wounded pose at the marker; (2) can he be talked to while down (the entry stage sets SQ_CaptiveStateNoBlockingHellos, as BrotherInNeed's stage 0 does); (3) does [Give Med Pack] take one and end the talk; (4) does HealActor stand him up, with vanilla's thanks line; (5) does a stock Help or Free prompt show on him at all, and what does it do.",
+    "The Papyrus log carries a [wounded] line on the heal stage with IsRestrained read back. Pay easy."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet worked site."
+  },
+  "prose": {
+    "name": "Rescue: PROBE w1, Wounded Miner",
+    "briefing": "A miner at the <Place> is down and won't come in to the clinic. Someone has to take him a med pack.",
+    "card": "Settlement Contract. Bring a med pack to an injured miner at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "PROBE w1: treat the wounded miner at the <Place>",
+      "person": {
+        "name": "Bram Kessler",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericMale01",
+        "elevenlabs": "onwK4e9ZLuTAKqWW03F9",
+        "wounded": true,
+        "hellos": [
+          [
+            "If you're from the clinic, I'm fine."
+          ],
+          [
+            "It's a scratch. Mostly."
+          ]
+        ]
+      },
+      "greeting": [
+        "Don't fuss. It's a scratch. A big scratch. Did they send you with a med pack?"
+      ],
+      "exchanges": [
+        {
+          "prompt": "Here's a med pack. Hold still.",
+          "give": {
+            "item": "Aid_MedPack",
+            "count": 1
+          },
+          "reply": [
+            "Ow. Right. Thank you. I'd have walked in eventually. Probably."
+          ]
+        },
+        {
+          "prompt": "How did it happen?",
+          "reply": [
+            "Arguing with a drill. The drill won."
+          ]
+        }
+      ],
+      "journal": "PROBE w1: I treated the wounded miner at the <Place> with a med pack, and he got up.",
+      "reward": "easy"
+    }
+  ],
+  "speaker": {
+    "name": "Clinic Dispatcher",
+    "voice": "GenericFemale01",
+    "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
+  },
+  "broadcast": [
+    "The patient's a miner who won't come in. Bring a med pack and be patient with him. More patient than he is."
+  ],
+  "_speech": "MB85a's lines, unchanged, so nothing new is voiced."
+}

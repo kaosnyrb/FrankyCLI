@@ -34,6 +34,33 @@ namespace FrankyCLI
             /// <summary>A give's tag, the literal words vanilla opens the player's line with: "[Give Med Pack] ", "[Give 3 Addichrone] ".</summary>
             internal static string GiveTag(string name, int count) => count > 1 ? $"[Give {count} {name}] " : $"[Give {name}] ";
 
+            // OT-9A, a wounded person: vanilla's forms, every one read off OE_BryanB_FamilyInNeed (gen_inspect qalias / qall,
+            // 2026-11-10) except the package, which is the generic one (no OwnerQuest; it sits only while SQ_WoundedState reads
+            // wounded, so HealActor's state change is what stands him up).
+            internal static readonly FormKey WoundedFurniture = FormKey.Factory("02296A:Starfield.esm");      // NPCWoundedLean
+            internal static readonly FormKey CaptiveFurnitureLink = FormKey.Factory("1D3036:Starfield.esm");  // SQ_Link_CaptiveFurniture
+            internal static readonly FormKey CaptiveSitPackage = FormKey.Factory("1D3037:Starfield.esm");     // SQ_Captive_Sit
+            internal static readonly FormKey NoBlockingHellos = FormKey.Factory("1FCA3D:Starfield.esm");      // SQ_CaptiveStateNoBlockingHellos (AV)
+            internal const string WoundedScript = "DefaultCaptiveWoundedAlias";
+
+            /// <summary>DefaultCaptiveWoundedAlias as FamilyInNeed's WoundedSibling carries it: the ten autofill properties, no
+            /// StageToSetWhenHealed (the talk's closer sets the stage; HealActor is called from it).</summary>
+            internal static ScriptEntry WoundedAliasScript()
+            {
+                var sc = new ScriptEntry { Name = WoundedScript };
+                foreach (var (n, fk) in new[]
+                {
+                    ("SQ_Link_CaptiveFurniture", "1D3036"), ("WoundedFaction", "0578FF"),
+                    ("SQ_Wounded_DialogueSubtype_HealedActorGratitude", "05E832"), ("SQ_Captive", "1D3081"),
+                    ("SQ_WoundedState_1_Wounded", "05E834"), ("SQ_WoundedState_0_Unset", "05E835"),
+                    ("SQ_WoundedState", "05E836"), ("SQ_WoundedState_2_Healed", "05E833"),
+                    ("SQ_Captive_FurnitureType_Wounded", "057902"), ("CaptiveFaction", "03E0C8"),
+                })
+                    sc.Properties.Add(new ScriptObjectProperty { Name = n, Flags = ScriptProperty.Flag.Edited,
+                                                                 Object = new FormLink<IStarfieldMajorRecordGetter>(FormKey.Factory(fk + ":Starfield.esm")) });
+                return sc;
+            }
+
             /// <summary>The perk families vanilla tags a dialogue choice with (INFO.Perk census, 2026-10-14).</summary>
             private static readonly string[] CheckPerkFamilies = { "Background", "TRAIT_", "Skill_", "Faction" };
 
@@ -121,6 +148,16 @@ namespace FrankyCLI
                         else if (!CheckPerkFamilies.Any(f => perk.EditorID!.StartsWith(f, StringComparison.OrdinalIgnoreCase)))
                             Warn($"{at} exchanges[{x}].perk '{pn}' is not a background, trait, skill or faction perk; vanilla tags choices only with those, so how the game shows it is unknown.");
                     }
+                // OT-9A: a wounded person is healed by the closer's stage (Fragment's HealActor), as vanilla's two wounded
+                // quests take a med pack and then heal. So the closer hands something over, and there is ONE closer.
+                if (b.person?.wounded == true)
+                {
+                    if (IsBoardSpace(t)) Fatal($"{at} person.wounded on a rescue; a rescue's person rides the ship, she is not lying anywhere.");
+                    if (b.exchanges is { Count: > 0 } && b.exchanges[0].give == null)
+                        Fatal($"{at} person.wounded and exchanges[0] gives nothing: the heal is the hand-over (both vanilla wounded quests take a med pack), so give exchanges[0] an item.");
+                    if (b.exchanges?.Any(e => e.ends != null) == true)
+                        Fatal($"{at} person.wounded with an exchange that ends: the heal is written on the beat's own stage only, so a second closer would leave him lying there.");
+                }
             }
 
             /// <summary>
@@ -137,10 +174,28 @@ namespace FrankyCLI
                 var tp = build.activatorPattern!.DeepCopy(); tp.ID = tid + 1; tp.Name = "DelveBeat" + (i + 1) + "Person";
                 tp.CreateReferenceToObject!.AliasID = (short)tm.ID;
                 build.clone.Aliases.Add(tm);
+                // OT-9A, a wounded person: OE_BryanB_FamilyInNeed's WoundedMarker and WoundedSibling, copied. The furniture is
+                // created at the marker and he AT the furniture, so it goes between them in the list (fill order is list order).
+                QuestReferenceAlias? tf = null;
+                if (build.r.beats[i].person?.wounded == true)
+                {
+                    tf = build.activatorPattern!.DeepCopy(); tf.ID = tid + 2; tf.Name = "DelveBeat" + (i + 1) + "WoundedFurniture";
+                    tf.CreateReferenceToObject!.AliasID = (short)tm.ID;
+                    tf.CreateReferenceToObject.Object.SetTo(WoundedFurniture);
+                    tp.CreateReferenceToObject.AliasID = (short)tf.ID;
+                    // The activator pattern carries no LinkedAliases list, so it is made here (null on the copy, 2026-11-10's dry run).
+                    tp.LinkedAliases ??= new Noggog.ExtendedList<LinkedAlias>();
+                    tp.LinkedAliases.Add(new LinkedAlias { AliasID = (int)tf.ID, Keyword = new FormLinkNullable<IKeywordGetter>(CaptiveFurnitureLink) });
+                    tp.PackageData.Add(new FormLink<IPackageGetter>(CaptiveSitPackage));
+                    build.clone.Aliases.Add(tf);
+                    var entry = NewAliasEntry(build.vma, build.clone.FormKey, (int)tp.ID);
+                    entry.Scripts.Add(WoundedAliasScript());
+                }
                 build.clone.Aliases.Add(tp);
                 build.slotOf[i] = new BeatSlot { markerAlias = (int)tm.ID, activatorAlias = -1, targetAlias = (int)tp.ID, journalStage = build.beatStage[i] };
                 build.talkAlias[i] = tp;
-                Console.WriteLine($"  +slot    : beat {i + 1} (talk) -- marker alias {tm.ID}, person {tp.ID} (created at the marker on quest start)");
+                Console.WriteLine($"  +slot    : beat {i + 1} (talk) -- marker alias {tm.ID}, person {tp.ID} (created at the marker on quest start)"
+                                  + (tf != null ? $"; WOUNDED: furniture {tf.ID} NPCWoundedLean at the marker, he is created at it, linked by SQ_Link_CaptiveFurniture, SQ_Captive_Sit, DefaultCaptiveWoundedAlias" : ""));
                 return 0;
             }
 

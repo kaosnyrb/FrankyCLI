@@ -3746,6 +3746,7 @@ namespace FrankyCLI
             "CreateReferenceToObject", "FindMatchingRefFromEvent", "ForcedReference",
             "UniqueActor", "UniqueBaseForm", "Location", "External",
             "ReferenceCollectionAliasID",
+            "LinkedAliases", "Factions", "PackageData",
         };
 
         // ---------------------------------------------------------------------------------
@@ -3947,6 +3948,18 @@ namespace FrankyCLI
                 foreach (var c in a.Conditions)
                     DumpConditionFull(c, pad + "    ", allMods);
             }
+
+            // What the filled ref is TOLD (2026-11-10, OT-9A): who it is linked to by which keyword, which factions
+            // it joins and which packages it runs. Read off OE_BryanB_FamilyInNeed's WoundedSibling, the vanilla
+            // wounded person, where these three are how he gets into his furniture; until today they printed as a
+            // list's type name in the "not decoded" line.
+            if (a.LinkedAliases != null && a.LinkedAliases.Count > 0)
+                foreach (var la in a.LinkedAliases)
+                    Console.WriteLine($"{pad}  LINKED ALIAS: alias {la.AliasID} by keyword {ResolveName(la.Keyword.FormKey, allMods)}");
+            if (a.Factions != null && a.Factions.Count > 0)
+                Console.WriteLine($"{pad}  FACTIONS: {string.Join(", ", a.Factions.Select(f => ResolveName(f.FormKey, allMods)))}");
+            if (a.PackageData != null && a.PackageData.Count > 0)
+                Console.WriteLine($"{pad}  PACKAGES: {string.Join(", ", a.PackageData.Select(p => ResolveName(p.FormKey, allMods)))}");
 
             if (undecoded.Count > 0)
                 Console.WriteLine($"{pad}  ⚠ not decoded here: {string.Join("  ", undecoded)}");

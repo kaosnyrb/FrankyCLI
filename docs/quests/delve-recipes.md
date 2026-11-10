@@ -647,6 +647,28 @@ hazard of our tooling, not of the engine, so it belongs beside the step it is ab
 - Prefer a row with no ★. A ★ is somebody in the game, and a player may know the face.
 - ⚠ The person's own face lists are ignored, so sliders do nothing on a `face` person.
 
+## A wounded person (`wounded`)
+
+**Built 2026-11-10, plan OT-9A, UNPLAYED** (his *"I think B, it matches vanilla"*). A talk's `person` can set
+`"wounded": true`: he lies in vanilla's wounded pose until the talk's closer heals him. The shape is vanilla's own,
+read off `OE_BryanB_FamilyInNeed`'s `WoundedSibling` (home-office Bethesda manual 44 and its 2026-11-10 Inbox entry):
+
+- An `NPCWoundedLean` furniture alias is created at the beat's marker, and he is created AT it (it sits between the
+  marker and him in the alias list, because fill order is list order).
+- He is linked to it by `SQ_Link_CaptiveFurniture`, runs `SQ_Captive_Sit` (the generic package, which only sits
+  while his `SQ_WoundedState` reads wounded) and carries `DefaultCaptiveWoundedAlias` with vanilla's ten
+  properties, which puts him in `CaptiveFaction` so hostiles leave him be.
+- The entry stage sets `SQ_CaptiveStateNoBlockingHellos` to 1 so he can greet (BrotherInNeed's stage 0).
+- The closer's stage calls `HealActor()` (vanilla's thanks line, out of the faction, up on his feet), as
+  BrotherInNeed's stage 215 does, after `give` has taken the item. A `[wounded]` line in the Papyrus log reads his
+  sit state back.
+
+The lint refuses `wounded` on anything but a talk, a wounded talk whose `exchanges[0]` gives nothing (both vanilla
+wounded quests take a med pack), and one with an `ends` exchange (the heal is on the beat's own stage only).
+⚠ **Why the heal is ours and not the stock "Help" prompt:** the wounded rescue perk's fragment source sends the
+CAPTIVE event, which `DefaultCaptiveWoundedAlias` never hears; vanilla's own wounded quests heal from a stage.
+Probe: `duo_delvetest_w1` (MB85a's Bram, every line cached).
+
 ## Ride: a person comes aboard (`ride`)
 
 **Built 2026-11-04 (plan OT-9H), board only, probe `duo_delvetest_r1`.** The person of an earlier `talk` beat boards the player's ship when the ride's step begins, and is carried to the beat's place. Vanilla's own shape (`RQ_OE_TransportPerson_02`, `RQ_OE_Rescue_01`): the stock `DefaultPassengerQuestScript` on the quest, a `Passengers` collection wearing `DefaultPassengerPackage`, `AddPassenger` from a stage fragment.

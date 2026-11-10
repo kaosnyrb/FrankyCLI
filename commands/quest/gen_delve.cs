@@ -426,6 +426,16 @@ namespace FrankyCLI
             /// Absent = the template's face, at the one tone an unbaked NPC has.
             /// </summary>
             public string? face { get; set; }
+            /// <summary>
+            /// talk, OPTIONAL (plan OT-9A, his 2026-11-02 "there is a wounded animation and a captive animation. We should use NPCs
+            /// and not activators", and 2026-11-10 "B, it matches vanilla"): he lies wounded until the talk's closer heals him.
+            /// Vanilla's own wounded person, read off OE_BryanB_FamilyInNeed's WoundedSibling: an NPCWoundedLean created at the
+            /// marker, he is created AT it, linked to it by SQ_Link_CaptiveFurniture, sits in it on SQ_Captive_Sit, and carries
+            /// DefaultCaptiveWoundedAlias (the pose, CaptiveFaction so hostiles leave him be). The closer's stage calls HealActor(),
+            /// as BrotherInNeed's stage 215 does: the thanks line, out of the faction, up on his feet. exchanges[0] must give
+            /// (both vanilla wounded quests take a med pack). Home-office manual 44 and its 2026-11-10 Inbox entry.
+            /// </summary>
+            public bool wounded { get; set; }
             /// <summary>OPTIONAL: nameless friendly NPCs placed around this person. Absent = they stand alone.</summary>
             public Company? company { get; set; }
             /// <summary>talk, REQUIRED there: the VoiceType EditorID his lines are filed under (GenericMale01 / GenericFemale01).</summary>
