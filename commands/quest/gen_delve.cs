@@ -436,6 +436,14 @@ namespace FrankyCLI
             /// (both vanilla wounded quests take a med pack). Home-office manual 44 and its 2026-11-10 Inbox entry.
             /// </summary>
             public bool wounded { get; set; }
+            /// <summary>
+            /// talk, OPTIONAL (plan OT-9A, his 2026-11-10 "let's do B next"): he kneels bound until the talk's closer frees him.
+            /// Vanilla's board rescue, MB_Rescue01_FCR05's Prisoner: NPCSitFloorCaptive_Kneeling at the marker, he is created at
+            /// the marker, linked to it by SQ_Link_CaptiveFurniture, SQ_Captive_Sit, CaptiveFaction and PlayerAllyFaction on the
+            /// alias, DefaultCaptiveAlias; the closer's stage calls FreePrisoner(), as its stage 100 does. No give needed. Never
+            /// with `wounded` (vanilla's scripts refuse the pair).
+            /// </summary>
+            public bool captive { get; set; }
             /// <summary>OPTIONAL: nameless friendly NPCs placed around this person. Absent = they stand alone.</summary>
             public Company? company { get; set; }
             /// <summary>talk, REQUIRED there: the VoiceType EditorID his lines are filed under (GenericMale01 / GenericFemale01).</summary>

@@ -647,7 +647,7 @@ hazard of our tooling, not of the engine, so it belongs beside the step it is ab
 - Prefer a row with no ★. A ★ is somebody in the game, and a player may know the face.
 - ⚠ The person's own face lists are ignored, so sliders do nothing on a `face` person.
 
-## A wounded person (`wounded`)
+## A wounded or captive person (`wounded`, `captive`)
 
 **Built 2026-11-10, plan OT-9A, UNPLAYED** (his *"I think B, it matches vanilla"*). A talk's `person` can set
 `"wounded": true`: he lies in vanilla's wounded pose until the talk's closer heals him. The shape is vanilla's own,
@@ -667,7 +667,17 @@ The lint refuses `wounded` on anything but a talk, a wounded talk whose `exchang
 wounded quests take a med pack), and one with an `ends` exchange (the heal is on the beat's own stage only).
 ⚠ **Why the heal is ours and not the stock "Help" prompt:** the wounded rescue perk's fragment source sends the
 CAPTIVE event, which `DefaultCaptiveWoundedAlias` never hears; vanilla's own wounded quests heal from a stage.
-Probe: `duo_delvetest_w1` (MB85a's Bram, every line cached).
+Probe: `duo_delvetest_w1` (MB85a's Bram, every line cached). ✅ **PLAYED 2026-11-10 08:31**, his *"He was lieing
+down injured, talked to him and he remained prone. Gave medpack and dialog played as usual. After conversation he
+got up"*. ⚠ Not seen: vanilla's thanks line (`HealActor`'s `SayCustom`) and any stock Help prompt.
+
+**`"captive": true`** (built 2026-11-10, his *"let's do B next"*, UNPLAYED) is the same machinery on vanilla's board
+rescue, `MB_Rescue01_FCR05`'s `Prisoner`: an `NPCSitFloorCaptive_Kneeling` at the marker, he is created at the
+MARKER beside it (not at it), linked by `SQ_Link_CaptiveFurniture`, `SQ_Captive_Sit`, `CaptiveFaction` and
+`PlayerAllyFaction` on the alias, and `DefaultCaptiveAlias` (eleven forms, `AlsoRemoveFromCaptiveFaction` true).
+The closer's stage calls `FreePrisoner()`, as that quest's stage 100 does. No `give` is needed. The lint refuses
+`wounded` and `captive` together (vanilla's scripts say the pair is unsupported), `captive` off a talk, and
+`captive` with `ends`. Probe: `duo_delvetest_f1`. Alias `Factions` now cross the quest model (`gen_questmodel`).
 
 ## Ride: a person comes aboard (`ride`)
 

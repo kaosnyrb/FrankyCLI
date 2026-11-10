@@ -148,6 +148,7 @@ namespace FrankyCLI
                         (r.LinkedAliases ??= new()).Add(nl);   // null on a new alias
                     }
                 if (a.PackageData != null) r.PackageData.AddRange(a.PackageData.Select(k => (IFormLinkGetter<IPackageGetter>)new FormLink<IPackageGetter>(Key(k))));
+                if (a.Factions != null) r.Factions.AddRange(a.Factions.Select(k => (IFormLinkGetter<IFactionGetter>)new FormLink<IFactionGetter>(Key(k))));
                 Link(r.ForcedReference, a.ForcedReference); Link(r.UniqueActor, a.UniqueActor); Link(r.UniqueBaseForm, a.UniqueBaseForm);
                 Link(r.DisplayName, a.DisplayName); Link(r.DeathItem, a.DeathItem); Link(r.ForcedVoice, a.ForcedVoice); Link(r.VoiceTypes, a.VoiceTypes);
                 if (a.InLocation is { } l)

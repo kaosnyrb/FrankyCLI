@@ -455,8 +455,8 @@ namespace FrankyCLI
                 if (r.beats[i].choose == null && r.beats[i].person != null && r.beats[i].type is not ("talk" or "ride"))
                     Fatal($"beat {i + 1} sets person and is not a choose ending or a talk, so it would be silently ignored.");
             for (int i = 0; i < r.beats.Count; i++)
-                if (r.beats[i].person?.wounded == true && (r.beats[i].type != "talk" || r.beats[i].choose != null))
-                    Fatal($"beat {i + 1} person.wounded is a talk's: only a talk's closer heals him (OT-9A), so anywhere else he would lie there for good.");
+                if ((r.beats[i].person?.wounded == true || r.beats[i].person?.captive == true) && (r.beats[i].type != "talk" || r.beats[i].choose != null))
+                    Fatal($"beat {i + 1} person.{(r.beats[i].person!.wounded ? "wounded" : "captive")} is a talk's: only a talk's closer releases him (OT-9A), so anywhere else he would stay held for good.");
             // A reward tier is read on an ENDING: every choose ending, or the beat that is the whole last step (it sets
             // the completing stage, whose pay this replaces). Anywhere else the stage it would pay on completes nothing.
             int soleLast = steps.Count > 0 && !steps[^1].IsChoose && !steps[^1].IsGroup ? steps[^1].Beats[0] : -1;
@@ -834,8 +834,8 @@ namespace FrankyCLI
             public string? Recap;                                        // the completing stage's line, when ending on a group
             public List<(int objective, int alias, int stage)> TargetGates = new();
             public List<(string name, int alias)> Replaced = new();
-            /// <summary>OT-9A: each wounded talk person's beat, alias and heal stage (Fragment), for the verify.</summary>
-            public List<(int beat, int alias, int stage)> Wounded = new();
+            /// <summary>OT-9A: each held (wounded or captive) talk person's beat, alias, release stage and kind (Fragment), for the verify.</summary>
+            public List<(int beat, int alias, int stage, TalkBeat.Held kind)> Held = new();
             public List<int> Holders = new();   // recover beats' empty Optional aliases
             public List<int> SpawnNear = new();   // the holders among them placed outside, carrying SpawnNearScript
             public List<(int on, int to)> SpawnHooks = new();
@@ -2068,18 +2068,20 @@ namespace FrankyCLI
                 // off QF_OE_BryanB_BrotherInNeed_000DAACF: stage 0 lets him greet (the captive system blocks hellos unless
                 // told), stage 215 heals him. Ours: the greet on the entry stage, the heal on the stage the talk's closer sets,
                 // which is after duo_delve_give has taken the item.
+                // A CAPTIVE is the same two lines off MB_Rescue01_FCR05 (its stage 0 sets the hellos value, its stage 100 calls
+                // FreePrisoner()), so one loop writes both kinds off TalkBeat.Held.
                 for (int b = 0; b < r.beats.Count; b++)
                 {
-                    if (r.beats[b].type != "talk" || r.beats[b].person?.wounded != true) continue;
-                    string wa = $"Alias_Beat{b + 1}Wounded";
+                    if (r.beats[b].type != "talk" || TalkBeat.HeldOf(r.beats[b].person) is not TalkBeat.Held h) continue;
+                    string wa = $"Alias_Beat{b + 1}Held";
                     props.Add(("ReferenceAlias", wa, clone.FormKey, slotOf[b].targetAlias));
                     props.Add(("ActorValue", "SQ_CaptiveStateNoBlockingHellos", TalkBeat.NoBlockingHellos, -1));
                     Add(t.entryStage, $"{wa}.TryToSetValue(SQ_CaptiveStateNoBlockingHellos, 1)");
-                    Add(beatStage[b], $"({wa} as {TalkBeat.WoundedScript}).HealActor()");
+                    Add(beatStage[b], $"({wa} as {h.Script}).{h.Release}");
                     Add(beatStage[b], $"{wa}.GetActorRef().EvaluatePackage()");
-                    Add(beatStage[b], $"Debug.Trace(\"[wounded] \" + Self + \" stage {beatStage[b]}: healed \" + {wa}.GetActorRef() + \" sitstate=\" + {wa}.GetActorRef().GetSitState())");   // Actor.psc has SetRestrained and no IsRestrained
-                    bm.Wounded.Add((b, slotOf[b].targetAlias, beatStage[b]));
-                    Console.WriteLine($"  +wounded : beat {b + 1}'s person ({wa}) may greet from stage {t.entryStage}; HealActor() on stage {beatStage[b]}");
+                    Add(beatStage[b], $"Debug.Trace(\"[{h.Kind}] \" + Self + \" stage {beatStage[b]}: {h.Release} on \" + {wa}.GetActorRef() + \" sitstate=\" + {wa}.GetActorRef().GetSitState())");   // Actor.psc has SetRestrained and no IsRestrained
+                    bm.Held.Add((b, slotOf[b].targetAlias, beatStage[b], h));
+                    Console.WriteLine($"  +{h.Kind,-8}: beat {b + 1}'s person ({wa}) may greet from stage {t.entryStage}; {h.Release} on stage {beatStage[b]}");
                 }
 
                 // OT-30, a CHAIN LINK ACCEPTS ITSELF. A board quest started by a script is only LISTED: MissionQuestScript's
@@ -3443,30 +3445,36 @@ namespace FrankyCLI
             }
             // OT-9A, a wounded person, read back against vanilla's WoundedSibling. Each leg is named off the RECORD (alias
             // names and list positions), never off the ids the build printed, so a wrong link cannot agree with itself.
-            foreach (var (wb, wal, wst) in bm.Wounded)
+            foreach (var (wb, wal, wst, h) in bm.Held)
             {
-                string who = $"beat {wb + 1}'s wounded person";
+                string who = $"beat {wb + 1}'s {h.Kind} person";
                 var all = q.Aliases.OfType<IQuestReferenceAliasGetter>().ToList();
                 var pa = all.FirstOrDefault(a => a.ID == (uint)wal);
-                var fu = all.FirstOrDefault(a => a.ID == (uint)(pa?.CreateReferenceToObject?.AliasID ?? -1));
+                // The furniture is found by the LINK (both kinds have one), never by where he is created: a captive is created
+                // at the marker, so his create target says nothing about the furniture.
+                var link = pa?.LinkedAliases?.FirstOrDefault();
+                var fu = all.FirstOrDefault(a => a.ID == (uint)(link?.AliasID ?? -1));
                 var mk = all.FirstOrDefault(a => a.ID == (uint)(fu?.CreateReferenceToObject?.AliasID ?? -1));
-                fail += Check($"{who}: created at an NPCWoundedLean, itself created at the beat's marker",
-                              $"{fu?.Name ?? "no furniture alias"} ({fu?.CreateReferenceToObject?.Object.FormKey}) at {mk?.Name ?? "nothing"}",
-                              $"DelveBeat{wb + 1}WoundedFurniture ({TalkBeat.WoundedFurniture}) at DelveBeat{wb + 1}Marker");
+                var at = all.FirstOrDefault(a => a.ID == (uint)(pa?.CreateReferenceToObject?.AliasID ?? -1));
+                fail += Check($"{who}: linked by SQ_Link_CaptiveFurniture to a {h.FurnitureName}, itself created at the beat's marker",
+                              $"{(link == null ? "no link" : link.Keyword.FormKey.ToString())} to {fu?.CreateReferenceToObject?.Object.FormKey} at {mk?.Name ?? "nothing"}",
+                              $"{TalkBeat.CaptiveFurnitureLink} to {h.Furniture} at DelveBeat{wb + 1}Marker");
+                fail += Check($"{who}: created at {(h.AtFurniture ? "the furniture" : "the marker")} ({h.Source}'s shape)",
+                              at?.Name ?? "nothing", h.AtFurniture ? (fu?.Name ?? "no furniture") : $"DelveBeat{wb + 1}Marker");
                 fail += Check($"{who}: the furniture fills before him (list order)",
                               (fu != null && pa != null && all.IndexOf(fu) < all.IndexOf(pa)).ToString(), "True");
-                fail += Check($"{who}: linked to the furniture by SQ_Link_CaptiveFurniture",
-                              string.Join(", ", pa?.LinkedAliases.Select(l => $"{l.AliasID} by {l.Keyword.FormKey}") ?? Enumerable.Empty<string>()),
-                              $"{fu?.ID} by {TalkBeat.CaptiveFurnitureLink}");
                 fail += Check($"{who}: runs SQ_Captive_Sit",
                               string.Join(", ", pa?.PackageData.Select(p => p.FormKey.ToString()) ?? Enumerable.Empty<string>()), TalkBeat.CaptiveSitPackage.ToString());
+                fail += Check($"{who}: the alias's factions are {h.Source}'s",
+                              string.Join(", ", pa?.Factions.Select(f => f.FormKey.ToString()) ?? Enumerable.Empty<string>()),
+                              string.Join(", ", h.Factions.Select(f => f.ToString())));
                 var ws = q.VirtualMachineAdapter?.Aliases.Where(a => a.Property.Alias == wal).SelectMany(a => a.Scripts)
-                          .FirstOrDefault(s => s.Name == TalkBeat.WoundedScript);
-                fail += Check($"{who}: carries {TalkBeat.WoundedScript} with vanilla's ten properties, every one set",
+                          .FirstOrDefault(s => s.Name == h.Script);
+                fail += Check($"{who}: carries {h.Script} with vanilla's {h.ObjectProps} form properties, every one set",
                               ws == null ? "missing" : $"{ws.Properties.OfType<IScriptObjectPropertyGetter>().Count(p => !p.Object.IsNull)} set",
-                              "10 set");
+                              $"{h.ObjectProps} set");
                 string body = File.ReadAllText(bm.PscPath).Split($"Function {FragmentFunction(wst)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
-                fail += Check($"{who}: stage {wst} (the closer's) heals him", body.Contains($"as {TalkBeat.WoundedScript}).HealActor()").ToString(), "True");
+                fail += Check($"{who}: stage {wst} (the closer's) calls {h.Release}", body.Contains($"as {h.Script}).{h.Release}").ToString(), "True");
             }
             foreach (var (tbeat, tstage, talias, tnpc, nex, tconds) in bm.Talks)
             {

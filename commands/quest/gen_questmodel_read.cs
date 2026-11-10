@@ -226,6 +226,7 @@ namespace FrankyCLI
                             Keywords = r.Keywords?.Select(k => k.FormKey.ToString()).ToList(),
                             DeathItem = Fk(r.DeathItem), ForcedVoice = Fk(r.ForcedVoice), VoiceTypes = Fk(r.VoiceTypes),
                             PackageData = r.PackageData is { Count: > 0 } pk ? pk.Select(k => k.FormKey.ToString()).ToList() : null,
+                            Factions = r.Factions is { Count: > 0 } fc ? fc.Select(k => k.FormKey.ToString()).ToList() : null,
                             Conditions = r.Conditions == null ? null : Conditions(r.Conditions, path + ".Conditions"),
                         };
                         if (r.Location is { } l)
@@ -247,7 +248,7 @@ namespace FrankyCLI
                         }
                         Guard(r, typeof(IQuestReferenceAliasGetter), path, "ID", "Name", "Flags", "ALFG", "AliasIDToForceIntoWhenFilled",
                               "ClosestToAlias", "DisplayName", "LegendaryRank", "ForcedReference", "UniqueActor", "UniqueBaseForm",
-                              "ReferenceCollectionAliasID", "LinkedAliases", "Keywords", "DeathItem", "ForcedVoice", "VoiceTypes", "PackageData", "Conditions", "Location",
+                              "ReferenceCollectionAliasID", "LinkedAliases", "Keywords", "DeathItem", "ForcedVoice", "VoiceTypes", "PackageData", "Factions", "Conditions", "Location",
                               "CreateReferenceToObject", "External");
                         return m;
                     }

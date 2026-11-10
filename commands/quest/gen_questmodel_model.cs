@@ -145,6 +145,9 @@ namespace FrankyCLI
         public string? VoiceTypes { get; set; }
         /// The packages a ref alias puts on whatever fills it (a wave's travel package rides on the collection member).
         public List<string>? PackageData { get; set; }
+        /// The factions a ref alias puts on whatever fills it (2026-11-10, OT-9A: vanilla's rescued prisoner carries CaptiveFaction
+        /// and PlayerAllyFaction here, MB_Rescue01_FCR05). Null = none.
+        public List<string>? Factions { get; set; }
         // loc
         public string? SpecificLocation { get; set; }
         public string? LocationTypeKeyword { get; set; }
