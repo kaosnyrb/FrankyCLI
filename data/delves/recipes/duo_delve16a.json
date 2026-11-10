@@ -16,7 +16,9 @@
     "unless one person who briefs at the talk and speaks again at the deliver needs it.",
     "Voiced lines: no names, no places, no flags. 'Navy' is a role; she never says which navy.",
     "MODELS: the relay dish (approved, his rig) stands in for the comms mast until Kim's kitbash has a mesh path;",
-    "the power cell is vanilla Power_Cell_Static_PackinOnly (Kim's carries pass, C4)."
+    "the power cell is vanilla Power_Cell_Static_PackinOnly (Kim's carries pass, C4).",
+    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, a repair with a read and two finds: the middle tier.",
+    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, a repair with a read and two finds: the middle tier."
   ],
   "place": {
     "theme": {
@@ -144,7 +146,8 @@
       "name": "Relay",
       "say": [
         "Left bay. Good. Right bay. Good. Cells nominal. Log closed. Next."
-      ]
+      ],
+      "reward": "med"
     }
   ],
   "speaker": {

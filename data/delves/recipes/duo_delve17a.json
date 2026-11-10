@@ -15,7 +15,9 @@
     "THE MELT IS REAL (his 2026-10-12 19:28: \"go on, make it a real timer. We can have Mission failure as well,",
     "theres a failed objective animation\"). See `deadline`, PROPOSED: the recipe is the ask (his 10-12).",
     "Voiced lines: no names, no places, no flags. She has seven colleagues and names none of them.",
-    "MODELS: the freight crate stands in for a cool box (Kim's list); the picnic blanket is 13a's, his eye owed."
+    "MODELS: the freight crate stands in for a cool box (Kim's list); the picnic blanket is 13a's, his eye owed.",
+    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): easy, a plain haul, nothing to fight: the bottom tier.",
+    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): easy, a plain haul, nothing to fight: the bottom tier."
   ],
   "place": {
     "theme": {
@@ -129,7 +131,8 @@
       "name": "Lolly Friday",
       "say": [
         "You found it, and it's still cold, it's actually still cold, and we've got loads of time, and you got the cups, and first pick's yours, have a lime one, the lime ones are the best ones."
-      ]
+      ],
+      "reward": "easy"
     }
   ],
   "deadline": {

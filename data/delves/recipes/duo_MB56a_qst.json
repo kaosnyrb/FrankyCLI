@@ -19,7 +19,8 @@
     "the planet carries instead of its name. Whether the engine has a condition for it is the first question.",
     "(2) beats[0].bring: a deliver that takes N of a resource the PLAYER brings, not an item the mission gave him.",
     "His MB11 to MB13 finish on an item put into a container at the site: the prior art for the handover.",
-    "Not narrow, so roles only aloud. The ore's name is an item, not a place or faction, so the voice may say it. Pay: med, placeholder."
+    "Not narrow, so roles only aloud. The ore's name is an item, not a place or faction, so the voice may say it. Pay: med, placeholder.",
+    "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): bring.item is InorgUncommonTungsten; the objective is short, no place and no count (the build appends (n/N)); pinned to Bolivar I, which carries tungsten."
   ],
   "place": {
     "theme": {
@@ -31,8 +32,8 @@
       ]
     },
     "_theme": "A quiet built site with people working it: the crew who are short.",
-    "resource": "Tungsten",
-    "_resource": "STAND-IN: only planets whose resources include tungsten. Not a field yet; Eliza's."
+    "planet": "Bolivar I",
+    "_planet": "Pinned: a planet that carries tungsten. Resource lists off the Starfield wiki's Mined Resources, 2026-11-10 (C:/tmp/planet_resources.json on the rig)."
   },
   "prose": {
     "name": "Requisition: Tungsten for the <Place> on <Planet>",
@@ -44,15 +45,14 @@
       "type": "deliver",
       "at": "REContainerLocRef",
       "replace": true,
-      "objective": "Deliver ten tungsten to the ore hopper at the <Place>",
+      "objective": "Bring tungsten to the ore hopper",
       "model": "ORE HOPPER, UNPICKED",
       "_model": "A hopper or ore bin static, his or Kim's pick; the footlocker is the fallback.",
       "name": "Ore Hopper",
       "bring": {
-        "resource": "Tungsten",
+        "item": "InorgUncommonTungsten",
         "count": 10
       },
-      "_bring": "STAND-IN: completes when ten tungsten go from the player into the hopper. Not a field yet; Eliza's.",
       "message": {
         "title": "Ore Hopper",
         "text": "The hopper takes the tungsten with a long rattle."

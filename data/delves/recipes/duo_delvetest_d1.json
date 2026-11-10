@@ -6,7 +6,10 @@
   "_deal": "The mission board's test node, as 12a.",
   "author": "jessica",
   "source": "his 2026-10-17 09:42: \"yup write sabotage\". The first Delve of the old MB19/MB20 Sabotage families (backport-map.md: no Delve yet, fits today).",
-  "_note": "Eliza 2026-10-28: the destroy beat's test rung, 53a's three scanners shot instead of spoofed (his 'yeah build the beat now, Jessica will rewrite 53a'). Words are 53a's stand-ins until hers.",
+  "_note": [
+    "Eliza 2026-10-28: the destroy beat's test rung, 53a's three scanners shot instead of spoofed (his 'yeah build the beat now, Jessica will rewrite 53a'). Words are 53a's stand-ins until hers.",
+    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, three things to destroy at a guarded site: the middle tier."
+  ],
   "place": {
     "theme": {
       "require": [
@@ -64,5 +67,6 @@
   "broadcast": [
     "You took our job? Remember, don't break anything. A broken scanner gets fixed. A scanner that's wrong gets believed."
   ],
-  "_speech": "The issuer on the radio once the job is taken. Voice is 05a and 18a's (wCizWKvnaS3LOIUwHo98); his ear decides. Radio rules: no names, no places, no factions spoken, no currency."
+  "_speech": "The issuer on the radio once the job is taken. Voice is 05a and 18a's (wCizWKvnaS3LOIUwHo98); his ear decides. Radio rules: no names, no places, no factions spoken, no currency.",
+  "reward": "med"
 }

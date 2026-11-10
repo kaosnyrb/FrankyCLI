@@ -9,7 +9,8 @@
   "_note": [
     "THE MINING FAMILY, 6: THE FUEL RUN (MB56a's b letter). Plan: home-office office/projects/delves/mining-family.md.",
     "EVE's ice: fuel every structure burns forever, so the demand never stops. MB56a's shape with helium-3, Starfield's",
-    "own ship fuel. Same two stand-ins as MB56a (place.resource, beats[0].bring). Pay: med."
+    "own ship fuel. Same two stand-ins as MB56a (place.resource, beats[0].bring). Pay: med.",
+    "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): bring.item is InorgCommonHelium3; the objective is short, no place and no count (the build appends (n/N)); pinned to Andromas III, which carries helium-3."
   ],
   "place": {
     "theme": {
@@ -21,8 +22,8 @@
       ]
     },
     "_theme": "A quiet site with a reactor to keep running.",
-    "resource": "Helium-3",
-    "_resource": "STAND-IN: only planets whose resources include helium-3. MB56a's field."
+    "planet": "Andromas III",
+    "_planet": "Pinned: a planet that carries helium-3. Resource lists off the Starfield wiki's Mined Resources, 2026-11-10 (C:/tmp/planet_resources.json on the rig)."
   },
   "prose": {
     "name": "Requisition: Helium-3 for the <Place> on <Planet>",
@@ -37,12 +38,11 @@
       "model": "FUEL INTAKE, UNPICKED",
       "_model": "A fuel tank or intake static, his or Kim's pick.",
       "name": "Fuel Intake",
-      "objective": "Deliver ten helium-3 to the fuel intake at the <Place>",
+      "objective": "Bring helium-3 to the fuel intake",
       "bring": {
-        "resource": "Helium-3",
+        "item": "InorgCommonHelium3",
         "count": 10
       },
-      "_bring": "STAND-IN: MB56a's field.",
       "message": {
         "title": "Fuel Intake",
         "text": "The intake gauge climbs out of the red."

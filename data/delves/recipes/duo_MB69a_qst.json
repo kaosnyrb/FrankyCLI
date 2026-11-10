@@ -10,7 +10,7 @@
     "THE INDUSTRY FAMILY, 5: THE WHOLE PIPELINE. Plan: home-office office/projects/delves/industry-family.md.",
     "EVE's Producer career track in one job: the ore, the bench, the delivery. A craft whose ingredients include a",
     "mid-rarity ore, then a deliver, at a site on a planet that carries it (MB56a's place.resource).",
-    "STAND-INS: place.resource; the Tungsten ingredient EditorID. Pay: med."
+    "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): the tungsten ingredient is ResInorgUncommonTungsten (a craft takes the Resource record, the lint says so); pinned to Bolivar I."
   ],
   "place": {
     "theme": {
@@ -22,8 +22,8 @@
       ]
     },
     "_theme": "A quiet worked site with a worn-out dig.",
-    "resource": "Tungsten",
-    "_resource": "STAND-IN: only planets whose resources include tungsten. MB56a's field."
+    "planet": "Bolivar I",
+    "_planet": "Pinned: a planet that carries tungsten, so the ore the bits need is local. Resource lists off the Starfield wiki, 2026-11-10."
   },
   "prose": {
     "name": "Fabrication: Drill Bits for the <Place> on <Planet>",
@@ -37,7 +37,7 @@
         "bench": "industrial",
         "ingredients": [
           [
-            "TUNGSTEN, UNRESOLVED",
+            "ResInorgUncommonTungsten",
             6
           ],
           [
@@ -45,7 +45,6 @@
             2
           ]
         ],
-        "_ingredients": "STAND-IN: Tungsten's resource EditorID, Eliza's to resolve.",
         "description": "Drill bits tipped with tungsten, for a dig that wore through its last set."
       },
       "item": "Tungsten Drill Bits",

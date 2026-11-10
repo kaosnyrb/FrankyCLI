@@ -9,7 +9,9 @@
   "_note": [
     "THE MINING FAMILY, 1: THE SURVEY. Plan: home-office office/projects/delves/mining-family.md.",
     "EVE's survey scanner as a job: three sample points in any order (30a's group), a claims office files on the result.",
-    "Buildable today. Pay: med, placeholder."
+    "Buildable today. Pay: med, placeholder.",
+    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, its own note: med.",
+    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, its own note: med."
   ],
   "place": {
     "theme": {
@@ -82,5 +84,6 @@
   "recap": "I took three core samples at the <Place> for a claims office. They'll file on what I sent them.",
   "recapSay": [
     "That's all three. We'll file on these."
-  ]
+  ],
+  "reward": "med"
 }

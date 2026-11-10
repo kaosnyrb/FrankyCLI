@@ -9,7 +9,8 @@
   "_note": [
     "THE MINING FAMILY, 7: CLAIM JUMPERS. Plan: home-office office/projects/delves/mining-family.md.",
     "EVE's guarded asteroid: the fight is the toll for the ore. A clear, then MB56a's counted bring. Cobalt, mid-rarity.",
-    "Same two stand-ins as MB56a. Pay: hard, placeholder."
+    "Same two stand-ins as MB56a. Pay: hard, placeholder.",
+    "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): bring.item is InorgUncommonCobalt; the objective is short, no place and no count (the build appends (n/N)); pinned to Akila, which carries cobalt."
   ],
   "place": {
     "theme": {
@@ -20,8 +21,8 @@
       ]
     },
     "_theme": "A built site somebody has taken: the jumpers.",
-    "resource": "Cobalt",
-    "_resource": "STAND-IN: only planets whose resources include cobalt. MB56a's field."
+    "planet": "Akila",
+    "_planet": "Pinned: a planet that carries cobalt. Resource lists off the Starfield wiki's Mined Resources, 2026-11-10 (C:/tmp/planet_resources.json on the rig)."
   },
   "prose": {
     "name": "Strike: Claim Jumpers on <Planet>",
@@ -50,12 +51,11 @@
       "replace": true,
       "model": "ORE HOPPER, UNPICKED",
       "name": "Ore Hopper",
-      "objective": "Deliver ten cobalt to the ore hopper at the <Place>",
+      "objective": "Bring cobalt to the ore hopper",
       "bring": {
-        "resource": "Cobalt",
+        "item": "InorgUncommonCobalt",
         "count": 10
       },
-      "_bring": "STAND-IN: MB56a's field.",
       "message": {
         "title": "Ore Hopper",
         "text": "The hopper takes the cobalt with a long rattle."

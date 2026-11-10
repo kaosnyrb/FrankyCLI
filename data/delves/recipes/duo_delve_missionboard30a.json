@@ -17,7 +17,9 @@
     "are the shape (list, min, max), the space shell's own target was a ship, and his MB15 has a combat flag.",
     "WORDS: 'Spacers' and the drug's name are faction and item words, so nothing voiced says either. The card says",
     "'contraband' and 'an armed crew'. 'Their base' and 'their ships' are only said because both are placed.",
-    "The broadcast plays at 1500 m (the template's). Closing line on the radio, on the last container. Pay: med, capped."
+    "The broadcast plays at 1500 m (the template's). Closing line on the radio, on the last container. Pay: med, capped.",
+    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, its own note: med, capped.",
+    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, its own note: med, capped."
   ],
   "place": {
     "dressing": [
@@ -82,5 +84,6 @@
     "That's the last one gone."
   ],
   "_recap": "The grouped ending, as 23a: stage 100 carries the recap and the closing radio. boardspace refuses a recapSay today (one beat, so the closing line was its say); with a group it wants this. Reward placement follows 23a.",
-  "_reward": "med, capped. 23a's grouped ending carries no reward tier, so where it goes on a grouped board ending is Eliza's."
+  "_reward": "med, capped. 23a's grouped ending carries no reward tier, so where it goes on a grouped board ending is Eliza's.",
+  "reward": "med"
 }

@@ -10,9 +10,8 @@
     "THE MEDIC FAMILY, 3: THE HOUSE CALL. Plan: home-office office/projects/delves/medic-family.md.",
     "Register: the warm common job. You are the one who turns up.",
     "One patient: a miner who won't come in. The med pack IS the job: the closing prompt takes one from him.",
-    "STAND-IN: exchanges[0].give (his 10-30 item check, [Give Med Pack]; Aid_MedPack read off Starfield.esm). A player",
-    "with none cannot finish, so the card says to bring one. Fallback: capability E (deliver one Aid_MedPack), as his",
-    "old Overtime's 'Deliver 3 Med Pack' did. Pay: easy."
+    "old Overtime's 'Deliver 3 Med Pack' did. Pay: easy.",
+    "GIVE BUILT 2026-11-10 (OT-34, Eliza 11-09): the build prefixes '[Give Med Pack] ', so the prompt is trimmed to 'Hold still.' (silent player line, no revoice). A player with no med pack cannot finish, so the broadcast says to bring one. Pay: easy."
   ],
   "place": {
     "theme": {
@@ -48,19 +47,24 @@
           [
             "It's a scratch. Mostly."
           ]
-        ]
+        ],
+        "_bio": {
+          "age": "forties (authored 2026-11-10)",
+          "from": "a miner on the site (his lines)",
+          "why_there": "cut arguing with a drill, and won't walk in to the clinic (his lines, the broadcast)",
+          "wants": "to not be fussed over, and to get back to work (his lines)"
+        }
       },
       "greeting": [
         "Don't fuss. It's a scratch. A big scratch. Did they send you with a med pack?"
       ],
       "exchanges": [
         {
-          "prompt": "Here's a med pack. Hold still.",
+          "prompt": "Hold still.",
           "give": {
             "item": "Aid_MedPack",
             "count": 1
           },
-          "_give": "STAND-IN: offered only if he carries one, and takes it. Eliza's (mission-parts.md, section F).",
           "reply": [
             "Ow. Right. Thank you. I'd have walked in eventually. Probably."
           ]

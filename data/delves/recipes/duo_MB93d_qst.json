@@ -8,7 +8,7 @@
   "source": "his 2026-10-31 12:48: \"general idea for missioms, meeting up with someone\", then \"yup write em\" 12:51",
   "_note": [
     "THE MEET-UP: a new board family, his idea. The job is turning up; the story is who is there and what they want. Talks at a placed person are built, so most letters need nothing new.",
-    "THE PLAYER'S PART: the order you say it in. He gives two things and tells you to say them how you like; she hears the ship first or the apology first, and that is the ending. Today only exchanges[0] can close a talk, so ship-first is built and apology-first waits in _choice (letter to Eliza 2026-11-07). Until it can be chosen this Delve has no player's part, so it stays unbuilt.",
+    "THE PLAYER'S PART: the order you say it in. He gives two things and tells you to say them how you like; she hears the ship first or the apology first, and that is the ending. Both are built (exchanges[0] and exchanges[1] with ends, Eliza 2026-11-09).",
     "Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
     "LETTER d: THE GO-BETWEEN: two old partners who have not spoken in ten years. He sends: the ship is hers, and he was wrong about the engine. She answers that she'll fetch it herself. The player never goes back; the answer is the end.",
     "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93d.md): rework, findings 1-6 taken, 7 kept. Forced pick answered YES: he put the ship first on purpose so the apology arrived second, and she notices ('he puts it second'). Her close is a decision, not an errand: no 'tell him'.",
@@ -137,7 +137,7 @@
             "journal": "I told his old partner he was wrong about the engine before anything else. She's going to go and see him.",
             "reward": "med"
           },
-          "_ends": "Jessica's _choice, moved verbatim into the closer field by Eliza 2026-11-09 (FrankyCLI 003d814). The pay is the beat's med: hers to change."
+          "_ends": "Jessica's, moved into the closer field by Eliza 2026-11-09 (FrankyCLI 003d814). PAY SET 2026-11-10, Jessica: med, the same as the other ending, on purpose. Neither order is the right one (bad or worse, never good or evil), so neither pays more."
         },
         {
           "prompt": "He sounded like he meant it.",

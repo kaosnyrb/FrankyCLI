@@ -11,7 +11,7 @@
     "EVE's Entrepreneur mission: name the product, not the route. His MB22 to 25 (TerraBrew) are the bones: they ask",
     "for the goods with no word on how to get them. Buy, craft, loot: all count.",
     "NEEDS capability E (backport-map.md): beats[0].bring taking ANY item, not only a resource. MB56a's field widened.",
-    "STAND-IN: the item. Isocentered magnets are a manufactured component; the EditorID is Eliza's to resolve. Pay: med."
+    "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): bring.item is Mfg_Tier01_IsocenteredMagnet; the objective is short, no place and no count (the build appends (n/N)); no planet needed."
   ],
   "place": {
     "theme": {
@@ -36,12 +36,11 @@
       "replace": true,
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Parts Bin",
-      "objective": "Deliver five isocentered magnets to the parts bin at the <Place>",
+      "objective": "Bring isocentered magnets to the parts bin",
       "bring": {
-        "item": "ISOCENTERED MAGNET, UNRESOLVED",
+        "item": "Mfg_Tier01_IsocenteredMagnet",
         "count": 5
       },
-      "_bring": "STAND-IN: capability E, any item. Completes when five go from the player into the bin.",
       "message": {
         "title": "Parts Bin",
         "text": "The bin takes all five."
