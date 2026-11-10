@@ -675,7 +675,12 @@ got up"*. ⚠ Not seen: vanilla's thanks line (`HealActor`'s `SayCustom`) and an
 rescue, `MB_Rescue01_FCR05`'s `Prisoner`: an `NPCSitFloorCaptive_Kneeling` at the marker, he is created at the
 MARKER beside it (not at it), linked by `SQ_Link_CaptiveFurniture`, `SQ_Captive_Sit`, `CaptiveFaction` and
 `PlayerAllyFaction` on the alias, and `DefaultCaptiveAlias` (eleven forms, `AlsoRemoveFromCaptiveFaction` true).
-The closer's stage calls `FreePrisoner()`, as that quest's stage 100 does. No `give` is needed. The lint refuses
+The closer's stage calls `FreePrisoner()`, as that quest's stage 100 does. No `give` is needed. ⭐ **His f1 play
+(2026-11-10): vanilla's own `Set Free` / `Equip & Free` prompts show on him beside Talk**, and they reach
+`DefaultCaptiveAlias`. So on his *"Both will progress the stage"* its `StageToSetWhenFreed` is the beat's stage:
+the prompt or the talk, whichever comes first, completes the beat (MB_Rescue01 leaves it -1, talk only). The
+talk's `FreePrisoner()` is guarded on `BoundFaction`, so a prompt-freed captive is not freed and thanked twice, and
+the `[captive]` log line reads `still bound` back before the guard: `True` is the talk, `False` the prompt. The lint refuses
 `wounded` and `captive` together (vanilla's scripts say the pair is unsupported), `captive` off a talk, and
 `captive` with `ends`. Probe: `duo_delvetest_f1`. Alias `Factions` now cross the quest model (`gen_questmodel`).
 
