@@ -25,6 +25,9 @@ namespace FrankyCLI
                                              Action<string> Fatal, Action<string> Warn)
             {
                 string at = $"beat {i + 1} ({b.type})";
+                // In orbit a defeat is a SHIP (OT-37) and GradeSpace grades it whole; the ground rules below (a player alias to
+                // spawn near, an NPC target, lists) are about a fight on foot.
+                if (IsSpace(t)) return;
                 if (b.model != null || b.name != null || b.replace || b.item != null || b.returnTo != null || b.group != null || b.choose != null)
                     Fatal($"{at} sets model, name, replace, item, returnTo, group or choose; a fight has no object of its own (the enemies are its object), so they would be silently ignored.");
                 void List(string where, string? edid, bool actors)

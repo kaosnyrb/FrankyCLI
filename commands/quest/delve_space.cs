@@ -81,8 +81,21 @@ namespace FrankyCLI
             // activator (it takes the kit and pays itself), or a PICKUP THEN A DELIVER on two scriptless objects in the one
             // cell. The pair is the shape built; every other mix is refused here rather than half-wired.
             bool two = TwoBeatBoard(r, t);
-            if (IsBoardSpace(t) && r.beats.Count == 1 && r.beats[0].type != "use" && r.beats[0].type != "destroy")
-                Fatal($"beat 1 is a '{r.beats[0].type}'; a one-beat board is a use (his MB01a's activator) or a destroy (his MB14a's).");
+            if (IsBoardSpace(t) && r.beats.Count == 1 && r.beats[0].type is not ("use" or "destroy" or "defeat"))
+                Fatal($"beat 1 is a '{r.beats[0].type}'; a one-beat board is a use (his MB01a's activator), a destroy (his MB14a's) or a defeat (vanilla's space bounty ship).");
+            // A DEFEAT IN ORBIT (plan OT-37): a hostile SHIP is the target, vanilla's MB_BountySpace01Far shape. Its one field is
+            // target (an LvlShip_*); everything an activator or a ground defeat carries would be silently ignored.
+            if (r.beats.Any(b => b.type == "defeat") && !SpaceDefeat(r, t))
+                Fatal("a beat is a defeat and this is not a one-beat board; only a one-beat boardspace defeat (a ship) is built in orbit.");
+            if (SpaceDefeat(r, t))
+            {
+                var d = r.beats[0];
+                if (string.IsNullOrWhiteSpace(d.target) || !d.target.StartsWith("LvlShip_", StringComparison.Ordinal))
+                    Fatal("beat 1 is a defeat in orbit; its target names a levelled ship, LvlShip_* (vanilla's space bounty: LvlShip_CrimsonFleet_Combat).");
+                if (d.model != null || d.name != null || d.elite != null || d.gang != null || d.enemies != null || d.loot != null
+                    || d.support != null || d.guards != null || d.ask != null || d.repair || d.scenery != null)
+                    Fatal("beat 1 is a defeat in orbit and sets model, name, elite, gang, enemies, loot, support, guards, ask, repair or scenery; the ship is its own object, so they would be silently ignored.");
+            }
             // A DESTROY IN ORBIT (plan OT-9I): shot from the ship, never pressed, so nothing that rides on a press is built.
             if (r.beats.Any(b => b.type == "destroy") && !SpaceDestroy(r, t))
                 Fatal("a beat is a destroy and this is not a one-beat board; only a one-beat boardspace destroy is built in orbit.");
@@ -125,7 +138,7 @@ namespace FrankyCLI
                 if (!b.at.StartsWith("se_", StringComparison.OrdinalIgnoreCase))
                     Fatal($"beat {i + 1} is at '{b.at}'; an orbit's markers are its space cell's own (se_*), filled from the cell.");
                 if (string.IsNullOrWhiteSpace(b.objective)) Fatal($"beat {i + 1} has no objective; it is the one line that points him at the object.");
-                if (string.IsNullOrWhiteSpace(b.model) || string.IsNullOrWhiteSpace(b.name))
+                if (!SpaceDefeat(r, t) && (string.IsNullOrWhiteSpace(b.model) || string.IsNullOrWhiteSpace(b.name)))
                     Fatal($"beat {i + 1} needs a model and a name: its object is a clone of {(RepairBoard(r, t) ? "the base's own activator" : t.activatorFrom)}, reskinned.");
                 if (b.scenery is Scenery sc)
                 {
@@ -237,6 +250,17 @@ namespace FrankyCLI
         /// </summary>
         private static bool SpaceDestroy(Recipe r, Template t)
             => PlainBoard(r, t) && r.beats[0].type == "destroy";
+
+        /// <summary>
+        /// A one-beat board whose beat is a DEFEAT (plan OT-37, his 2026-11-10 "yeah OT-37"): the target is a hostile SHIP,
+        /// vanilla's own space bounty, which is what this shell's base always was. MB_BountySpace01Far's PrimaryRef creates
+        /// LvlShip_CrimsonFleet_Combat at the cell's marker, Hard, InitiallyDisabled; MissionBountySpaceScript.MissionAccepted
+        /// enables it (line 24, the Enable() every activator board logs as None); the shell's own DefaultAliasOnDeath on
+        /// PrimaryRef sets 100. So the build changes only what PrimaryRef creates and puts the flag back: no clone, no
+        /// health, no hook of ours.
+        /// </summary>
+        private static bool SpaceDefeat(Recipe r, Template t)
+            => PlainBoard(r, t) && r.beats[0].type == "defeat";
 
         /// <summary>
         /// A guarded destroy's guard stage (OT-9I's twin): set by DefaultAliasOnLoad on the object after the accept, so the
@@ -419,6 +443,19 @@ namespace FrankyCLI
                 if (n != 1) { Console.WriteLine($"REFUSED: the activator's script named its base quest {n} time(s); one (questobjective) was expected."); return 1; }
                 Console.WriteLine($"  object   : {act.EditorID} keeps {string.Join(", ", act.VirtualMachineAdapter.Scripts.Select(s => s.Name))}; questobjective now this quest");
             }
+            else if (SpaceDefeat(r, t))
+            {
+                // THE SHIP (OT-37): PrimaryRef creates the recipe's levelled ship, as vanilla's space bounty does, and starts
+                // disabled until the accept enables it (MB01a dropped the flag, right for an activator, wrong for a hostile ship
+                // that would otherwise wait in the cell before he takes the job). No activator: an old _b1 clone is removed.
+                var ship = OwnOrMaster<IGenericBaseFormGetter>(myMod, env, beat.target!);
+                if (ship == null) { Console.WriteLine($"REFUSED: target '{beat.target}' is not a levelled ship (a GenericBaseForm, LvlShip_*) in {myMod.ModKey.FileName} or its masters."); return 1; }
+                target.CreateReferenceToObject!.Object.SetTo(ship.FormKey);
+                target.Flags = (target.Flags ?? 0) | QuestReferenceAlias.Flag.InitiallyDisabled;
+                bm.SpaceShip = ship.FormKey;
+                if (ReskinActivator(myMod, clone, t, r.id + "_b1", -1, null, null) != 0) return 1;
+                Console.WriteLine($"  +ship    : alias {target.ID} {target.Name} creates {beat.target} {ship.FormKey} at alias {target.CreateReferenceToObject.AliasID}, InitiallyDisabled (the accept enables it)");
+            }
             else
             {
                 // THE OBJECT. The shell's target is a ship; it becomes a clone of activatorFrom, reskinned to the beat's model.
@@ -556,7 +593,15 @@ namespace FrankyCLI
 
             // A PLAIN ONE-BEAT BOARD (MB104a, 2026-11-03): our hook sets the completing stage after the accept, as a two-beat
             // board's pickup does. HideAfterUse is the PROMPT (BlockActivation), true on every use; the object itself stays.
-            if (SpaceDestroy(r, t))
+            if (SpaceDefeat(r, t))
+            {
+                // No hook of ours: the shell's own DefaultAliasOnDeath on PrimaryRef completes it. Refused if the shell lost it.
+                var dh = vma.Aliases.FirstOrDefault(a => a.Property.Alias == (int)target.ID)?.Scripts.FirstOrDefault(s => s.Name == "DefaultAliasOnDeath");
+                int set = dh?.Properties.OfType<ScriptIntProperty>().FirstOrDefault(p => p.Name == "StageToSet")?.Data ?? -1;
+                if (set != t.completeStage) { Console.WriteLine($"REFUSED: the shell's PrimaryRef (alias {target.ID}) carries no DefaultAliasOnDeath setting {t.completeStage} (got {set}); the ship's death would complete nothing."); return 1; }
+                Console.WriteLine($"  hook     : alias {target.ID} keeps the shell's DefaultAliasOnDeath (sets {set}); the ship's death completes it");
+            }
+            else if (SpaceDestroy(r, t))
             {
                 // The stock death-of-an-object hook, as the ground destroy's: no prompt to hide, the accept blocked it.
                 var h = StageHook("DefaultAliasOnDestroyed", t.completeStage, t.entryStage);
@@ -1224,10 +1269,16 @@ namespace FrankyCLI
             }
             var target = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)slot.activatorAlias);
             var act = m.Activators.FirstOrDefault(a => a.EditorID == r.id + "_b1");
-            fail += Check($"alias {slot.activatorAlias} creates {r.id}_b1 at marker alias {slot.markerAlias}",
-                          target?.CreateReferenceToObject == null ? "creates nothing"
-                              : $"{target.CreateReferenceToObject.Object.FormKey} at {target.CreateReferenceToObject.AliasID}",
-                          $"{act?.FormKey.ToString() ?? "no activator"} at {slot.markerAlias}");
+            // A defeat's object is the SHIP (OT-37), graded in its own branch below; every other kind creates our _b1 here.
+            if (SpaceDefeat(r, t))
+                fail += Check($"alias {slot.activatorAlias} creates the ship at marker alias {slot.markerAlias}",
+                              target?.CreateReferenceToObject == null ? "creates nothing" : $"at {target.CreateReferenceToObject.AliasID}",
+                              $"at {slot.markerAlias}");
+            else
+                fail += Check($"alias {slot.activatorAlias} creates {r.id}_b1 at marker alias {slot.markerAlias}",
+                              target?.CreateReferenceToObject == null ? "creates nothing"
+                                  : $"{target.CreateReferenceToObject.Object.FormKey} at {target.CreateReferenceToObject.AliasID}",
+                              $"{act?.FormKey.ToString() ?? "no activator"} at {slot.markerAlias}");
             bool two = TwoBeatBoard(r, t);
             int mk = 0;   // OrbitMarkers is written in beat order
             foreach (var (ma, wrote) in bm.OrbitMarkers)
@@ -1285,6 +1336,30 @@ namespace FrankyCLI
                     fail += Check("rescue: she becomes a passenger on the check-in, not the use",
                                   (rideSrc.IndexOf($"Function {FragmentFunction(PickupStage)}()") < rideSrc.IndexOf($"Function {FragmentFunction(50)}()")
                                    && rideSrc.IndexOf(".AddPassenger(") > rideSrc.IndexOf($"Function {FragmentFunction(50)}()")).ToString(), "True");
+                }
+                else if (SpaceDefeat(r, t))
+                {
+                    // A DEFEAT in orbit (OT-37): PrimaryRef creates the recipe's ship, starts disabled, and the shell's death hook
+                    // completes it; no activator of ours and no use hook.
+                    var pr = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)slot.activatorAlias);
+                    // ⚠ The limit, stated: this verify reads only our plugin and has no link cache, so it cannot resolve the
+                    // LvlShip_* itself. It checks that PrimaryRef creates what the BUILD resolved from the recipe's EditorID, and
+                    // that it is a master's record, not one of ours; the EditorID-to-FormKey step is the link cache's.
+                    var made = pr?.CreateReferenceToObject?.Object.FormKey;
+                    fail += Check($"PrimaryRef creates the ship the build resolved from '{r.beats[0].target}'",
+                                  made?.ToString() ?? "nothing", bm.SpaceShip?.ToString() ?? "unresolved");
+                    fail += Check("that ship is a master's record, not one of ours (not an activator clone)",
+                                  made is FormKey shipKey ? (shipKey.ModKey == m.ModKey ? $"ours ({shipKey})" : "a master's") : "nothing", "a master's");
+                    fail += Check("PrimaryRef starts disabled (the accept enables it, vanilla's MB_BountySpace01Far)",
+                                  (pr?.Flags?.HasFlag(QuestReferenceAlias.Flag.InitiallyDisabled) ?? false).ToString(), "True");
+                    var hooks = vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts;
+                    var dh = hooks?.FirstOrDefault(s => s.Name == "DefaultAliasOnDeath");
+                    fail += Check("the ship's death sets the completing stage (the shell's DefaultAliasOnDeath)",
+                                  dh?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == "StageToSet")?.Data.ToString() ?? "no hook",
+                                  t.completeStage.ToString());
+                    fail += Check($"PrimaryRef carries no {UseScript} (a ship is not pressed)",
+                                  (hooks?.Any(s => s.Name == UseScript) ?? false).ToString(), "False");
+                    fail += Check($"no {r.id}_b1 activator is left in the plugin", (objAct != null).ToString(), "False");
                 }
                 else if (SpaceDestroy(r, t))
                 {

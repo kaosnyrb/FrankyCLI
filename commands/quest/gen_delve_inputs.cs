@@ -202,6 +202,8 @@ namespace FrankyCLI
             {
                 var fb = r.beats[i];
                 if (fb.type != "defeat" && fb.type != "clear") continue;
+                // In orbit a defeat's target is a SHIP (OT-37): the space build resolves it (delve_space.cs), not this NPC path.
+                if (IsSpace(t)) continue;
                 var ff = new FightForms();
                 if (fb.elite?.from is string ef)
                 {

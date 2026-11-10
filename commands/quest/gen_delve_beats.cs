@@ -819,6 +819,7 @@ namespace FrankyCLI
             public List<int> ClearGroups = new();   // clear beats' collections: empty, Optional, and wearing NO package (they hold the site)
             public (int cell, int at)? CellAt;      // space only, place.cellAt: the cell member moved, and the alias it is now created at
             public int ArriveStage = -1;            // boardspace only: the arrival-in-system stage the beat's objective shows on
+            public FormKey? SpaceShip;              // boardspace defeat (OT-37): the LvlShip_* the build resolved from the recipe's target
             public int LateFillStage = -1;          // place.second.fill "late": the stage that refills the second place (OT-03)
             public List<int> LateAliases = new();   // ...and what it refills, in order: the place, then each alias filled from it
             public FormKey? PaidGlobal;             // boardspace only: the reward global written onto the board's script, when a tier is set

@@ -1,0 +1,33 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_sk1",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-10 14:26 \"yeah OT-37\": a hostile ship as the target in orbit, vanilla's MB_BountySpace01Far shape",
+  "_note": [
+    "SHIP KILL PROBE SK1 (plan OT-37): one Crimson Fleet ship from vanilla's own list, silent, placeholder words. Not a mission.",
+    "Reading it: take it, go to the system. The ship should NOT be there before you accept, and should be there after. Kill it: the mission completes and pays easy.",
+    "Papyrus.0.log: the board's MissionAccepted line 24 Enable() should now be silent (it enables this ship). Unbuilt once a real ship target has played."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "c1's, sd1's."
+  },
+  "prose": {
+    "name": "Bounty: Ship Probe over <Planet>",
+    "briefing": "Test mission. A pirate ship is holding orbit over <Planet>. Destroy it.",
+    "card": "Test contract. Destroy the pirate ship over <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "se_GeneralMarkerLocRef01",
+      "target": "LvlShip_CrimsonFleet_Combat",
+      "objective": "Destroy the pirate ship over <Planet>",
+      "journal": "Test journal: I destroyed the pirate ship over <Planet>.",
+      "reward": "easy"
+    }
+  ]
+}
