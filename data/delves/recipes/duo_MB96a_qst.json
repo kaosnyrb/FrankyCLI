@@ -11,7 +11,8 @@
     "THE PLAYER'S PART: the fight, then the spend: clear the drop, then one med pack each for three people, in the foreman's order.",
     "REWORKED 2026-11-10 on OT-9A: the wounded are people in talks now, in a fixed order (talks do not group), placed away from RECenterLocRef where the pods land; wounded people sit in CaptiveFaction, so the crews leave them be (Eliza's manual). The details kept: the stitches counted to four, the ribs who asks after the others, the ankle who wants to know if you saw the pods.",
     "Ruth Pargeter's register on the speaker: level, counting, not warm; the care is in the accuracy. Voice borrowed until his ear casts it. No names, places, factions or currency in any voiced line.",
-    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB96a.md): rework, findings 1-5 taken, 6 kept, 7 is the stand-in wounded (Eliza's, already asked). Forced pick answered NO: the foreman's last line is a count and nothing else."
+    "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB96a.md): rework, findings 1-5 taken, 6 kept, 7 is the stand-in wounded (Eliza's, already asked). Forced pick answered NO: the foreman's last line is a count and nothing else.",
+    "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB96a.md): rework, findings 1-6 taken, 7-8 kept. Forced pick: the foreman CANNOT have the last word (the last step is a talk, which carries no radio line), so the count closes in Hollis's mouth instead: the order is now shoulder, young one, ribs, and the man who keeps the count is treated last and says 'Three down, three treated.' The foreman says the whole order."
   ],
   "place": {
     "theme": {
@@ -53,9 +54,9 @@
         }
       },
       "objective": "Clear the pod crews at the <Place>",
-      "journal": "I cleared the pod crews at the <Place>. Now the three hurt in the last drop, starting with the shoulder.",
+      "journal": "I cleared the pod crews at the <Place>. Now the three hurt in the last drop: the shoulder first, then the young one, then the ribs.",
       "say": [
-        "That's the drop dealt with. Three of ours, three med packs. The shoulder first, she's lost the most."
+        "That's the drop dealt with. Three of ours, three med packs. The shoulder first, she's lost the most. Then the young one, then the ribs."
       ]
     },
     {
@@ -93,52 +94,11 @@
         {
           "prompt": "Were you here for the first drop?",
           "reply": [
-            "Both of them. The first time we hid. This time we didn't get the chance."
+            "Both of them. The first one I didn't see coming. This one I hid from."
           ]
         }
       ],
-      "journal": "I stitched a gash across one settler's shoulder. Next, the one with the ribs."
-    },
-    {
-      "type": "talk",
-      "at": "REContainerLocRef",
-      "objective": "Treat the settler with cracked ribs",
-      "person": {
-        "name": "Hollis Grant",
-        "template": "UC_NA_MASTWorkerMale02",
-        "outfit": "Outfit_Clothes_Mechanic_Brown",
-        "voice": "GenericMale01",
-        "elevenlabs": "JBFqnCBsd6RMkjVDRZzb",
-        "wounded": true,
-        "_bio": {
-          "age": "fifties (authored 2026-11-10)",
-          "from": "keeps the count of who still lives here (his lines)",
-          "why_there": "thrown down when a pod landed close (his lines)",
-          "wants": "the others seen to before him (his lines)"
-        }
-      },
-      "greeting": [
-        "You've seen to her? And the young one? Him first, then. I'm only sore."
-      ],
-      "exchanges": [
-        {
-          "prompt": "You're more than sore. Hold still.",
-          "give": {
-            "item": "Aid_MedPack",
-            "count": 1
-          },
-          "reply": [
-            "Ribs. I heard them go when I landed. That's easier. I can breathe in the whole way now."
-          ]
-        },
-        {
-          "prompt": "How many of you live here?",
-          "reply": [
-            "Eleven. Fourteen last month. People leave after the first drop."
-          ]
-        }
-      ],
-      "journal": "I saw to a settler with cracked ribs. He's breathing easier. Last, the young one with the ankle."
+      "journal": "I stitched a gash across one settler's shoulder. Next, the young one with the ankle."
     },
     {
       "type": "talk",
@@ -164,7 +124,7 @@
         }
       },
       "greeting": [
-        "I dived clear and my ankle didn't come with me. Did you see the pods come in? Like falling stars, only they open."
+        "I dived clear and my ankle didn't come with me. They come in like falling stars, only they open."
       ],
       "exchanges": [
         {
@@ -181,6 +141,47 @@
           "prompt": "Weren't you scared?",
           "reply": [
             "After. Not while it was happening. Is that strange?"
+          ]
+        }
+      ],
+      "journal": "I strapped the ankle of a settler who sprained it diving clear. Last, the one with the ribs."
+    },
+    {
+      "type": "talk",
+      "at": "REContainerLocRef",
+      "objective": "Treat the settler with cracked ribs",
+      "person": {
+        "name": "Hollis Grant",
+        "template": "UC_NA_MASTWorkerMale02",
+        "outfit": "Outfit_Clothes_Mechanic_Brown",
+        "voice": "GenericMale01",
+        "elevenlabs": "JBFqnCBsd6RMkjVDRZzb",
+        "wounded": true,
+        "_bio": {
+          "age": "fifties (authored 2026-11-10)",
+          "from": "keeps the count of who still lives here (his lines)",
+          "why_there": "thrown down when a pod landed close (his lines)",
+          "wants": "the others seen to before him, and the count kept (his lines)"
+        }
+      },
+      "greeting": [
+        "You've seen to her? And the young one? Then I'm last, which is right. I'm only sore."
+      ],
+      "exchanges": [
+        {
+          "prompt": "You're more than sore. Hold still.",
+          "give": {
+            "item": "Aid_MedPack",
+            "count": 1
+          },
+          "reply": [
+            "Ribs. I heard them go when I hit the ground. That's easier. Three down, three treated."
+          ]
+        },
+        {
+          "prompt": "How many of you live here?",
+          "reply": [
+            "Fewer than last month. People leave after the first drop."
           ]
         }
       ],

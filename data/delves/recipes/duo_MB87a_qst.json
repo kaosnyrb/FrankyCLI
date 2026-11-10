@@ -10,7 +10,8 @@
     "THE MEDIC FAMILY, 5: FIELD TRIAGE. Plan: home-office office/projects/delves/medic-family.md.",
     "THE PLAYER'S PART: you bring the med packs and spend them. Each treatment is offered only while you carry one, so three people means three packs, and the warden's order (worst first) is the triage.",
     "Register: the warm common job. You are the one who turns up.",
-    "REWORKED 2026-11-10 on OT-9A (Eliza's letter 2026-11-10-eliza-jessica-wounded-and-captives-are-people-now.md, his 'B, it matches vanilla'): the three message boxes became three wounded people in three talks, in a fixed order because talks do not group. The details kept: the cut arm, the burnt hands that say almost nothing, the knock to the head. Voices borrowed until his ear casts them. Pay: med."
+    "REWORKED 2026-11-10 on OT-9A (Eliza's letter 2026-11-10-eliza-jessica-wounded-and-captives-are-people-now.md, his 'B, it matches vanilla'): the three message boxes became three wounded people in three talks, in a fixed order because talks do not group. The details kept: the cut arm, the burnt hands that say almost nothing, the knock to the head. Voices borrowed until his ear casts them. Pay: med.",
+    "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB87a.md): ship, findings 2-5 taken, 6-7 kept. Forced pick answered YES: each give takes the med pack (OT-34 as built), so the triage spends three and every prompt stands; the card now says three."
   ],
   "place": {
     "theme": {
@@ -26,7 +27,7 @@
   "prose": {
     "name": "Rescue: Field Triage at the <Place> on <Planet>",
     "briefing": "Raiders hit the <Place> and left three of its people wounded. The settlement needs someone with med packs.",
-    "card": "Settlement Contract. Treat the wounded settlers at the <Place> on <Planet>. Bring med packs. Payment on contract completion."
+    "card": "Settlement Contract. Treat the wounded settlers at the <Place> on <Planet>. Bring three med packs. Payment on contract completion."
   },
   "beats": [
     {
@@ -69,7 +70,7 @@
         {
           "prompt": "What happened here?",
           "reply": [
-            "They came in shooting at first light, took what they could carry, and left us lying where we fell."
+            "They came in shooting, took what they could carry, and left us where we fell."
           ]
         }
       ],
@@ -120,23 +121,18 @@
           ]
         }
       ],
-      "journal": "I dressed a settler's burnt hands. He barely said a word. Next, the one who took a knock to the head."
+      "journal": "I dressed a settler's burnt hands. Next, the one who took a knock to the head."
     },
     {
       "type": "talk",
       "at": "REContainerLocRef",
-      "objective": "Check on the settler who took a knock",
+      "objective": "Treat the settler who took a knock to the head",
       "person": {
         "name": "Rory Dunne",
         "template": "UC_NA_MASTWorkerMale01",
         "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
         "voice": "GenericMale01",
         "elevenlabs": "CsbTapRVtZdcBs3vBbQe",
-        "hellos": [
-          [
-            "Is it still morning? It feels like it should be morning."
-          ]
-        ],
         "wounded": true,
         "_bio": {
           "age": "early twenties (authored 2026-11-10)",

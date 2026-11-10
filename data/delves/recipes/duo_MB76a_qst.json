@@ -9,7 +9,8 @@
   "_note": [
     "THE COMBAT FAMILY, 4: ESCALATION. Plan: home-office office/projects/delves/combat-family.md.",
     "EVE's expeditions: finishing a site hands you a lead to a harder one. A plain clear whose close points onward.",
-    "THE OUTFIT, link 1 of 2 (2026-11-10): next is MB108a via slate (the clear's message box is the slate). The derelict link and the boss's schematic in chains.md are NOT parts (boarding, a named boss); cut to two links that build today."
+    "THE OUTFIT, link 1 of 2 (2026-11-10): next is MB108a via slate (the clear's message box is the slate). The derelict link and the boss's schematic in chains.md are NOT parts (boarding, a named boss); cut to two links that build today.",
+    "FRANCES 2026-11-10 (MB108a's review, read with this link): ', by the sound of it' cut (the captain heard nothing); the slate ends 'Bring the rest here to meet.' so the next link's 'meeting place' agrees with it."
   ],
   "place": {
     "theme": {
@@ -39,11 +40,11 @@
       "objective": "Clear the gang from the <Place>",
       "message": {
         "title": "Courier's Slate",
-        "text": "One of them carried a slate: coordinates for another site, and a note. Bring the rest here."
+        "text": "One of them carried a slate: coordinates for another site, and a note. Bring the rest here to meet."
       },
       "journal": "I cleared the gang at the <Place>. One of them carried a slate pointing at another site.",
       "say": [
-        "That's them. And they weren't the whole outfit, by the sound of it."
+        "That's them. And they weren't the whole outfit."
       ],
       "reward": "med"
     }

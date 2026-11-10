@@ -10,7 +10,8 @@
     "THE PLAYER'S PART: finding him. The note on his door says where he went and when, and the date is the alarm. Then a med pack (a wounded talk, OT-9A).",
     "CAUSE (rule 2): Rosa asked, because nobody has heard from him in days. Chain-only, so it may remember her (rule 3), but no voiced line names her (no names aloud).",
     "SHAPE (rule 1): link 1 was pickup then talk; this is use (read the door) then a wounded talk.",
-    "Register: the warm common job, and a small fright. Pay: med, more than link 1's easy (rule 6)."
+    "Register: the warm common job, and a small fright. Pay: med, more than link 1's easy (rule 6).",
+    "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB107a.md): ship, findings 2, 3, 8 taken; 4 is paid (the give takes the med pack, OT-34); 5 is paid by the build (person.wounded lies him in vanilla's wounded pose); 1 is the sheet's layout, the date is already inside the box; 6-7 kept. Forced pick answered YES: Sunday is for the patient, so the medic's call says 'My patient' and 'she' in his lines lands on the woman who asked for company."
   ],
   "place": {
     "theme": {
@@ -35,7 +36,7 @@
     "_name": "MB86a's speaker: the same person on the radio, which is the point of a chain."
   },
   "broadcast": [
-    "She told me you're looking in on him. He won't have asked for anyone. Take a med pack, he'll say he doesn't need it."
+    "My patient says you're looking in on him. He won't have asked for anyone. Take a med pack."
   ],
   "beats": [
     {
@@ -95,7 +96,7 @@
           ]
         }
       ],
-      "journal": "A patient of the medic's sent me to look in on an old miner at the <Place>. He'd been down his own dig for four days. I patched him up.",
+      "journal": "A patient of the medic's asked me to look in on an old miner at the <Place>. He'd been down his own dig for four days. I patched him up.",
       "reward": "med"
     }
   ]
