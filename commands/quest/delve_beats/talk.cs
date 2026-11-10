@@ -67,6 +67,7 @@ namespace FrankyCLI
             // vanilla board mission frees by talk, and so do we.
             internal static readonly FormKey CaptiveFurniture = FormKey.Factory("047707:Starfield.esm");     // NPCSitFloorCaptive_Kneeling
             internal const string CaptiveScript = "DefaultCaptiveAlias";
+            internal static readonly FormKey BoundFaction = FormKey.Factory("058610:Starfield.esm");          // BoundFaction
 
             /// <summary>DefaultCaptiveAlias as MB_Rescue01_FCR05's Prisoner carries it: eleven forms and two bools, no StageToSetWhenFreed.</summary>
             internal static ScriptEntry CaptiveAliasScript()
@@ -234,7 +235,14 @@ namespace FrankyCLI
                     foreach (var f in held.Factions) tp.Factions.Add(new FormLink<IFactionGetter>(f));
                     build.clone.Aliases.Add(tf);
                     var entry = NewAliasEntry(build.vma, build.clone.FormKey, (int)tp.ID);
-                    entry.Scripts.Add(held.MakeScript());
+                    var hs = held.MakeScript();
+                    // His 2026-11-10 "lets do B ... Both will progress the stage", after f1: vanilla's own "Set Free" prompt reaches
+                    // DefaultCaptiveAlias (the perk sends CaptiveSetFree), so the stock script's own StageToSetWhenFreed is the
+                    // beat's stage, and freeing him by the prompt completes the beat as the talk does. MB_Rescue01 leaves it -1
+                    // (talk only); ours is the other vanilla setting of the same property. Wounded stays -1: no prompt heals.
+                    if (held == CaptiveHeld)
+                        hs.Properties.Add(new ScriptIntProperty { Name = "StageToSetWhenFreed", Flags = ScriptProperty.Flag.Edited, Data = build.beatStage[i] });
+                    entry.Scripts.Add(hs);
                 }
                 build.clone.Aliases.Add(tp);
                 build.slotOf[i] = new BeatSlot { markerAlias = (int)tm.ID, activatorAlias = -1, targetAlias = (int)tp.ID, journalStage = build.beatStage[i] };

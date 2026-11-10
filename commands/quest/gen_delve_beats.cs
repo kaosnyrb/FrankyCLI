@@ -2077,9 +2077,20 @@ namespace FrankyCLI
                     props.Add(("ReferenceAlias", wa, clone.FormKey, slotOf[b].targetAlias));
                     props.Add(("ActorValue", "SQ_CaptiveStateNoBlockingHellos", TalkBeat.NoBlockingHellos, -1));
                     Add(t.entryStage, $"{wa}.TryToSetValue(SQ_CaptiveStateNoBlockingHellos, 1)");
-                    Add(beatStage[b], $"({wa} as {h.Script}).{h.Release}");
+                    if (h == TalkBeat.CaptiveHeld)
+                    {
+                        // Freed by the stock prompt, FreePrisoner already ran (it set this stage via StageToSetWhenFreed) and took
+                        // him out of BoundFaction first, so the talk's call is guarded: a second one would thank him twice.
+                        props.Add(("Faction", "BoundFaction", TalkBeat.BoundFaction, -1));
+                        // Which path freed him, read back BEFORE the guard: bound=True is the talk, False the stock prompt.
+                        Add(beatStage[b], $"Debug.Trace(\"[captive] \" + Self + \" stage {beatStage[b]}: still bound=\" + {wa}.GetActorRef().IsInFaction(BoundFaction) + \" (True: the talk frees him now; False: Set Free already did)\")");
+                        Add(beatStage[b], $"If {wa}.GetActorRef().IsInFaction(BoundFaction)");
+                        Add(beatStage[b], $"    ({wa} as {h.Script}).{h.Release}");
+                        Add(beatStage[b], "EndIf");
+                    }
+                    else Add(beatStage[b], $"({wa} as {h.Script}).{h.Release}");
                     Add(beatStage[b], $"{wa}.GetActorRef().EvaluatePackage()");
-                    Add(beatStage[b], $"Debug.Trace(\"[{h.Kind}] \" + Self + \" stage {beatStage[b]}: {h.Release} on \" + {wa}.GetActorRef() + \" sitstate=\" + {wa}.GetActorRef().GetSitState())");   // Actor.psc has SetRestrained and no IsRestrained
+                    Add(beatStage[b], $"Debug.Trace(\"[{h.Kind}] \" + Self + \" stage {beatStage[b]}: released \" + {wa}.GetActorRef() + \" sitstate=\" + {wa}.GetActorRef().GetSitState())");   // Actor.psc has SetRestrained and no IsRestrained
                     bm.Held.Add((b, slotOf[b].targetAlias, beatStage[b], h));
                     Console.WriteLine($"  +{h.Kind,-8}: beat {b + 1}'s person ({wa}) may greet from stage {t.entryStage}; {h.Release} on stage {beatStage[b]}");
                 }
@@ -3475,6 +3486,18 @@ namespace FrankyCLI
                               $"{h.ObjectProps} set");
                 string body = File.ReadAllText(bm.PscPath).Split($"Function {FragmentFunction(wst)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
                 fail += Check($"{who}: stage {wst} (the closer's) calls {h.Release}", body.Contains($"as {h.Script}).{h.Release}").ToString(), "True");
+                if (h == TalkBeat.CaptiveHeld)
+                {
+                    // His "Both will progress the stage": the stock prompt's path sets the SAME stage the talk does, and the talk's
+                    // call only runs while he is still bound (so a prompt-freed captive is not freed, and thanked, twice).
+                    var sw = ws?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == "StageToSetWhenFreed");
+                    fail += Check($"{who}: the stock Set Free prompt sets the beat's own stage (StageToSetWhenFreed)", sw?.Data.ToString() ?? "unset", wst.ToString());
+                    // By line ORDER, not whitespace: the psc writer prefixes every line, so an indent-exact needle would miss.
+                    var bl = body.Split('\n').Select(s => s.Trim()).ToList();
+                    int gi = bl.FindIndex(s => s.StartsWith("If ") && s.EndsWith("IsInFaction(BoundFaction)"));
+                    fail += Check($"{who}: the talk frees him only while he is still bound",
+                                  gi < 0 ? "no guard" : $"{bl[gi + 1].EndsWith($".{h.Release}")} then {bl.ElementAtOrDefault(gi + 2)}", "True then EndIf");
+                }
             }
             foreach (var (tbeat, tstage, talias, tnpc, nex, tconds) in bm.Talks)
             {
