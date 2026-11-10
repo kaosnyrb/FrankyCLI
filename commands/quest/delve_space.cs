@@ -81,8 +81,13 @@ namespace FrankyCLI
             // activator (it takes the kit and pays itself), or a PICKUP THEN A DELIVER on two scriptless objects in the one
             // cell. The pair is the shape built; every other mix is refused here rather than half-wired.
             bool two = TwoBeatBoard(r, t);
-            if (IsBoardSpace(t) && r.beats.Count == 1 && r.beats[0].type != "use")
-                Fatal($"beat 1 is a '{r.beats[0].type}'; a one-beat board is a use, his MB01a's activator.");
+            if (IsBoardSpace(t) && r.beats.Count == 1 && r.beats[0].type != "use" && r.beats[0].type != "destroy")
+                Fatal($"beat 1 is a '{r.beats[0].type}'; a one-beat board is a use (his MB01a's activator) or a destroy (his MB14a's).");
+            // A DESTROY IN ORBIT (plan OT-9I): shot from the ship, never pressed, so nothing that rides on a press is built.
+            if (r.beats.Any(b => b.type == "destroy") && !SpaceDestroy(r, t))
+                Fatal("a beat is a destroy and this is not a one-beat board; only a one-beat boardspace destroy is built in orbit.");
+            if (SpaceDestroy(r, t) && (r.beats[0].repair || r.beats[0].ask != null))
+                Fatal($"beat 1 is a destroy and sets {(r.beats[0].repair ? "repair" : "ask")}; it is shot, not used, so that would be silently ignored.");
             if (IsBoardSpace(t) && r.beats.Count >= 2 && !two && !rescue)
                 Fatal($"the beats are {string.Join(" then ", r.beats.Select(x => x.type))}; a board builds a pickup then a deliver, or a rescue's use, talk, ride, talk, and nothing else yet.");
             if (two && string.Equals(r.beats[0].at, r.beats[1].at, StringComparison.OrdinalIgnoreCase))
@@ -218,6 +223,16 @@ namespace FrankyCLI
         /// <summary>A one-beat board that is NOT a repair: a scriptless object, our hook, the stage pays.</summary>
         private static bool PlainBoard(Recipe r, Template t)
             => IsBoardSpace(t) && r.beats.Count == 1 && !r.beats[0].repair;
+
+        /// <summary>
+        /// A one-beat board whose beat is a DESTROY (plan OT-9I, 2026-11-10): a plain board whose object is shot from the ship.
+        /// His classic MB14a (ccs_activatedestroy) does it with BlockActivation on init, OnDestroyed setting the stage, then
+        /// Disable; the ground destroy beat (object.cs) does the same three moves as stock and data, and so does this: the
+        /// clone takes SpaceDestroyTemplate's Destructible, the accept blocks activation, the stock DefaultAliasOnDestroyed
+        /// sets the completing stage, whose first line disables the object.
+        /// </summary>
+        private static bool SpaceDestroy(Recipe r, Template t)
+            => PlainBoard(r, t) && r.beats[0].type == "destroy";
 
         /// <summary>A two-beat board's stages and objective: the pickup's own stage, and the deliver's objective beside the
         /// shell's 20. Neither exists on his MB01a (the build refuses if one does). 40, not 30: the broadcast's arrival is
@@ -402,6 +417,7 @@ namespace FrankyCLI
                 { Console.WriteLine($"REFUSED: activatorFrom '{t.activatorFrom}' carries a script, and a clone would run it."); return 1; }
                 target.CreateReferenceToObject!.Object.SetTo(src.FormKey);
                 if (ReskinActivator(myMod, clone, t, r.id + "_b1", (int)target.ID, beat.model, beat.name) != 0) return 1;
+                if (SpaceDestroy(r, t) && GiveHealth(myMod, r.id + "_b1", SpaceDestroyTemplate) != 0) return 1;
             }
 
             // ITS MARKER: the cell's own, by the beat's ref type (the shell's is kept when the recipe names the same one).
@@ -529,7 +545,15 @@ namespace FrankyCLI
 
             // A PLAIN ONE-BEAT BOARD (MB104a, 2026-11-03): our hook sets the completing stage after the accept, as a two-beat
             // board's pickup does. HideAfterUse is the PROMPT (BlockActivation), true on every use; the object itself stays.
-            if (PlainBoard(r, t) || rescue)
+            if (SpaceDestroy(r, t))
+            {
+                // The stock death-of-an-object hook, as the ground destroy's: no prompt to hide, the accept blocked it.
+                var h = StageHook("DefaultAliasOnDestroyed", t.completeStage, t.entryStage);
+                if (AttachHook(vma, clone.FormKey, (int)target.ID, h, HookEntry.FindOrCreate, true, bm, t.completeStage, t.entryStage) == Hooked.AlreadyCarries)
+                { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnDestroyed."); return 1; }
+                Console.WriteLine($"  +hook    : alias {target.ID} DefaultAliasOnDestroyed sets {t.completeStage} after {t.entryStage}; shot, never pressed");
+            }
+            else if (PlainBoard(r, t) || rescue)
             {
                 int useSets = rescue ? PickupStage : beat.ask != null ? AskStage : t.completeStage;
                 var h = StageHook(UseScript, useSets, t.entryStage,
@@ -577,6 +601,14 @@ namespace FrankyCLI
                 code[arrive] = new() { $"SetObjectiveCompleted({systemObjective})", $"SetObjectiveDisplayed({slot.objective})" };
                 code[t.completeStage] = new() { $"SetObjectiveCompleted({slot.objective})" };
                 bm.ArriveStage = arrive;
+                if (SpaceDestroy(r, t))
+                {
+                    // Shot, never pressed: the accept blocks the prompt (his MB14a's OnInit), and the wreck goes as the
+                    // completing stage's first line (his OnDestroyed's Disable), before anything there can wait.
+                    extraProps.Add(("ReferenceAlias", "Alias_Beat1Target", clone.FormKey, (int)target.ID));
+                    code[t.entryStage].Add("Alias_Beat1Target.GetRef().BlockActivation(True, True)");
+                    code[t.completeStage].Insert(0, "Alias_Beat1Target.GetRef().Disable()");
+                }
 
                 if (two)
                 {

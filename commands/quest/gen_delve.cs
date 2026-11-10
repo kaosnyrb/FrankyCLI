@@ -565,6 +565,15 @@ namespace FrankyCLI
             /// </summary>
             public string? planet { get; set; }
             /// <summary>
+            /// OPTIONAL, a REQUESTED place only (as planet): the EditorID of a Resource (IRES, e.g. "InorgUncommonTungsten") the
+            /// request's planet must have. Written as BodyHasResource(that resource) == 1 on the REQUEST's own conditions, which
+            /// run on the planet, beside the Body* tests habitability uses. ⚠ A PROBE, plan OT-32, his 2026-11-10 "let's do one
+            /// quick probe just incase it works first time": vanilla never puts BodyHasResource on a request (census of every
+            /// quest, condition form, PCM and story-manager node in Starfield.esm + ShatteredSpace.esm, 2026-11-10: zero; its
+            /// only uses are surface flora levelled lists), so whether a request can evaluate it is unproven until played.
+            /// </summary>
+            public string? resource { get; set; }
+            /// <summary>
             /// OPTIONAL, place.second only, a request (remote: true): "late" = the second place is NOT filled when the quest
             /// starts, but when the player finishes the step before its first beat (his 2026-10-30, OT-03: "mark the second
             /// location as optional and fill it when the player reaches the first"). With system "same" the request then means
@@ -1977,8 +1986,8 @@ namespace FrankyCLI
                 // On a board (2026-10-23, missionboard05a, after city01a played): the borrowed second place (the slate base's
                 // FinalLocation, the same alias city01a pinned) is pinned instead of requested. Nothing holds a city near the
                 // first site, and nothing needs to: it is where it is.
-                if (s.remote != null || s.orbit != null || s.parsecs != null || s.habitability != null || s.level != null || s.system != null || s.altitude != null || s.planet != null)
-                    Fatal("place.second.settlement is a PINNED city: remote, orbit, parsecs, habitability, level, system, altitude and planet do not apply to it.");
+                if (s.remote != null || s.orbit != null || s.parsecs != null || s.habitability != null || s.level != null || s.system != null || s.altitude != null || s.planet != null || s.resource != null)
+                    Fatal("place.second.settlement is a PINNED city: remote, orbit, parsecs, habitability, level, system, altitude, planet and resource do not apply to it.");
                 if (s.theme.require.Count > 0 || s.theme.exclude.Count > 0)
                     Fatal("place.second.settlement has a theme; a pinned city is not drawn, so a theme would test nothing.");
                 if (s.who != null) Fatal("place.second.settlement has a who; the city has its own people.");
@@ -2024,6 +2033,11 @@ namespace FrankyCLI
                     Console.WriteLine($"  planet   : {label} only on {p.planet} (GetIsCurrentLocationExact on the request, FFCydoniaZ07's shape). "
                                       + "⚠ The pool below is the WHOLE request corpus: nothing here reads which sites the planet content manager can place on one planet, so a planet that cannot take these markers shows as a full pool and never lists.");
                 }
+                // place.resource (OT-32, a probe): like planet, a REQUEST's own planet test, so only on a request.
+                if (p.resource != null && !(p.remote == true || (label == "place" && IsBoard(t))))
+                    Fatal($"{label}.resource tests a REQUEST's planet, and {label} is not one (a board's own place, or remote: true).");
+                if (p.resource != null && p.planet != null)
+                    Fatal($"{label}.resource and {label}.planet: a pinned planet either has the resource or the Delve never lists; pin, or ask for the resource, not both.");
                 if (p.altitude != null && !(label == "place.third" && p.orbit != null))
                     Fatal($"{label}.altitude is an orbit's; only place.third with orbit (or a space template's place) has one.");
                 if (p.altitude is double alt && !(alt >= OrbitAltitudeBand.min && alt <= OrbitAltitudeBand.max))
@@ -2881,8 +2895,17 @@ namespace FrankyCLI
                                              ResolveKeywords(env, theme.require, _ => { }),
                                              ResolveKeywords(env, theme.exclude, _ => { }));
                 if (fail == 0)
-                    fail += ShapePlanet(clone, PlaceAliasOf(t, pi, made4.ThirdPlaceAlias), PlaceAt(r, pi),
-                                        pi == 0 ? "place" : pi == 1 ? "place.second" : "place.third");
+                {
+                    string plabel = pi == 0 ? "place" : pi == 1 ? "place.second" : "place.third";
+                    FormKey? res = null;
+                    if (PlaceAt(r, pi)?.resource is string rn)
+                    {
+                        if (env.LinkCache.TryResolve<IResourceGetter>(rn, out var rg)) res = rg.FormKey;
+                        else { Console.WriteLine($"REFUSED: {plabel}.resource '{rn}' is not a Resource EditorID in the load order."); fail++; }
+                    }
+                    if (fail == 0)
+                        fail += ShapePlanet(clone, PlaceAliasOf(t, pi, made4.ThirdPlaceAlias), PlaceAt(r, pi), plabel, res);
+                }
             }
             // ⛔ EVERY PLACE HE IS SENT TO RESERVES ITS LOCATION (his 2026-10-28, "can we add it to the linter", after the board
             // base's TargetLocation did not and vanilla's POI encounters took 53a's site). An OE_Location fills without
@@ -3139,19 +3162,26 @@ namespace FrankyCLI
         private const string DestroyTemplate = "duo_MB19a_Scanner";
 
         /// <summary>
-        /// A DESTROY BEAT'S HEALTH, on its own clone: DestroyTemplate's Destructible, deep-copied onto the activator
-        /// ReskinActivator just made as {edid}. Refused if either is missing, never a clone without health, which would
-        /// stand unkillable with its prompt blocked.
+        /// The activator an ORBIT destroy's health is copied from (plan OT-9I, 2026-11-10, his "yeah"): his classic space
+        /// board's Dangerous Asteroid (MB14a, ccs_activatedestroy), shot from a ship in his shipped Overtime. A ground
+        /// scanner's health was tuned for small arms; this one for ship weapons. Only the Destructible is taken.
         /// </summary>
-        private static int GiveHealth(StarfieldMod myMod, string edid)
+        private const string SpaceDestroyTemplate = "duo_MB14a_act";
+
+        /// <summary>
+        /// A DESTROY BEAT'S HEALTH, on its own clone: {from}'s Destructible (DestroyTemplate unless named), deep-copied onto
+        /// the activator ReskinActivator just made as {edid}. Refused if either is missing, never a clone without health,
+        /// which would stand unkillable with its prompt blocked.
+        /// </summary>
+        private static int GiveHealth(StarfieldMod myMod, string edid, string from = DestroyTemplate)
         {
             var act = myMod.Activators.FirstOrDefault(a => a.EditorID == edid);
-            var src = myMod.Activators.FirstOrDefault(a => a.EditorID == DestroyTemplate);
+            var src = myMod.Activators.FirstOrDefault(a => a.EditorID == from);
             if (act == null) { Console.WriteLine($"REFUSED: destroy beat's clone {edid} was not made."); return 1; }
-            if (src?.Destructible == null) { Console.WriteLine($"REFUSED: {DestroyTemplate} has no Destructible to copy."); return 1; }
+            if (src?.Destructible == null) { Console.WriteLine($"REFUSED: {from} has no Destructible to copy."); return 1; }
             act.Destructible = src.Destructible.DeepCopy();
             var d = act.Destructible;
-            Console.WriteLine($"  +health  : {edid} takes {DestroyTemplate}'s Destructible (health {d.Data?.Health}, {d.Stages.Count} stage(s): "
+            Console.WriteLine($"  +health  : {edid} takes {from}'s Destructible (health {d.Data?.Health}, {d.Stages.Count} stage(s): "
                               + string.Join("; ", d.Stages.Select(s => s.ToString()?.Replace(System.Environment.NewLine, " ").Replace("  ", " "))) + ")");
             return 0;
         }
@@ -3692,7 +3722,7 @@ namespace FrankyCLI
         /// request (a pinned city, an orbit, a placed site) has nothing to shape, unless the recipe asked, which is refused:
         /// a dial must never be silently a no-op.
         /// </summary>
-        private static int ShapePlanet(Quest clone, int placeAlias, Place? shape, string label)
+        private static int ShapePlanet(Quest clone, int placeAlias, Place? shape, string label, FormKey? resource = null)
         {
             var loc = clone.Aliases?.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)placeAlias);
             foreach (var (form, field) in PlanetConditionsOff)
@@ -3715,6 +3745,16 @@ namespace FrankyCLI
                 if (PinsPlanet(loc.ALPS.Conditions) != null) { Console.WriteLine($"REFUSED: place alias {placeAlias}'s request already pins a planet; the shell carried one."); return 1; }
                 loc.ALPS.Conditions.Add(PinnedPlanetCondition(Planets[pn]));
                 Console.WriteLine($"  planet   : place alias {placeAlias} {loc.Name} only on {pn} (GetIsCurrentLocationExact {Planets[pn]} == 1, FFCydoniaZ07's)");
+            }
+            // place.resource (OT-32, a PROBE): the request's planet must have the resource. Run on the subject, the planet, as
+            // the habitability form's BodyHasKeyword tests are. No vanilla request carries one (the 2026-11-10 census).
+            if (resource is FormKey rk)
+            {
+                if (loc?.ALPS == null) { Console.WriteLine($"REFUSED: {label}.resource is set and place alias {placeAlias} is not a PCM request, so there is no planet test to write it on."); return 1; }
+                var d = new BodyHasResourceConditionData { Unknown3 = -1 };
+                d.FirstParameter.Link.SetTo(rk);
+                loc.ALPS.Conditions.Add(new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f });
+                Console.WriteLine($"  planet   : place alias {placeAlias} {loc.Name} only on a planet with {shape?.resource} {rk} (BodyHasResource == 1, run on the planet; UNPROVEN, OT-32)");
             }
             return 0;
         }

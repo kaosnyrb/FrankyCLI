@@ -1,0 +1,34 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_sd1",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-10 09:2x \"yeah\" to OT-9I (space destroy) after the five 19 November parts played: the plan's first step, his classic MB14a's destroy ported onto the space board",
+  "_note": [
+    "SPACE DESTROY PROBE SD1 (plan OT-9I): one shot-not-pressed object in orbit, silent, placeholder words. Not a mission.",
+    "Reading it: fly to the asteroid; there is no prompt on it. Shoot it with the ship's weapons: it goes, and the mission completes and pays easy. Papyrus.0.log should hold no error of ours.",
+    "Its health is his MB14a Dangerous Asteroid's (duo_MB14a_act), so if it takes too many or too few shots the fault is that number, not the beat. Unbuilt once a real space destroy has played."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "c1's and MB104a's."
+  },
+  "prose": {
+    "name": "Sabotage: Destroy Probe over <Planet>",
+    "briefing": "Test mission. A dangerous asteroid is drifting over <Planet>. Shoot it to pieces.",
+    "card": "Test contract. Destroy the asteroid over <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "destroy",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Destroy the asteroid over <Planet>",
+      "journal": "Test journal: I shot the asteroid over <Planet> to pieces.",
+      "model": "Meshes\\Landscape\\Rocks\\asteroids\\RockAsteroidRoughLarge01.nif",
+      "name": "Dangerous Asteroid",
+      "reward": "easy"
+    }
+  ]
+}

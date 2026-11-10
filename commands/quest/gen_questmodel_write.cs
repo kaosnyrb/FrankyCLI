@@ -307,6 +307,11 @@ namespace FrankyCLI
             ["BodyHasKeyword"] = new(typeof(IBodyHasKeywordConditionDataGetter), () => new BodyHasKeywordConditionData(),
                 (g, m) => { var x = (IBodyHasKeywordConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
                 (d, m) => { var x = (BodyHasKeywordConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
+            // BodyHasResource (2026-11-10, plan OT-32, a probe): gen_delve place.resource on a request's planet test. The same
+            // fields as BodyHasKeyword (a link, an int, two unused strings), read off the 2026-11-10 census of vanilla's uses.
+            ["BodyHasResource"] = new(typeof(IBodyHasResourceConditionDataGetter), () => new BodyHasResourceConditionData(),
+                (g, m) => { var x = (IBodyHasResourceConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
+                (d, m) => { var x = (BodyHasResourceConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
             ["LocationHasKeyword"] = new(typeof(ILocationHasKeywordConditionDataGetter), () => new LocationHasKeywordConditionData(),
                 (g, m) => { var x = (ILocationHasKeywordConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
                 (d, m) => { var x = (LocationHasKeywordConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
