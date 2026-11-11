@@ -35,8 +35,9 @@
     {
       "type": "pickup",
       "at": "REContainerLocRef",
-      "model": "OLD REGULATOR, UNPICKED",
-      "_model": "A worn machine part, his or Kim's pick.",
+      "replace": true,
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "_model": "PLACEHOLDER CRATE, his 2026-11-11 'build it with a placeholder crate'. The worn regulator itself is still his or Kim's pick. replace: true so the crate stands in for the container at REContainerLocRef, never inside one (MB59a's shape).",
       "name": "Old Regulator",
       "item": "Old Pressure Regulator",
       "objective": "Collect the old regulator from the hauler's drop",
