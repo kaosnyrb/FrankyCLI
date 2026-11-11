@@ -20,7 +20,8 @@
     "Pay: med on the hand-back (it crosses planets, README rule 3).",
     "MODEL: AK_Toolbox_01_Closed, vanilla, STANDS (gen_inspect bounds 2026-10-14), already Overtime's own cargo-run",
     "pickup on MB26 and MB27, so not new to the mod. Not on the Delve approved list yet. Small, about half a metre.",
-    "Voices: not yet heard in game; his ear decides. No names or places in any voiced line."
+    "Voices: not yet heard in game; his ear decides. No names or places in any voiced line.",
+    "SAME SYSTEM 2026-11-11 (his: not across the whole map to deliver a coffee): the second place was any other planet; now another place in the same star system."
   ],
   "author": "jessica",
   "source": "home-office office/projects/delves (his 2026-10-14 ask); shape from duo_artifact_localcargo_qst32a",
@@ -43,14 +44,17 @@
           "LocTypeOE_ThemeCaveKeyword",
           "LocTypeTest"
         ]
-      }
+      },
+      "fill": "late",
+      "system": "same",
+      "_fill": "SAME SYSTEM 2026-11-11, his rule: 'we need to make sure we're not sending them across the whole map just to deliver a coffee'. A small personal delivery stays in the first site's star system (OT-03's late same-system fill, as MB90a)."
     },
     "_theme": "Both ends are working sites with an engineer at them, so no natural landmarks and no caves."
   },
   "prose": {
-    "name": "Hauling: Engineer's Toolbox to <SecondPlanet>",
-    "briefing": "A retiring engineer at the <Place> wants her toolbox taken to the apprentice she trained, who runs his own site at the <SecondPlace> now.",
-    "card": "Retiring after forty years. My toolbox goes to the lad I trained, who runs the <SecondPlace> on <SecondPlanet> now. Mind the big wrench."
+    "name": "Hauling: Engineer's Toolbox to Her Apprentice",
+    "briefing": "A retiring engineer at the <Place> wants her toolbox taken to the apprentice she trained, who runs his own site in this system now.",
+    "card": "Retiring after forty years. My toolbox goes to the lad I trained, who runs his own site in this system now. Mind the big wrench."
   },
   "beats": [
     {

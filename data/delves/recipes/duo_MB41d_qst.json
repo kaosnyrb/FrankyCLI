@@ -10,7 +10,8 @@
     "Sites: industrial OE themes (manual 32: Mining 7 POI types, Power 8, UnderConstruction 8 in vanilla). The pools are small; the lint's pool count decides whether they deal often enough.",
     "Own people, voices, opener and close, not 41a's (card 20261031-071709). Voices borrowed until his ear casts them. No names or places in any voiced line.",
     "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB41d.md): rework, findings 1-5 taken, 6 kept as she allowed. Forced pick answered YES: the kettle reaches her only because her crew is next; the coincidence is hers to notice ('I never once thought it would come to me'), never a destination, or it is the toolbox again.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Delivery Contract. Deliver a kettle from the <Place>, <Planet> to the <SecondPlace>, <SecondPlanet>. Payment on delivery.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Delivery Contract. Deliver a kettle from the <Place>, <Planet> to the <SecondPlace>, <SecondPlanet>. Payment on delivery.\"",
+    "SAME SYSTEM 2026-11-11 (his: not across the whole map to deliver a coffee): the second place was any other planet; now another place in the same star system."
   ],
   "author": "jessica",
   "source": "his 2026-10-31 07:51: \"the cargo run family, where you delover the toolbox, can we add a few industrial ones\"",
@@ -35,14 +36,17 @@
           "LocTypeOE_ThemeCaveKeyword",
           "LocTypeTest"
         ]
-      }
+      },
+      "fill": "late",
+      "system": "same",
+      "_fill": "SAME SYSTEM 2026-11-11, his rule: 'we need to make sure we're not sending them across the whole map just to deliver a coffee'. A small personal delivery stays in the first site's star system (OT-03's late same-system fill, as MB90a)."
     },
     "_theme": "Both ends are working industrial sites with a person at them, so no natural landmarks and no caves."
   },
   "prose": {
-    "name": "Hauling: Crew Kettle to <SecondPlanet>",
-    "briefing": "A construction crew at the <Place> has finished its build, and by tradition its kettle goes to whichever crew breaks ground next, at the <SecondPlace>.",
-    "card": "Our build at the <Place> is done, so the crew kettle goes to whoever breaks ground next. That's the <SecondPlace>. It's tradition."
+    "name": "Hauling: Crew Kettle",
+    "briefing": "A construction crew at the <Place> has finished its build, and by tradition its kettle goes to whichever crew breaks ground next, elsewhere in this system.",
+    "card": "Our build at the <Place> is done, so the crew kettle goes to whoever breaks ground next in this system. It's tradition."
   },
   "beats": [
     {

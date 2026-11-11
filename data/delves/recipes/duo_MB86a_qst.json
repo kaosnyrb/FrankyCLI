@@ -12,7 +12,8 @@
     "The warm chain (home-office office/projects/delves/chains.md): a settlement medic's rounds, one patient per link.",
     "Link 1: take the medicine case from the clinic to a patient at a second site. Her closing talk asks the next one.",
     "THE ROUNDS, link 1 of 2 (2026-11-10): next is MB107a via talk; Rosa's closing reply carries the ask. CAUSE: she knows the medic is short-handed because the player came instead, so she asks him to look in on the one nobody has checked.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Take a medicine case from the <Place> to a patient at the <SecondPlace>. Payment on delivery.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Take a medicine case from the <Place> to a patient at the <SecondPlace>. Payment on delivery.\"",
+    "SAME SYSTEM 2026-11-11 (his: not across the whole map to deliver a coffee): the second place was any other planet; now another place in the same star system."
   ],
   "place": {
     "theme": {
@@ -33,13 +34,16 @@
         "exclude": [
           "LocTypeOE_ThemeCaveKeyword"
         ]
-      }
+      },
+      "fill": "late",
+      "system": "same",
+      "_fill": "SAME SYSTEM 2026-11-11, his rule: 'we need to make sure we're not sending them across the whole map just to deliver a coffee'. A small personal delivery stays in the first site's star system (OT-03's late same-system fill, as MB90a)."
     }
   },
   "prose": {
     "name": "Hauling: The Rounds on <Planet>",
-    "briefing": "The medic at the <Place> is short-handed and has a patient at the <SecondPlace> who needs her medicine today.",
-    "card": "I'm short-handed, and my patient at the <SecondPlace> needs her medicine today. The case is at the <Place>."
+    "briefing": "The medic at the <Place> is short-handed and has a patient elsewhere in this system who needs her medicine today.",
+    "card": "I'm short-handed, and my patient in this system needs her medicine today. The case is at the <Place>."
   },
   "beats": [
     {
