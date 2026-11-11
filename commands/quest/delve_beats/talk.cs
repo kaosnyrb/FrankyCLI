@@ -104,7 +104,12 @@ namespace FrankyCLI
             // Vendors (his 2026-11-11 "having people selling stuff"; probe duo_delvetest_v1), each form read that day on Defiant
             // (home-office manual 44, Vendors): vanilla's open-world vendor faction, its chest base, the link keyword
             // VendorActivatorScript uses, and the stock TopicInfo script that opens the trade screen when a line ends.
-            internal static readonly FormKey VendorFaction = FormKey.Factory("10E2B9:Starfield.esm");     // Vendor_OE_Standard_Faction
+            // ⛔ NOT Vendor_OE_Standard_Faction [10E2B9]: its MerchantContainer (10E231, a shared holding-cell chest) is read
+            // TOGETHER WITH the linked chest, so v1 sold its 7 tungsten and 2 magnets beside the whole generic open-world
+            // stock (his play, 2026-11-11 14:57 and 15:00, "yarp"). SQ_Group_VendorFaction_Default has the same buy/sell
+            // list, rules and hours and NO MerchantContainer: vanilla's own vendor faction for a quest-placed person, one of
+            // 19 Vendor-flagged factions with none (census of 165, the same day).
+            internal static readonly FormKey VendorFaction = FormKey.Factory("354BCE:Starfield.esm");     // SQ_Group_VendorFaction_Default
             internal static readonly FormKey VendorChestSrc = FormKey.Factory("10E232:Starfield.esm");    // Vendor_OE_Standard_Container
             internal static readonly FormKey VendorChestLink = FormKey.Factory("10FCD1:Starfield.esm");   // VendorContainerKeyword01
             internal const string VendorInfoScript = "VendorInfoScript";
@@ -323,7 +328,7 @@ namespace FrankyCLI
                 build.clone.Aliases.Add(tp);
                 if (vc != null)
                     Console.WriteLine($"  +vendor  : beat {i + 1} chest alias {vc.ID} creates {build.r.id}_b{i + 1}_vendorchest (Vendor_OE_Standard_Container's copy, "
-                                      + $"{stock!.Count} item(s)) at the marker, InitiallyDisabled; person {tp.ID} linked to it by VendorContainerKeyword01, in Vendor_OE_Standard_Faction");
+                                      + $"{stock!.Count} item(s)) at the marker, InitiallyDisabled; person {tp.ID} linked to it by VendorContainerKeyword01, in SQ_Group_VendorFaction_Default");
                 build.slotOf[i] = new BeatSlot { markerAlias = (int)tm.ID, activatorAlias = -1, targetAlias = (int)tp.ID, journalStage = build.beatStage[i] };
                 build.talkAlias[i] = tp;
                 Console.WriteLine($"  +slot    : beat {i + 1} (talk) -- marker alias {tm.ID}, person {tp.ID} (created at the marker on quest start)"

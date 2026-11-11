@@ -503,8 +503,10 @@ namespace FrankyCLI
             /// 2026-11-11 (home-office manual 44, Vendors): a copy of Vendor_OE_Standard_Container [10E232] holding this stock is
             /// created DISABLED at his marker (VendorActivatorScript places its chest disabled too), he is linked to it by
             /// VendorContainerKeyword01 [10FCD1] (VendorActivatorScript's SetLinkedRef), and his alias carries
-            /// Vendor_OE_Standard_Faction [10E2B9] (Flags Vendor). An exchange with trade: true opens the trade screen.
-            /// ⚠ UNPROVEN: that the linked chest, not the faction's own MerchantContainer, is what he sells from.
+            /// SQ_Group_VendorFaction_Default [354BCE] (Flags Vendor, no MerchantContainer). An exchange with trade: true opens
+            /// the trade screen. PLAYED on v1 (his 2026-11-11): the screen opens and the linked chest's stock is sold, but a
+            /// faction WITH a MerchantContainer (v1 had Vendor_OE_Standard_Faction) adds its shared generic stock beside it,
+            /// so the faction is the one with none. ⚠ Unplayed on that faction yet (v1's rebuild).
             /// </summary>
             public List<Give>? sells { get; set; }
         }
