@@ -9,7 +9,8 @@
   "_note": [
     "HAIL PROBE HL1 (plan OT-9G, spike office/spikes/2026-11-03-hailing-a-ship.md): one friendly UC citizen cargo ship, vanilla's own hail ship, and a menu cast on it. SILENT (subtitles only) and placeholder words. Not a mission.",
     "Reading it: take it from the board, go to the system. The ship should NOT be there before the accept, and should be after. Hail it. The question the probe answers: does its greeting and the two options below show up in the hail?",
-    "Picking the first option should complete the mission and pay easy; the second should loop back to the menu. Shooting it should complete NOTHING (its death hook is removed)."
+    "Picking the first option should complete the mission and pay easy; the second should loop back to the menu. Shooting it should complete NOTHING (its death hook is removed).",
+    "2026-11-11 10:15, his \"lets test voice\": a speaker added, so the ship's three lines are voiced in GenericMale01 (Oskar's ElevenLabs voice); the player's prompts stay silent. The question: does a ship play its audio?"
   ],
   "place": {
     "altitude": 32.0,
@@ -27,12 +28,30 @@
       "ship": "LvlShip_UCCitizen_Cargo",
       "objective": "Hail the cargo ship over <Planet>",
       "journal": "Test journal: I hailed the cargo ship over <Planet>.",
-      "greeting": ["Test greeting. Cargo ship here, go ahead."],
+      "greeting": [
+        "Cargo ship here. Go ahead, I'm listening."
+      ],
       "exchanges": [
-        {"prompt": "Test: this completes the job.", "reply": ["Test reply. Job done, thanks."]},
-        {"prompt": "Test: this loops back.", "reply": ["Test reply. Ask me something else."]}
+        {
+          "prompt": "Test: this completes the job.",
+          "reply": [
+            "That's the job done. Thanks, Captain, safe travels."
+          ]
+        },
+        {
+          "prompt": "Test: this loops back.",
+          "reply": [
+            "Not much to tell out here. Ask me something else."
+          ]
+        }
       ],
       "reward": "easy"
     }
-  ]
+  ],
+  "speaker": {
+    "name": "UC Mule",
+    "voice": "GenericMale01",
+    "elevenlabs": "N2lVS1w4EtoT3dr4eOWO",
+    "_elevenlabs": "Oskar's (MB106a), a voice already cached and played; GenericMale01 is vanilla's hail ship's voice type too."
+  }
 }

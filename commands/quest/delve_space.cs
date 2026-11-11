@@ -496,11 +496,20 @@ namespace FrankyCLI
                 if (ship == null) { Console.WriteLine($"REFUSED: ship '{beat.ship}' is not a levelled ship (a GenericBaseForm, LvlShip_*) in {myMod.ModKey.FileName} or its masters."); return 1; }
                 target.CreateReferenceToObject!.Object.SetTo(ship.FormKey);
                 target.Flags = (target.Flags ?? 0) | QuestReferenceAlias.Flag.InitiallyDisabled;
-                target.ForcedVoice.SetTo(HailShipVoice);
-                target.VoiceTypes.SetTo(HailShipVoice);
+                // ITS VOICE: the recipe's speaker's voice type when it names one (its lines are then voiced, filed under it),
+                // else vanilla's hail ship's (silent, the probe's).
+                var voice = HailShipVoice;
+                if (r.speaker?.voice is string vn)
+                {
+                    var vtype = OwnOrMaster<IVoiceTypeGetter>(myMod, env, vn);
+                    if (vtype == null) { Console.WriteLine($"REFUSED: speaker.voice '{vn}' is not a VoiceType in {myMod.ModKey.FileName} or its masters."); return 1; }
+                    voice = vtype.FormKey;
+                }
+                target.ForcedVoice.SetTo(voice);
+                target.VoiceTypes.SetTo(voice);
                 bm.SpaceShip = ship.FormKey;
                 if (ReskinActivator(myMod, clone, t, r.id + "_b1", -1, null, null) != 0) return 1;
-                Console.WriteLine($"  +ship    : alias {target.ID} {target.Name} creates {beat.ship} {ship.FormKey} at alias {target.CreateReferenceToObject.AliasID}, InitiallyDisabled, voice {HailShipVoice} (vanilla's hail ship's)");
+                Console.WriteLine($"  +ship    : alias {target.ID} {target.Name} creates {beat.ship} {ship.FormKey} at alias {target.CreateReferenceToObject.AliasID}, InitiallyDisabled, voice {voice}" + (r.speaker == null ? " (vanilla's hail ship's, silent)" : $" ({r.speaker.voice}, the speaker's)"));
             }
             else
             {
@@ -1114,7 +1123,12 @@ namespace FrankyCLI
                 d.FirstParameter = new FormLinkOrIndex<IQuestGetter>(d, clone.FormKey);
                 return new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = want };
             }
-            DialogTopic Line(string name, List<string> texts, out DialogResponses info)
+            // VOICED when the recipe names a speaker (2026-11-11, his "lets test voice"): the ship's own lines go to the voice
+            // step as a talk person's do, filed under the speaker's voice type, which the ship's alias also wears. The player's
+            // prompts stay silent, as every talk's.
+            bool voiced = r.speaker?.voice != null && r.speaker.elevenlabs != null;
+            bool female = r.speaker?.voice?.Contains("Female", StringComparison.OrdinalIgnoreCase) == true;
+            DialogTopic Line(string name, List<string> texts, out DialogResponses info, bool his = true)
             {
                 var topic = new DialogTopic(myMod)
                 {
@@ -1125,7 +1139,8 @@ namespace FrankyCLI
                 };
                 topic.Quest.SetTo(clone.FormKey);
                 info = new DialogResponses(myMod) { EditorID = name + "_info", SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low };
-                AddResponses(myMod, info, texts, topic.FormKey.ID, false, 7.466667f);
+                foreach (var (wem, text) in AddResponses(myMod, info, texts, topic.FormKey.ID, voiced && his, 7.466667f))
+                    bm.TalkLines.Add((wem, text, r.speaker!.voice!, r.speaker.elevenlabs!, female));
                 topic.Responses.Add(info);
                 topic.TopicInfoList = new Noggog.ExtendedList<IFormLinkGetter<IDialogResponsesGetter>> { info.ToLink<IDialogResponsesGetter>() };
                 clone.DialogTopics.Add(topic);
@@ -1154,7 +1169,7 @@ namespace FrankyCLI
             for (int x = 0; x < tb.exchanges!.Count; x++)
             {
                 var ex = tb.exchanges[x];
-                var pt = Line($"{tag}_ask{x + 1}", new List<string> { ex.prompt! }, out var pi);
+                var pt = Line($"{tag}_ask{x + 1}", new List<string> { ex.prompt! }, out var pi, his: false);
                 if (ex.perk != null) { Console.WriteLine($"REFUSED: exchanges[{x}].perk is not built on a talk with a ship (the probe)."); return 1; }
                 var nt = Line($"{tag}_reply{x + 1}", ex.reply!, out var ni);
                 bool closer = x == 0;
@@ -1171,7 +1186,8 @@ namespace FrankyCLI
                 sc.Actions = new Noggog.ExtendedList<ASceneAction> { pa, na };
                 Console.WriteLine($"  +hail    : {sc.EditorID} \"{ex.prompt}\"" + (closer ? $"  (sets {t.completeStage} when the reply ends: the job is done)" : "  (loops to the menu)"));
             }
-            Console.WriteLine($"  hail     : SILENT probe, {1 + tb.exchanges.Count} scene(s), no line voiced (WEMFile 0)");
+            Console.WriteLine(voiced ? $"  hail     : {1 + tb.exchanges.Count} scene(s), the ship's lines voiced in {r.speaker!.voice} ({r.speaker.elevenlabs})"
+                                     : $"  hail     : SILENT, {1 + tb.exchanges.Count} scene(s), no line voiced (WEMFile 0): name a speaker to voice it");
             return 0;
         }
 
@@ -1490,8 +1506,12 @@ namespace FrankyCLI
                     var made = pr?.CreateReferenceToObject?.Object.FormKey;
                     fail += Check($"PrimaryRef creates the ship the build resolved from '{r.beats[0].ship}'", made?.ToString() ?? "nothing", bm.SpaceShip?.ToString() ?? "unresolved");
                     fail += Check("PrimaryRef starts disabled (the accept enables it)", (pr?.Flags?.HasFlag(QuestReferenceAlias.Flag.InitiallyDisabled) ?? false).ToString(), "True");
-                    fail += Check("the ship speaks in vanilla's hail ship's voice (ForcedVoice and VoiceTypes)",
-                                  $"{pr?.ForcedVoice.FormKeyNullable} {pr?.VoiceTypes.FormKeyNullable}", $"{HailShipVoice} {HailShipVoice}");
+                    string gotVoice = $"{pr?.ForcedVoice.FormKeyNullable}";
+                    // A master's voice type (GenericMale01 is Starfield.esm's) cannot be named from this plugin alone, so the
+                    // check is the two fields agreeing and, unvoiced, being vanilla's hail ship's.
+                    fail += Check("the ship's ForcedVoice and VoiceTypes agree" + (r.speaker == null ? $" and are vanilla's hail ship's" : ""),
+                                  $"{gotVoice} {pr?.VoiceTypes.FormKeyNullable}",
+                                  r.speaker == null ? $"{HailShipVoice} {HailShipVoice}" : $"{gotVoice} {gotVoice}");
                     var hooks = vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts;
                     fail += Check("the ship carries no death hook and no use hook (shooting it or pressing it completes nothing)",
                                   string.Join(",", hooks?.Select(s => s.Name) ?? Array.Empty<string>()), "");

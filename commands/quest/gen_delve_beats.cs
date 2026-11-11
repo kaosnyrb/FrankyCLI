@@ -672,7 +672,9 @@ namespace FrankyCLI
             if (spoken.Count > 0 && r.speaker == null) Fatal("there are spoken lines and no speaker: say who speaks them (name, voice, elevenlabs).");
             if (r.speaker != null)
             {
-                if (spoken.Count == 0) Fatal("a speaker is set and nothing is said (no broadcast, no beat says anything), so it would be silently ignored.");
+                // A talk with a SHIP (OT-9G) speaks through its talk: the speaker is the ship's voice, so it is not ignored there.
+                bool shipSpeaks = r.beats.Any(b => b.type == "talk" && b.ship != null);
+                if (spoken.Count == 0 && !shipSpeaks) Fatal("a speaker is set and nothing is said (no broadcast, no beat says anything), so it would be silently ignored.");
                 if (string.IsNullOrWhiteSpace(r.speaker.name)) Fatal("speaker.name is required: it is the name on the subtitle.");
                 else if (Tokens(r.speaker.name).Any()) Fatal("speaker.name carries a <Token>; an NPC name is not an alias context.");
                 if (string.IsNullOrWhiteSpace(r.speaker.elevenlabs)) Fatal("speaker.elevenlabs is required: the voice the audio is generated in.");
