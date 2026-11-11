@@ -2345,8 +2345,11 @@ namespace FrankyCLI
                         props.Add(("ReferenceAlias", mk, clone.FormKey, marker));
                         props.Add(("ReferenceAlias", hz, clone.FormKey, hazardOf[b]));
                         props.Add(("Form", $"Hazard{b + 1}", inputs.Hazards[b], -1));
-                        Add(spawned, $"{mk}.GetRef().PlaceAtMe(Hazard{b + 1}, 1, False, False, True, None, {hz})");
-                        Add(spawned, $"Debug.Trace(\"[hazard] \" + Self + \" stage {spawned}: beat {b + 1}'s zone \" + {hz}.GetRef() + \" at \" + {mk}.GetRef())");
+                        // ⚠ The RETURN is traced apart from the alias (his hz2 play, 2026-11-11: hz1 placed its zone, hz2's
+                        // read None and no status fired, same line): a None return means the engine refused the placement,
+                        // a ref with an empty alias means it placed and did not fill.
+                        Add(spawned, $"ObjectReference zone{b + 1} = {mk}.GetRef().PlaceAtMe(Hazard{b + 1}, 1, False, False, True, None, {hz})");
+                        Add(spawned, $"Debug.Trace(\"[hazard] \" + Self + \" stage {spawned}: beat {b + 1}'s zone: PlaceAtMe returned \" + zone{b + 1} + \", alias holds \" + {hz}.GetRef() + \", hazard \" + Hazard{b + 1} + \", at \" + {mk}.GetRef() + \" (3D loaded \" + {mk}.GetRef().Is3DLoaded() + \")\")");
                         Add(steps[^1].DoneStage, $"If {hz}.GetRef()");
                         Add(steps[^1].DoneStage, $"    {hz}.GetRef().Delete()");
                         Add(steps[^1].DoneStage, "EndIf");
