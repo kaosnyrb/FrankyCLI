@@ -13,7 +13,8 @@
     "fit one at a shipyard and come back. The most ambitious of the family.",
     "STAND-IN: beats[0].ship.cargoMin (the pickup waits until his ship's hold is at least that big). Eliza's.",
     "Pay: hard, placeholder.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Haul a bulk load from the <Place> to the <SecondPlace>. Large cargo hold required. Payment on delivery.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Haul a bulk load from the <Place> to the <SecondPlace>. Large cargo hold required. Payment on delivery.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 20: a hard job may fly further."
   ],
   "place": {
     "theme": {
@@ -35,7 +36,8 @@
           "LocTypeOE_ThemeCaveKeyword"
         ]
       }
-    }
+    },
+    "parsecs": 20
   },
   "prose": {
     "name": "Hauling: Bulk Load on <Planet>",

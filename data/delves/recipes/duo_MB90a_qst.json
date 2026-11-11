@@ -13,7 +13,8 @@
     "⛔ PART IT NEEDS, NOT BUILT: the SAME person talking twice (beats 3 and 5 are Ivo). No recipe does it today. Written here as the same person object on both talks; how it is spelled is Eliza's. Letter 2026-10-31.",
     "Voices borrowed until his ear casts them. No names or places in any voiced line. Pay: med on the return talk.",
     "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB90a.md): rework, findings 1-5 and 7 taken (the mast is half dead: it sends, it cannot hear, which is what an amplifier fixes; the light became a hum because the model's light is unverified); 6 kept as she allowed. Forced pick answered YES: the player tells him the relay heard him, so his return line 'I'll tell her myself, now I can' pays her nights of listening.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Take a signal amplifier from the <Place> on <Planet> and fit it at a site in the same system. Payment on completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Take a signal amplifier from the <Place> on <Planet> and fit it at a site in the same system. Payment on completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -42,7 +43,8 @@
         ]
       },
       "_theme": "B: a small working site, never another relay."
-    }
+    },
+    "parsecs": 12
   },
   "prose": {
     "name": "Repairs: Signal Amplifier on <Planet>",

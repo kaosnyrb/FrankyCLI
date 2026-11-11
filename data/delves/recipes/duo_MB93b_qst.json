@@ -12,7 +12,8 @@
     "Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
     "LETTER b: THE NO-SHOW: nobody is there. Her kit is, with a note: her sister's having a baby and she has the only ship. Nothing hostile, nothing explained further.",
     "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93b.md): ship, findings 1-3 taken (the initial dropped, so a repeat draw is not the same person twice); 4 holds because the objective marker is the kit itself. Forced pick answered NO: the broker learns of the absence as the player did.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Meet a contact at the <Place> on <Planet> and collect the kit she is bringing. Payment on completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Meet a contact at the <Place> on <Planet> and collect the kit she is bringing. Payment on completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -23,7 +24,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "Any built site where two people could arrange to meet: no caves, no natural landmarks."
+    "_theme": "Any built site where two people could arrange to meet: no caves, no natural landmarks.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Recovery: The Contact's Kit",

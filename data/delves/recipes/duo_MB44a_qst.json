@@ -20,7 +20,8 @@
     "Voices: not yet heard in game; his ear decides. No names or places in any voiced line.",
     "2026-10-23 (Eliza): place.second.settlement now builds on a board (city01a played first), so the WHAT DOES NOT BUILD",
     "lines above are history. The talk is at New Atlantis's AutofillGeneric01; see the beat's _at.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Raiders at the <Place> on <Planet> hold our belongings. Recover a brass compass and return it to <SecondPlace>. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Raiders at the <Place> on <Planet> hold our belongings. Recover a brass compass and return it to <SecondPlace>. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -35,7 +36,8 @@
     "second": {
       "settlement": "New Atlantis"
     },
-    "_second": "PROPOSED, city01a's field (there 'Akila City'). Where in New Atlantis is his eye; somewhere a family that has just moved in would live, not the spaceport."
+    "_second": "PROPOSED, city01a's field (there 'Akila City'). Where in New Atlantis is his eye; somewhere a family that has just moved in would live, not the spaceport.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Recovery: Family Compass on <Planet>",

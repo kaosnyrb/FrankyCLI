@@ -15,7 +15,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "Any built site that is not a cave or a natural landmark: somewhere a beacon could be."
+    "_theme": "Any built site that is not a cave or a natural landmark: somewhere a beacon could be.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Survey: Faint Signal on <Planet>",
@@ -30,7 +31,8 @@
     "FAMILY RULE, REFINED 2026-10-31 on the four verdicts: a broadcast may say what KIND of message it is (c's 'supply request', b's all-clear) but not what the source is; and a repeat player may recognise a letter by its call, which is answered by adding letters, not by blanking calls.",
     "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB92a.md): rework, findings 1-4 and 6 taken, 5 kept as allowed. Forced pick answered YES: the broadcast is a message she recorded once and left looping, nine days old when he hears it; 'I've listened to it long enough' is her own voice on repeat.",
     "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Comms Office Contract. A faint signal is coming from the <Place> on <Planet>. Find its source. Payment on completion.\"",
-    "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"You're real. Good.\" became \"You're real. I'd started to think I was imagining the engines.\". A revoice."
+    "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"You're real. Good.\" became \"You're real. I'd started to think I was imagining the engines.\". A revoice.",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "beats": [
     {

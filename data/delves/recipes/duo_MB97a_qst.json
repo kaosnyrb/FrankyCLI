@@ -12,7 +12,8 @@
     "The base is pinned to pirates at the accept (place.faction, plan OT-01), so its residents are the pirates the words name. Fleet members: his 10-31 check stops those missions starting.",
     "Vic Tarrant's register on the speaker (a convoy master): level, dry, unimpressed. Voice borrowed until his ear casts it. No names, places, factions or currency in any voiced line; 'pirates' is a role.",
     "DOES NOT LINT YET, on purpose (2026-11-02): a board has main and a remote second only, no <ThirdPlace> token, and the Crimson pin is refused until the member gate exists. His 07:52: \"ask Eliza to look at N places. should be possible\". Letter: home-office office/correspondence/2026-11-02-jessica-eliza-n-places.md.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Trace the pirates hitting traders in this system, then clear their base. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Trace the pirates hitting traders in this system, then clear their base. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): minLevel 15: a pirate base at the end of a trace; parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -51,7 +52,8 @@
         ]
       }
     },
-    "_themes": "THREE DISJOINT POOLS: a trader hit in the open (natural), a trading stop hit (quiet), the base (built, hostile)."
+    "_themes": "THREE DISJOINT POOLS: a trader hit in the open (natural), a trading stop hit (quiet), the base (built, hostile).",
+    "parsecs": 12
   },
   "prose": {
     "name": "Hunt: Signal Traces",
@@ -121,5 +123,6 @@
       ],
       "reward": "med"
     }
-  ]
+  ],
+  "minLevel": 15
 }

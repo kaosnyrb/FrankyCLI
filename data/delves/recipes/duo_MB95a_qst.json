@@ -12,7 +12,8 @@
     "The clear's near trigger may fire at once if he is already inside 250 after the talk (unmeasured, recipe doc). For a defence that is the wanted behaviour: they land as soon as the chat ends.",
     "Momo's register: genki, delighted by small logistics, never sad. Voice borrowed until his ear casts it. No names, places, factions or currency in any voiced line.",
     "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB95a.md): rework, findings 1-6 taken, 7 kept. Forced pick answered YES: the raiders are on her schedule today, so the walk-up says he is in time and the fight arrives when she said.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Defend the <Place> on <Planet> from a drop pod raid. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Defend the <Place> on <Planet> from a drop pod raid. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -24,7 +25,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "Quiet sites with residents, open sky at the centre for the pods."
+    "_theme": "Quiet sites with residents, open sky at the centre for the pods.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Defense: Drop Pods at the <Place> on <Planet>",

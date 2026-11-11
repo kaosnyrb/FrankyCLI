@@ -10,7 +10,8 @@
     "CARD BY VANCE OKONKWO-REYES (2026-11-04, his: 'Each mission is set by a different person, we should use pennames'; no payer label or payment line, his 'redundant noise'). Was: Private Contract. Plant a tracker on the ship at the <Place> on <Planet>, then leave. Payment on contract completion.",
     "THE COMBAT FAMILY, 8: RECON. Plan: home-office office/projects/delves/combat-family.md.",
     "EVE's recon missions: reach the point and leave; the fight is optional. Plant a tracker, then get clear.",
-    "STAND-INS: a landed ship static (model); beat type 'escape' (done at a distance from the site). Eliza's. Pay: med."
+    "STAND-INS: a landed ship static (model); beat type 'escape' (done at a distance from the site). Eliza's. Pay: med.",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -20,7 +21,8 @@
         "LocTypeOE_ThemeCaveKeyword"
       ]
     },
-    "_theme": "A built site with a crew's ship on the ground."
+    "_theme": "A built site with a crew's ship on the ground.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Sabotage: Tracker at the <Place> on <Planet>",

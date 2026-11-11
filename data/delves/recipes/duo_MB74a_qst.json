@@ -11,7 +11,8 @@
     "Abyssal Deadspace's timer: clear the site and shut the reactor down before it fails. The deadline field exists",
     "(17a). The words stay replay-true; only the mechanic has a clock. The fail text claims no explosion nobody sees.",
     "Pay: hard.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Clear the <Place> on <Planet> and shut down its reactor before it fails. Time-critical. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Clear the <Place> on <Planet> and shut down its reactor before it fails. Time-critical. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): minLevel 10: a crew holding a failing reactor; parsecs 20: a hard job may fly further."
   ],
   "place": {
     "theme": {
@@ -22,7 +23,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "Industrial interiors, which carry a reactor's worth of machinery."
+    "_theme": "Industrial interiors, which carry a reactor's worth of machinery.",
+    "parsecs": 20
   },
   "prose": {
     "name": "Danger: Failing Reactor at the <Place> on <Planet>",
@@ -82,5 +84,6 @@
       ],
       "journal": "I didn't reach the reactor controls at the <Place> in time."
     }
-  }
+  },
+  "minLevel": 10
 }

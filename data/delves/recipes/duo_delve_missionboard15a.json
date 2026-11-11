@@ -17,7 +17,8 @@
     "Every word holds at any military site: nothing names the site, the faction or the weather; everything the lines",
     "point at is placed. Pay: med, capped.",
     "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover a soldier's discharge papers from the <Place> on <Planet>. Discretion appreciated. Payment on contract completion.\"",
-    "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"Whatever you've heard.\" became \"Whatever you've heard about me, I'd rather you heard it from me.\". A revoice."
+    "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"Whatever you've heard.\" became \"Whatever you've heard about me, I'd rather you heard it from me.\". A revoice.",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -28,7 +29,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "Military sites; the family's marker set."
+    "_theme": "Military sites; the family's marker set.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Recovery: Deserter's Papers on <Planet>",

@@ -16,7 +16,8 @@
     "Written to the delve marker set (outside entrance, centre, item markers, boss, wounded) on his ruling, so the",
     "lint pool is EMPTY on military sites until the markers are on them (missionboard06a's note says why).",
     "Every word holds at any military site: nothing names the site, the faction or the weather; everything the lines",
-    "point at is placed. Pay: med, capped."
+    "point at is placed. Pay: med, capped.",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -27,7 +28,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "Military sites; the family's marker set."
+    "_theme": "Military sites; the family's marker set.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Sabotage: Beacon Network on <Planet>",

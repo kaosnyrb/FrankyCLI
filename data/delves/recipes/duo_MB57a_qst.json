@@ -12,7 +12,8 @@
     "Buildable today. Pay: med, placeholder.",
     "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, its own note: med.",
     "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, its own note: med.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Take three core samples at the <Place> on <Planet> before the claim is filed. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Take three core samples at the <Place> on <Planet> before the claim is filed. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -24,7 +25,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "A wild site: nobody's claim yet, which is the point."
+    "_theme": "A wild site: nobody's claim yet, which is the point.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Survey: Core Samples at the <Place> on <Planet>",

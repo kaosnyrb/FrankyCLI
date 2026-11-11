@@ -14,7 +14,8 @@
     "Voices borrowed until his ear casts them. No names, places or currency in any voiced line. Pay: med (it leaves the ground, README rule 3).",
     "The closing radio is about the box and stops: it cannot forecast the pirates, because on the loud run that says it for them and on the quiet run it is a threat the game never pays. 'Until somebody comes for it' is answered by the pirates when they come and by nobody when they do not.",
     "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB91a.md): rework, findings 1-5 taken, 6 and 7 kept as she allowed. Forced pick answered NO: no voiced line says or implies the ship came to harm; she believes it late and silent, and the pirates are the first to say what happened to it.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Research Contract. Take a sample from the <Place> on <Planet> up to the site's cargo dropbox in orbit. Payment on delivery.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Research Contract. Take a sample from the <Place> on <Planet> up to the site's cargo dropbox in orbit. Payment on delivery.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -31,7 +32,8 @@
     "third": {
       "orbit": "planet",
       "_orbit": "The orbit over the site's planet, so the dropbox is in the same system. Scope 'planet' never started (only 'player' has, on 33a); Eliza's call."
-    }
+    },
+    "parsecs": 12
   },
   "prose": {
     "name": "Hauling: Research Sample to Orbit",

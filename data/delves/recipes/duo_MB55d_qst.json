@@ -11,7 +11,8 @@
     "PEN NAME: home-office office/pennames/momo-hazuki.json. Her heat checks do not apply; her voice does. Plant Control in Momo's register: delighted, direct, exclamations, one list that gets away from it. It tells everyone everything. Nothing melancholy, and it never ends quieter than it started.",
     "Words name the occupiers by role, never by faction name (his ruling: thugs, mercenaries, never the proper name). Journals are the player's record, first person, per Frances on MB55a (2026-10-29).",
     "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB55d.md): rework, all six findings taken. Forced pick answered NO (residents at arrival are not proven for every draw), so the scavengers pick the place over rather than live in it, and the close no longer calls the facility safe.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Shut down the runaway plant at the <Place> on <Planet>, picked over by scavengers. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Shut down the runaway plant at the <Place> on <Planet>, picked over by scavengers. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -24,7 +25,8 @@
     },
     "_theme": "Industrial dungeons; the delve marker set.",
     "faction": "Spacers",
-    "_faction": "Pinned at the accept (plan OT-01): residents and waves are the scavengers, so the words may say so."
+    "_faction": "Pinned at the accept (plan OT-01): residents and waves are the scavengers, so the words may say so.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Repairs: Runaway Plant on <Planet>",

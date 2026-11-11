@@ -11,7 +11,8 @@
     "Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
     "LETTER a: THE HANDOVER: the contact hands over a sealed case with a condition the client was never told; the client's one line on delivery is that it is lighter than promised. TIE Fighter's second briefing, done through a person.",
     "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93a.md): rework, findings 1-4 taken, 5 and 6 kept. Forced pick answered NO: the client learns it is short, never why; the contact refuses to send word, so the player makes no promise the job cannot keep.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Meet a contact at the <Place> on <Planet> and take what they hand over to a drop in the same system. Payment on delivery.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Meet a contact at the <Place> on <Planet> and take what they hand over to a drop in the same system. Payment on delivery.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -36,7 +37,8 @@
           "LocTypeTest"
         ]
       }
-    }
+    },
+    "parsecs": 12
   },
   "prose": {
     "name": "Hauling: Sealed Case to the Client",

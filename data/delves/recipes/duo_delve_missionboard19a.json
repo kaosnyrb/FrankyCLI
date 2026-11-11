@@ -13,7 +13,8 @@
     "Industrial dungeons (LocTypeDungeon_ThemeIndustrial, 20 per Eliza's count), vanilla interiors that carry the",
     "delve markers today. Every word holds in any of them: nothing names the site, the faction or what the plant",
     "made; everything a line points at is placed. Pay: med, capped.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Repair the two coolant pumps at the <Place> on <Planet>. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Repair the two coolant pumps at the <Place> on <Planet>. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -24,7 +25,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "Industrial dungeons; the delve marker set."
+    "_theme": "Industrial dungeons; the delve marker set.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Repairs: Coolant Pumps on <Planet>",

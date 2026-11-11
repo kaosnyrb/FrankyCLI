@@ -12,7 +12,8 @@
     "beats Delve; on the board it is the lint's and Eliza's to confirm.",
     "Issuer: the owners waiting on a signature. Single ending, so the clear's say is the closing radio.",
     "Pay: med, placeholder; the tier is his.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Clear the creatures from our site at the <Place> on <Planet>. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Clear the creatures from our site at the <Place> on <Planet>. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -23,7 +24,8 @@
         "LocTypeOE_ThemeCaveKeyword"
       ]
     },
-    "_theme": "A quiet built site that SHOULD be someone's: the creatures are the reason it is empty."
+    "_theme": "A quiet built site that SHOULD be someone's: the creatures are the reason it is empty.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Infestation: Unsigned Survey on <Planet>",

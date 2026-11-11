@@ -11,7 +11,8 @@
     "EVE's retrieve-the-goods-from-a-structure: break the crew's stash open, take the shipment. A destroy, then a",
     "pickup where it stood (MB58a's shape). STAND-IN: the explosion (a blast that resolves). Pay: med.",
     "FIXED 2026-11-10 (OT-36): the stash breaks to fragGrenadeExplosion and sits on REContainerLocRef; it is EMPTY, and the shipment is under a tarp at RECenterLocRef (median 24 m, gen_delve spread). A small find-by-looking, which is a player's part of its own.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Insurance Contract. Recover a stolen shipment from the crew's stash at the <Place> on <Planet>. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Insurance Contract. Recover a stolen shipment from the crew's stash at the <Place> on <Planet>. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -28,7 +29,8 @@
       "min": 3,
       "max": 5,
       "beat": 1
-    }
+    },
+    "parsecs": 12
   },
   "prose": {
     "name": "Recovery: Stolen Shipment at the <Place> on <Planet>",

@@ -11,7 +11,8 @@
     "Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
     "LETTER c: THE WRONG PERSON: her brother is there instead. She got the job she wanted for six years and shipped out this morning, and sent him because she had promised.",
     "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93c.md): ship, findings 1-4 and 6 taken, 5 kept. Forced pick answered YES: the letter can be drawn again, so the brother no longer dates her leaving ('this morning' is gone).",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Meet a contact at the <Place> on <Planet> and collect a parcel from her. Payment on completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Meet a contact at the <Place> on <Planet> and collect a parcel from her. Payment on completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -22,7 +23,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "Any built site where two people could arrange to meet: no caves, no natural landmarks."
+    "_theme": "Any built site where two people could arrange to meet: no caves, no natural landmarks.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Recovery: Rhona's Parcel",

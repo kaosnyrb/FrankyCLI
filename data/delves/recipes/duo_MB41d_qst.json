@@ -11,7 +11,8 @@
     "Own people, voices, opener and close, not 41a's (card 20261031-071709). Voices borrowed until his ear casts them. No names or places in any voiced line.",
     "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB41d.md): rework, findings 1-5 taken, 6 kept as she allowed. Forced pick answered YES: the kettle reaches her only because her crew is next; the coincidence is hers to notice ('I never once thought it would come to me'), never a destination, or it is the toolbox again.",
     "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Delivery Contract. Deliver a kettle from the <Place>, <Planet> to the <SecondPlace>, <SecondPlanet>. Payment on delivery.\"",
-    "SAME SYSTEM 2026-11-11 (his: not across the whole map to deliver a coffee): the second place was any other planet; now another place in the same star system."
+    "SAME SYSTEM 2026-11-11 (his: not across the whole map to deliver a coffee): the second place was any other planet; now another place in the same star system.",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "author": "jessica",
   "source": "his 2026-10-31 07:51: \"the cargo run family, where you delover the toolbox, can we add a few industrial ones\"",
@@ -41,7 +42,8 @@
       "system": "same",
       "_fill": "SAME SYSTEM 2026-11-11, his rule: 'we need to make sure we're not sending them across the whole map just to deliver a coffee'. A small personal delivery stays in the first site's star system (OT-03's late same-system fill, as MB90a)."
     },
-    "_theme": "Both ends are working industrial sites with a person at them, so no natural landmarks and no caves."
+    "_theme": "Both ends are working industrial sites with a person at them, so no natural landmarks and no caves.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Hauling: Crew Kettle",

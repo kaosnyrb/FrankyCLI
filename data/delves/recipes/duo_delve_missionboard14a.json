@@ -15,7 +15,8 @@
     "lint pool is EMPTY on military sites until the markers are on them (missionboard06a's note says why).",
     "Every word holds at any military site: nothing names the site, the faction or the weather; everything the lines",
     "point at is placed. Pay: med, capped.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Take the medical crate to the holdouts inside the <Place> on <Planet>. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Take the medical crate to the holdouts inside the <Place> on <Planet>. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -26,7 +27,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "Military sites; the family's marker set."
+    "_theme": "Military sites; the family's marker set.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Hauling: Holdouts on <Planet>",

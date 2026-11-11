@@ -12,7 +12,8 @@
     "for the goods with no word on how to get them. Buy, craft, loot: all count.",
     "NEEDS capability E (backport-map.md): beats[0].bring taking ANY item, not only a resource. MB56a's field widened.",
     "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): bring.item is Mfg_Tier01_IsocenteredMagnet; the objective is short, no place and no count (the build appends (n/N)); no planet needed.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Deliver five isocentered magnets to the <Place> on <Planet>. Payment on delivery.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Deliver five isocentered magnets to the <Place> on <Planet>. Payment on delivery.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -23,7 +24,8 @@
         "LocTypeOE_ThemeCaveKeyword"
       ]
     },
-    "_theme": "A quiet worked site with a stopped line."
+    "_theme": "A quiet worked site with a stopped line.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Requisition: Magnets for the <Place> on <Planet>",

@@ -11,7 +11,8 @@
     "EVE's Producer career track in one job: the ore, the bench, the delivery. A craft whose ingredients include a",
     "mid-rarity ore, then a deliver, at a site on a planet that carries it (MB56a's place.resource).",
     "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): the tungsten ingredient is ResInorgUncommonTungsten (a craft takes the Resource record, the lint says so); pinned to Bolivar I.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Make a set of tungsten drill bits and deliver them to the <Place> on <Planet>. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Make a set of tungsten drill bits and deliver them to the <Place> on <Planet>. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): minLevel 35: pinned to Bolivar I, a level-35 system."
   ],
   "place": {
     "theme": {
@@ -78,5 +79,6 @@
   "broadcast": [
     "Those the bits? Drop them in the crate and we'll fit them."
   ],
-  "_speech": "Cheerful, mostly about his drill. A stand-in voice; his ear decides."
+  "_speech": "Cheerful, mostly about his drill. A stand-in voice; his ear decides.",
+  "minLevel": 35
 }

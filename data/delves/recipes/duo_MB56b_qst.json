@@ -11,7 +11,8 @@
     "EVE's ice: fuel every structure burns forever, so the demand never stops. MB56a's shape with helium-3, Starfield's",
     "own ship fuel. Same two stand-ins as MB56a (place.resource, beats[0].bring). Pay: med.",
     "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): bring.item is InorgCommonHelium3; the objective is short, no place and no count (the build appends (n/N)); pinned to Andromas III, which carries helium-3.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Deliver ten units of helium-3 to the <Place> on <Planet>. Payment on delivery.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Deliver ten units of helium-3 to the <Place> on <Planet>. Payment on delivery.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): minLevel 15: pinned to Andromas III, a level-15 system."
   ],
   "place": {
     "theme": {
@@ -63,5 +64,6 @@
   "broadcast": [
     "Our reactor's on its last cells. Bring us ten units of helium-3, dug or bought, and we'll keep the lights on."
   ],
-  "_speech": "Calm, counting. A stand-in voice; his ear decides."
+  "_speech": "Calm, counting. A stand-in voice; his ear decides.",
+  "minLevel": 15
 }

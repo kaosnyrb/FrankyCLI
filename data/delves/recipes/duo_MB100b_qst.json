@@ -17,7 +17,8 @@
     "NARROWER, his 14:39: 'Tamar Hesketh knows this is an Ashta den. She knows what planet shes on.' So she names the den, Akila, Akila City and the crangon it hunts (Elk Crangon, Akila's prey in fauna.md). The lore (fandom): Ashta hunt at night, and a miner once came back to Akila City swearing a house-sized one killed his crew; she tells it as a city rumour, so nothing promises this one is that big (the build makes it one size step up). Five prompts, so her count is not the four his ear caught as formulaic.",
     "NAMED 2026-11-02 on his \"give e1 and e2 proper numbers\": duo_delvetest_e1 moved to a draft id, then gen_delve name. The two are one family (the Elder Ashta), so e1 took e2's number with the next letter.",
     "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB100b.md): ship, findings 1-5 taken, 7-8 kept. Forced pick answered YES: the same Tamar briefs every draw, so 'every few years' became 'now and then'. No line gives the animal a feeling; the walls are now voiced.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Hunt the Elder Ashta at the <Place> on <Planet>. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Hunt the Elder Ashta at the <Place> on <Planet>. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): minLevel 10: an Elder Ashta in its den."
   ],
   "place": {
     "theme": {
@@ -115,5 +116,6 @@
     "voice": "GenericFemale01",
     "elevenlabs": "pFZP5JQG7iQjIQuC4Bku"
   },
-  "_speech": "An Akila Ranger, a woman, standing on the edge of the site (his 14:37: 'for E1 can we have the npc on the outskirts of the base standing there'), so the brief is a talk and only the close is radio, in her voice. Narrow, so Ashta and Rangers are said aloud. Voice borrowed until his ear casts it."
+  "_speech": "An Akila Ranger, a woman, standing on the edge of the site (his 14:37: 'for E1 can we have the npc on the outskirts of the base standing there'), so the brief is a talk and only the close is radio, in her voice. Narrow, so Ashta and Rangers are said aloud. Voice borrowed until his ear casts it.",
+  "minLevel": 10
 }

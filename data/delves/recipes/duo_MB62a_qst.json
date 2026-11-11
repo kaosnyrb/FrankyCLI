@@ -11,7 +11,8 @@
     "EVE's guarded asteroid: the fight is the toll for the ore. A clear, then MB56a's counted bring. Cobalt, mid-rarity.",
     "Same two stand-ins as MB56a. Pay: hard, placeholder.",
     "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): bring.item is InorgUncommonCobalt; the objective is short, no place and no count (the build appends (n/N)); pinned to Akila, which carries cobalt.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Clear the claim jumpers from the <Place> on <Planet>, then deliver ten units of cobalt. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Clear the claim jumpers from the <Place> on <Planet>, then deliver ten units of cobalt. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): minLevel 10: claim jumpers, a hard-pay fight."
   ],
   "place": {
     "theme": {
@@ -76,5 +77,6 @@
   "broadcast": [
     "That's my claim they're sitting on. Move them off it, then bring me ten units of cobalt, and I'll call it square."
   ],
-  "_speech": "Aggrieved and businesslike. A stand-in voice; his ear decides."
+  "_speech": "Aggrieved and businesslike. A stand-in voice; his ear decides.",
+  "minLevel": 10
 }

@@ -14,7 +14,8 @@
     "FRANCES 2026-11-02 (reviews/2026-11-02-delve-board44a.md): ship, findings 1-3 taken, 4-5 kept. Forced pick answered NO: the Maulers do not come to him when one dies (each defeat spawns at its own marker), so the call says they settle close and the objectives carry the walk: edge, far edge, centre (RETravelA1, RETravelB1, RECenter).",
     "TARGET FOUND 2026-11-02: PCM_Porrima_Porrima-III_Predator01, the Red Mile Mauler in Eliza's fauna.md (ce5aee0); the stand-in is gone.",
     "JAEGER PASS 2026-11-02, his 'If we know exactly where and what we can get sexy with it': the words use the planet's own lore (fandom, read the same day). Frances's 11-02 findings are kept; only lines were added.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Hunt the three Red Mile Maulers at the <Place> on <Planet>. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Hunt the three Red Mile Maulers at the <Place> on <Planet>. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): minLevel 30: pinned to Porrima III, a level-30 system."
   ],
   "place": {
     "theme": {
@@ -75,5 +76,6 @@
       ],
       "reward": "med"
     }
-  ]
+  ],
+  "minLevel": 30
 }

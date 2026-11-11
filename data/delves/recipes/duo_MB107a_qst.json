@@ -11,7 +11,8 @@
     "CAUSE (rule 2): Rosa asked, because nobody has heard from him in days. Chain-only, so it may remember her (rule 3), but no voiced line names her (no names aloud).",
     "SHAPE (rule 1): link 1 was pickup then talk; this is use (read the door) then a wounded talk.",
     "Register: the warm common job, and a small fright. Pay: med, more than link 1's easy (rule 6).",
-    "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB107a.md): ship, findings 2, 3, 8 taken; 4 is paid (the give takes the med pack, OT-34); 5 is paid by the build (person.wounded lies him in vanilla's wounded pose); 1 is the sheet's layout, the date is already inside the box; 6-7 kept. Forced pick answered YES: Sunday is for the patient, so the medic's call says 'My patient' and 'she' in his lines lands on the woman who asked for company."
+    "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB107a.md): ship, findings 2, 3, 8 taken; 4 is paid (the give takes the med pack, OT-34); 5 is paid by the build (person.wounded lies him in vanilla's wounded pose); 1 is the sheet's layout, the date is already inside the box; 6-7 kept. Forced pick answered YES: Sunday is for the patient, so the medic's call says 'My patient' and 'she' in his lines lands on the woman who asked for company.",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -23,7 +24,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "A quiet worked site, his. The board's own request, a new site (every link has a site of its own: place.inherit retired 2026-11-09, his 'If we need it always to run it should be using remote sites and making gaurnteed stuff')."
+    "_theme": "A quiet worked site, his. The board's own request, a new site (every link has a site of its own: place.inherit retired 2026-11-09, his 'If we need it always to run it should be using remote sites and making gaurnteed stuff').",
+    "parsecs": 12
   },
   "prose": {
     "name": "Hauling: The Old Miner on <Planet>",

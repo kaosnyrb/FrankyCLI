@@ -22,7 +22,8 @@
     "Ingredients and pay RULED 2026-11-02 (his \"sounds fine\", plan OT-77): 4 Aluminum, 2 Copper, 2 Sealant; pay med, capped.",
     "LINT 2026-10-26 without the craft stand-in: two fatals, both the craft step (recover on a board; no marker). The talk half and the place pass. talk_check: one ? (How have you managed?), set up by the card and radio's rationing, kept.",
     "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Build a pressure regulator for the <Place> on <Planet> and deliver it by hand. Payment on delivery.\"",
-    "2026-11-11: Noor's closer and the accept line rewritten from Eliza's PLACEHOLDERS. Her closer offers rather than asks; the accept prompt is the player's yes; her hand-over carries the age and the price."
+    "2026-11-11: Noor's closer and the accept line rewritten from Eliza's PLACEHOLDERS. Her closer offers rather than asks; the accept prompt is the player's yes; her hand-over carries the age and the price.",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -33,7 +34,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "A lived-in non-hostile site: the people waiting. The residents stay ALIVE here (no place.residents)."
+    "_theme": "A lived-in non-hostile site: the people waiting. The residents stay ALIVE here (no place.residents).",
+    "parsecs": 12
   },
   "prose": {
     "name": "Fabrication: Pressure Regulator for the <Place> on <Planet>",

@@ -16,7 +16,8 @@
     "PROPOSED, Eliza's; the beats kind's is the precedent (19a, played).",
     "The broadcast plays outside the dungeon (step one's marker is inside, so it may need the entrance; 04a put step one",
     "outside for this reason). Closing line on the radio. Pay: med, capped.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover the weather satellite's core from the <Place> and fit it. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover the weather satellite's core from the <Place> and fit it. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -31,7 +32,8 @@
     "third": {
       "orbit": "planet",
       "_orbit": "PROPOSED on a board (the beats kind builds it, 19a). 'planet', the orbit over the dungeon's planet, is the meaning wanted, and it NEVER STARTED on 19a, which played on 'player'. 'player' is wrong here: a board quest starts when the board refreshes, so the orbit would fill over wherever he stood then. Eliza's: the board's own target planet is the likely anchor."
-    }
+    },
+    "parsecs": 12
   },
   "prose": {
     "name": "Recovery: Weather Satellite Part on <Planet>",

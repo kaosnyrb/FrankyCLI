@@ -12,7 +12,8 @@
     "A medic working on a patient in a field treatment bay; people outside want what's in her cabinet. Talk, then",
     "hold. MB55a's shape with a person. Buildable today (the bay model is a stand-in). Pay: med.",
     "FIXED 2026-11-10: 'defend: 1' pointed at the talk, which leaves no object to defend; dropped, so the hold holds the bay (defending a person is not a part, and his rule: missions must not rely on NPCs). Her greeting no longer opens on the 'X? Good.' tic; her hello asks if you're the help, the greeting answers it. _bio added. Her voice line changed: one revoice.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Protect the medic's treatment bay at the <Place> on <Planet> until her patient is stable. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Protect the medic's treatment bay at the <Place> on <Planet> until her patient is stable. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -24,7 +25,8 @@
       ]
     },
     "_theme": "A quiet site with a medic working it.",
-    "_bay": "STAND-IN: a medical bed or bay static at RECenterLocRef, so 'the treatment bay' is placed. His or Kim's pick."
+    "_bay": "STAND-IN: a medical bed or bay static at RECenterLocRef, so 'the treatment bay' is placed. His or Kim's pick.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Defense: Treatment Bay at the <Place> on <Planet>",

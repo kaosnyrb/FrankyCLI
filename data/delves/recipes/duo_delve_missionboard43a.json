@@ -16,7 +16,8 @@
     "A HOLD ALONE, no machine to start first: four drafts already open on 'start a machine, then hold' (09a, 16a, 19a, 22a)",
     "and that shape should not be the only way a fight arrives. Unproven: whether a board hold can be beat 1 with nothing",
     "before it; the lint is the first test. Residents alive, defended. Pay: med.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Hold the <Place> on <Planet> against raiders. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Hold the <Place> on <Planet> against raiders. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -27,7 +28,8 @@
         "LocTypeOE_ThemeCaveKeyword"
       ]
     },
-    "_theme": "Quiet sites with residents; here they are the people being defended, so the words keep them alive."
+    "_theme": "Quiet sites with residents; here they are the people being defended, so the words keep them alive.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Defense: Raiders at the <Place> on <Planet>",

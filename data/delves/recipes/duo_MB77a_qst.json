@@ -11,7 +11,8 @@
     "EVE's Worlds Collide: two factions already fighting when you arrive, and you pick a side by whose boss you kill.",
     "STAND-INS: place.feud (two lists spawned hostile to each other) and the second boss; choose endings on a board",
     "are Eliza's to confirm. Voiced lines name neither faction. Pay: hard.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Two crews are fighting over the <Place> on <Planet>. End it. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Two crews are fighting over the <Place> on <Planet>. End it. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 20: a hard job may fly further."
   ],
   "place": {
     "theme": {
@@ -28,7 +29,8 @@
       "min": 3,
       "max": 5
     },
-    "_feud": "STAND-IN: two gangs at the site, hostile to each other and to him. Eliza's field."
+    "_feud": "STAND-IN: two gangs at the site, hostile to each other and to him. Eliza's field.",
+    "parsecs": 20
   },
   "prose": {
     "name": "Strike: Feud at the <Place> on <Planet>",

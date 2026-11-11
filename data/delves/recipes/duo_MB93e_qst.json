@@ -11,7 +11,8 @@
     "Voices borrowed until his ear casts them. No names, places or currency in any voiced line.",
     "LETTER e: THE INTERVIEW: a crew lead who hires only people she has met. The player's prompts are the questions; her answers tell him more about her than his tell her. The ending is a promise of work on the board (EVE's breadcrumb, unbuilt, so it stays a promise).",
     "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB93e.md): rework, findings 1-5 taken, 6 kept. Forced pick answered YES: it is the same named crew lead every draw, so she says she meets people more than once, and the close is her verdict and her reason.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. A crew lead at the <Place> on <Planet> wants to meet a contractor before hiring. Payment on completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. A crew lead at the <Place> on <Planet> wants to meet a contractor before hiring. Payment on completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -22,7 +23,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "Any built site where two people could arrange to meet: no caves, no natural landmarks."
+    "_theme": "Any built site where two people could arrange to meet: no caves, no natural landmarks.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Requisition: A Crew Lead Wants to Meet",

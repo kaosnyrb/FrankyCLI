@@ -15,7 +15,8 @@
     "delve markers today. Every word holds in any of them: nothing names the site, the faction or what the plant",
     "made; everything a line points at is placed. Pay: med, capped.",
     "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover the workers' payroll from the <Place> on <Planet>. Payment on contract completion.\"",
-    "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"Easy.\" became \"Easy, now. Forty people are going to want to know what you've got.\". A revoice."
+    "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"Easy.\" became \"Easy, now. Forty people are going to want to know what you've got.\". A revoice.",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -26,7 +27,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "Industrial dungeons; the delve marker set."
+    "_theme": "Industrial dungeons; the delve marker set.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Recovery: Workers' Payroll on <Planet>",

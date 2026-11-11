@@ -22,7 +22,8 @@
     "The second place is local and leashed (built, as 08a): a POI near the wreck, where the cargo was bound.",
     "Message box on the pickup only, after the fight: a calm moment (his 2026-10-08 rule). Either or: no say there.",
     "Pay: a guarded pickup; suggest med.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Shipping Firm Contract. Recover our crate from the wreck at the <Place> and deliver it to the <SecondPlace>. Spacers present. Payment on delivery.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Shipping Firm Contract. Recover our crate from the wreck at the <Place> and deliver it to the <SecondPlace>. Spacers present. Payment on delivery.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -52,7 +53,8 @@
         ]
       }
     },
-    "_theme": "A wreck here; the delivery site must never be a wreck itself (two places that could draw one POI warn). ELIZA 2026-10-15, measured: a request can put down 3 wreck sites of 214, so every crash site is one of three; the board places it, so it always starts."
+    "_theme": "A wreck here; the delivery site must never be a wreck itself (two places that could draw one POI warn). ELIZA 2026-10-15, measured: a request can put down 3 wreck sites of 214, so every crash site is one of three; the board places it, so it always starts.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Recovery: Crash Site Cargo on <Planet>",

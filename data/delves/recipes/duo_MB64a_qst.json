@@ -10,7 +10,8 @@
     "THE MINING FAMILY, 9: THE RIGGED CLAIM. Plan: home-office office/projects/delves/mining-family.md.",
     "EVE's booby-trapped asteroids, as mines on the approach. One use at the beacon with mines placed round it.",
     "STAND-IN: place.mines (count, radius round the beacon). Vanilla's own frag mines; Eliza's field. Pay: med.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Administrative Contract. Reset the claim beacon at the <Place> on <Planet>. The approach is mined. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Administrative Contract. Reset the claim beacon at the <Place> on <Planet>. The approach is mined. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -26,7 +27,8 @@
       "at": "RECenterLocRef",
       "radius": 20
     },
-    "_mines": "STAND-IN: armed mines on the approach to the beacon, there from arrival. Eliza's field."
+    "_mines": "STAND-IN: armed mines on the approach to the beacon, there from arrival. Eliza's field.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Danger: Rigged Claim at the <Place> on <Planet>",

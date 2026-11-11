@@ -4,7 +4,8 @@
   "template": "board",
   "_note": [
     "PROOF RECIPE for the board template (his 2026-10-14: 'full sep missionboard template', clone duo_MB28a_qst, deal into _duo_MB_MissionNode_test, 'yeah that remote05a'). The GAMEPLAY and every word are duo_artifact_remote_planet_qst24a's, Jessica's since 2026-10-14 11:0x; the CARD is Jessica's since 2026-10-14 14:2x, in the board's issuer voice (bethesda 33 section 4: a posting, 'we' and 'ours' never 'I', short, the stock closer 'Payment on contract completion.'): the site's operator posting the job. The place is the board base's own request, so place.remote is absent; the theme is 05a's (infrastructure), so the build drops MB28a's NonHostile_Civilian requirement and says so.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Tracker's Alliance Contract. Crimson Fleet raiders hold the <Place> on <Planet>. Remove their leader. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Tracker's Alliance Contract. Crimson Fleet raiders hold the <Place> on <Planet>. Remove their leader. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): minLevel 10: a Crimson Fleet leader and crew; parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "author": "eliza",
   "source": "duo_artifact_remote_planet_qst24a (gameplay and words); duo_MB28a_qst (the board base)",
@@ -16,7 +17,8 @@
       "exclude": [
         "LocTypeTest"
       ]
-    }
+    },
+    "parsecs": 12
   },
   "prose": {
     "name": "Bounty: Crimson Fleet Raiders on <Planet>",
@@ -55,5 +57,6 @@
     }
   ],
   "_speech": "Radio rules: no names, no places, no clock (a remote job can be a jump away). Voice is ElevenLabs' 'David Jarrett' (Australian, casual), NOT yet heard in game (voices.md); his ear decides.",
-  "deal": "duo_MB_MissionNode_Bounty"
+  "deal": "duo_MB_MissionNode_Bounty",
+  "minLevel": 10
 }

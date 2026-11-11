@@ -14,7 +14,8 @@
     "NARROW, as MB98a: pinned to Akila, so Ashta and the Rangers are said aloud (his exemption, 2026-10-26).",
     "NAMED 2026-11-02 on his \"give e1 and e2 proper numbers\": duo_delvetest_e2 moved to a draft id, then gen_delve name. The two are one family (the Elder Ashta), so e1 took e2's number with the next letter.",
     "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB100a.md): rework, findings 1-4 taken, 5-6 kept. Forced pick answered YES: it lives at the site (the defeat places it there at any hour), so the call says it walked in at midday and hasn't left. The close keeps the night lore instead of saying the night is safer.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Hunt the Elder Ashta at the <Place> on <Planet>. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Hunt the Elder Ashta at the <Place> on <Planet>. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): minLevel 10: an Elder Ashta, bigger and older than the rest."
   ],
   "place": {
     "theme": {
@@ -59,5 +60,6 @@
   "broadcast": [
     "Rangers here. This one isn't like the young ones. They circle and wait for dark. This one walked in at midday, took what it liked in front of everyone, and hasn't left. We haven't the people to sit on it. Don't let it get close."
   ],
-  "_speech": "An Akila Ranger, steady, has seen a few. Narrow, so Ashta and Rangers are said aloud (his exemption, 2026-10-26). The lore (fandom): Ashta grow bolder at night, so the old one coming at midday is what marks it. Voice borrowed until his ear casts it."
+  "_speech": "An Akila Ranger, steady, has seen a few. Narrow, so Ashta and Rangers are said aloud (his exemption, 2026-10-26). The lore (fandom): Ashta grow bolder at night, so the old one coming at midday is what marks it. Voice borrowed until his ear casts it.",
+  "minLevel": 10
 }

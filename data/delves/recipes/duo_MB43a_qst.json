@@ -13,7 +13,8 @@
     "that distance check through a load door is unproven, so the call should not depend on it.",
     "No who: a dungeon brings its own occupants, and they are why the crew left. Pay med, under his cap.",
     "Beat one is a box and no radio, beats two and three are radio and no box: his either-or.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover the survey data from the evacuated <Place> on <Planet>. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover the survey data from the evacuated <Place> on <Planet>. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -25,7 +26,8 @@
       ]
     },
     "_require": "2026-10-23 (Eliza): his play of the item-marker rebuild 'went to a tiny POI', so 'need to limit the quest to LocTypeDungeon' (his). The item markers alone are not a dungeon.",
-    "_theme": "A dungeon (entrance, centre, boss container: about 162 dungeons on his load order, Eliza 10-13; the terminal marker cut it to 29, and we bring our own terminal, so it stands on the centre). The stops are the dungeon marker vocabulary (bethesda 32), and only places carrying all three plus a map marker can draw it. Caves allowed: a survey crew works caves. The lint measures the pool."
+    "_theme": "A dungeon (entrance, centre, boss container: about 162 dungeons on his load order, Eliza 10-13; the terminal marker cut it to 29, and we bring our own terminal, so it stands on the centre). The stops are the dungeon marker vocabulary (bethesda 32), and only places carrying all three plus a map marker can draw it. Caves allowed: a survey crew works caves. The lint measures the pool.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Recovery: Survey Data on <Planet>",

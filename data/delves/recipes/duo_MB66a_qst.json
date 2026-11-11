@@ -11,7 +11,8 @@
     "THE INDUSTRY FAMILY, 2: THE DATA CORE. Plan: home-office office/projects/delves/industry-family.md.",
     "EVE's relic hacking that feeds invention: a research core out of a hostile site, to a lab. Buildable today",
     "(pickup, deliver at a second place). Pay: med.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover a data core from the <Place> and deliver it to the lab at the <SecondPlace>. Payment on delivery.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover a data core from the <Place> and deliver it to the lab at the <SecondPlace>. Payment on delivery.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -32,7 +33,8 @@
           "LocTypeOE_ThemeCaveKeyword"
         ]
       }
-    }
+    },
+    "parsecs": 12
   },
   "prose": {
     "name": "Recovery: Data Core on <Planet>",

@@ -11,7 +11,8 @@
     "EVE's planetary industry, which ships goods off the surface through customs offices. An abandoned extractor",
     "full of product: take it, deliver it to a shuttle in orbit.",
     "STAND-IN: place.third.orbit on a board (29a's proposed field, Eliza's). Pay: med.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover the output from the abandoned extractor at the <Place> on <Planet> and deliver it to orbit. Payment on delivery.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover the output from the abandoned extractor at the <Place> on <Planet> and deliver it to orbit. Payment on delivery.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -27,7 +28,8 @@
     "third": {
       "orbit": "planet",
       "_orbit": "PROPOSED, as 29a: the orbit over the site's planet. Eliza's."
-    }
+    },
+    "parsecs": 12
   },
   "prose": {
     "name": "Hauling: Extractor Output on <Planet>",

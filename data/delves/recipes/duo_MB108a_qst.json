@@ -10,7 +10,8 @@
     "THE PLAYER'S PART: he calls them in himself. The slate said 'Bring the rest here'; the beacon is how they would be called, and switching it on is his choice to spring the trap. Then he holds.",
     "CAUSE (rule 2): the slate off the gang at MB76a. SHAPE (rule 1): MB76a was a clear; this is use then hold.",
     "CUT from chains.md's three links (derelict, boss, schematic): none of those is a part before the 19th. Pay: hard (rule 6).",
-    "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB108a.md): ship, findings 1-4 taken, 5 and 6 kept (chain-only, so no card; no count spoken). Forced pick answered NO: the choice is WHEN, not whether, so 'Your call.' became 'when you're ready', and 'You called them in yourself' pays it."
+    "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB108a.md): ship, findings 1-4 taken, 5 and 6 kept (chain-only, so no card; no count spoken). Forced pick answered NO: the choice is WHEN, not whether, so 'Your call.' became 'when you're ready', and 'You called them in yourself' pays it.",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): minLevel 10: the chain finale, three waves of the outfit; parsecs 20: a hard job may fly further."
   ],
   "place": {
     "theme": {
@@ -21,7 +22,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "A built site the outfit uses as its meeting place. The board's own request, a new site (every link has a site of its own: place.inherit retired 2026-11-09, his 'If we need it always to run it should be using remote sites and making gaurnteed stuff')."
+    "_theme": "A built site the outfit uses as its meeting place. The board's own request, a new site (every link has a site of its own: place.inherit retired 2026-11-09, his 'If we need it always to run it should be using remote sites and making gaurnteed stuff').",
+    "parsecs": 20
   },
   "prose": {
     "name": "Strike: The Rest of the Outfit on <Planet>",
@@ -73,5 +75,6 @@
       ],
       "reward": "hard"
     }
-  ]
+  ],
+  "minLevel": 10
 }

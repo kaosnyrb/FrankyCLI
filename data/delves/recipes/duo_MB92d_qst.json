@@ -15,7 +15,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "Any built site that is not a cave or a natural landmark: somewhere a beacon could be."
+    "_theme": "Any built site that is not a cave or a natural landmark: somewhere a beacon could be.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Survey: Faint Signal on <Planet>",
@@ -29,7 +30,8 @@
     "LETTER d: BAIT: a new beacon with a full battery and nobody beside it; whoever set it comes for the player.",
     "FAMILY RULE, REFINED 2026-10-31 on the four verdicts: a broadcast may say what KIND of message it is (c's 'supply request', b's all-clear) but not what the source is; and a repeat player may recognise a letter by its call, which is answered by adding letters, not by blanking calls.",
     "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB92d.md): ship, findings 1-3 taken. Forced pick answered YES: a repeat player may know the bait by its call.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Comms Office Contract. A faint signal is coming from the <Place> on <Planet>. Find its source. Payment on completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Comms Office Contract. A faint signal is coming from the <Place> on <Planet>. Find its source. Payment on completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "beats": [
     {

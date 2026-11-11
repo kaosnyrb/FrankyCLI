@@ -21,7 +21,8 @@
     "His MB11 to MB13 finish on an item put into a container at the site: the prior art for the handover.",
     "Not narrow, so roles only aloud. The ore's name is an item, not a place or faction, so the voice may say it. Pay: med, placeholder.",
     "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): bring.item is InorgUncommonTungsten; the objective is short, no place and no count (the build appends (n/N)); pinned to Bolivar I, which carries tungsten.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Deliver ten units of tungsten to the <Place> on <Planet>. Payment on delivery.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Deliver ten units of tungsten to the <Place> on <Planet>. Payment on delivery.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): minLevel 35: pinned to Bolivar I, a level-35 system."
   ],
   "place": {
     "theme": {
@@ -73,5 +74,6 @@
   "broadcast": [
     "We're builders, not miners, and we've run out of tungsten. There's plenty in the ground if you've got a cutter, and I won't ask if you bought it instead. Ten units in the hopper and we're back to work."
   ],
-  "_speech": "A foreman with a small, practical stake and no patience for digging. 41a's voice as a stand-in; his ear decides."
+  "_speech": "A foreman with a small, practical stake and no patience for digging. 41a's voice as a stand-in; his ear decides.",
+  "minLevel": 35
 }

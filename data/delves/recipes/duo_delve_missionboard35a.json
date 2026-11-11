@@ -16,7 +16,8 @@
     "beats[0].slate.audio, four entries. The Delves' speech already builds the same radio-scene shape (AliasID -4).",
     "IT PLAYS WHEN OPENED, vanilla's way (his 2026-10-27 05:50: \"it should play when you open it\"). Never on pickup.",
     "Not narrow, so roles only aloud: no names, places, factions or currency. Pay: med, capped.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover a prospector's diary from the <Place> and bring it to the <SecondPlace>. Payment on delivery.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover a prospector's diary from the <Place> and bring it to the <SecondPlace>. Payment on delivery.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -40,7 +41,8 @@
         ]
       },
       "_theme": "Where she is now: a lived-in non-hostile site. Residents stay alive here."
-    }
+    },
+    "parsecs": 12
   },
   "prose": {
     "name": "Recovery: Prospector's Diary on <Planet>",

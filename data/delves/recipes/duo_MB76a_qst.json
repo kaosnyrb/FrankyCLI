@@ -11,7 +11,8 @@
     "EVE's expeditions: finishing a site hands you a lead to a harder one. A plain clear whose close points onward.",
     "THE OUTFIT, link 1 of 2 (2026-11-10): next is MB108a via slate (the clear's message box is the slate). The derelict link and the boss's schematic in chains.md are NOT parts (boarding, a named boss); cut to two links that build today.",
     "FRANCES 2026-11-10 (MB108a's review, read with this link): ', by the sound of it' cut (the captain heard nothing); the slate ends 'Bring the rest here to meet.' so the next link's 'meeting place' agrees with it.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Clear the gang from the <Place> on <Planet>. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Clear the gang from the <Place> on <Planet>. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -21,7 +22,8 @@
         "LocTypeOE_ThemeCaveKeyword"
       ]
     },
-    "_theme": "A built site a gang holds."
+    "_theme": "A built site a gang holds.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Strike: Gang at the <Place> on <Planet>",

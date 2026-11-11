@@ -14,7 +14,8 @@
     "and burning; words rewritten 2026-10-28. The beat is destroy (Eliza's, FrankyCLI 7195765) with the incendiary kept;",
     "vanish dropped, since a destroy stage disables the object itself. Unplayed as destroy.",
     "Issuer: an administrator's office, flat and unexplained (style guide 33 s4). Single ending, so the last beat's say",
-    "is the closing radio (his 2026-10-17). Pay: easy, placeholder; the tier is his."
+    "is the closing radio (his 2026-10-17). Pay: easy, placeholder; the tier is his.",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -35,7 +36,8 @@
       "max": 5,
       "beat": 1
     },
-    "_who": "His 2026-10-28 play: \"dull... Originally these were defended by there faction\". A spacer crew sits on the cache (the old MB20e: boxed and waiting on a hauler), MB42a's built field and list."
+    "_who": "His 2026-10-28 play: \"dull... Originally these were defended by there faction\". A spacer crew sits on the cache (the old MB20e: boxed and waiting on a hauler), MB42a's built field and list.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Sabotage: Banned Texts on <Planet>",

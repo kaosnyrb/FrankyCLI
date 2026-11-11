@@ -10,7 +10,8 @@
     "PLAYER'S PART (2026-11-04, his ask, beats written on his 'sounds good, write the beats'): clear the workings: the crew pulled out when creatures moved into the dig, and the ore crate is in among them. 32a's clear, the predator list, then the haul.",
     "THE MINING FAMILY, 3: THE ORE RUN. Plan: home-office office/projects/delves/mining-family.md.",
     "EVE's courier mission with ore in the crate: 41a's haul, dig to refinery. Buildable today. Pay: easy.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Clear the creatures out of the <Place> and deliver its raw ore to the <SecondPlace>. Payment on delivery.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Clear the creatures out of the <Place> and deliver its raw ore to the <SecondPlace>. Payment on delivery.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -32,7 +33,8 @@
           "LocTypeOE_ThemeCaveKeyword"
         ]
       }
-    }
+    },
+    "parsecs": 12
   },
   "prose": {
     "name": "Hauling: Raw Ore on <Planet>",

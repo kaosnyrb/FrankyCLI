@@ -11,7 +11,8 @@
     "THE SILENT CLOSE IS DELIBERATE. One speaker per recipe, and the speaker is her; a say plays when its stage is DONE, so after the defeat nobody is left to talk. Her last line goes on the pod clear, the first time she sounds less sure (the taunter's habit). His close-on-radio rule (20261017-091959) is broken on purpose here; his ear decides whether the quiet works or the Delve wants a closing line from someone else.",
     "Voice borrowed (used once before) until his ear casts it. No names, places, factions or currency in any voiced line.",
     "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB94a.md): ship, findings 1-3 taken, 4 and 5 kept. Forced pick answered NO: she does not still want him to come in, so her last line ends on the doubt and the silence starts with her. Finding 4's timing: the call and the pods share the step-one marker's 250 m, so the line plays as they fall.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Bounty Contract. Eliminate the crew boss at the <Place> on <Planet>. Expect drop pods. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Bounty Contract. Eliminate the crew boss at the <Place> on <Planet>. Expect drop pods. Payment on contract completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): minLevel 10: a crew boss who calls her people down by pod; parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -21,7 +22,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "Any site with an outside entrance (open sky for the pods) and a boss marker inside. Not MB45a's military: on the board's general request military, entrance and boss together draw ZERO (lint 11-02)."
+    "_theme": "Any site with an outside entrance (open sky for the pods) and a boss marker inside. Not MB45a's military: on the board's general request military, entrance and boss together draw ZERO (lint 11-02).",
+    "parsecs": 12
   },
   "prose": {
     "name": "Bounty: The Drop Leader on <Planet>",
@@ -74,5 +76,6 @@
       "journal": "I killed the crew boss at the <Place>.",
       "reward": "med"
     }
-  ]
+  ],
+  "minLevel": 10
 }

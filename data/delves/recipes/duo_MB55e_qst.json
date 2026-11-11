@@ -12,7 +12,8 @@
     "PEN NAME: home-office office/pennames/vic-tarrant.json. Her heat checks do not apply; her voice does: level, dry, faintly amused, unimpressed, a shift being run. Natural English with contractions (card 20261024-103920), no telegraphese.",
     "Faction unpinned on purpose: every word holds for whoever the site rolled. Nothing names a faction, a person or a currency; 'sell' and 'our week' hold for any crew.",
     "Not MB55a's plant: own speaker, own opener, own close (card 20261031-071709).",
-    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB55e.md): rework, all five findings taken. Forced pick answered NO: a hostile site's residents shoot on sight, so the call owns the fight it is heard over and the purge line escalates it into a sequence (a couple, then keep sending), so each wave is them deciding again. The close collects the week."
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB55e.md): rework, all five findings taken. Forced pick answered NO: a hostile site's residents shoot on sight, so the call owns the fight it is heard over and the purge line escalates it into a sequence (a couple, then keep sending), so each wave is them deciding again. The close collects the week.",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "place": {
     "theme": {
@@ -23,7 +24,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "Industrial dungeons; the delve marker set."
+    "_theme": "Industrial dungeons; the delve marker set.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Sabotage: Data Purge on <Planet>",

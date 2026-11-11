@@ -17,7 +17,8 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "An abandoned built site (20 POI types), so no residents stand where the camp should be: 'nobody is found' must be true at every draw."
+    "_theme": "An abandoned built site (20 POI types), so no residents stand where the camp should be: 'nobody is found' must be true at every draw.",
+    "parsecs": 12
   },
   "prose": {
     "name": "Survey: Faint Signal on <Planet>",
@@ -32,7 +33,8 @@
     "LETTER b: A LOOP: a camp's all-clear, sent every six hours for four years. Nobody is found and nothing is said about why.",
     "FAMILY RULE, REFINED 2026-10-31 on the four verdicts: a broadcast may say what KIND of message it is (c's 'supply request', b's all-clear) but not what the source is; and a repeat player may recognise a letter by its call, which is answered by adding letters, not by blanking calls.",
     "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB92b.md): ship, findings 1-3 taken, 4 kept as allowed. Forced pick answered NO: the broadcast offers no cause (the weather is cut), so the four years are explained by nothing a voice has said.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Comms Office Contract. A faint signal is coming from the <Place> on <Planet>. Find its source. Payment on completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Comms Office Contract. A faint signal is coming from the <Place> on <Planet>. Find its source. Payment on completion.\"",
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
   ],
   "beats": [
     {
