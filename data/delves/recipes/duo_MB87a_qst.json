@@ -13,7 +13,8 @@
     "REWORKED 2026-11-10 on OT-9A (Eliza's letter 2026-11-10-eliza-jessica-wounded-and-captives-are-people-now.md, his 'B, it matches vanilla'): the three message boxes became three wounded people in three talks, in a fixed order because talks do not group. The details kept: the cut arm, the burnt hands that say almost nothing, the knock to the head. Voices borrowed until his ear casts them. Pay: med.",
     "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB87a.md): ship, findings 2-5 taken, 6-7 kept. Forced pick answered YES: each give takes the med pack (OT-34 as built), so the triage spends three and every prompt stands; the card now says three.",
     "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Treat the wounded settlers at the <Place> on <Planet>. Bring three med packs. Payment on contract completion.\"",
-    "KIERAN DOYLE 2026-11-11 (reviews/2026-11-11-delve-MB87a.md): ship. Finding 1 taken on both medic boards: each wounded objective names the med pack ('Give ... a med pack'), so a player one pack short sees why the line is missing. Finding 5 kept: Corin is short on purpose. Forced pick answered: the warden's order stays (talks do not group, and the line is the 19th)."
+    "KIERAN DOYLE 2026-11-11 (reviews/2026-11-11-delve-MB87a.md): ship. Finding 1 taken on both medic boards: each wounded objective names the med pack ('Give ... a med pack'), so a player one pack short sees why the line is missing. Finding 5 kept: Corin is short on purpose. Forced pick answered: the warden's order stays (talks do not group, and the line is the 19th).",
+    "REVOICED 2026-11-11 on his play: 'due to him being so terse the voice gen has nothing to work off which makes him sound off'. Corin keeps few words in what he says, not in how long the line is: four whole sentences instead of 'My hands.', 'Better.', 'Some.'. Four lines to revoice."
   ],
   "place": {
     "theme": {
@@ -97,7 +98,7 @@
         }
       },
       "greeting": [
-        "My hands. The seed stock."
+        "It's my hands. I went back in for the seed stock, and I'd do it again."
       ],
       "exchanges": [
         {
@@ -107,19 +108,19 @@
             "count": 1
           },
           "reply": [
-            "Better."
+            "That's better. I'll be back on the planting inside a week, you watch."
           ]
         },
         {
           "prompt": "How did you burn them?",
           "reply": [
-            "They set the store going. I went in."
+            "They set the store going on their way out, and the seed stock was still inside."
           ]
         },
         {
           "prompt": "Did you save any of it?",
           "reply": [
-            "Some."
+            "Some of it. Enough to plant next season, if nothing else goes wrong."
           ]
         }
       ],
