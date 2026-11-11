@@ -429,6 +429,29 @@ namespace FrankyCLI
                     Console.WriteLine($"  +talk    : {sc.EditorID} \"{ex.prompt}\"" + (closer ? $"  (sets {endStage} when the reply ends, loops to the menu)" : "  (loops to the menu, askable after the completion)")
                                       + (ex.perk != null ? $"  [{ex.perk}]" : "") + (gives ? $"  gives {give.count} x {give.item} ({give.name}), offered only while carried" : ""));
                 }
+                // next.accept (his 2026-11-11 play of MB50a: "she should offer it and I should accept"): one more exchange in the
+                // talk that ends the Delve, shown only AFTER the completion (its closing reply is the ask) and only until picked.
+                // Its reply sets the accept stage, whose fragment starts the next link. Named {id}_accept_*, apart from the
+                // talk's own {id}_talk{n}_* records, so the talk's counts (scenes, stage setters) stay what they were.
+                if (b == HandBackTalk(r, steps) && r.next?.accept is Exchange acc && bm.AcceptStage >= 0)
+                {
+                    var (apt, _) = Line($"{r.id}_accept_ask", new List<string> { acc.prompt! }, false);
+                    var (ant, ani) = Line($"{r.id}_accept_reply", acc.reply!, true);
+                    ani.SetParentQuestStage = new DialogSetParentQuestStage { OnEnd = (short)bm.AcceptStage };
+                    var asc = NewScene($"{r.id}_accept_scene", 0x00002814u, false);
+                    asc.Conditions.Add(StageDone(stage, 1f));
+                    asc.Conditions.Add(StageDone(bm.AcceptStage, 0f));
+                    asc.Index = (uint)(tb.exchanges.Count + 1);
+                    asc.SCPI = BitConverter.GetBytes((ushort)(100 - closes.Count));   // under every closer, above every side question
+                    asc.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
+                    asc.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
+                    var apa = new DialogueSceneAction { Index = 3, AliasID = -2, StartPhase = 0, EndPhase = 0 };
+                    apa.Topic.SetTo(apt.FormKey);
+                    var ana = new DialogueSceneAction { Index = 4, AliasID = personAlias, StartPhase = 1, EndPhase = 1 };
+                    ana.Topic.SetTo(ant.FormKey);
+                    asc.Actions = new Noggog.ExtendedList<ASceneAction> { apa, ana };
+                    Console.WriteLine($"  +accept  : {asc.EditorID} \"{acc.prompt}\"  (after {stage}, until {bm.AcceptStage}; the reply sets {bm.AcceptStage}, which starts {r.next.id})");
+                }
                 bm.Talks.Add((b, stage, personAlias, npc, tb.exchanges.Count, enter > 0 ? 3 : 2));   // the greeting's and the completion's; a side question has one fewer
 
                 // What he says as the player WALKS UP (person.hellos, Jessica's; his 2026-10-19). ONE Hello topic per quest

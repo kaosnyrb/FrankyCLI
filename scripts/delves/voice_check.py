@@ -97,6 +97,10 @@ def fields(d):
                 out.append((f"beat {i} reply {j}", e["reply"]))
         for h in (b.get("person") or {}).get("hellos") or []:
             out.append((f"beat {i} hello", h))
+    # next.accept (gen_delve, 2026-11-11): the person's reply to the player taking the next link is spoken too.
+    acc = (d.get("next") or {}).get("accept") or {}
+    if acc.get("reply"):
+        out.append(("next accept reply", acc["reply"]))
     return out
 
 
@@ -111,6 +115,7 @@ def spoken(d):
             out += [(f"beat {i} reply {j}", s) for s in e.get("reply") or []]
         for h in (b.get("person") or {}).get("hellos") or []:
             out += [(f"beat {i} hello", s) for s in h]
+    out += [("next accept reply", s) for s in ((d.get("next") or {}).get("accept") or {}).get("reply") or []]
     return out
 
 

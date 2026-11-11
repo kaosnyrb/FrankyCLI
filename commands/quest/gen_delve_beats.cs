@@ -201,6 +201,8 @@ namespace FrankyCLI
         /// <summary>A talk with more than one closer sets the board's CompleteStage here, a silent stage of its own (see Stages).
         /// 9, as OT-9J's AskCompleteOffset: under the next closer's 110.</summary>
         private const int TalkCompleteOffset = 9;
+        /// <summary>itemOf's key for the carry item (a recipe's carry, not a beat's), so the fragment's Item{key + 1} is Item0.</summary>
+        private const int CarryKey = -1;
 
         /// <summary>
         /// The pickups that give NO item (plan OT-08, his 2026-11-02 "yeah don't give at all"): a pickup in the LAST step whose
@@ -488,6 +490,12 @@ namespace FrankyCLI
             // A TALK WITH MORE THAN ONE CLOSER (MB93d): "ends" on an exchange of the talk that is the whole last step, on a ground
             // board. Anywhere else its stage would end nothing, so it is refused by name rather than built and ignored.
             int endsOn = HandBackTalk(r, steps);
+            // carry (his 2026-11-11): the handed item must be TAKEN somewhere, or it stays in his pack after the job.
+            if (r.carry != null && endsOn < 0 && !r.beats.Any(x => x.type == "deliver" && x.bring == null))
+                Fatal("carry: nothing takes the handed item (no talk that ends the Delve, no plain deliver), so it would stay in his pack after the job.");
+            // next.accept: its line rides the talk that ends the Delve, after the completion, so the quest must linger there.
+            if (r.next?.accept != null && endsOn < 0)
+                Fatal("next.accept: the accept line is offered in the talk that ends the Delve, after the completion; the last step is not a single talk.");
             for (int i = 0; i < r.beats.Count; i++)
                 for (int x = 0; x < (r.beats[i].exchanges?.Count ?? 0); x++)
                 {
@@ -875,6 +883,7 @@ namespace FrankyCLI
             public int LingerFrom;    // the completing stage it waits behind (the last step's DoneStage)
             public List<(int ex, int stage)> TalkEnds = new();   // a talk with more than one closer: each closing exchange and its ending stage (TalkEndings); empty = one closer
             public int TalkSilent = -1;   // that talk's silent CompleteStage, which the linger hook arms on; -1 = none
+            public int AcceptStage = -1;   // next.accept: the stage the accept line sets, which starts the next link; -1 = none (it starts on completion)
             public FormKey? PaidTierGlobal;   // a board's RewardAmountGlobal: the last paid tier's creds global, for the verify
             public (int beat, int passengers, int marker, int arrived, int done)? Ride;   // a ride beat's pieces, for the verify
             public List<(int beat, FormKey npc, int lines)> Hellos = new();   // a talk person's walk-up lines, for the verify
@@ -1479,8 +1488,17 @@ namespace FrankyCLI
                 }
                 foreach (var ss in spawnedStage.Values)
                     if (clone.Stages!.Any(x => x.Index == ss)) { Console.WriteLine($"REFUSED: stage {ss} already exists on this base; a fight's spawned stage collides."); return 1; }
+                // next.accept (his 2026-11-11): the stage the accept line sets, whose fragment starts the next link. The quest is
+                // still running then, because a talk that ends the Delve lingers until the person unloads (above).
+                if (r.next?.accept != null)
+                {
+                    if (bm.Linger < 0) { Console.WriteLine("REFUSED: next.accept needs the closing talk to linger after the completion, and this Delve does not end on a talk."); return 1; }
+                    if (clone.Stages!.Any(x => x.Index == ChainAcceptStage)) { Console.WriteLine($"REFUSED: stage {ChainAcceptStage} already exists on this base; the chain's accept stage collides."); return 1; }
+                    bm.AcceptStage = ChainAcceptStage;
+                }
                 allStages = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Concat(steps.SelectMany(s => s.WaveStages))
                     .Concat(bm.Linger >= 0 ? new[] { bm.Linger } : Array.Empty<int>())
+                    .Concat(bm.AcceptStage >= 0 ? new[] { bm.AcceptStage } : Array.Empty<int>())
                     .Concat(spawnedStage.Values)
                     .Concat(r.approach != null ? new[] { t.approachStage } : Array.Empty<int>())
                     .Concat(personStage.Values).Concat(whoStage.Values)
@@ -1653,6 +1671,17 @@ namespace FrankyCLI
                     mi.Weight = 0f;
                     itemOf[i] = mi.FormKey;
                     Console.WriteLine($"  +item    : {mi.EditorID} {mi.FormKey}  \"{mi.Name}\"  (clone of {itemSrc.EditorID}, weight {itemSrc.Weight} -> 0)");
+                }
+                // carry (his 2026-11-11): the handed item, made as a pickup's is, keyed CarryKey so the fragment names it Item0.
+                if (r.carry != null)
+                {
+                    if (itemSrc == null) { Console.WriteLine($"REFUSED: the removed driver's CargoObject is not a MiscItem in {t.mod} to clone."); return 1; }
+                    var ci = myMod.MiscItems.DuplicateInAsNewRecord(itemSrc);
+                    ci.EditorID = $"{r.id}_item0";
+                    ci.Name = r.carry.item!;
+                    ci.Weight = 0f;
+                    itemOf[CarryKey] = ci.FormKey;
+                    Console.WriteLine($"  +item    : {ci.EditorID} {ci.FormKey}  \"{ci.Name}\"  (carry: handed to the player on stage {t.entryStage}; clone of {itemSrc.EditorID}, weight 0)");
                 }
                 return Recipes();
             }
@@ -2362,7 +2391,23 @@ namespace FrankyCLI
                     if (!Lingers(st)) WaitForLines(st);   // lingering, MissionComplete no longer shuts it down (ShutdownOnCompletion false)
                     // OT-30: the next link starts HERE, after the closing lines (the ask is in them) and BEFORE MissionComplete,
                     // which shuts this quest down and can wait on the reward screen. The link fills its own site (a board request).
-                    if (r.next != null)
+                    // With next.accept (his 2026-11-11) it starts on the accept line's own stage instead, so nothing here.
+                    if (r.next != null && bm.AcceptStage < 0) StartNext(st);
+                    Add(st, "Quest __temp = Self as Quest");
+                    Add(st, $"{t.questScript} kmyQuest = __temp as {t.questScript}");
+                    Add(st, "kmyQuest.MissionComplete()");
+                    // The shutdown stage's lines once, from the completing stage: a talk's further closers call this too, and a
+                    // second copy would declare __temp twice in one fragment.
+                    if (Lingers(st) && st == steps[^1].DoneStage)
+                    {
+                        Add(bm.Linger, "Quest __temp = Self as Quest");
+                        Add(bm.Linger, $"{t.questScript} kmyQuest = __temp as {t.questScript}");
+                        Add(bm.Linger, "kmyQuest.MissionShutdown()   ; the person unloaded after the completion (DefaultAliasOnUnload)");
+                    }
+                }
+                // The next link's start (OT-30), on whichever stage hands on: the completing one, or next.accept's own.
+                void StartNext(int st)
+                {
                     {
                         string pad = "";
                         if (r.next.chance < 100) { Add(st, $"If Utility.RandomInt(1, 100) <= {r.next.chance}   ; an escalation: {r.next.chance}%"); pad = "    "; }
@@ -2377,18 +2422,8 @@ namespace FrankyCLI
                         Add(st, $"{pad}EndIf");
                         if (r.next.chance < 100) Add(st, "EndIf");
                     }
-                    Add(st, "Quest __temp = Self as Quest");
-                    Add(st, $"{t.questScript} kmyQuest = __temp as {t.questScript}");
-                    Add(st, "kmyQuest.MissionComplete()");
-                    // The shutdown stage's lines once, from the completing stage: a talk's further closers call this too, and a
-                    // second copy would declare __temp twice in one fragment.
-                    if (Lingers(st) && st == steps[^1].DoneStage)
-                    {
-                        Add(bm.Linger, "Quest __temp = Self as Quest");
-                        Add(bm.Linger, $"{t.questScript} kmyQuest = __temp as {t.questScript}");
-                        Add(bm.Linger, "kmyQuest.MissionShutdown()   ; the person unloaded after the completion (DefaultAliasOnUnload)");
-                    }
                 }
+                if (bm.AcceptStage >= 0) StartNext(bm.AcceptStage);
                 void WaitForLines(int st)
                 {
                     foreach (var (_, n) in spokenAt.Where(x => x.stage == st))
@@ -2403,6 +2438,13 @@ namespace FrankyCLI
                 }
                 var held = new List<int>();   // pickups and recovered items not yet delivered
                 int handBack = HandBackTalk(r, steps);
+                // carry (his 2026-11-11): handed over as the link starts, then carried like a picked-up item until something takes it.
+                if (r.carry != null)
+                {
+                    props.Add(("Form", $"Item{CarryKey + 1}", itemOf[CarryKey], -1));
+                    Add(t.entryStage, $"Game.GetPlayer().AddItem(Item{CarryKey + 1}, 1, False)   ; carry: handed over by the link before");
+                    held.Add(CarryKey);
+                }
                 for (int k = 0; k < steps.Count; k++)
                 {
                     var s = steps[k];
@@ -3396,6 +3438,41 @@ namespace FrankyCLI
                 fail += Check($"the talk that ends the Delve takes what is carried, on stage {hst}",
                               at < 0 ? "no fragment" : $"{hlines.Count(body.Contains)} of {hlines.Count} item(s) taken",
                               $"{hlines.Count} of {hlines.Count} item(s) taken");
+            }
+            string BodyOf(int st)
+            {
+                string fn = $"Function {FragmentFunction(st)}()";
+                int at = fsrc.IndexOf(fn, StringComparison.Ordinal);
+                return at < 0 ? "" : fsrc[at..(fsrc.IndexOf("EndFunction", at, StringComparison.Ordinal) is int e && e > at ? e : fsrc.Length)];
+            }
+            // carry (his 2026-11-11), read back: the handed item exists, weighs 0 (above), is added on the entry stage, and is taken.
+            if (r.carry != null)
+            {
+                var ci = m.MiscItems.FirstOrDefault(x => x.EditorID == $"{r.id}_item0");
+                fail += Check("carry: the handed item is in the plugin, named as the recipe says", ci == null ? "missing" : ci.Name?.String ?? "(no name)", r.carry.item!);
+                fail += Check($"carry: stage {t.entryStage} hands it to the player", BodyOf(t.entryStage).Contains("Game.GetPlayer().AddItem(Item0, 1, False)").ToString(), "True");
+                fail += Check("carry: something takes it back", (fsrc.Contains("Game.GetPlayer().RemoveItem(Item0, 1)")).ToString(), "True");
+            }
+            // next.accept (his 2026-11-11), read back: the accept line is HIS person's, offered only after the completion and only
+            // until picked, its reply sets the accept stage, that stage starts the next link, and the completing stage does not.
+            if (bm.AcceptStage >= 0)
+            {
+                // The completing stage the build recorded (Stages sets LingerFrom off the real steps). NOT StepsOf(r)[^1].DoneStage,
+                // which is 0 at verify time: the first version of this check read 0 and so compared nothing (2026-11-11, its first run).
+                int done = bm.LingerFrom;
+                if (done <= 0) fail += Check("accept: the completing stage is known to the verify", done.ToString(), "a stage above 0");
+                var asc = q.Scenes.FirstOrDefault(s => s.EditorID == $"{r.id}_accept_scene");
+                var gates = asc?.Conditions.Select(c => (c.Data as IGetStageDoneConditionDataGetter, c as IConditionFloatGetter))
+                                .Where(x => x.Item1 != null).Select(x => $"{x.Item1!.SecondParameter}={x.Item2?.ComparisonValue}").OrderBy(x => x).ToList();
+                fail += Check("accept: the accept scene exists and loops to the menu", asc == null ? "missing" : $"0x{(uint)(asc.Flags ?? 0):X8}", "0x00002814");
+                fail += Check($"accept: offered after the completion ({done}) and until picked ({bm.AcceptStage})",
+                              gates == null ? "missing" : string.Join(" ", gates.Where(g => g.StartsWith($"{done}=") || g.StartsWith($"{bm.AcceptStage}="))),
+                              string.Join(" ", new[] { $"{done}=1", $"{bm.AcceptStage}=0" }.OrderBy(x => x)));
+                var ar = q.DialogTopics.FirstOrDefault(d => d.EditorID == $"{r.id}_accept_reply")?.Responses.FirstOrDefault();
+                fail += Check($"accept: the reply sets stage {bm.AcceptStage}", ar?.SetParentQuestStage == null ? "none" : $"OnEnd {ar.SetParentQuestStage.OnEnd}", $"OnEnd {bm.AcceptStage}");
+                string start = $"If !{ChainNextProperty}.Start()";
+                fail += Check($"accept: stage {bm.AcceptStage} starts the next link", BodyOf(bm.AcceptStage).Contains(start).ToString(), "True");
+                fail += Check($"accept: the completing stage {done} does NOT start it", BodyOf(done).Contains(start).ToString(), "False");
             }
             foreach (var (sm, sa) in bm.DroppedSlots)
             {

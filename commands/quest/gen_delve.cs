@@ -328,6 +328,15 @@ namespace FrankyCLI
             /// <summary>OPTIONAL: the surprise between the find and the choose endings (journal, and a box or a spoken line).</summary>
             public Offer? offer { get; set; }
             /// <summary>
+            /// OPTIONAL, a chain link only (his 2026-11-11 play of MB50a -> MB106a: "The regulator was at the scrap dealer before
+            /// me, that doesn't make any sense. She should give me the old scrap regulator."): an item the player is HANDED as the
+            /// link starts, by the person who asked in the link before. The build makes it as a pickup's item is made (a weightless
+            /// MiscItem, `<id>_item0`), adds it to the player on the entry stage, and it is carried like a picked-up item, so the
+            /// talk that ends the Delve (or a plain deliver) takes it. Refused with nothing to take it. A new optional field, so
+            /// schema stays 2.
+            /// </summary>
+            public Carry? carry { get; set; }
+            /// <summary>
             /// beats, REQUIRED when the last step is a group (and refused otherwise): the completing stage's
             /// journal line. The group's last member sets its own stage and then the completing stage in the
             /// same instant, and the quest log shows only the newest line, so without this the player reads
@@ -392,7 +401,21 @@ namespace FrankyCLI
             public string? via { get; set; }
             /// <summary>1 to 100, default 100. Below 100 the thread is an ESCALATION: a common job that sometimes leads on.</summary>
             public int chance { get; set; } = 100;
+            /// <summary>
+            /// via talk, OPTIONAL (his 2026-11-11 play of MB50a: "I wasn't given the option to take the mission, she should offer
+            /// it and I should accept"): the player's line that TAKES the next job, and the person's reply. Absent, the next link
+            /// starts by itself on the completing stage, as before. Present, the closing reply asks, this exchange shows in the
+            /// same menu only after the completion (and only until it is picked), and the next link starts on its own stage
+            /// (ChainAcceptStage) when the reply ends. Walking away without it starts nothing. Chance 100 only.
+            /// </summary>
+            public Exchange? accept { get; set; }
         }
+        /// <summary>carry: the item's display name, as a pickup's item is named.</summary>
+        private sealed class Carry { public string? item { get; set; } }
+        /// <summary>The stage a chain's accept line sets, whose fragment starts the next link (Next.accept). 300: the board shell
+        /// already holds 5, 10, 100 and 200 (its first try was 200, refused by the collision guard on 2026-11-11), endings take
+        /// 109/110/120..., and spawned fights 900 up.</summary>
+        private const int ChainAcceptStage = 300;
         /// <summary>The voice of a Delve's spoken lines.</summary>
         private sealed class Speaker
         {
@@ -1659,6 +1682,26 @@ namespace FrankyCLI
                 }
                 if (r.beats.Any(b => b.choose != null))
                     Fatal("next on a choose ending is the fork, which is not built: next sits on the recipe, so both endings would start the same link.");
+                if (n.accept is Exchange acc)
+                {
+                    if (n.via != "talk") Fatal($"next.accept is a line in the closing conversation, so next.via must be \"talk\"; it is '{n.via ?? "(none)"}'.");
+                    if (n.chance != 100) Fatal($"next.accept with next.chance {n.chance}: an accept line that only sometimes shows is not built; chance 100 only.");
+                    if (string.IsNullOrWhiteSpace(acc.prompt)) Fatal("next.accept.prompt is required: the player's line that takes the job.");
+                    else if (acc.prompt.Length > 60) Fatal($"next.accept.prompt is {acc.prompt.Length} characters; a prompt is 60 at most.");
+                    if (acc.reply == null || acc.reply.Count == 0 || acc.reply.Any(string.IsNullOrWhiteSpace))
+                        Fatal("next.accept.reply is required: the person's answer, a list of responses.");
+                    else if (acc.reply.FirstOrDefault(x => x.Length > 200) is string longR)
+                        Fatal($"next.accept.reply has a response of {longR.Length} characters; 200 at most.");
+                    if (acc.perk != null || acc.give != null || acc.ends != null)
+                        Fatal("next.accept takes prompt and reply only: it starts the next link, it does not end, give or need a perk.");
+                    if (acc.prompt != null) Console.WriteLine($"  accept   : \"{acc.prompt}\" starts {n.id} on stage {ChainAcceptStage}, offered after the completion");
+                }
+            }
+            if (r.carry != null)
+            {
+                if (!chain) Fatal("carry is an item handed over by the link before, so it is on a chain link (deal \"chain\") only.");
+                if (string.IsNullOrWhiteSpace(r.carry.item)) Fatal("carry.item is required: the name the player sees in his inventory.");
+                else Console.WriteLine($"  carry    : \"{r.carry.item}\" handed to the player as the link starts");
             }
             if (chain)
             {

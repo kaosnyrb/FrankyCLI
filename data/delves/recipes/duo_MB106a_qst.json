@@ -13,7 +13,8 @@
     "REWRITTEN 2026-11-10 on place.inherit's retirement (Eliza 2026-11-09): no longer at Noor's site. The hauler's drop and the scrapper are both at this link's own site, so it is pickup (the drop) then talk (the scrapper): not MB50a's craft then talk (rule 1).",
     "Chain-only (deal chain), so it may remember (rule 3). Noor stays on the radio: the same person, which is the point of a chain. Pay: med, the finale pays more than a coda would (rule 6).",
     "FIXED 2026-11-10: Noor's closing radio line ('Keep a share, you've earned it') came off the talk, which cannot carry a say. Her last word in the chain is now the ask in MB50a.",
-    "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB106a.md): rework, findings 1-8 taken, 9 is chain-only (no card owed), 10 kept. Forced pick answered NO: the regulator does not leave whole. He takes it apart and writes it down, so 'Nobody can make them' (MB50a) is answered by someone who means to make it untrue. The scarcity is in the always-heard greeting now; the age is said once, on Noor's radio."
+    "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB106a.md): rework, findings 1-8 taken, 9 is chain-only (no card owed), 10 kept. Forced pick answered NO: the regulator does not leave whole. He takes it apart and writes it down, so 'Nobody can make them' (MB50a) is answered by someone who means to make it untrue. The scarcity is in the always-heard greeting now; the age is said once, on Noor's radio.",
+    "REBUILT 2026-11-11 on his 2026-11-11 play of MB50a -> MB106a: (1) \"The regulator was at the scrap dealer before me, that doesn't make any sense. She should give me the old scrap regulator.\" (2) \"I wasn't given the option to take the mission, she should offer it and I should accept.\" (3) \"The Commerce option didn't end the quest, which makes it feel like it did nothing\". Built by Eliza the same morning on his \"yeah build, tell Jessica the changes too and we'll rewrite\". The pickup at the hauler's drop is gone: the player arrives CARRYING the regulator (carry), so it is one talk. Commerce ends the job (ends, hard). Every new line is a placeholder for Jessica."
   ],
   "place": {
     "theme": {
@@ -29,27 +30,10 @@
   },
   "prose": {
     "name": "Hauling: The Old Regulator on <Planet>",
-    "briefing": "The crew lead from the water reclaimer sent their old pressure regulator on with a hauler. It's waiting at the drop at the <Place>, where a scrapper wants it."
+    "briefing": "The crew lead at the water reclaimer gave you their old pressure regulator. A scrapper at the <Place> wants it.",
+    "_briefing": "PLACEHOLDER (Eliza 2026-11-11), Jessica's to rewrite. Was: The crew lead from the water reclaimer sent their old pressure regulator on with a hauler. It's waiting at the drop at the <Place>, where a scrapper wants it."
   },
   "beats": [
-    {
-      "type": "pickup",
-      "at": "REContainerLocRef",
-      "replace": true,
-      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
-      "_model": "PLACEHOLDER CRATE, his 2026-11-11 'build it with a placeholder crate'. The worn regulator itself is still his or Kim's pick. replace: true so the crate stands in for the container at REContainerLocRef, never inside one (MB59a's shape).",
-      "name": "Old Regulator",
-      "item": "Old Pressure Regulator",
-      "objective": "Collect the old regulator from the hauler's drop",
-      "message": {
-        "title": "Old Regulator",
-        "text": "Heavier than the new one, and stamped with a maker's mark nobody uses any more."
-      },
-      "journal": "I've got the old pressure regulator from the hauler's drop. I need to find the scrapper at the <Place>.",
-      "say": [
-        "That's the one. It's older than both of us."
-      ]
-    },
     {
       "type": "talk",
       "at": "RECenterLocRef",
@@ -86,7 +70,12 @@
           "reply": [
             "It is. Fine. A little more."
           ],
-          "perk": "Skill_Commerce"
+          "perk": "Skill_Commerce",
+          "ends": {
+            "journal": "I talked the scrapper at the <Place> up on the water reclaimer crew's old regulator. He's paying them direct, and more than he meant to.",
+            "reward": "hard"
+          },
+          "_ends": "PLACEHOLDER journal (Eliza 2026-11-11), Jessica's to rewrite: the Commerce line now ENDS the job on its own, paying hard where the plain sale pays med (his note 3)."
         },
         {
           "prompt": "Why's it worth anything?",
@@ -114,5 +103,9 @@
   "broadcast": [
     "It's the heavy one. Mind your back, and don't let them have it cheap."
   ],
-  "_speech": "Noor, MB50a's voice, carried on. The scrapper: dry, delighted by old machines; a stand-in voice, his ear decides."
+  "_speech": "Noor, MB50a's voice, carried on. The scrapper: dry, delighted by old machines; a stand-in voice, his ear decides.",
+  "carry": {
+    "item": "Old Pressure Regulator"
+  },
+  "_carry": "Handed over by Noor's accept line in MB50a (his note 1); taken back by the scrapper's talk. Replaces the hauler's-drop pickup and its placeholder crate."
 }

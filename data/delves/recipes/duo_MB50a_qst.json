@@ -96,8 +96,9 @@
         {
           "prompt": "Here's your regulator.",
           "reply": [
-            "That's exactly it. Give me an hour and we'll have running water again. The old one's gone on with a hauler to a scrapper who wants it. Would you meet it there?"
-          ]
+            "That's exactly it. Give me an hour and we'll have running water again. There's a scrapper who'd pay for the old one. Would you take it to him?"
+          ],
+          "_reply": "PLACEHOLDER (Eliza 2026-11-11), Jessica's to rewrite: the old one no longer goes on with a hauler; she asks, and the accept line takes it."
         },
         {
           "prompt": "Old kit like that outlasts whoever fitted it.",
@@ -140,7 +141,14 @@
   "_speech": "The same voice on the radio and in person (Noor), as 11a and 19a. Lucy (Friendly, Relaxed, Thoughtful), in two recipes; his ear decides. No names, places, factions or currency in a voiced line; her name is subtitle only.",
   "next": {
     "id": "duo_MB106a_qst",
-    "via": "talk"
+    "via": "talk",
+    "accept": {
+      "prompt": "I'll take the old one to him.",
+      "reply": [
+        "Here it is. Don't let him have it cheap."
+      ]
+    },
+    "_accept": "PLACEHOLDER words (Eliza 2026-11-11), Jessica's to rewrite. his 2026-11-11 play of MB50a -> MB106a: (1) \"The regulator was at the scrap dealer before me, that doesn't make any sense. She should give me the old scrap regulator.\" (2) \"I wasn't given the option to take the mission, she should offer it and I should accept.\" (3) \"The Commerce option didn't end the quest, which makes it feel like it did nothing\". Built by Eliza the same morning on his \"yeah build, tell Jessica the changes too and we'll rewrite\". The accept line shows after the completion; picking it hands over the old regulator (MB106a's carry) and starts MB106a."
   },
   "_next": "THE OLD REGULATOR, link 1 of 2 (2026-11-10, Jessica; chains.md). Noor's closing reply carries the ask; accepting starts MB106a. ⚠ MB50a is LIVE: this changes one voiced line (a revoice) and needs a rebuild, both his go."
 }
