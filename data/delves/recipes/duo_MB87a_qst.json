@@ -12,7 +12,8 @@
     "Register: the warm common job. You are the one who turns up.",
     "REWORKED 2026-11-10 on OT-9A (Eliza's letter 2026-11-10-eliza-jessica-wounded-and-captives-are-people-now.md, his 'B, it matches vanilla'): the three message boxes became three wounded people in three talks, in a fixed order because talks do not group. The details kept: the cut arm, the burnt hands that say almost nothing, the knock to the head. Voices borrowed until his ear casts them. Pay: med.",
     "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB87a.md): ship, findings 2-5 taken, 6-7 kept. Forced pick answered YES: each give takes the med pack (OT-34 as built), so the triage spends three and every prompt stands; the card now says three.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Treat the wounded settlers at the <Place> on <Planet>. Bring three med packs. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Treat the wounded settlers at the <Place> on <Planet>. Bring three med packs. Payment on contract completion.\"",
+    "KIERAN DOYLE 2026-11-11 (reviews/2026-11-11-delve-MB87a.md): ship. Finding 1 taken on both medic boards: each wounded objective names the med pack ('Give ... a med pack'), so a player one pack short sees why the line is missing. Finding 5 kept: Corin is short on purpose. Forced pick answered: the warden's order stays (talks do not group, and the line is the 19th)."
   ],
   "place": {
     "theme": {
@@ -34,7 +35,7 @@
     {
       "type": "talk",
       "at": "RECenterLocRef",
-      "objective": "Treat the bleeding settler at the <Place>",
+      "objective": "Give the bleeding settler a med pack",
       "person": {
         "name": "Tamsin Rowe",
         "template": "UC_NA_MASTWorkerFemale03",
@@ -80,7 +81,7 @@
     {
       "type": "talk",
       "at": "REMarkerMediumLocRef",
-      "objective": "Treat the settler with burnt hands",
+      "objective": "Give the settler with burnt hands a med pack",
       "person": {
         "name": "Corin Vale",
         "template": "UC_NA_MASTWorkerMale02",
@@ -129,7 +130,7 @@
       "at": "REContainerLocRef",
       "replace": true,
       "_replace": "REContainerLocRef is the box itself: his MB87a play, 2026-11-10, \"Rory was sat in a chest tho\". The box goes at the accept.",
-      "objective": "Treat the settler who took a knock to the head",
+      "objective": "Give the settler who took a knock a med pack",
       "person": {
         "name": "Rory Dunne",
         "template": "UC_NA_MASTWorkerMale01",

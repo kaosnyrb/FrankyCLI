@@ -14,7 +14,8 @@
     "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB96a.md): rework, findings 1-5 taken, 6 kept, 7 is the stand-in wounded (Eliza's, already asked). Forced pick answered NO: the foreman's last line is a count and nothing else.",
     "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB96a.md): rework, findings 1-6 taken, 7-8 kept. Forced pick: the foreman CANNOT have the last word (the last step is a talk, which carries no radio line), so the count closes in Hollis's mouth instead: the order is now shoulder, young one, ribs, and the man who keeps the count is treated last and says 'Three down, three treated.' The foreman says the whole order.",
     "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Clear a drop pod raid at the <Place> on <Planet>, then treat the wounded. Bring med packs. Payment on contract completion.\"",
-    "KIERAN DOYLE 2026-11-11 (reviews/2026-11-11-delve-MB96a.md): rework, finding 1 taken: the card says 'Bring three med packs' again (my 11-10 card sweep dropped it, so a player who spent his packs in the fight could stall at the first settler). Forced pick answered: the PLAYER brings his own, the spend is the player's part. Findings 2 (pay against three packs) and 3 (a 478 m worst-case walk) are his to rule and Eliza's to measure; 4-7 need nothing."
+    "KIERAN DOYLE 2026-11-11 (reviews/2026-11-11-delve-MB96a.md): rework, finding 1 taken: the card says 'Bring three med packs' again (my 11-10 card sweep dropped it, so a player who spent his packs in the fight could stall at the first settler). Forced pick answered: the PLAYER brings his own, the spend is the player's part. Findings 2 (pay against three packs) and 3 (a 478 m worst-case walk) are his to rule and Eliza's to measure; 4-7 need nothing.",
+    "KIERAN DOYLE 2026-11-11 (reviews/2026-11-11-delve-MB87a.md): ship. Finding 1 taken on both medic boards: each wounded objective names the med pack ('Give ... a med pack'), so a player one pack short sees why the line is missing. Finding 5 kept: Corin is short on purpose. Forced pick answered: the warden's order stays (talks do not group, and the line is the 19th)."
   ],
   "place": {
     "theme": {
@@ -64,7 +65,7 @@
     {
       "type": "talk",
       "at": "REMarkerMediumLocRef",
-      "objective": "Treat the settler with the shoulder wound",
+      "objective": "Give the settler with the shoulder wound a med pack",
       "person": {
         "name": "Morag Ellis",
         "template": "UC_NA_MASTWorkerFemale01",
@@ -106,7 +107,7 @@
       "type": "talk",
       "at": "REMarkerSmallLocRef",
       "_at": "Was RETravelB1LocRef: on a board request it never dealt (his play, 2026-11-10: 42 failed fills on TargetLocation; probe duo_delvetest_m96, this one change, dealt first refresh and played). Moved on his go.",
-      "objective": "Treat the settler with the twisted ankle",
+      "objective": "Give the young settler with the ankle a med pack",
       "person": {
         "name": "Jory Marsh",
         "template": "UC_NA_MASTWorkerMale01",
@@ -154,7 +155,7 @@
       "at": "REContainerLocRef",
       "replace": true,
       "_replace": "REContainerLocRef is the box itself: his MB87a play, 2026-11-10, \"Rory was sat in a chest tho\". The box goes at the accept.",
-      "objective": "Treat the settler with cracked ribs",
+      "objective": "Give the settler with cracked ribs a med pack",
       "person": {
         "name": "Hollis Grant",
         "template": "UC_NA_MASTWorkerMale02",
