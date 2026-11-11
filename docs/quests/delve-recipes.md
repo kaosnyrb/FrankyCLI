@@ -701,6 +701,38 @@ the `[captive]` log line reads `still bound` back before the guard: `True` is th
 `wounded` and `captive` together (vanilla's scripts say the pair is unsupported), `captive` off a talk, and
 `captive` with `ends`. Probe: `duo_delvetest_f1`. Alias `Factions` now cross the quest model (`gen_questmodel`).
 
+## A talk with a ship (`ship`)
+
+**The talk beat with a SHIP as the speaker** (plan OT-9G, his 2026-11-11: *"you can just start conversations with
+frienldly ships, so I'm assuming we'd make it a conversation option to progress the quest"*). On a one-beat
+`boardspace`, a `talk` with `"ship": "LvlShip_*"` in place of a `person`: PrimaryRef creates the ship at `at` from the
+space cell (OT-37's defeat's creation: disabled until the accept), friendly, with its death hook removed (shooting it
+completes nothing) and no use hook. He hails it and gets the talk's menu: `greeting`, then `exchanges`, `exchanges[0]`
+first, its reply completing (and paying) the job. Vanilla's own ship lines stay beside ours (trade, piracy, chatter):
+**his ruling, piracy left in, *"that's funny"*.**
+
+```json
+"speaker": { "name": "UC Mule", "voice": "GenericMale01", "elevenlabs": "<id>" },
+"beats": [ { "type": "talk", "at": "se_GeneralMarkerLocRef01", "ship": "LvlShip_UCCitizen_Cargo",
+             "objective": "Hail the cargo ship over <Planet>", "greeting": ["..."],
+             "exchanges": [ { "prompt": "...", "reply": ["..."] } ], "reward": "easy" } ]
+```
+
+- **The voice is the recipe's `speaker`**: the ship's alias wears its voice type (ForcedVoice and VoiceTypes) and its
+  lines go to the voice step as a person's do. With no speaker the ship is silent (subtitles only). `GenericMale01` is
+  vanilla's own hail ship's voice type (`2BCA32`).
+- **One builder, the speaker varies** (his *"ok A, merge"*): `TalkBeat.BuildTalk` with `ship: true` casts every scene on
+  the ship's ALIAS and gates it `GetIsAliasRef` (vanilla's hail scenes cast their ship alias the same way), sets no
+  Speaker form, and builds everything else exactly as a ground talk. The merge was proven by `ab.py` on eight talk
+  recipes (give, ends, wounded, captive, the rescue aboard, next.accept, carry): 24 files and 8 logs identical.
+- **Refused on a ship** (so nothing is silently ignored): `person`, `model`, `name`, `target`, `ask`, `repair`,
+  `scenery`, `guards`, `replace`, `rider`, and an exchange's `give`, `ends` or `perk` (the space build resolves none
+  yet). A `ship` anywhere but a one-beat boardspace talk is refused.
+- ⚠ **Played on the probe `duo_delvetest_hl1`** (silent, then voiced: *"yeah that worked"*, *"yup audio worked
+  great"*); the merged build is verified, not replayed. After the completion his side option was still listed,
+  greyed. The vanilla hail (the ship hailing HIM on approach) is a different shape and is not built; see the spike
+  `office/spikes/2026-11-03-hailing-a-ship.md` in the home office.
+
 ## Ride: a person comes aboard (`ride`)
 
 **Built 2026-11-04 (plan OT-9H), board only, probe `duo_delvetest_r1`.** The person of an earlier `talk` beat boards the player's ship when the ride's step begins, and is carried to the beat's place. Vanilla's own shape (`RQ_OE_TransportPerson_02`, `RQ_OE_Rescue_01`): the stock `DefaultPassengerQuestScript` on the quest, a `Passengers` collection wearing `DefaultPassengerPackage`, `AddPassenger` from a stage fragment.

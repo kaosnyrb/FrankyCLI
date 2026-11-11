@@ -301,19 +301,27 @@ namespace FrankyCLI
             /// The greeting and the completion are also gated on the beat's stage NOT done (nothing completes twice, and he
             /// does not re-open with the ask); the side questions are not, so they outlive the completion.
             /// The person's lines are voiced by HIS voice (TalkLines), the player's are silent (WEMFile 0, as in vanilla).
+            /// ⭐ THE SPEAKER VARIES, THE CONVERSATION DOES NOT (his 2026-11-11 ruling, A: one talk beat, "if we later add talking
+            /// to a passenger on a ship after boarding"): a person at a marker (npc, GetIsID, Speaker set), a rescue's rider
+            /// (the same person again), or A SHIP he hails (ship: true, OT-9G, played on duo_delvetest_hl1): the ship's ALIAS is
+            /// the cast and the gate (GetIsAliasRef, vanilla's hail scenes cast the ship alias the same way), no Speaker form,
+            /// and its voice is the recipe's speaker's (silent when there is none). Everything else is one code path.
             /// </summary>
             internal static void BuildTalk(StarfieldMod myMod, Quest clone, Recipe r, int b, List<Step> steps,
                                           Dictionary<int, int> beatStage, int entryStage, int personAlias, FormKey npc, bool female, BeatsMade bm,
                                           Dictionary<(int beat, int ex), FormKey> talkPerks,
-                                          Dictionary<(int beat, int ex), (FormKey item, string name, int count)> talkGives)
+                                          Dictionary<(int beat, int ex), (FormKey item, string name, int count)> talkGives,
+                                          bool ship = false)
             {
                 var tb = r.beats[b];
                 int stage = beatStage[b];
                 int k = steps.FindIndex(s => s.Beats.Contains(b));
                 int enter = k == 0 ? entryStage : steps[k - 1].DoneStage;   // step one opens on the entry stage: 0 on a slate, the board's accept (10)
                 string tag = $"{r.id}_talk{b + 1}";
-                var who = tb.person ?? r.beats[tb.rider!.Value - 1].person!;   // a rescue's goodbye is the check-in's person again
-                string vt = who.voice!, vid = who.elevenlabs!;
+                // The voice: the person's own, a rescue's goodbye the check-in's person again, a ship the recipe's speaker's.
+                var who = ship ? null : tb.person ?? r.beats[tb.rider!.Value - 1].person!;
+                string? vt = ship ? r.speaker?.voice : who!.voice, vid = ship ? r.speaker?.elevenlabs : who!.elevenlabs;
+                bool voiced = vt != null && vid != null;
                 // The closers: exchanges[0] on the beat's stage, and on the talk that ends the Delve every exchange carrying
                 // "ends" on its own ending stage (MB93d; TalkEndings, written in Stages). One closer is the shape as it was.
                 var closes = HandBackTalk(r, steps) == b && bm.TalkEnds.Count > 0
@@ -321,6 +329,11 @@ namespace FrankyCLI
 
                 ConditionFloat IsHim()
                 {
+                    if (ship)
+                    {
+                        var sd = new GetIsAliasRefConditionData { FirstParameter = personAlias };
+                        return new ConditionFloat { Data = sd, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f };
+                    }
                     var d = new GetIsIDConditionData();
                     d.FirstParameter = new FormLinkOrIndex<IPlaceableObjectGetter>(d, npc);
                     return new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f };
@@ -343,15 +356,15 @@ namespace FrankyCLI
                     };
                     topic.Quest.SetTo(clone.FormKey);
                     var info = new DialogResponses(myMod) { EditorID = name + "_info", SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low };
-                    if (his) info.Speaker.SetTo(npc);
+                    if (his && !ship) info.Speaker.SetTo(npc);
                     // The game plays the file each response's WEMFile names; the first is the topic's id, as the radio lines'
                     // are. Emotion is FFFFFFFF, the "None Reference" (npc_dialogue.md's gotcha).
-                    var said = AddResponses(myMod, info, texts, topic.FormKey.ID, his, 7.466667f);
+                    var said = AddResponses(myMod, info, texts, topic.FormKey.ID, his && voiced, 7.466667f);
                     topic.Responses.Add(info);
                     // TPIC: the topic's own list of its infos. Missing, the CK crashes on a click (book_audio.md).
                     topic.TopicInfoList = new Noggog.ExtendedList<IFormLinkGetter<IDialogResponsesGetter>> { info.ToLink<IDialogResponsesGetter>() };
                     clone.DialogTopics.Add(topic);
-                    foreach (var (wem, text) in said) bm.TalkLines.Add((wem, text, vt, vid, female));
+                    foreach (var (wem, text) in said) bm.TalkLines.Add((wem, text, vt!, vid!, female));
                     return (topic, info);
                 }
                 Scene NewScene(string name, uint flags, bool untilDone)
