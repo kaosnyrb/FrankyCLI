@@ -497,6 +497,16 @@ namespace FrankyCLI
             /// Absent, he says nothing of his own, and vanilla's ambient greetings no longer match him either (see Factions).
             /// </summary>
             public List<List<string>>? hellos { get; set; }
+            /// <summary>
+            /// talk, OPTIONAL (vendors, his 2026-11-11 "having people selling stuff, little lore things or quest objectives",
+            /// Jessica's letter; probe duo_delvetest_v1): what he sells, each an item EditorID and a count. Vanilla's shape, read
+            /// 2026-11-11 (home-office manual 44, Vendors): a copy of Vendor_OE_Standard_Container [10E232] holding this stock is
+            /// created DISABLED at his marker (VendorActivatorScript places its chest disabled too), he is linked to it by
+            /// VendorContainerKeyword01 [10FCD1] (VendorActivatorScript's SetLinkedRef), and his alias carries
+            /// Vendor_OE_Standard_Faction [10E2B9] (Flags Vendor). An exchange with trade: true opens the trade screen.
+            /// ⚠ UNPROVEN: that the linked chest, not the faction's own MerchantContainer, is what he sells from.
+            /// </summary>
+            public List<Give>? sells { get; set; }
         }
         /// <summary>talk: one question the player can ask and the person's answer. Prompt is silent menu text, reply is voiced.</summary>
         private sealed class Exchange
@@ -522,6 +532,11 @@ namespace FrankyCLI
             /// beat's. Only on the talk that is the whole last step of a ground board Delve, never on exchanges[0]. Each ending
             /// is a copy of the completing stage (the choose endings' and OT-9J's shape); see TalkEndings.</summary>
             public ExchangeEnd? ends { get; set; }
+            /// <summary>talk, optional (vendors, his 2026-11-11 "having people selling stuff", probe duo_delvetest_v1): when
+            /// this exchange's REPLY ends, the trade screen opens on the person, by vanilla's own VendorInfoScript on that INFO
+            /// (the stock "let's trade" script: OnEnd, ShowBarterMenu on the speaker). Needs person.sells. Never exchanges[0],
+            /// never with give or ends: it is a side question he can ask again. Home-office manual 44, Vendors.</summary>
+            public bool trade { get; set; }
         }
         /// <summary>talk: exchanges[x].ends. journal is the ending's log line, reward its pay tier (easy / med / hard).</summary>
         private sealed class ExchangeEnd { public string? journal { get; set; } public string? reward { get; set; } }

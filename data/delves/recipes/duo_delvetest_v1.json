@@ -1,0 +1,76 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_v1",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-11 14:29 \"yeah let's look at vendors\", then 14:36 \"yeah probe\", off Jessica's vendor letter (office/correspondence/2026-11-11-jessica-eliza-people-who-sell-things.md)",
+  "_note": [
+    "VENDOR PROBE v1: a person who trades. person.sells puts 7 tungsten and 2 isocentered magnets in his own chest (a disabled copy of vanilla's Vendor_OE_Standard_Container at his marker), he is linked to it by VendorContainerKeyword01 and is in Vendor_OE_Standard_Faction; the second question carries trade: true, so the trade screen opens when his reply ends (vanilla's VendorInfoScript).",
+    "What a play answers: (1) does the trade screen open after 'What have you got for sale?'; (2) WHOSE STOCK is in it. Exactly tungsten x7 and magnets x2 means the linked chest wins over the faction's own chest. Generic open-world vendor stock means the faction chest wins, and a real vendor needs a faction of our own. Both together means both are read. (3) can he buy and sell, and is the trade line still there after the completion.",
+    "Every voiced line is w1's (MB85a's), word for word, so the voice cache already holds them and the build spends nothing. The prompts are silent menu text, so the new ones cost nothing either. The lines do not match the prompts: it is a probe.",
+    "Pay easy. The first question completes the mission; ask the trade question before or after."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "ch2's: a board request, non-hostile, never a cave."
+  },
+  "prose": {
+    "name": "Hauling: Vendor Probe on <Planet>",
+    "briefing": "Test mission. A scrapper at the <Place> on <Planet> has stock to sell. Talk to him.",
+    "card": "Test contract. Talk to a scrapper at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "PROBE v1: talk to the scrapper at the <Place>",
+      "person": {
+        "name": "Bram Kessler",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericMale01",
+        "elevenlabs": "onwK4e9ZLuTAKqWW03F9",
+        "sells": [
+          {
+            "item": "InorgUncommonTungsten",
+            "count": 7
+          },
+          {
+            "item": "Mfg_Tier01_IsocenteredMagnet",
+            "count": 2
+          }
+        ]
+      },
+      "greeting": [
+        "Don't fuss. It's a scratch. A big scratch. Did they send you with a med pack?"
+      ],
+      "exchanges": [
+        {
+          "prompt": "PROBE: complete the mission.",
+          "reply": [
+            "Ow. Right. Thank you. I'd have walked in eventually. Probably."
+          ]
+        },
+        {
+          "prompt": "What have you got for sale?",
+          "trade": true,
+          "reply": [
+            "Arguing with a drill. The drill won."
+          ]
+        }
+      ],
+      "journal": "PROBE v1: I talked to the scrapper at the <Place>.",
+      "reward": "easy"
+    }
+  ]
+}

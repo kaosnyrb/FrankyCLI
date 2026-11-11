@@ -44,6 +44,10 @@ namespace FrankyCLI
             public readonly Dictionary<(int beat, int ex), (FormKey item, string name, int count)> TalkGives = new();
             /// <summary>By beat index: a deliver's bring, the item, its in-game name (the short box's words) and how many (OT-31).</summary>
             public readonly Dictionary<int, (FormKey item, string name, int count)> Brings = new();
+            /// <summary>By beat index: a talk person's stock (person.sells), resolved items and counts.</summary>
+            public readonly Dictionary<int, List<(FormKey item, int count)>> VendorStock = new();
+            /// <summary>Vanilla's Vendor_OE_Standard_Container [10E232], copied per vendor; null when nobody sells.</summary>
+            public IContainerGetter? VendorChestSrc;
             /// <summary>By beat index, for a craft: the bench keyword and each ingredient with its count.</summary>
             public readonly Dictionary<int, (FormKey bench, List<(FormKey part, int count)> parts)> Crafts = new();
             /// <summary>By beat index, for a use with explosion: the Explosion placed at its object.</summary>
@@ -320,6 +324,22 @@ namespace FrankyCLI
                 string? nm = (it as Mutagen.Bethesda.Plugins.Aspects.ITranslatedNamedGetter)?.Name?.String;
                 if (it == null || string.IsNullOrWhiteSpace(nm)) { Console.WriteLine($"REFUSED: beat {i + 1} bring.item '{br.item}' is not a named item in {t.mod} or one of its masters."); fail++; continue; }
                 inputs.Brings[i] = (it.FormKey, nm, br.count);
+            }
+            // A talk person's stock (person.sells, vendors): each item own-or-master, and vanilla's chest base to copy.
+            for (int i = 0; i < r.beats.Count && fail == 0; i++)
+            {
+                if (r.beats[i].person?.sells is not List<Give> sl) continue;
+                var stock = new List<(FormKey, int)>();
+                foreach (var s in sl)
+                {
+                    var it = OwnOrMaster<IItemGetter>(myMod, env, s.item ?? "");
+                    if (it == null) { Console.WriteLine($"REFUSED: beat {i + 1} person.sells item '{s.item}' is not an item in {t.mod} or one of its masters."); fail++; break; }
+                    stock.Add((it.FormKey, s.count));
+                }
+                inputs.VendorStock[i] = stock;
+                if (inputs.VendorChestSrc == null
+                    && !env.LinkCache.TryResolve<IContainerGetter>(TalkBeat.VendorChestSrc, out inputs.VendorChestSrc))
+                { Console.WriteLine($"REFUSED: vanilla's vendor chest {TalkBeat.VendorChestSrc} (Vendor_OE_Standard_Container) does not resolve."); fail++; }
             }
             // A talk exchange's perk (a [Background] / [Skill] / [Trait] choice), own-or-master as every other form here.
             for (int i = 0; i < r.beats.Count && fail == 0; i++)

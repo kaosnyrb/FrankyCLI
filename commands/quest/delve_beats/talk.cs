@@ -101,6 +101,14 @@ namespace FrankyCLI
                 new[] { FormKey.Factory("03E0C8:Starfield.esm"), FormKey.Factory("106C30:Starfield.esm") });   // CaptiveFaction, PlayerAllyFaction
             internal static Held? HeldOf(Person? p) => p?.wounded == true ? WoundedHeld : p?.captive == true ? CaptiveHeld : null;
 
+            // Vendors (his 2026-11-11 "having people selling stuff"; probe duo_delvetest_v1), each form read that day on Defiant
+            // (home-office manual 44, Vendors): vanilla's open-world vendor faction, its chest base, the link keyword
+            // VendorActivatorScript uses, and the stock TopicInfo script that opens the trade screen when a line ends.
+            internal static readonly FormKey VendorFaction = FormKey.Factory("10E2B9:Starfield.esm");     // Vendor_OE_Standard_Faction
+            internal static readonly FormKey VendorChestSrc = FormKey.Factory("10E232:Starfield.esm");    // Vendor_OE_Standard_Container
+            internal static readonly FormKey VendorChestLink = FormKey.Factory("10FCD1:Starfield.esm");   // VendorContainerKeyword01
+            internal const string VendorInfoScript = "VendorInfoScript";
+
             /// <summary>The perk families vanilla tags a dialogue choice with (INFO.Perk census, 2026-10-14).</summary>
             private static readonly string[] CheckPerkFamilies = { "Background", "TRAIT_", "Skill_", "Faction" };
 
@@ -200,6 +208,36 @@ namespace FrankyCLI
                         else if (!CheckPerkFamilies.Any(f => perk.EditorID!.StartsWith(f, StringComparison.OrdinalIgnoreCase)))
                             Warn($"{at} exchanges[{x}].perk '{pn}' is not a background, trait, skill or faction perk; vanilla tags choices only with those, so how the game shows it is unknown.");
                     }
+                // Vendors: a trade line needs stock to sell, stock needs a trade line (or nobody can reach it), and the trade
+                // line is a side question (askable again, and never what moves the quest). Not on a held person: the probe is
+                // a free person, and a vendor kneeling bound is a shape nobody has asked for.
+                bool sells = b.person?.sells != null;
+                int trades = b.exchanges?.Count(e => e.trade) ?? 0;
+                if (sells)
+                {
+                    var sl = b.person!.sells!;
+                    if (sl.Count == 0) Fatal($"{at} person.sells is empty; give at least one item, or leave it out.");
+                    foreach (var s in sl)
+                    {
+                        if (string.IsNullOrWhiteSpace(s.item)) Fatal($"{at} person.sells has an entry with no item.");
+                        else if (s.count < 1) Fatal($"{at} person.sells '{s.item}' count is {s.count}; it is how many he stocks, 1 or more.");
+                        else if (!env.LoadOrder.PriorityOrder.WinningOverrides<IItemGetter>().Any(it => Allowed(env, t).Contains(it.FormKey.ModKey)
+                                     && string.Equals(it.EditorID, s.item, StringComparison.OrdinalIgnoreCase)))
+                            Fatal($"{at} person.sells '{s.item}' is not an item in {t.mod} or one of its masters.");
+                    }
+                    if (trades == 0) Fatal($"{at} person.sells with no exchange carrying trade: true; nothing opens the trade screen, so the stock is unreachable.");
+                    if (HeldOf(b.person) != null) Fatal($"{at} person.sells on a wounded or captive person; a vendor is a free person.");
+                    if (IsBoardSpace(t)) Fatal($"{at} person.sells on a rescue's talk; the rescue build writes no vendor.");
+                }
+                else if (trades > 0) Fatal($"{at} an exchange carries trade: true and the person sells nothing; the screen would open on an empty stock.");
+                if (trades > 1) Fatal($"{at} {trades} exchanges carry trade: true; one trade line is enough.");
+                if (b.exchanges is { Count: > 0 } exs)
+                    for (int x = 0; x < exs.Count; x++)
+                    {
+                        if (!exs[x].trade) continue;
+                        if (x == 0) Fatal($"{at} exchanges[0] carries trade: true; exchanges[0] moves the quest, the trade line is a side question.");
+                        if (exs[x].give != null || exs[x].ends != null) Fatal($"{at} exchanges[{x}] carries trade with give or ends; the trade line only opens the screen.");
+                    }
                 // OT-9A: a wounded person is healed by the closer's stage (Fragment's HealActor), as vanilla's two wounded
                 // quests take a med pack and then heal. So the closer hands something over, and there is ONE closer.
                 // A captive is freed the same way (FreePrisoner on the closer's stage, MB_Rescue01's stage 100) and needs no give.
@@ -261,7 +299,31 @@ namespace FrankyCLI
                         hs.Properties.OfType<ScriptBoolProperty>().Single(p => p.Name == "AlsoRemoveFromCaptiveFaction").Data = false;
                     entry.Scripts.Add(hs);
                 }
+                // Vendors (person.sells): his own stock chest, a copy of vanilla's Vendor_OE_Standard_Container with the
+                // recipe's items, created DISABLED at the marker and listed before him (fill order is list order), and him
+                // linked to it by VendorContainerKeyword01, VendorActivatorScript's shape; his alias carries the vendor faction.
+                QuestReferenceAlias? vc = null;
+                if (build.inputs.VendorStock.TryGetValue(i, out var stock))
+                {
+                    string chestId = $"{build.r.id}_b{i + 1}_vendorchest";
+                    RemovePrevious(build.myMod.Containers, e => e == chestId);   // a rebuild replaces, never accumulates
+                    var chest = build.myMod.Containers.DuplicateInAsNewRecord(build.inputs.VendorChestSrc!);
+                    chest.EditorID = chestId;
+                    chest.Items = new Noggog.ExtendedList<ContainerEntry>(stock.Select(s =>
+                        new ContainerEntry { Item = new ContainerItem { Item = new FormLink<IItemGetter>(s.item), Count = s.count } }));
+                    vc = build.activatorPattern!.DeepCopy(); vc.ID = tid + 3; vc.Name = "DelveBeat" + (i + 1) + "VendorChest";
+                    vc.CreateReferenceToObject!.AliasID = (short)tm.ID;
+                    vc.CreateReferenceToObject.Object.SetTo(chest.FormKey);
+                    vc.Flags = (vc.Flags ?? 0) | QuestReferenceAlias.Flag.InitiallyDisabled;
+                    tp.LinkedAliases ??= new Noggog.ExtendedList<LinkedAlias>();
+                    tp.LinkedAliases.Add(new LinkedAlias { AliasID = (int)vc.ID, Keyword = new FormLinkNullable<IKeywordGetter>(VendorChestLink) });
+                    tp.Factions.Add(new FormLink<IFactionGetter>(VendorFaction));
+                    build.clone.Aliases.Add(vc);
+                }
                 build.clone.Aliases.Add(tp);
+                if (vc != null)
+                    Console.WriteLine($"  +vendor  : beat {i + 1} chest alias {vc.ID} creates {build.r.id}_b{i + 1}_vendorchest (Vendor_OE_Standard_Container's copy, "
+                                      + $"{stock!.Count} item(s)) at the marker, InitiallyDisabled; person {tp.ID} linked to it by VendorContainerKeyword01, in Vendor_OE_Standard_Faction");
                 build.slotOf[i] = new BeatSlot { markerAlias = (int)tm.ID, activatorAlias = -1, targetAlias = (int)tp.ID, journalStage = build.beatStage[i] };
                 build.talkAlias[i] = tp;
                 Console.WriteLine($"  +slot    : beat {i + 1} (talk) -- marker alias {tm.ID}, person {tp.ID} (created at the marker on quest start)"
@@ -431,6 +493,14 @@ namespace FrankyCLI
                     var (nt, ni) = Line($"{tag}_reply{x + 1}", ex.reply!, true);
                     bool closer = closes.TryGetValue(x, out int endStage);
                     if (closer) ni.SetParentQuestStage = new DialogSetParentQuestStage { OnEnd = (short)endStage };
+                    // Vendors: the trade line's REPLY carries vanilla's VendorInfoScript, so the screen opens on him when he
+                    // finishes speaking (its OnEnd: ShowBarterMenu on the speaker). The adapter shape is the give line's.
+                    if (ex.trade)
+                    {
+                        var tva = new DialogResponsesAdapter { Version = 6, ObjectFormat = 2 };
+                        tva.Scripts.Add(new ScriptEntry { Name = TalkBeat.VendorInfoScript });
+                        ni.VirtualMachineAdapter = tva;
+                    }
                     var sc = NewScene($"{tag}_topic{x + 1}_scene", 0x00002814u, closer);
                     if (itemGate != null) { sc.Conditions.Add(itemGate); pi.Conditions.Add(itemGate.DeepCopy()); }
                     sc.Index = (uint)(x + 1);   // vanilla's numbering, from 1; NOT shown to be the menu's sort key (see above)
