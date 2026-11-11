@@ -743,6 +743,13 @@ namespace FrankyCLI
             /// Lifetime), not the placement's. On a use, pickup or deliver on the ground only, so far.
             /// </summary>
             public string? hazard { get; set; }
+            /// <summary>
+            /// The hazard's LOOK (OT-39; his play of hz1, 2026-11-11: the status fired, "didn't see anything"): a HAZD is
+            /// a damage volume only, so up to three vanilla FX objects (a MoveableStatic or a Static EditorID, e.g.
+            /// FXGasseousMist_01_10x10, FXGasJet_GreenToxicGas_01) are placed with it, at the same marker on the same stage,
+            /// each into an empty alias of its own, and deleted with it. Only beside a hazard.
+            /// </summary>
+            public List<string>? visuals { get; set; }
             public string? objective { get; set; }
             public string? journal { get; set; }
             /// <summary>"main" (default), "second" or "third": which drawn POI this beat happens at.</summary>

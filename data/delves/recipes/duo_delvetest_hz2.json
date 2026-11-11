@@ -1,0 +1,48 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_hz2",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-11 13:42 \"yeah\" to two looks side by side, after hz1 played: the status fired, \"didn't see anything\", gone at the end",
+  "_note": [
+    "HAZARD LOOK PROBE HZ2 (plan OT-39): hz1's gas leak with two vanilla FX objects placed with it at the site's centre, for his eye to grade side by side.",
+    "FXGasseousMist_01_10x10: a ground mist, 10 x 10 m, the leak's radius 5. FXGasJet_GreenToxicGas_01: a green jet from a point, a leak.",
+    "Reading it, his eye: which reads as TOXIC (not fog), does the mist cover the zone that hurts, which way the jet points (it takes the marker's rotation). Then use the canister: pays, and all three should go.",
+    "Papyrus.0.log: '[hazard] ... look 1 ...' and '... look 2 ...' name the placed refs; None means refused."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "ch2's: a board request, non-hostile, never a cave."
+  },
+  "prose": {
+    "name": "Hauling: Gas Leak Look Probe on <Planet>",
+    "briefing": "Test mission. A canister at the <Place> on <Planet> is leaking toxic gas. Shut it off.",
+    "card": "Test contract. Shut off a leaking canister at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "name": "Leaking Canister",
+      "hazard": "ENV_GenericHazard_ToxicGas_Leak",
+      "objective": "Shut off the leaking canister at the <Place>",
+      "journal": "Test journal: I shut off the leaking canister at the <Place>.",
+      "reward": "easy",
+      "visuals": [
+        "FXGasseousMist_01_10x10",
+        "FXGasJet_GreenToxicGas_01"
+      ]
+    }
+  ]
+}

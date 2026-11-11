@@ -309,6 +309,13 @@ namespace FrankyCLI
                     Fatal($"beat {i + 1} sets hazard and is a {b.type}; only a use, pickup or deliver places one at its marker (so far), so it would be silently ignored.");
                 else if (b.hazard != null && OwnOrMaster<IHazardGetter>(Allowed(env, t), env, b.hazard) == null)
                     Fatal($"beat {i + 1} hazard '{b.hazard}' is not a Hazard in {t.mod} or one of its masters.");
+                if (b.visuals != null && b.hazard == null)
+                    Fatal($"beat {i + 1} sets visuals and no hazard; the visuals are a hazard's look, placed and deleted with it, so they would be silently ignored.");
+                if (b.visuals != null && (b.visuals.Count == 0 || b.visuals.Count > MaxHazardVisuals))
+                    Fatal($"beat {i + 1} has {b.visuals.Count} visuals; a hazard takes 1 to {MaxHazardVisuals}.");
+                foreach (var v in b.visuals ?? new())
+                    if (OwnOrMaster<IMoveableStaticGetter>(Allowed(env, t), env, v) == null && OwnOrMaster<IStaticGetter>(Allowed(env, t), env, v) == null)
+                        Fatal($"beat {i + 1} visual '{v}' is not a MoveableStatic or a Static in {t.mod} or one of its masters.");
                 if (b.hazard != null && b.choose != null)
                     Fatal($"beat {i + 1} sets hazard and is a choose ending; the cleanup deletes zones on the completing stage only, so it would outlive the job.");
                 if (b.explosion != null && b.type != "use" && b.type != "destroy")
@@ -723,6 +730,8 @@ namespace FrankyCLI
         /// an integer TurnOffStage, the one stock check that reads GetStage() (DefaultScriptFunctions.CheckForStages).
         /// </summary>
         private const int SpawnedStageBase = 900;
+        /// <summary>The most FX objects one hazard's look may place (OT-39): each costs an alias and a placement.</summary>
+        private const int MaxHazardVisuals = 3;
         /// <summary>The most responses one spoken line may carry. Vanilla, measured 2026-10-19 over MQ101 and OE_Dialogue's
         /// 1,027 lines: 909 one, 101 two, 17 three.</summary>
         private const int ResponsesMax = 4;
@@ -863,6 +872,7 @@ namespace FrankyCLI
             /// <summary>Each hazard zone (OT-39): its beat, its empty alias, the marker it is placed at, its placing stage.</summary>
             public List<(int beat, int alias, int marker, int stage)> HazardAliases = new();
             public Dictionary<int, FormKey> HazardForms = new();   // by beat, what the build resolved
+            public List<(int beat, int index, int alias, FormKey form)> HazardVisuals = new();   // each FX object of a hazard's look
             public int HazardDone = -1;                            // the stage that deletes them (the last step's done)
             public (int place, int cell, int main, FormKey scope)? Orbit;   // an orbit third place: its alias, its space cell's member, the main place it is tested against
             public List<(int alias, FormKey refType)> OrbitMarkers = new();
@@ -1207,6 +1217,8 @@ namespace FrankyCLI
             internal readonly Dictionary<int, int> spawnedStage = new();
             /// <summary>Each hazard beat's alias, by beat index: empty, filled by the PlaceAtMe that makes the zone (OT-39).</summary>
             internal readonly Dictionary<int, int> hazardOf = new();
+            /// <summary>Each hazard's look, by beat index: one empty alias per FX object, filled by its PlaceAtMe (OT-39).</summary>
+            internal readonly Dictionary<int, List<int>> visualsOf = new();
 
             /// <summary>
             /// A support team's landing marker carries LandingScript. Like SpawnNear, not a stage hook: no properties, its own
@@ -1519,6 +1531,23 @@ namespace FrankyCLI
                     clone.Aliases!.Add(ha);
                     hazardOf[hb] = (int)ha.ID;
                     Console.WriteLine($"  +slot    : beat {hb + 1} hazard -- alias {ha.ID} (EMPTY, Optional; filled by its PlaceAtMe), placed on stage {spawnedStage[hb]}");
+                    // Its look: one empty alias per FX object, the same shape.
+                    var vas = new List<int>();
+                    for (int v = 0; v < (inputs.HazardVisuals.TryGetValue(hb, out var vl) ? vl.Count : 0); v++)
+                    {
+                        var va = markerPattern.DeepCopy();
+                        va.ID = NextAliasId(clone);
+                        va.Name = $"DelveBeat{hb + 1}Visual{v + 1}";
+                        va.Location = null;
+                        va.Flags = QuestReferenceAlias.Flag.Optional;
+                        clone.Aliases!.Add(va);
+                        vas.Add((int)va.ID);
+                    }
+                    if (vas.Count > 0)
+                    {
+                        visualsOf[hb] = vas;
+                        Console.WriteLine($"  +slot    : beat {hb + 1} hazard's look -- alias(es) {string.Join(", ", vas)} (EMPTY, Optional)");
+                    }
                 }
                 foreach (var ss in spawnedStage.Values)
                     if (clone.Stages!.Any(x => x.Index == ss)) { Console.WriteLine($"REFUSED: stage {ss} already exists on this base; a fight's spawned stage collides."); return 1; }
@@ -2321,6 +2350,20 @@ namespace FrankyCLI
                         Add(steps[^1].DoneStage, $"If {hz}.GetRef()");
                         Add(steps[^1].DoneStage, $"    {hz}.GetRef().Delete()");
                         Add(steps[^1].DoneStage, "EndIf");
+                        // ITS LOOK, the same three moves per FX object: placed at the marker, traced read-back, deleted.
+                        for (int v = 0; v < (visualsOf.TryGetValue(b, out var vas) ? vas.Count : 0); v++)
+                        {
+                            string va = $"Alias_Beat{b + 1}Visual{v + 1}", vf = $"Visual{b + 1}_{v + 1}";
+                            props.Add(("ReferenceAlias", va, clone.FormKey, vas![v]));
+                            props.Add(("Form", vf, inputs.HazardVisuals[b][v], -1));
+                            Add(spawned, $"{mk}.GetRef().PlaceAtMe({vf}, 1, False, False, True, None, {va})");
+                            Add(spawned, $"Debug.Trace(\"[hazard] \" + Self + \" stage {spawned}: beat {b + 1}'s look {v + 1} \" + {va}.GetRef())");
+                            Add(steps[^1].DoneStage, $"If {va}.GetRef()");
+                            Add(steps[^1].DoneStage, $"    {va}.GetRef().Delete()");
+                            Add(steps[^1].DoneStage, "EndIf");
+                            bm.HazardVisuals.Add((b, v, vas[v], inputs.HazardVisuals[b][v]));
+                            Console.WriteLine($"  +look    : beat {b + 1} {r.beats[b].visuals![v]} {inputs.HazardVisuals[b][v]} into alias {vas[v]}, with the hazard; deleted on {steps[^1].DoneStage}");
+                        }
                         bm.HazardAliases.Add((b, hazardOf[b], marker, spawned));
                         bm.HazardForms[b] = inputs.Hazards[b];
                         bm.HazardDone = steps[^1].DoneStage;
@@ -3273,6 +3316,22 @@ namespace FrankyCLI
                 var hp = vma.Script?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == $"Hazard{hb + 1}");
                 fail += Check($"the fragment's Hazard{hb + 1} is the Hazard the build resolved from '{r.beats[hb].hazard}'",
                               hp?.Object.FormKey.ToString() ?? "no property", bm.HazardForms.TryGetValue(hb, out var hf) ? hf.ToString() : "unresolved");
+                // ITS LOOK, each FX object: an empty Optional alias, placed on the hazard's stage, deleted on the same done stage.
+                fail += Check($"beat {hb + 1}'s look: one FX object per recipe visual",
+                              bm.HazardVisuals.Count(x => x.beat == hb).ToString(), (r.beats[hb].visuals?.Count ?? 0).ToString());
+                foreach (var (_, vi, va, vf) in bm.HazardVisuals.Where(x => x.beat == hb))
+                {
+                    var vl = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(x => x.ID == (uint)va);
+                    fail += Check($"beat {hb + 1}'s look {vi + 1} alias {va} is empty and Optional",
+                                  vl == null ? "missing" : $"fill {(vl.Location == null && vl.ForcedReference.IsNull && vl.CreateReferenceToObject == null ? "none" : "SET")}, optional {vl.Flags?.HasFlag(QuestReferenceAlias.Flag.Optional) ?? false}",
+                                  "fill none, optional True");
+                    fail += Check($"stage {hs} places look {vi + 1} at the marker into alias {va}",
+                                  (fs >= 0 && hsrc.IndexOf($"Alias_Beat{hb + 1}Marker.GetRef().PlaceAtMe(Visual{hb + 1}_{vi + 1}, 1, False, False, True, None, Alias_Beat{hb + 1}Visual{vi + 1})", fs) is int vp && vp > fs && vp < fe).ToString(), "True");
+                    fail += Check($"stage {done} deletes look {vi + 1}",
+                                  (ds >= 0 && hsrc.IndexOf($"Alias_Beat{hb + 1}Visual{vi + 1}.GetRef().Delete()", ds) is int vd && vd > ds && vd < de).ToString(), "True");
+                    var vprop = vma.Script?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == $"Visual{hb + 1}_{vi + 1}");
+                    fail += Check($"the fragment's Visual{hb + 1}_{vi + 1} is '{r.beats[hb].visuals![vi]}' as resolved", vprop?.Object.FormKey.ToString() ?? "no property", vf.ToString());
+                }
             }
             // A bring (OT-31): the object's check-and-take, the player's counter, the short box, and the first count, each off disk.
             foreach (var br in bm.Brings)

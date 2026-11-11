@@ -50,6 +50,8 @@ namespace FrankyCLI
             public readonly Dictionary<int, FormKey> Explosions = new();
             /// <summary>By beat index, for a beat with hazard: the Hazard placed at its marker when he comes near (OT-39).</summary>
             public readonly Dictionary<int, FormKey> Hazards = new();
+            /// <summary>By beat index, a hazard's look: the FX objects placed with it (OT-39).</summary>
+            public readonly Dictionary<int, List<FormKey>> HazardVisuals = new();
             /// <summary>The faction table's two parallel lists (gen_delve factions), when a beat reads the site's faction or
             /// place.faction swaps it (plan OT-01).</summary>
             public FormKey? EncKeywords, EncGangs;
@@ -269,6 +271,15 @@ namespace FrankyCLI
                 var hz = OwnOrMaster<IHazardGetter>(myMod, env, hn);
                 if (hz == null) { Console.WriteLine($"REFUSED: beat {i + 1} hazard '{hn}' is not a Hazard in {t.mod} or one of its masters."); fail++; continue; }
                 inputs.Hazards[i] = hz.FormKey;
+                // Its look: each a MoveableStatic (vanilla's FX gas) or a Static.
+                var vis = new List<FormKey>();
+                foreach (var vn in r.beats[i].visuals ?? new())
+                {
+                    FormKey? vk = OwnOrMaster<IMoveableStaticGetter>(myMod, env, vn)?.FormKey ?? OwnOrMaster<IStaticGetter>(myMod, env, vn)?.FormKey;
+                    if (vk == null) { Console.WriteLine($"REFUSED: beat {i + 1} visual '{vn}' is not a MoveableStatic or a Static in {t.mod} or one of its masters."); fail++; break; }
+                    vis.Add(vk.Value);
+                }
+                if (vis.Count > 0) inputs.HazardVisuals[i] = vis;
             }
             // The site's faction (plan OT-01): a hold or a recover spawns from the site's own faction, read off its one
             // LocEnc keyword through the table gen_delve factions wrote; place.faction swaps that keyword at the accept.
