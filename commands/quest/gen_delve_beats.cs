@@ -866,6 +866,9 @@ namespace FrankyCLI
             public List<(string name, int alias)> Replaced = new();
             /// <summary>OT-9A: each held (wounded or captive) talk person's beat, alias, release stage and kind (Fragment), for the verify.</summary>
             public List<(int beat, int alias, int stage, TalkBeat.Held kind)> Held = new();
+            /// <summary>Vendors (person.sells): each talk beat's person alias and the stock RESOLVED FROM THE RECIPE (items, then his
+            /// credits list), for the verify. The verify reads only our plugin, so it cannot resolve an EditorID itself.</summary>
+            public List<(int beat, int alias, List<(FormKey item, int count)> stock)> Vendors = new();
             public List<int> Holders = new();   // recover beats' empty Optional aliases
             public List<int> SpawnNear = new();   // the holders among them placed outside, carrying SpawnNearScript
             public List<(int on, int to)> SpawnHooks = new();
@@ -3727,6 +3730,50 @@ namespace FrankyCLI
                     fail += Check($"{who}: the talk frees him only while he is still bound",
                                   gi < 0 ? "no guard" : $"{bl[gi + 1].EndsWith($".{h.Release}")} then {bl.ElementAtOrDefault(gi + 2)}", "True then EndIf");
                 }
+            }
+            // Vendors (person.sells, played on v1 2026-11-11), read back. Driven from the RECIPE: every beat whose person sells
+            // must have a vendor, and every trade line must carry the trade script, so a vendor the build dropped fails here
+            // rather than reading as none. The chest is found by the LINK's keyword, never by an id the build printed.
+            {
+                // ⛔ The expected forms are LITERALS read off vanilla on 2026-11-11, never TalkBeat's constants: a check that
+                // expects the build's own constant agrees with a wrong constant (a check reading its subject's source fails green).
+                var wantFaction = FormKey.Factory("354BCE:Starfield.esm");   // SQ_Group_VendorFaction_Default, MerchantContainer Null
+                var wantLink = FormKey.Factory("10FCD1:Starfield.esm");      // VendorContainerKeyword01
+                const string wantScript = "VendorInfoScript";
+                var sellers = r.beats.Select((bt, k) => (bt, k)).Where(x => x.bt.person?.sells != null).Select(x => x.k).ToList();
+                if (sellers.Count + bm.Vendors.Count > 0)
+                    fail += Check("every person who sells has a vendor chest built",
+                                  string.Join(",", bm.Vendors.Select(v => v.beat + 1).OrderBy(x => x)), string.Join(",", sellers.Select(k => k + 1)));
+                var all = q.Aliases.OfType<IQuestReferenceAliasGetter>().ToList();
+                foreach (var (vb, val, stock) in bm.Vendors)
+                {
+                    string who = $"beat {vb + 1}'s vendor";
+                    var pa = all.FirstOrDefault(a => a.ID == (uint)val);
+                    var link = pa?.LinkedAliases?.FirstOrDefault(l => l.Keyword.FormKey == wantLink);
+                    var ch = all.FirstOrDefault(a => a.ID == (uint)(link?.AliasID ?? -1));
+                    var mk = all.FirstOrDefault(a => a.ID == (uint)(ch?.CreateReferenceToObject?.AliasID ?? -1));
+                    fail += Check($"{who}: linked by VendorContainerKeyword01 to a chest created at the beat's marker",
+                                  ch == null ? "no linked chest" : $"chest at {mk?.Name ?? "nothing"}", $"chest at DelveBeat{vb + 1}Marker");
+                    fail += Check($"{who}: the chest is created disabled and fills before him",
+                                  ch == null ? "no chest" : $"{(ch.Flags ?? 0).HasFlag(QuestReferenceAlias.Flag.InitiallyDisabled)}, {all.IndexOf(ch) < all.IndexOf(pa!)}", "True, True");
+                    // Exactly the recipe's stock: an extra entry is how v1's first build sold vanilla's whole shop.
+                    var cont = m.Containers.FirstOrDefault(c => c.FormKey == ch?.CreateReferenceToObject?.Object.FormKey);
+                    string Stock(IEnumerable<(FormKey item, int count)> s) => string.Join(" ", s.Select(x => $"{x.item}x{x.count}").OrderBy(x => x));
+                    fail += Check($"{who}: the chest holds exactly the recipe's stock and his credits list",
+                                  cont == null ? "chest record missing" : Stock(cont.Items?.Select(e => (e.Item.Item.FormKey, e.Item.Count)) ?? Enumerable.Empty<(FormKey, int)>()),
+                                  Stock(stock));
+                    // ⛔ The faction must be the one with NO shared chest: v1 on Vendor_OE_Standard_Faction sold its generic stock too.
+                    fail += Check($"{who}: his alias is in SQ_Group_VendorFaction_Default (no shared chest) and nothing else",
+                                  string.Join(", ", pa?.Factions.Select(f => f.FormKey.ToString()) ?? Enumerable.Empty<string>()), wantFaction.ToString());
+                }
+                // The trade lines, from the recipe: each reply carries VendorInfoScript, and no other line in the quest does.
+                var want = r.beats.SelectMany((bt, k) => (bt.exchanges ?? new()).Select((e, x) => (e, k, x)))
+                              .Where(t3 => t3.e.trade).Select(t3 => $"{r.id}_talk{t3.k + 1}_reply{t3.x + 1}").OrderBy(x => x).ToList();
+                var have = q.DialogTopics.SelectMany(d => d.Responses.Select(x => (d.EditorID, x)))
+                              .Where(p => p.x.VirtualMachineAdapter?.Scripts.Any(s => s.Name == wantScript) == true)
+                              .Select(p => p.EditorID ?? "?").OrderBy(x => x).ToList();
+                if (want.Count + have.Count > 0)
+                    fail += Check("the trade lines' replies, and only they, carry VendorInfoScript", string.Join(", ", have), string.Join(", ", want));
             }
             foreach (var (tbeat, tstage, talias, tnpc, nex, tconds) in bm.Talks)
             {

@@ -330,6 +330,7 @@ namespace FrankyCLI
                     tp.LinkedAliases.Add(new LinkedAlias { AliasID = (int)vc.ID, Keyword = new FormLinkNullable<IKeywordGetter>(VendorChestLink) });
                     tp.Factions.Add(new FormLink<IFactionGetter>(VendorFaction));
                     build.clone.Aliases.Add(vc);
+                    build.bm.Vendors.Add((i, (int)tp.ID, stock));
                 }
                 build.clone.Aliases.Add(tp);
                 if (vc != null)
