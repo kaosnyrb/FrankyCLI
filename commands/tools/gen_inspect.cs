@@ -1667,7 +1667,13 @@ namespace FrankyCLI
             {
                 Console.WriteLine($"  Phases [{scene.Phases.Count}]:");
                 foreach (var p in scene.Phases)
+                {
                     Console.WriteLine($"    Name={p.Name} Flags={p.Flags} StartConds={p.StartConditions.Count} CompletionConds={p.CompletionConditions.Count}");
+                    // Each condition by function and value (2026-11-11, for OT-9G: a hail scene's phase waits on the player
+                    // answering, and the COUNT alone could not say what it waits on).
+                    foreach (var c in p.StartConditions) Console.WriteLine($"      start:      {DescribeCondition(c)}");
+                    foreach (var c in p.CompletionConditions) Console.WriteLine($"      completion: {DescribeCondition(c)}");
+                }
             }
             Console.WriteLine();
         }
