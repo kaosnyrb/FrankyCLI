@@ -126,6 +126,12 @@ namespace FrankyCLI
                     if (b.person != null) Fatal($"{at} sets rider and person; the rider is its person.");
                     if (b.exchanges?.Count != 1) Fatal($"{at} is a goodbye with {b.exchanges?.Count ?? 0} exchanges; it has one, because its reply ends the mission.");
                 }
+                else if (b.ship != null)
+                {
+                    // A talk with a SHIP (OT-9G): its speaker is the ship, so there is no person to grade; GradeSpace grades it.
+                    if (!IsBoardSpace(t)) Fatal($"{at} sets ship; a talk with a ship is built on a one-beat boardspace only.");
+                    if (b.person != null) Fatal($"{at} sets ship and person; the ship is its speaker.");
+                }
                 else if (b.person is not Person p) { Fatal($"{at} has no person: nobody to talk to."); }
                 else
                 {

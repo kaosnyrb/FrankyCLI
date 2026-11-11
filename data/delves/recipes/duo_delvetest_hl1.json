@@ -1,0 +1,38 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_hl1",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-11 10:00 \"you can just start conversations with frienldly ships, so I'm assuming we'd make it a conversation option to progress the quest\", then \"yup go\" on a bare probe",
+  "_note": [
+    "HAIL PROBE HL1 (plan OT-9G, spike office/spikes/2026-11-03-hailing-a-ship.md): one friendly UC citizen cargo ship, vanilla's own hail ship, and a menu cast on it. SILENT (subtitles only) and placeholder words. Not a mission.",
+    "Reading it: take it from the board, go to the system. The ship should NOT be there before the accept, and should be after. Hail it. The question the probe answers: does its greeting and the two options below show up in the hail?",
+    "Picking the first option should complete the mission and pay easy; the second should loop back to the menu. Shooting it should complete NOTHING (its death hook is removed)."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "sk1's, sd1's."
+  },
+  "prose": {
+    "name": "Hauling: Hail Probe over <Planet>",
+    "briefing": "Test mission. A cargo ship is holding orbit over <Planet>. Hail it.",
+    "card": "Test contract. Hail the cargo ship over <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "se_GeneralMarkerLocRef01",
+      "ship": "LvlShip_UCCitizen_Cargo",
+      "objective": "Hail the cargo ship over <Planet>",
+      "journal": "Test journal: I hailed the cargo ship over <Planet>.",
+      "greeting": ["Test greeting. Cargo ship here, go ahead."],
+      "exchanges": [
+        {"prompt": "Test: this completes the job.", "reply": ["Test reply. Job done, thanks."]},
+        {"prompt": "Test: this loops back.", "reply": ["Test reply. Ask me something else."]}
+      ],
+      "reward": "easy"
+    }
+  ]
+}

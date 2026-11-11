@@ -914,6 +914,12 @@ namespace FrankyCLI
             /// </summary>
             public string? target { get; set; }
             /// <summary>
+            /// talk on a one-beat boardspace, OPTIONAL (plan OT-9G, a probe, his 2026-11-11): the levelled ship (LvlShip_*) the
+            /// player hails and talks to, in place of a person. Created at `at` from the space cell, friendly, disabled until the
+            /// accept; its greeting and exchanges are the menu he gets when he hails it (delve_space.cs, SpaceHail).
+            /// </summary>
+            public string? ship { get; set; }
+            /// <summary>
             /// defeat, OPTIONAL and instead of target: an ELITE made from a creature, {from, name}. The build clones `from`
             /// (an Npc, own mod or a master) as `<id>_b<N>elite` with vanilla's own alpha swaps, read off Ashta -> Alpha
             /// Ashta and Lesser -> Greater Silverfish (manual Inbox 2026-11-02, for 40): the challenge object mod becomes

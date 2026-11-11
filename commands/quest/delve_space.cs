@@ -81,8 +81,25 @@ namespace FrankyCLI
             // activator (it takes the kit and pays itself), or a PICKUP THEN A DELIVER on two scriptless objects in the one
             // cell. The pair is the shape built; every other mix is refused here rather than half-wired.
             bool two = TwoBeatBoard(r, t);
-            if (IsBoardSpace(t) && r.beats.Count == 1 && r.beats[0].type is not ("use" or "destroy" or "defeat"))
-                Fatal($"beat 1 is a '{r.beats[0].type}'; a one-beat board is a use (his MB01a's activator), a destroy (his MB14a's) or a defeat (vanilla's space bounty ship).");
+            if (IsBoardSpace(t) && r.beats.Count == 1 && r.beats[0].type is not ("use" or "destroy" or "defeat") && !SpaceHail(r, t))
+                Fatal($"beat 1 is a '{r.beats[0].type}'; a one-beat board is a use (his MB01a's activator), a destroy (his MB14a's), a defeat (vanilla's space bounty ship) or a talk with a ship (OT-9G).");
+            if (r.beats.Any(b => b.ship != null) && !SpaceHail(r, t))
+                Fatal("a beat sets ship; only a one-beat boardspace talk is a talk with a ship (OT-9G).");
+            if (SpaceHail(r, t))
+            {
+                // A TALK WITH A SHIP (OT-9G, a probe): the ship is its object and its speaker, so nothing an activator or a
+                // person carries is built; a give or a further ending is the ground talk's and is not built here yet.
+                var h = r.beats[0];
+                if (!h.ship!.StartsWith("LvlShip_", StringComparison.Ordinal))
+                    Fatal("beat 1's ship names a levelled ship, LvlShip_* (vanilla's hail ship: LvlShip_UCCitizen_Cargo).");
+                if (h.person != null || h.model != null || h.name != null || h.target != null || h.ask != null || h.repair
+                    || h.scenery != null || h.guards != null || h.replace || h.rider != null)
+                    Fatal("beat 1 is a talk with a ship and sets person, model, name, target, ask, repair, scenery, guards, replace or rider; the ship is its object and its speaker, so they would be silently ignored.");
+                if (h.greeting == null || h.greeting.Count == 0) Fatal("beat 1 is a talk with a ship and has no greeting: what the ship says when he hails it.");
+                if (h.exchanges == null || h.exchanges.Count == 0) Fatal("beat 1 is a talk with a ship and has no exchanges; exchanges[0] is the one that completes the job.");
+                else if (h.exchanges.Any(x => x.give != null || x.ends != null))
+                    Fatal("beat 1 is a talk with a ship and an exchange sets give or ends; the probe builds neither yet.");
+            }
             // A DEFEAT IN ORBIT (plan OT-37): a hostile SHIP is the target, vanilla's MB_BountySpace01Far shape. Its one field is
             // target (an LvlShip_*); everything an activator or a ground defeat carries would be silently ignored.
             if (r.beats.Any(b => b.type == "defeat") && !SpaceDefeat(r, t))
@@ -138,7 +155,7 @@ namespace FrankyCLI
                 if (!b.at.StartsWith("se_", StringComparison.OrdinalIgnoreCase))
                     Fatal($"beat {i + 1} is at '{b.at}'; an orbit's markers are its space cell's own (se_*), filled from the cell.");
                 if (string.IsNullOrWhiteSpace(b.objective)) Fatal($"beat {i + 1} has no objective; it is the one line that points him at the object.");
-                if (!SpaceDefeat(r, t) && (string.IsNullOrWhiteSpace(b.model) || string.IsNullOrWhiteSpace(b.name)))
+                if (!SpaceDefeat(r, t) && !SpaceHail(r, t) && (string.IsNullOrWhiteSpace(b.model) || string.IsNullOrWhiteSpace(b.name)))
                     Fatal($"beat {i + 1} needs a model and a name: its object is a clone of {(RepairBoard(r, t) ? "the base's own activator" : t.activatorFrom)}, reskinned.");
                 if (b.scenery is Scenery sc)
                 {
@@ -261,6 +278,22 @@ namespace FrankyCLI
         /// </summary>
         private static bool SpaceDefeat(Recipe r, Template t)
             => PlainBoard(r, t) && r.beats[0].type == "defeat";
+
+        /// <summary>
+        /// A one-beat board whose beat is a TALK TO A SHIP (plan OT-9G, a PROBE, his 2026-11-11: "you can just start
+        /// conversations with frienldly ships, so I'm assuming we'd make it a conversation option to progress the quest").
+        /// The defeat's ship (PrimaryRef creates the recipe's LvlShip_*, disabled until the accept), friendly, voiced by
+        /// vanilla's hail ship's voice type, with no death hook and no use hook; its menu is BuildShipTalk's, gated on the
+        /// ship's ALIAS (vanilla speaks to a ship as a subject: LC088_Space, IsSpaceship plus a voice type). The closing reply
+        /// sets the completing stage, which pays as a plain board's does. Spike office/spikes/2026-11-03-hailing-a-ship.md:
+        /// it graduates into the talk beat only once his hail of the probe shows the menu.
+        /// </summary>
+        private static bool SpaceHail(Recipe r, Template t)
+            => PlainBoard(r, t) && r.beats[0].type == "talk" && r.beats[0].ship != null;
+
+        /// <summary>The voice vanilla's hail ship carries on its alias (SE_HailTemplate and SE_Player_HailTemplate's HailingShip:
+        /// ForcedVoice and VoiceTypes both 2BCA32), read 2026-11-11.</summary>
+        private static readonly FormKey HailShipVoice = FormKey.Factory("2BCA32:Starfield.esm");
 
         /// <summary>
         /// A guarded destroy's guard stage (OT-9I's twin): set by DefaultAliasOnLoad on the object after the accept, so the
@@ -456,6 +489,19 @@ namespace FrankyCLI
                 if (ReskinActivator(myMod, clone, t, r.id + "_b1", -1, null, null) != 0) return 1;
                 Console.WriteLine($"  +ship    : alias {target.ID} {target.Name} creates {beat.target} {ship.FormKey} at alias {target.CreateReferenceToObject.AliasID}, InitiallyDisabled (the accept enables it)");
             }
+            else if (SpaceHail(r, t))
+            {
+                // THE SHIP HE HAILS (OT-9G, a probe): the defeat's creation, friendly, voiced as vanilla's hail ship is.
+                var ship = OwnOrMaster<IGenericBaseFormGetter>(myMod, env, beat.ship!);
+                if (ship == null) { Console.WriteLine($"REFUSED: ship '{beat.ship}' is not a levelled ship (a GenericBaseForm, LvlShip_*) in {myMod.ModKey.FileName} or its masters."); return 1; }
+                target.CreateReferenceToObject!.Object.SetTo(ship.FormKey);
+                target.Flags = (target.Flags ?? 0) | QuestReferenceAlias.Flag.InitiallyDisabled;
+                target.ForcedVoice.SetTo(HailShipVoice);
+                target.VoiceTypes.SetTo(HailShipVoice);
+                bm.SpaceShip = ship.FormKey;
+                if (ReskinActivator(myMod, clone, t, r.id + "_b1", -1, null, null) != 0) return 1;
+                Console.WriteLine($"  +ship    : alias {target.ID} {target.Name} creates {beat.ship} {ship.FormKey} at alias {target.CreateReferenceToObject.AliasID}, InitiallyDisabled, voice {HailShipVoice} (vanilla's hail ship's)");
+            }
             else
             {
                 // THE OBJECT. The shell's target is a ship; it becomes a clone of activatorFrom, reskinned to the beat's model.
@@ -615,6 +661,17 @@ namespace FrankyCLI
                     { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnLoad."); return 1; }
                     Console.WriteLine($"  +hook    : alias {target.ID} DefaultAliasOnLoad sets {GuardStage} after {t.entryStage}; the guards come when it loads");
                 }
+            }
+            else if (SpaceHail(r, t))
+            {
+                // No use hook (his hail opens the talk) and NO death hook: the shell's DefaultAliasOnDeath on PrimaryRef would
+                // complete and pay the job if the friendly ship were shot. Its menu is BuildShipTalk's; its closing reply sets
+                // the completing stage.
+                var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == (int)target.ID);
+                int gone = entry?.Scripts.RemoveAll(s => s.Name == "DefaultAliasOnDeath") ?? 0;
+                if (entry != null && entry.Scripts.Count == 0) vma.Aliases.Remove(entry);
+                Console.WriteLine($"  hook     : alias {target.ID} loses the shell's DefaultAliasOnDeath ({gone} removed): shooting a friendly ship completes nothing");
+                if (BuildShipTalk(myMod, clone, t, r, (int)target.ID, bm) != 0) return 1;
             }
             else if (PlainBoard(r, t) || rescue)
             {
@@ -1031,6 +1088,93 @@ namespace FrankyCLI
         /// filling) pointed at SQ_PlayerShip's alias 0, the ship he is flying, where the shell's points at 16, his HOME ship
         /// (the manual, part 12: vanilla's player space encounters take alias 0). Returns the new id, or -1 having said why.
         /// </summary>
+        /// <summary>
+        /// THE MENU A HAILED SHIP GIVES (OT-9G, a probe): the ground talk beat's records (TalkBeat.BuildTalk: a Greeting scene
+        /// 0x1834, one Top Level scene 0x2814 per exchange, exchanges[0] first in the menu at SCPI 100 and its reply setting the
+        /// completing stage on END), CAST ON THE SHIP'S ALIAS in place of a person: every scene's actor is the ship alias and
+        /// every scene is gated GetIsAliasRef(ship) == 1 (vanilla's hail scenes cast HailingShip alias 95 the same way), after
+        /// the accept (GetStageDone(entry) == 1). The greeting and the closer also go once the job is done; side questions stay.
+        /// ⚠ SILENT: no line is voiced (WEMFile 0, subtitles only) and nothing is sent to ElevenLabs; a probe asks only whether
+        /// the menu shows. ⚠ A DELIBERATE COPY of BuildTalk's record shapes, not a call: BuildTalk is keyed on a person's
+        /// GetIsID and Speaker, and every ground talk would have to be A/B-proved through a change to it. Graduation (the
+        /// spike's exit) folds this back into one builder.
+        /// </summary>
+        private static int BuildShipTalk(StarfieldMod myMod, Quest clone, Template t, Recipe r, int shipAlias, BeatsMade bm)
+        {
+            var tb = r.beats[0];
+            string tag = $"{r.id}_hail";
+            ConditionFloat IsShip()
+            {
+                var d = new GetIsAliasRefConditionData { FirstParameter = shipAlias };
+                return new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f };
+            }
+            ConditionFloat StageDone(int st, float want)
+            {
+                var d = new GetStageDoneConditionData { RunOnType = Condition.RunOnType.Subject, SecondParameter = st };
+                d.FirstParameter = new FormLinkOrIndex<IQuestGetter>(d, clone.FormKey);
+                return new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = want };
+            }
+            DialogTopic Line(string name, List<string> texts, out DialogResponses info)
+            {
+                var topic = new DialogTopic(myMod)
+                {
+                    EditorID = name,
+                    Category = DialogTopic.CategoryEnum.Scene,
+                    Subtype = DialogTopic.SubtypeEnum.CustomScene,
+                    SubtypeName = DialogTopic.SubtypeNameEnum.CustomScene,
+                };
+                topic.Quest.SetTo(clone.FormKey);
+                info = new DialogResponses(myMod) { EditorID = name + "_info", SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low };
+                AddResponses(myMod, info, texts, topic.FormKey.ID, false, 7.466667f);
+                topic.Responses.Add(info);
+                topic.TopicInfoList = new Noggog.ExtendedList<IFormLinkGetter<IDialogResponsesGetter>> { info.ToLink<IDialogResponsesGetter>() };
+                clone.DialogTopics.Add(topic);
+                return topic;
+            }
+            Scene NewScene(string name, uint flags, bool untilDone)
+            {
+                var sc = new Scene(myMod) { EditorID = name, Flags = (Scene.Flag)flags, VNAM = new byte[] { 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0 } };
+                sc.Quest.SetTo(clone.FormKey);
+                sc.Conditions.Add(IsShip());
+                if (untilDone) sc.Conditions.Add(StageDone(t.completeStage, 0f));
+                sc.Conditions.Add(StageDone(t.entryStage, 1f));
+                sc.Actors.Add(new SceneActor { ID = (uint)shipAlias, BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+                sc.Actors.Add(new SceneActor { ID = unchecked((uint)-2), BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+                clone.Scenes.Add(sc);
+                return sc;
+            }
+
+            var gt = Line(tag + "_greet", tb.greeting!, out _);
+            var gs = NewScene(tag + "_greet_scene", 0x00001834u, true);
+            gs.Phases.Add(new ScenePhase { Name = "Greeting", EditorWidth = 298 });
+            var ga = new DialogueSceneAction { Index = 1, AliasID = shipAlias, StartPhase = 0, EndPhase = 0 };
+            ga.Topic.SetTo(gt.FormKey);
+            gs.Actions = new Noggog.ExtendedList<ASceneAction> { ga };
+            Console.WriteLine($"  +hail    : {gs.EditorID} greets \"{string.Join(" / ", tb.greeting!)}\" (cast on the ship, alias {shipAlias})");
+            for (int x = 0; x < tb.exchanges!.Count; x++)
+            {
+                var ex = tb.exchanges[x];
+                var pt = Line($"{tag}_ask{x + 1}", new List<string> { ex.prompt! }, out var pi);
+                if (ex.perk != null) { Console.WriteLine($"REFUSED: exchanges[{x}].perk is not built on a talk with a ship (the probe)."); return 1; }
+                var nt = Line($"{tag}_reply{x + 1}", ex.reply!, out var ni);
+                bool closer = x == 0;
+                if (closer) ni.SetParentQuestStage = new DialogSetParentQuestStage { OnEnd = (short)t.completeStage };
+                var sc = NewScene($"{tag}_topic{x + 1}_scene", 0x00002814u, closer);
+                sc.Index = (uint)(x + 1);
+                sc.SCPI = BitConverter.GetBytes((ushort)(x == 0 ? 100 : 51 - x));
+                sc.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
+                sc.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
+                var pa = new DialogueSceneAction { Index = 3, AliasID = -2, StartPhase = 0, EndPhase = 0 };
+                pa.Topic.SetTo(pt.FormKey);
+                var na = new DialogueSceneAction { Index = 4, AliasID = shipAlias, StartPhase = 1, EndPhase = 1 };
+                na.Topic.SetTo(nt.FormKey);
+                sc.Actions = new Noggog.ExtendedList<ASceneAction> { pa, na };
+                Console.WriteLine($"  +hail    : {sc.EditorID} \"{ex.prompt}\"" + (closer ? $"  (sets {t.completeStage} when the reply ends: the job is done)" : "  (loops to the menu)"));
+            }
+            Console.WriteLine($"  hail     : SILENT probe, {1 + tb.exchanges.Count} scene(s), no line voiced (WEMFile 0)");
+            return 0;
+        }
+
         private static int AddFlyingShip(Quest clone)
         {
             const string Name = "FlyingShip";
@@ -1269,8 +1413,9 @@ namespace FrankyCLI
             }
             var target = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)slot.activatorAlias);
             var act = m.Activators.FirstOrDefault(a => a.EditorID == r.id + "_b1");
-            // A defeat's object is the SHIP (OT-37), graded in its own branch below; every other kind creates our _b1 here.
-            if (SpaceDefeat(r, t))
+            // A defeat's object is the SHIP (OT-37), and so is a hail's (OT-9G), each graded in its own branch below; every
+            // other kind creates our _b1 here.
+            if (SpaceDefeat(r, t) || SpaceHail(r, t))
                 fail += Check($"alias {slot.activatorAlias} creates the ship at marker alias {slot.markerAlias}",
                               target?.CreateReferenceToObject == null ? "creates nothing" : $"at {target.CreateReferenceToObject.AliasID}",
                               $"at {slot.markerAlias}");
@@ -1336,6 +1481,29 @@ namespace FrankyCLI
                     fail += Check("rescue: she becomes a passenger on the check-in, not the use",
                                   (rideSrc.IndexOf($"Function {FragmentFunction(PickupStage)}()") < rideSrc.IndexOf($"Function {FragmentFunction(50)}()")
                                    && rideSrc.IndexOf(".AddPassenger(") > rideSrc.IndexOf($"Function {FragmentFunction(50)}()")).ToString(), "True");
+                }
+                else if (SpaceHail(r, t))
+                {
+                    // A TALK WITH A SHIP (OT-9G, a probe), read back: the ship as the defeat's, its voice, no hook of either kind,
+                    // and the menu cast on and gated to the ship's alias, the closer completing the job.
+                    var pr = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)slot.activatorAlias);
+                    var made = pr?.CreateReferenceToObject?.Object.FormKey;
+                    fail += Check($"PrimaryRef creates the ship the build resolved from '{r.beats[0].ship}'", made?.ToString() ?? "nothing", bm.SpaceShip?.ToString() ?? "unresolved");
+                    fail += Check("PrimaryRef starts disabled (the accept enables it)", (pr?.Flags?.HasFlag(QuestReferenceAlias.Flag.InitiallyDisabled) ?? false).ToString(), "True");
+                    fail += Check("the ship speaks in vanilla's hail ship's voice (ForcedVoice and VoiceTypes)",
+                                  $"{pr?.ForcedVoice.FormKeyNullable} {pr?.VoiceTypes.FormKeyNullable}", $"{HailShipVoice} {HailShipVoice}");
+                    var hooks = vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts;
+                    fail += Check("the ship carries no death hook and no use hook (shooting it or pressing it completes nothing)",
+                                  string.Join(",", hooks?.Select(s => s.Name) ?? Array.Empty<string>()), "");
+                    var mine = q.Scenes.Where(s => s.EditorID?.StartsWith($"{r.id}_hail_") == true).ToList();
+                    fail += Check("a greeting and one scene per exchange", mine.Count.ToString(), (1 + r.beats[0].exchanges!.Count).ToString());
+                    var ungated = mine.Where(s => !s.Conditions.Any(c => c.Data is IGetIsAliasRefConditionDataGetter g && g.FirstParameter == slot.activatorAlias)
+                                               || s.Actors.FirstOrDefault()?.ID != (uint)slot.activatorAlias).Select(s => s.EditorID).ToList();
+                    fail += Check($"every scene is cast on and gated to the ship (alias {slot.activatorAlias})", ungated.Count == 0 ? "all" : string.Join(", ", ungated), "all");
+                    var closerReply = q.DialogTopics.FirstOrDefault(d => d.EditorID == $"{r.id}_hail_reply1")?.Responses.FirstOrDefault();
+                    fail += Check($"the first reply completes the job (sets {t.completeStage} on END)",
+                                  closerReply?.SetParentQuestStage == null ? "none" : $"OnEnd {closerReply.SetParentQuestStage.OnEnd}", $"OnEnd {t.completeStage}");
+                    fail += Check($"no {r.id}_b1 activator is left in the plugin", (objAct != null).ToString(), "False");
                 }
                 else if (SpaceDefeat(r, t))
                 {
@@ -1433,8 +1601,9 @@ namespace FrankyCLI
                 var says = (vma.Script?.Properties ?? new List<IScriptPropertyGetter>()).OfType<IScriptObjectPropertyGetter>().Where(p => p.Name.StartsWith("Say")).ToList();
                 fail += Check("each Say property names one of this quest's scenes",
                               says.Count(p => q.Scenes.Any(s => s.FormKey == p.Object.FormKey)).ToString(), says.Count.ToString());
-                // A rescue's talk adds her greeting and a scene per question beside the radio lines.
-                int talkScenes = q.Scenes.Count(s => s.EditorID?.Contains("_talk") == true);
+                // A rescue's talk adds her greeting and a scene per question beside the radio lines; a hail's menu (OT-9G) its
+                // own, named _hail_.
+                int talkScenes = q.Scenes.Count(s => s.EditorID?.Contains("_talk") == true || s.EditorID?.Contains("_hail_") == true);
                 fail += Check("one radio scene per spoken line", (q.Scenes.Count - talkScenes).ToString(), says.Count.ToString());
                 if (bm.ClosingLine is string cl)
                 {

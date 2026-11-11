@@ -515,6 +515,24 @@ namespace FrankyCLI
                                 }
                         break;
                     }
+                    if (search.StartsWith("condcheck:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Every line carrying ONE named condition function (2026-11-11, OT-9G: which lines a hailed ship
+                        // offers). condtally counts functions; this names the lines, as itemcheck does for GetItemCount.
+                        string fnWant = search["condcheck:".Length..];
+                        foreach (var quest in mod.Quests)
+                            foreach (var topic in quest.DialogTopics)
+                                foreach (var resp in topic.Responses)
+                                {
+                                    if (!resp.Conditions.Any(c => c.Data.GetType().Name.Replace("ConditionDataBinaryOverlay", "").Replace("ConditionData", "")
+                                                                  .Equals(fnWant, StringComparison.OrdinalIgnoreCase))) continue;
+                                    var first = resp.Responses.FirstOrDefault();
+                                    Console.WriteLine($"COND\t{quest.EditorID}\t{topic.EditorID}\t{topic.Category}/{topic.Subtype}\t{resp.FormKey}"
+                                        + $"\tprompt \"{resp.Prompt}\"\tsays \"{first?.ResponseText}\"\t{string.Join(" & ", resp.Conditions.Select(DescribeCondition))}");
+                                    found++;
+                                }
+                        break;
+                    }
                     if (search.Equals("fieldtally", StringComparison.OrdinalIgnoreCase))
                     {
                         // Every property SET on any dialogue response (and on its topic), counted, by reflection: finds
