@@ -13,7 +13,8 @@
     "Ruth Pargeter's register on the speaker: level, counting, not warm; the care is in the accuracy. Voice borrowed until his ear casts it. No names, places, factions or currency in any voiced line.",
     "FRANCES 2026-11-02 (reviews/2026-11-02-delve-MB96a.md): rework, findings 1-5 taken, 6 kept, 7 is the stand-in wounded (Eliza's, already asked). Forced pick answered NO: the foreman's last line is a count and nothing else.",
     "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB96a.md): rework, findings 1-6 taken, 7-8 kept. Forced pick: the foreman CANNOT have the last word (the last step is a talk, which carries no radio line), so the count closes in Hollis's mouth instead: the order is now shoulder, young one, ribs, and the man who keeps the count is treated last and says 'Three down, three treated.' The foreman says the whole order.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Clear a drop pod raid at the <Place> on <Planet>, then treat the wounded. Bring med packs. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Clear a drop pod raid at the <Place> on <Planet>, then treat the wounded. Bring med packs. Payment on contract completion.\"",
+    "KIERAN DOYLE 2026-11-11 (reviews/2026-11-11-delve-MB96a.md): rework, finding 1 taken: the card says 'Bring three med packs' again (my 11-10 card sweep dropped it, so a player who spent his packs in the fight could stall at the first settler). Forced pick answered: the PLAYER brings his own, the spend is the player's part. Findings 2 (pay against three packs) and 3 (a 478 m worst-case walk) are his to rule and Eliza's to measure; 4-7 need nothing."
   ],
   "place": {
     "theme": {
@@ -30,7 +31,7 @@
   "prose": {
     "name": "Rescue: After the Drop at the <Place> on <Planet>",
     "briefing": "Raiders are dropping onto the <Place> by pod for the second time this week. Three of its people were hurt in the last drop, and nobody can reach them until the pods are dealt with.",
-    "card": "Pods are dropping on the <Place> again, second time this week. Three of ours are hurt from the last. Clear the crews, then the three."
+    "card": "Pods are dropping on the <Place> again. Three of ours are hurt from the last drop. Clear the crews, then treat the three. Bring three med packs."
   },
   "speaker": {
     "name": "Site Foreman",
