@@ -121,7 +121,14 @@
   "_speech": "Overworked and grateful. A stand-in voice; his ear decides.",
   "next": {
     "id": "duo_MB107a_qst",
-    "via": "talk"
+    "via": "talk",
+    "accept": {
+      "prompt": "I'll look in on him.",
+      "reply": [
+        "Bless you. He won't thank you for it, but he'll be glad somebody came."
+      ]
+    },
+    "_accept": "Jessica 2026-11-11, on his MB50a play ('she should offer it and I should accept'): The Rounds offers too. Rosa's closer asks; this is the player's yes."
   },
   "_next": "STAND-IN: Rosa's closing reply gains the ask ('Ah, can you look in on the old miner up the ridge?') once next is real."
 }
