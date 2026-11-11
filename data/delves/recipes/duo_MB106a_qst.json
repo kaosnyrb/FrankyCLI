@@ -14,7 +14,8 @@
     "Chain-only (deal chain), so it may remember (rule 3). Noor stays on the radio: the same person, which is the point of a chain. Pay: med, the finale pays more than a coda would (rule 6).",
     "FIXED 2026-11-10: Noor's closing radio line ('Keep a share, you've earned it') came off the talk, which cannot carry a say. Her last word in the chain is now the ask in MB50a.",
     "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB106a.md): rework, findings 1-8 taken, 9 is chain-only (no card owed), 10 kept. Forced pick answered NO: the regulator does not leave whole. He takes it apart and writes it down, so 'Nobody can make them' (MB50a) is answered by someone who means to make it untrue. The scarcity is in the always-heard greeting now; the age is said once, on Noor's radio.",
-    "REBUILT 2026-11-11 on his 2026-11-11 play of MB50a -> MB106a: (1) \"The regulator was at the scrap dealer before me, that doesn't make any sense. She should give me the old scrap regulator.\" (2) \"I wasn't given the option to take the mission, she should offer it and I should accept.\" (3) \"The Commerce option didn't end the quest, which makes it feel like it did nothing\". Built by Eliza the same morning on his \"yeah build, tell Jessica the changes too and we'll rewrite\". The pickup at the hauler's drop is gone: the player arrives CARRYING the regulator (carry), so it is one talk. Commerce ends the job (ends, hard). Every new line is a placeholder for Jessica."
+    "REBUILT 2026-11-11 on his 2026-11-11 play of MB50a -> MB106a: (1) \"The regulator was at the scrap dealer before me, that doesn't make any sense. She should give me the old scrap regulator.\" (2) \"I wasn't given the option to take the mission, she should offer it and I should accept.\" (3) \"The Commerce option didn't end the quest, which makes it feel like it did nothing\". Built by Eliza the same morning on his \"yeah build, tell Jessica the changes too and we'll rewrite\". The pickup at the hauler's drop is gone: the player arrives CARRYING the regulator (carry), so it is one talk. Commerce ends the job (ends, hard). Every new line is a placeholder for Jessica.",
+    "2026-11-11, his play after the carry rebuild: \"the radio call on the approach to the buyer isn't really needed anymore\". The broadcast (\"It's the heavy one. Mind your back, and don't let them have it cheap.\") and the speaker it was the only line of are out; he already has the regulator in hand."
   ],
   "place": {
     "theme": {
@@ -93,15 +94,6 @@
       "journal": "I sold the water reclaimer crew's old regulator to the scrapper at the <Place>. He's paying them direct, and he means to find out what's inside it.",
       "reward": "med"
     }
-  ],
-  "speaker": {
-    "name": "Water Reclaimer Crew",
-    "_name": "Deliberately MB50a's speaker: the same person on the radio, which is the point of a chain.",
-    "voice": "GenericFemale01",
-    "elevenlabs": "r5iFzIytiA1rzjhWFCjW"
-  },
-  "broadcast": [
-    "It's the heavy one. Mind your back, and don't let them have it cheap."
   ],
   "_speech": "Noor, MB50a's voice, carried on. The scrapper: dry, delighted by old machines; a stand-in voice, his ear decides.",
   "carry": {
