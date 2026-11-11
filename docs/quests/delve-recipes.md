@@ -691,8 +691,12 @@ goods (*"he's also got no credits to buy things off me"*), which is why `credits
 
 The lint refuses: `sells` with no `trade` line, a `trade` line with no `sells`, `trade` on `exchanges[0]` or with
 `give` / `ends`, more than one `trade`, an item or credits list that does not resolve, `credits` with no `sells`,
-and a seller who is wounded, captive, or on a rescue. ⚠ **The build's verify does not yet grade the vendor half**
-(chest items, link, faction, the INFO's script); it was read back off the plugin's bytes by hand.
+and a seller who is wounded, captive, or on a rescue. **The build's verify reads the vendor back** (his *"lets add
+the verify now"*, 2026-11-11): every seller has a chest, linked by `VendorContainerKeyword01` and created disabled at
+his marker before him, holding EXACTLY the recipe's stock plus his credits list; his alias in
+`SQ_Group_VendorFaction_Default` and nothing else; and the trade replies, and only they, carrying `VendorInfoScript`.
+The expected forms are literals read off vanilla, not the build's own constants. Bitten four ways on real builds of
+v1 (the shared-chest faction, an extra chest entry, no trade script, an enabled chest), each refused by its own leg.
 Probe: `duo_delvetest_v1`. ✅ **PLAYED 2026-11-11 15:14:** only his stock, *"yup he has money and I can sell to him"*.
 
 ## A wounded or captive person (`wounded`, `captive`)
