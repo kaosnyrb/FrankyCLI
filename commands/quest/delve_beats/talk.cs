@@ -113,6 +113,8 @@ namespace FrankyCLI
             internal static readonly FormKey VendorChestSrc = FormKey.Factory("10E232:Starfield.esm");    // Vendor_OE_Standard_Container
             internal static readonly FormKey VendorChestLink = FormKey.Factory("10FCD1:Starfield.esm");   // VendorContainerKeyword01
             internal const string VendorInfoScript = "VendorInfoScript";
+            /// <summary>The vendor's money when the recipe names none: vanilla's open-world vendor's own (LL_OE_Default_Vendor_Standard's first entry).</summary>
+            internal const string VendorCreditsDefault = "LL_Vendor_Credits_Radiant_Wealthy";
 
             /// <summary>The perk families vanilla tags a dialogue choice with (INFO.Perk census, 2026-10-14).</summary>
             private static readonly string[] CheckPerkFamilies = { "Background", "TRAIT_", "Skill_", "Faction" };
@@ -230,11 +232,15 @@ namespace FrankyCLI
                                      && string.Equals(it.EditorID, s.item, StringComparison.OrdinalIgnoreCase)))
                             Fatal($"{at} person.sells '{s.item}' is not an item in {t.mod} or one of its masters.");
                     }
+                    if (b.person!.credits is string cr && !string.Equals(cr, "none", StringComparison.OrdinalIgnoreCase)
+                        && !cr.StartsWith("LL_Vendor_Credits_", StringComparison.OrdinalIgnoreCase))
+                        Fatal($"{at} person.credits '{cr}' is not an LL_Vendor_Credits_* list or \"none\"; his money is one of vanilla's credit lists.");
                     if (trades == 0) Fatal($"{at} person.sells with no exchange carrying trade: true; nothing opens the trade screen, so the stock is unreachable.");
                     if (HeldOf(b.person) != null) Fatal($"{at} person.sells on a wounded or captive person; a vendor is a free person.");
                     if (IsBoardSpace(t)) Fatal($"{at} person.sells on a rescue's talk; the rescue build writes no vendor.");
                 }
                 else if (trades > 0) Fatal($"{at} an exchange carries trade: true and the person sells nothing; the screen would open on an empty stock.");
+                else if (b.person?.credits != null) Fatal($"{at} person.credits with no person.sells; his money rides in his stock chest, so it would be silently ignored.");
                 if (trades > 1) Fatal($"{at} {trades} exchanges carry trade: true; one trade line is enough.");
                 if (b.exchanges is { Count: > 0 } exs)
                     for (int x = 0; x < exs.Count; x++)

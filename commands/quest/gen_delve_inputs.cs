@@ -336,6 +336,14 @@ namespace FrankyCLI
                     if (it == null) { Console.WriteLine($"REFUSED: beat {i + 1} person.sells item '{s.item}' is not an item in {t.mod} or one of its masters."); fail++; break; }
                     stock.Add((it.FormKey, s.count));
                 }
+                // His money: a vanilla credits list in the same chest (absent = the open-world vendor's own; "none" = none).
+                string cr = r.beats[i].person!.credits ?? TalkBeat.VendorCreditsDefault;
+                if (!string.Equals(cr, "none", StringComparison.OrdinalIgnoreCase))
+                {
+                    var ll = OwnOrMaster<ILeveledItemGetter>(myMod, env, cr);
+                    if (ll == null) { Console.WriteLine($"REFUSED: beat {i + 1} person.credits '{cr}' is not a LeveledItem in {t.mod} or one of its masters."); fail++; break; }
+                    stock.Add((ll.FormKey, 1));
+                }
                 inputs.VendorStock[i] = stock;
                 if (inputs.VendorChestSrc == null
                     && !env.LinkCache.TryResolve<IContainerGetter>(TalkBeat.VendorChestSrc, out inputs.VendorChestSrc))

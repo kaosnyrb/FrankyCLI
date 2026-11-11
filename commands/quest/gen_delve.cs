@@ -509,6 +509,14 @@ namespace FrankyCLI
             /// so the faction is the one with none. ⚠ Unplayed on that faction yet (v1's rebuild).
             /// </summary>
             public List<Give>? sells { get; set; }
+            /// <summary>
+            /// talk, with sells, OPTIONAL: the vendor's MONEY, which is a leveled list in his chest like the stock (vanilla's
+            /// Vendor_OE_Standard_Container carries LL_OE_Default_Vendor_Standard = LL_Vendor_Credits_Radiant_Wealthy + the
+            /// generic goods; v1 replaced both and played with "no credits to buy things off me", his 2026-11-11 15:06). An
+            /// LL_Vendor_Credits_* EditorID (15 in vanilla: _Radiant_Poor, _SmallBusiness, _BarRestaurant_Dive, ...), or "none"
+            /// for a person who only sells. Absent = LL_Vendor_Credits_Radiant_Wealthy, the open-world vendor's own.
+            /// </summary>
+            public string? credits { get; set; }
         }
         /// <summary>talk: one question the player can ask and the person's answer. Prompt is silent menu text, reply is voiced.</summary>
         private sealed class Exchange
