@@ -12,7 +12,8 @@
     "PEN NAME: home-office office/pennames/aoi-nakagawa.json. Her heat checks do not apply; her voice does.",
     "WILL NOT BUILD YET: place.faction is board-only (gen_delve_beats.cs 430). Asked of Eliza 2026-10-31 to extend the swap to local quests. The recover's holder already spawns from the site's gang (OT-01).",
     "Own opener, speaker and close, not 20a's (card 20261031-071709). Voiced lines: no names, places, factions or currency; the occupiers by role.",
-    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-local-qst20e.md): rework, findings 1-3 and 5-7 taken. Finding 4 SPLIT, not taken whole: she wanted the greeting's unclean line cut as a repeat of the radio; talk_check needs it heard before the menu (the radio may be long past), so the greeting keeps one deflected word of it and no retelling. Forced pick answered YES: she may let 'she' slip once, then take it back."
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-local-qst20e.md): rework, findings 1-3 and 5-7 taken. Finding 4 SPLIT, not taken whole: she wanted the greeting's unclean line cut as a repeat of the radio; talk_check needs it heard before the menu (the radio may be long past), so the greeting keeps one deflected word of it and no retelling. Forced pick answered YES: she may let 'she' slip once, then take it back.",
+    "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"Oh. You came.\" became \"Oh. You came. I wasn't expecting you to, if I'm honest.\". A revoice."
   ],
   "place": {
     "theme": {
@@ -58,7 +59,7 @@
         "elevenlabs": "pFZP5JQG7iQjIQuC4Bku",
         "hellos": [
           [
-            "Oh. You came."
+            "Oh. You came. I wasn't expecting you to, if I'm honest."
           ]
         ]
       },

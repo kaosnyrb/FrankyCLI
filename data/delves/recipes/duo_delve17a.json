@@ -17,7 +17,8 @@
     "Voiced lines: no names, no places, no flags. She has seven colleagues and names none of them.",
     "MODELS: the freight crate stands in for a cool box (Kim's list); the picnic blanket is 13a's, his eye owed.",
     "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): easy, a plain haul, nothing to fight: the bottom tier.",
-    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): easy, a plain haul, nothing to fight: the bottom tier."
+    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): easy, a plain haul, nothing to fight: the bottom tier.",
+    "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"Orange and lime.\" became \"Orange and lime. The lime ones always go first, so don't hang about.\". A revoice."
   ],
   "place": {
     "theme": {
@@ -86,7 +87,7 @@
         {
           "prompt": "What flavours?",
           "reply": [
-            "Orange and lime."
+            "Orange and lime. The lime ones always go first, so don't hang about."
           ]
         },
         {

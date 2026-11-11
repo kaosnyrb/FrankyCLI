@@ -20,7 +20,8 @@
     "leave a marker alias the dungeon cannot fill.",
     "Pay: reward on the talk, the single ending, replaces stage 100's easy. 'hard' is Jessica's suggestion and a",
     "placeholder; the tier is his.",
-    "Same voice on the radio and in person: the broadcast is HER, before you have met her."
+    "Same voice on the radio and in person: the broadcast is HER, before you have met her.",
+    "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"Oh. Hello.\" became \"Oh. Hello. Sorry, I didn't hear you come up.\". A revoice."
   ],
   "place": {
     "theme": {
@@ -65,7 +66,7 @@
         "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
         "hellos": [
           [
-            "Oh. Hello."
+            "Oh. Hello. Sorry, I didn't hear you come up."
           ]
         ]
       },

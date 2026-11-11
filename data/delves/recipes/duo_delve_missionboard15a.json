@@ -16,7 +16,8 @@
     "lint pool is EMPTY on military sites until the markers are on them (missionboard06a's note says why).",
     "Every word holds at any military site: nothing names the site, the faction or the weather; everything the lines",
     "point at is placed. Pay: med, capped.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover a soldier's discharge papers from the <Place> on <Planet>. Discretion appreciated. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover a soldier's discharge papers from the <Place> on <Planet>. Discretion appreciated. Payment on contract completion.\"",
+    "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"Whatever you've heard.\" became \"Whatever you've heard about me, I'd rather you heard it from me.\". A revoice."
   ],
   "place": {
     "theme": {
@@ -48,7 +49,7 @@
         "elevenlabs": "oW8bn5YtBB89X2nJ0DT9",
         "hellos": [
           [
-            "Whatever you've heard."
+            "Whatever you've heard about me, I'd rather you heard it from me."
           ]
         ]
       },

@@ -18,7 +18,8 @@
     "MODELS: the relay dish (approved, his rig) stands in for the comms mast until Kim's kitbash has a mesh path;",
     "the power cell is vanilla Power_Cell_Static_PackinOnly (Kim's carries pass, C4).",
     "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, a repair with a read and two finds: the middle tier.",
-    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, a repair with a read and two finds: the middle tier."
+    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, a repair with a read and two finds: the middle tier.",
+    "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"Contractor. Over here.\" became \"Contractor. Over here, and keep your head down on the way.\". A revoice."
   ],
   "place": {
     "theme": {
@@ -52,7 +53,7 @@
         "_elevenlabs": "Petra's voice reused as a placeholder. She wants flat and clipped, not chill. His ear.",
         "hellos": [
           [
-            "Contractor. Over here."
+            "Contractor. Over here, and keep your head down on the way."
           ]
         ]
       },

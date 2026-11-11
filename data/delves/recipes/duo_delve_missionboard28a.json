@@ -17,7 +17,9 @@
     "A destroyed ship drops its cargo to loot, which is the vanilla way. Recover is refused on a board today; hers.",
     "Boarding the ship instead of destroying it is the other way to 'get' it, and a bigger build; not written.",
     "The broadcast plays at the ship, his 1500 m. Closing line on the radio. Pay: med, capped.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover the stolen satellite part over <Planet> and fit it. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover the stolen satellite part over <Planet> and fit it. Payment on contract completion.\"",
+    "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"That's our part.\" became \"That's our part back. Fit it, and we'll be talking again.\". A revoice.",
+    "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"We're back on.\" became \"We're back on, and every channel's clear. They'll not try that again in a hurry.\". A revoice."
   ],
   "place": {
     "orbit": "board",
@@ -43,7 +45,7 @@
       "objective": "Recover the power regulator from the wreck",
       "journal": "I took the power regulator back off the ship that stole it. I need to fit it to the communications satellite over <Planet>.",
       "say": [
-        "That's our part."
+        "That's our part back. Fit it, and we'll be talking again."
       ]
     },
     {
@@ -58,7 +60,7 @@
         "text": "The regulator seats and the satellite powers up. Its channels open, one by one."
       },
       "say": [
-        "We're back on."
+        "We're back on, and every channel's clear. They'll not try that again in a hurry."
       ],
       "reward": "med"
     }

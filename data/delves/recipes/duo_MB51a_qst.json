@@ -16,7 +16,8 @@
     "MODEL: the crate is wreckcargocrate01 (03a's, seen on the ground). Whether the wreckage itself is a placed model or",
     "the cell's own debris is hers and his; a ship wreck in space is not on the approved list.",
     "The broadcast plays at the wreck, his 1500 m in space (26a). Closing line on the radio. Pay: med, capped.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover the satellite part from the freighter wreckage over <Planet> and fit it. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover the satellite part from the freighter wreckage over <Planet> and fit it. Payment on contract completion.\"",
+    "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"That's the part.\" became \"That's the part. Get it fitted and the satellite can start talking again.\". A revoice."
   ],
   "place": {
     "altitude": 27.673,
@@ -51,7 +52,7 @@
       "_scenery": "Eliza, 2026-11-02, plan OT-02 (his 10-30 playtest: \"There should be wreckage of the frieghter at the part, currently there isn't\"): Kim's OT-62 freighter (his \"Frieghter looks good\"), re-origined so the crate sits in the gap between the halves (Overtime kitbash/reorigin.py, origin (2.5, -35, 0.5) of her recipe; nearest wreck part 2.54 m from the crate's box). 2026-11-03, Kim's v6 (the spill tumbles, the aft half pitched -22 and rolled 30): same origin, nothing touches the crate's box, nearest part 0.89 m (the aft half's torn wall, box to box). bounds is kitbash.py's WHOLE line; rebuild the NIF and copy it again if her recipe changes.",
       "item": "Signal Amplifier",
       "say": [
-        "That's the part."
+        "That's the part. Get it fitted and the satellite can start talking again."
       ]
     },
     {

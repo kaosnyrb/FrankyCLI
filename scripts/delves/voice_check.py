@@ -20,6 +20,10 @@ THE CHECKS. Each one is a fault he caught, with the catch that earned it.
          with no context, so short takes come out flat. His, 2026-10-21 ("when you split the lines that small
          Elevenlabs has no context so the delivery is worse") and again 2026-10-27 ("we've sharded our lines too
          hard"). Split only past 250, or where the scene truly turns; a turn that fits is still ONE take.
+  SHORT  a voiced field of three words or fewer ("Better.", "Easy.", "Oh. Hello."). His, 2026-11-11, on MB87a's
+         burnt-hands settler: "due to him being so terse the voice gen has nothing to work off which makes him
+         sounds off". Terseness lives in what a person says, not in how short the line is. Probes exempt.
+         (34 fields were at five words or fewer on the day; three is his approved line, the 12 he said to lengthen.)
   NOUN   a faction, a place or currency, in a Delve that is not NARROW. His 2026-10-12: a total conversion
          patches our text but cannot re-record our audio, so the voice names roles. A narrow Delve (one planet
          or faction) is exempt, his 2026-10-26; it says so with "NARROW" in a _note.
@@ -156,6 +160,9 @@ def main():
                 hits += 1
                 print(f"{rid:40} {f:14} {where:16} {line}")
         for where, takes in fields(d):
+            if not rid.startswith("duo_delvetest") and len(re.findall(r"[A-Za-z0-9']+", " ".join(takes))) <= 3:
+                hits += 1
+                print(f"{rid:40} {'SHORT':14} {where:16} " + " | ".join(takes))
             if len(takes) > 1 and len(" ".join(takes)) <= 250:
                 hits += 1
                 print(f"{rid:40} {'SHARD':14} {where:16} " + " | ".join(takes))
@@ -171,7 +178,7 @@ def main():
     for name, pat, cap, *_ in TICS:
         n = len(tic_hits[name])
         print(f"  {'WARN' if n > cap else 'ok  '} {n:3}/{cap:<3} {name}")
-    print(f"\n{hits} flagged line(s). PAY, DASH, NOUN and SHARD are his catches; a LONE line is not checked (see the header).")
+    print(f"\n{hits} flagged line(s). PAY, DASH, NOUN, SHARD and SHORT are his catches; a LONE line is not checked (see the header).")
     return 1 if hits else 0
 
 

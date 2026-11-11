@@ -12,7 +12,8 @@
     "PEN NAME: home-office office/pennames/edie-mallow.json. Her heat checks do not apply; her voice does.",
     "WILL NOT BUILD YET: place.faction is board-only (gen_delve_beats.cs 430). Asked of Eliza 2026-10-31 to extend the swap to local quests. The recover's holder already spawns from the site's gang (OT-01).",
     "Own opener, speaker and close, not 20a's (card 20261031-071709). Voiced lines: no names, places, factions or currency; the occupiers by role.",
-    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-local-qst20d.md): rework, findings 2-8 taken. Finding 2: the hauls aphorism cut, but every talk keeps a perk prompt (his 10-30), so the Long Hauler prompt now starts from what he said (the ground, the hour). Forced pick answered NO: 'scavengers' describes them, the faction is Spacers, so the word stands."
+    "FRANCES 2026-10-31 (reviews/2026-10-31-delve-local-qst20d.md): rework, findings 2-8 taken. Finding 2: the hauls aphorism cut, but every talk keeps a perk prompt (his 10-30), so the Long Hauler prompt now starts from what he said (the ground, the hour). Forced pick answered NO: 'scavengers' describes them, the faction is Spacers, so the word stands.",
+    "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"Oh, hello there.\" became \"Oh, hello there. Don't mind me, I'm still sitting on the ground.\". A revoice."
   ],
   "place": {
     "theme": {
@@ -58,7 +59,7 @@
         "elevenlabs": "onwK4e9ZLuTAKqWW03F9",
         "hellos": [
           [
-            "Oh, hello there."
+            "Oh, hello there. Don't mind me, I'm still sitting on the ground."
           ]
         ]
       },
