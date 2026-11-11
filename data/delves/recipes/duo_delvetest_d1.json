@@ -3,12 +3,14 @@
   "id": "duo_delvetest_d1",
   "template": "board",
   "deal": "_duo_MB_MissionNode_test",
-  "_deal": "The mission board's test node, as 12a.",
-  "author": "jessica",
-  "source": "his 2026-10-17 09:42: \"yup write sabotage\". The first Delve of the old MB19/MB20 Sabotage families (backport-map.md: no Delve yet, fits today).",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-11 15:22 \"lets do a probe first to check its ok\", before rebuilding Jessica's 99 parsecs and 16 minLevel recipes (her 4a60b2b, on Eliza's 3c81f6a)",
   "_note": [
-    "Eliza 2026-10-28: the destroy beat's test rung, 53a's three scanners shot instead of spoofed (his 'yeah build the beat now, Jessica will rewrite 53a'). Words are 53a's stand-ins until hers.",
-    "PAY SET 2026-11-10 (OT-9L, his 'every mission must set rewards'): med, three things to destroy at a guarded site: the middle tier."
+    "DISTANCE PROBE d1: v1's talk with no vendor, plus place.parsecs 12 (Jessica's easy/med cap) and minLevel 2 (passes for any real character).",
+    "What a play answers: (1) does the board still DEAL it with both gates on (a place that cannot fill is never dealt, silently); (2) is the site always within 12 parsecs of where he took it. Take it a few times from boards in different systems and look where it sends him.",
+    "d2 follows on his word: the same with minLevel 300, which must NOT deal. The test node is emptied by each build, so they go one at a time.",
+    "Every voiced line is v1's (w1's), cached. Pay easy."
   ],
   "place": {
     "theme": {
@@ -16,57 +18,44 @@
         "LocTypeOE_NonHostile"
       ],
       "exclude": [
-        "LocTypeOE_ThemeCaveKeyword"
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
       ]
     },
-    "_theme": "A quiet (non-hostile) site, so nobody shoots and the job stays quiet; the array is unmanned. Abandoned-only was a pool of 4 (lint, 2026-10-17), too narrow. The board places the POI, so it always starts (his, 2026-10-12)."
+    "_theme": "ch2's: a board request, non-hostile, never a cave.",
+    "parsecs": 12
   },
   "prose": {
-    "name": "Sabotage: Ecliptic Scanners on <Planet>",
-    "briefing": "The Ecliptic have a scanner array at the <Place> watching everything that moves on <Planet>. The settlers who posted the job don't want it broken. They want it lying.",
-    "card": "Local Contract. The Ecliptic are watching <Planet> through a scanner array at the <Place>, and we need them watching the wrong thing. Do not smash it. Feed each scanner a false reading and leave it running. Payment on completion."
+    "name": "Hauling: Distance Probe on <Planet>",
+    "briefing": "Test mission. A miner at the <Place> on <Planet> wants a word. Talk to him.",
+    "card": "Test contract. Talk to a miner at the <Place> on <Planet>. Payment on contract completion."
   },
-  "recap": "The Ecliptic scanners at the <Place> are all still running, and all three are wrong. Whatever the mercenaries think is happening on <Planet>, it isn't.",
-  "recapSay": [
-    "Their camp's just logged three empty valleys and a dust storm. We moved everything this morning. Nobody so much as looked up."
-  ],
   "beats": [
     {
-      "type": "destroy",
-      "group": "spoof",
+      "type": "talk",
       "at": "RECenterLocRef",
-      "objective": "Feed false readings to the Ecliptic scanners at the <Place>",
-      "journal": "This scanner was tracking movement on the ground. I looped an hour of empty footage into it. It's still recording, just not anything real.",
-      "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
-      "name": "Ecliptic Motion Scanner"
-    },
-    {
-      "type": "destroy",
-      "group": "spoof",
-      "at": "RETravelA1LocRef",
-      "ring": "infrastructure",
-      "journal": "This one counted ships landing and taking off. I set it to read a dust storm. Nobody flies in a dust storm, so nobody will wonder why it's quiet.",
-      "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
-      "name": "Ecliptic Landing Scanner"
-    },
-    {
-      "type": "destroy",
-      "group": "spoof",
-      "at": "RETravelB1LocRef",
-      "ring": "infrastructure",
-      "journal": "This scanner logged heat signatures. I shifted its calibration so a whole settlement reads as warm rock. It will be right about the rock.",
-      "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
-      "name": "Ecliptic Thermal Scanner"
+      "objective": "PROBE d1: talk to the miner at the <Place>",
+      "person": {
+        "name": "Bram Kessler",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericMale01",
+        "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
+      },
+      "greeting": [
+        "Don't fuss. It's a scratch. A big scratch. Did they send you with a med pack?"
+      ],
+      "exchanges": [
+        {
+          "prompt": "PROBE: complete the mission.",
+          "reply": [
+            "Ow. Right. Thank you. I'd have walked in eventually. Probably."
+          ]
+        }
+      ],
+      "journal": "PROBE d1: I talked to the miner at the <Place>.",
+      "reward": "easy"
     }
   ],
-  "speaker": {
-    "name": "Settler",
-    "voice": "GenericFemale01",
-    "elevenlabs": "wCizWKvnaS3LOIUwHo98"
-  },
-  "broadcast": [
-    "You took our job? Remember, don't break anything. A broken scanner gets fixed. A scanner that's wrong gets believed."
-  ],
-  "_speech": "The issuer on the radio once the job is taken. Voice is 05a and 18a's (wCizWKvnaS3LOIUwHo98); his ear decides. Radio rules: no names, no places, no factions spoken, no currency.",
-  "reward": "med"
+  "minLevel": 2
 }
