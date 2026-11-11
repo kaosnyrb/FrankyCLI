@@ -1,0 +1,60 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_d2",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-11 16:32 \"yeah build the level prove\", after d1 dealt to Ursae Majoris (10.4 pc from Sol)",
+  "_note": [
+    "LEVEL PROBE d2: d1 exactly, but minLevel 300. It must NOT deal: no character is level 300.",
+    "d1 is the control: identical but for the level, and it dealt (his 16:31 map). So if d2 never shows on the board, the level gate is the only cause.",
+    "Every voiced line is cached. Pay easy."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "ch2's: a board request, non-hostile, never a cave.",
+    "parsecs": 12
+  },
+  "prose": {
+    "name": "Hauling: Level Probe on <Planet>",
+    "briefing": "Test mission. A miner at the <Place> on <Planet> wants a word. Talk to him.",
+    "card": "Test contract. Talk to a miner at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "PROBE d2: talk to the miner at the <Place>",
+      "person": {
+        "name": "Bram Kessler",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericMale01",
+        "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
+      },
+      "greeting": [
+        "Don't fuss. It's a scratch. A big scratch. Did they send you with a med pack?"
+      ],
+      "exchanges": [
+        {
+          "prompt": "PROBE: complete the mission.",
+          "reply": [
+            "Ow. Right. Thank you. I'd have walked in eventually. Probably."
+          ]
+        }
+      ],
+      "journal": "PROBE d2: I talked to the miner at the <Place>.",
+      "reward": "easy"
+    }
+  ],
+  "minLevel": 300
+}
