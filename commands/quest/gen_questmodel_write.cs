@@ -276,6 +276,12 @@ namespace FrankyCLI
             ["GetItemCount"] = new(typeof(IGetItemCountConditionDataGetter), () => new GetItemCountConditionData(),
                 (g, m) => { var x = (IGetItemCountConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
                 (d, m) => { var x = (GetItemCountConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
+            // GetLevel (2026-11-11, gen_delve minLevel): a board Delve offered only to a player at or above a level. It takes
+            // no parameters; RunOnType and Reference (PlayerRef, as every vanilla reactor recipe's) are the generic half,
+            // written above. A vanilla GetLevel carrying unused parameter values would not keep them through a model.
+            ["GetLevel"] = new(typeof(IGetLevelConditionDataGetter), () => new GetLevelConditionData(),
+                (g, m) => { },
+                (d, m) => { }),
             ["GetIsID"] = new(typeof(IGetIsIDConditionDataGetter), () => new GetIsIDConditionData(),
                 (g, m) => { var x = (IGetIsIDConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
                 (d, m) => { var x = (GetIsIDConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),

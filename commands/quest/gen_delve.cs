@@ -337,6 +337,15 @@ namespace FrankyCLI
             /// </summary>
             public Carry? carry { get; set; }
             /// <summary>
+            /// OPTIONAL, a board Delve only (his 2026-11-11, Jessica's question: "Some quests shouldnt be given to a level 1
+            /// player"): the player's own level the board needs before it deals this Delve. Written as GetLevel run on the
+            /// player (PlayerRef) >= minLevel on the main place alias, so below it the place cannot fill and the board never
+            /// deals the quest. A FLOOR on him, NOT vanilla's level band (place.level, MB_IsPlayerLevelAppropriate), which
+            /// also holds the planet to his band and is off by his 2026-10-30 "drop both": this one leaves the planet pool
+            /// alone. 2 to 300 (his level ladder's top rung).
+            /// </summary>
+            public int? minLevel { get; set; }
+            /// <summary>
             /// beats, REQUIRED when the last step is a group (and refused otherwise): the completing stage's
             /// journal line. The group's last member sets its own stage and then the completing stage in the
             /// same instant, and the quest log shows only the newest line, so without this the player reads
@@ -2057,12 +2066,22 @@ namespace FrankyCLI
             // beside a second request (his 2026-10-22, 19a: the dungeon a created POI, the orbit kept).
             if (secondRemote && (anyThird || r.place.third != null) && !IsOrbit(r))
                 Fatal("place.second.remote is set and the recipe has a third place; a third place is held within a drive of the second, which is on another planet.");
+            // minLevel (his 2026-11-11): a floor on the player, on a board's main place alias (BoardPlaceGates).
+            if (r.minLevel is int ml)
+            {
+                if (!IsBoard(t) && !IsBoardSpace(t)) Fatal($"minLevel gates what the BOARD deals; this template is '{t.id}'.");
+                if (ml < 2 || ml > 300) Fatal($"minLevel is {ml}; 2 to 300 (1 would gate nothing, 300 is his ladder's top rung).");
+                else Console.WriteLine($"  minLevel : dealt only to a player at level {ml} or above (GetLevel on PlayerRef, on the main place)");
+            }
             foreach (var (p, label) in new[] { (r.place, "place"), (r.place.second, "place.second"), (r.place.third, "place.third") })
             {
                 if (p == null) continue;
                 bool nearOrbit = label == "place.third" && p.orbit == "near";
-                if (p.parsecs != null && p.remote != true && !nearOrbit)
-                    Fatal($"{label}.parsecs shapes a REQUEST, and {label}.remote is not set.");
+                // A board's own main place IS a request (his 2026-11-11, Jessica's "not across the whole map just to deliver a
+                // coffee"), so parsecs caps it too: vanilla's far-mission distance, written on the request (BoardPlaceGates).
+                bool boardMain = label == "place" && IsBoard(t) && !IsBoardSpace(t) && p.remote != true;
+                if (p.parsecs != null && p.remote != true && !nearOrbit && !boardMain)
+                    Fatal($"{label}.parsecs shapes a REQUEST, and {label}.remote is not set (a board's own main place takes it without).");
                 if (p.parsecs is double ps && !(ps > 0))
                     Fatal($"{label}.parsecs must be above 0 (got {ps}).");
                 // Off is the default (his 2026-10-30); the build refuses a true whose request carries no such condition.
@@ -2878,6 +2897,7 @@ namespace FrankyCLI
                                     : VerifyBeats(outEsm, readParams, r, t, madeBeats, mastersBefore);
                 ve += VerifyDeal(outEsm, readParams, r);
                 ve += VerifyChain(outEsm, readParams, r);
+                ve += VerifyGates(outEsm, readParams, r, t);
                 return ve == 0 ? 0 : 1;
             }
             if (dry) { Console.WriteLine("\n  --dry: nothing written."); return 0; }
@@ -2892,6 +2912,7 @@ namespace FrankyCLI
                                : VerifyBeats(modFile, readParams, r, t, madeBeats, mastersBefore);
             v += VerifyDeal(modFile, readParams, r);
             v += VerifyChain(modFile, readParams, r);
+            v += VerifyGates(modFile, readParams, r, t);
             lap.Mark("voice");
             // The audio last, and only over a verified plugin: its file names are the written topics' ids.
             return v == 0 ? DeployVoice(r, t, madeBeats) : v;
@@ -2947,6 +2968,7 @@ namespace FrankyCLI
                     fail += ShapePlanet(clone, PlaceAliasOf(t, pi, made4.ThirdPlaceAlias), PlaceAt(r, pi),
                                         pi == 0 ? "place" : pi == 1 ? "place.second" : "place.third");
             }
+            if (fail == 0 && (IsBoard(t) || IsBoardSpace(t))) fail += BoardPlaceGates(clone, t, r);
             // ⛔ EVERY PLACE HE IS SENT TO RESERVES ITS LOCATION (his 2026-10-28, "can we add it to the linter", after the board
             // base's TargetLocation did not and vanilla's POI encounters took 53a's site). An OE_Location fills without
             // AllowReserved, so a reserved site is one they cannot take. Checked HERE, on the clone, because only the build knows
@@ -3068,6 +3090,33 @@ namespace FrankyCLI
             foreach (var x in reread.Quests)
                 if (NextOf(x) is string n && n.StartsWith("MISSING")) dangling.Add($"{x.EditorID} next -> {n}");
             fail += Check("no chain link in the plugin names a quest that is gone", dangling.Count == 0 ? "none" : string.Join("; ", dangling), "none");
+            return fail;
+        }
+
+        /// <summary>
+        /// The board's place dials (BoardPlaceGates), read back off disk: with place.parsecs, the main place's request carries
+        /// GetDistanceGalacticParsec on PlayerRef LessThan that number; with minLevel, its alias carries GetLevel run on PlayerRef
+        /// GreaterThanOrEqualTo it; and WITHOUT minLevel, no GetLevel at all (a gate nobody asked for is the worse defect).
+        /// </summary>
+        private static int VerifyGates(string modFile, Mutagen.Bethesda.Plugins.Binary.Parameters.BinaryReadParameters readParams, Recipe r, Template t)
+        {
+            if (!IsBoard(t) && !IsBoardSpace(t)) return 0;
+            var reread = StarfieldMod.CreateFromBinaryOverlay(modFile, StarfieldRelease.Starfield, readParams);
+            var q = reread.Quests.FirstOrDefault(x => x.EditorID == r.id);
+            var loc = q?.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.placeAlias);
+            if (loc == null) return 0;   // Verify has already failed on this
+            int fail = 0;
+            var levels = loc.Conditions.Where(c => c.Data is IGetLevelConditionDataGetter).ToList();
+            string lv = string.Join("; ", levels.Select(c => $"{c.CompareOperator} {(c as IConditionFloatGetter)?.ComparisonValue} on {c.Data.RunOnType} {c.Data.Reference.FormKey}"));
+            fail += Check("minLevel: the main place's level gate is the recipe's",
+                          levels.Count == 0 ? "none" : lv,
+                          r.minLevel is int ml ? $"GreaterThanOrEqualTo {ml} on Reference {PlayerRef}" : "none");
+            if (r.place.parsecs is double ps && r.place.remote != true)
+            {
+                var pc = loc.ALPS?.Conditions.Where(c => c.Data is IGetDistanceGalacticParsecConditionDataGetter).ToList() ?? new();
+                string got = string.Join("; ", pc.Select(c => $"{c.CompareOperator} {(c as IConditionFloatGetter)?.ComparisonValue} from {((IGetDistanceGalacticParsecConditionDataGetter)c.Data).FirstParameter.Link.FormKey}"));
+                fail += Check("place.parsecs: the main place's request holds to the player's distance", pc.Count == 0 ? "none" : got, $"LessThan {ps} from {PlayerRef}");
+            }
             return fail;
         }
 
@@ -3541,6 +3590,39 @@ namespace FrankyCLI
 
         /// <summary>The player's persistent reference, PlayerRef [000014:Starfield.esm].</summary>
         private static readonly FormKey PlayerRef = FormKey.Factory("000014:Starfield.esm");
+
+        /// <summary>
+        /// A board's two dials on its own MAIN place (his 2026-11-11, Jessica's level-and-distance letter). parsecs, on a board
+        /// place that is not remote: vanilla's far-mission distance (MB_Bounty01Far: GetDistanceGalacticParsec from the
+        /// player, on the REQUEST's own conditions, which test the planet), with this number where vanilla has
+        /// MB_ParsecsStandardFarMax (30). Refused if the request already carries one (a remote copy's is ShapeRequest's).
+        /// minLevel: GetLevel run on PlayerRef >= N on the place ALIAS's conditions, so below it the alias cannot fill and the
+        /// board never deals the quest. Both are written only when the recipe asks; absent, a build is what it was.
+        /// </summary>
+        private static int BoardPlaceGates(Quest clone, Template t, Recipe r)
+        {
+            if (r.place.parsecs == null && r.minLevel == null) return 0;
+            var loc = clone.Aliases?.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)t.placeAlias);
+            if (loc == null) { Console.WriteLine($"REFUSED: the board's main place alias {t.placeAlias} is not a location alias on the clone."); return 1; }
+            if (r.place.parsecs is double ps && r.place.remote != true)
+            {
+                if (loc.ALPS == null) { Console.WriteLine($"REFUSED: place.parsecs is set and place alias {t.placeAlias} {loc.Name} is not a PCM request, so there is no planet test to write it on."); return 1; }
+                if (loc.ALPS.Conditions.Concat(loc.Conditions).Any(c => c.Data is IGetDistanceGalacticParsecConditionDataGetter))
+                { Console.WriteLine($"REFUSED: place.parsecs is set and {loc.Name} already carries a GetDistanceGalacticParsec condition; the shell carried one."); return 1; }
+                var d = new GetDistanceGalacticParsecConditionData();
+                d.FirstParameter.Link.SetTo(PlayerRef);
+                loc.ALPS.Conditions.Add(new ConditionFloat { Data = d, CompareOperator = CompareOperator.LessThan, ComparisonValue = (float)ps });
+                Console.WriteLine($"  request  : {loc.Name} within {ps} parsecs of the player (GetDistanceGalacticParsec PlayerRef < {ps}, MB_Bounty01Far's, which uses 30)");
+            }
+            if (r.minLevel is int ml)
+            {
+                var g = new GetLevelConditionData { RunOnType = Condition.RunOnType.Reference };
+                g.Reference.SetTo(PlayerRef);
+                loc.Conditions.Add(new ConditionFloat { Data = g, CompareOperator = CompareOperator.GreaterThanOrEqualTo, ComparisonValue = ml });
+                Console.WriteLine($"  minLevel : {loc.Name} fills only for a player at level {ml}+ (GetLevel on PlayerRef >= {ml}); below it the board does not deal the quest");
+            }
+            return 0;
+        }
 
         /// <summary>His settled orbit altitude band (manual 12, 2026-08-04): 4 "much better", 32 "feels cool", 256 discarded.</summary>
         private static readonly (double min, double max) OrbitAltitudeBand = (8, 32);
