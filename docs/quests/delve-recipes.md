@@ -664,6 +664,37 @@ hazard of our tooling, not of the engine, so it belongs beside the step it is ab
 - Prefer a row with no ★. A ★ is somebody in the game, and a player may know the face.
 - ⚠ The person's own face lists are ignored, so sliders do nothing on a `face` person.
 
+## A person who sells (`sells`, `credits`, `trade`)
+
+**Built and PLAYED 2026-11-11** (his *"having people selling stuff, little lore things or quest objectives"*, Jessica's
+vendor letter). A talk's `person` can trade. The shape is vanilla's own (home-office Bethesda manual 44, *Vendors*):
+
+```json
+"person": { ..., "sells": [ { "item": "InorgUncommonTungsten", "count": 7 } ], "credits": "LL_Vendor_Credits_Radiant_Poor" },
+"exchanges": [ { ...the closer... }, { "prompt": "What have you got for sale?", "trade": true, "reply": [ "..." ] } ]
+```
+
+- `sells`: his stock, item EditorIDs and counts. A copy of `Vendor_OE_Standard_Container` holding it is created
+  DISABLED at his marker, before him in the alias list, and he is linked to it by `VendorContainerKeyword01`
+  (`VendorActivatorScript`'s shape). His alias carries `SQ_Group_VendorFaction_Default`.
+- `credits`, optional: his money, which is a leveled list in the same chest. An `LL_Vendor_Credits_*` EditorID
+  (15 in vanilla), or `"none"` for a person who only sells. Absent = `LL_Vendor_Credits_Radiant_Wealthy`, the
+  open-world vendor's own.
+- `trade: true` on one exchange: its REPLY carries vanilla's `VendorInfoScript`, so the trade screen opens when he
+  finishes the line. A side question, askable again after the completion.
+
+⛔ **The faction must have no shared chest.** v1 first played on `Vendor_OE_Standard_Faction`: the screen sold his
+own stock BESIDE that faction's `MerchantContainer`, the whole generic open-world spread (*"bought a med pack off
+him which was funny"*). `SQ_Group_VendorFaction_Default` is vanilla's twin with no chest (one of 20 in a census of
+165). ⛔ **And the money is not automatic:** replacing the chest's items dropped vanilla's credits list with its
+goods (*"he's also got no credits to buy things off me"*), which is why `credits` defaults on.
+
+The lint refuses: `sells` with no `trade` line, a `trade` line with no `sells`, `trade` on `exchanges[0]` or with
+`give` / `ends`, more than one `trade`, an item or credits list that does not resolve, `credits` with no `sells`,
+and a seller who is wounded, captive, or on a rescue. ⚠ **The build's verify does not yet grade the vendor half**
+(chest items, link, faction, the INFO's script); it was read back off the plugin's bytes by hand.
+Probe: `duo_delvetest_v1`. ✅ **PLAYED 2026-11-11 15:14:** only his stock, *"yup he has money and I can sell to him"*.
+
 ## A wounded or captive person (`wounded`, `captive`)
 
 **Built 2026-11-10, plan OT-9A, UNPLAYED** (his *"I think B, it matches vanilla"*). A talk's `person` can set
