@@ -129,6 +129,8 @@ namespace FrankyCLI
                 Fatal("a beat is a recover on a board in orbit and is not beat 2 after a ship's defeat; in orbit the part rides in the ship's hold, so that is the one recover built.");
             if (IsBoardSpace(t) && r.beats.Count >= 2 && !two && !rescue && !shipRec)
                 Fatal($"the beats are {string.Join(" then ", r.beats.Select(x => x.type))}; a board builds a pickup then a deliver, a ship's defeat then a recover, or a rescue's use, talk, ride, talk, and nothing else yet.");
+            if (ShipDeliverBoard(r, t) && string.Equals(r.beats[0].at, r.beats[2].at, StringComparison.OrdinalIgnoreCase))
+                Fatal($"beats 1 and 3 are both at '{r.beats[0].at}'; the ship and the deliver's object need two of the cell's markers.");
             if (two && string.Equals(r.beats[0].at, r.beats[1].at, StringComparison.OrdinalIgnoreCase))
                 Fatal($"both beats are at '{r.beats[0].at}'; the two objects need two of the cell's markers.");
             if (two && string.IsNullOrWhiteSpace(r.beats[0].item))
@@ -171,17 +173,22 @@ namespace FrankyCLI
                 if (!b.at.StartsWith("se_", StringComparison.OrdinalIgnoreCase))
                     Fatal($"beat {i + 1} is at '{b.at}'; an orbit's markers are its space cell's own (se_*), filled from the cell.");
                 if (string.IsNullOrWhiteSpace(b.objective)) Fatal($"beat {i + 1} has no objective; it is the one line that points him at the object.");
-                if (!SpaceDefeat(r, t) && !SpaceHail(r, t) && !shipRec && (string.IsNullOrWhiteSpace(b.model) || string.IsNullOrWhiteSpace(b.name)))
+                // A ship-then-hold board's beat 1 is the ship (beat 2 is skipped above); its deliver is an object like any.
+                if (!SpaceDefeat(r, t) && !SpaceHail(r, t) && !(shipRec && i == 0) && (string.IsNullOrWhiteSpace(b.model) || string.IsNullOrWhiteSpace(b.name)))
                     Fatal($"beat {i + 1} needs a model and a name: its object is a clone of {(RepairBoard(r, t) ? "the base's own activator" : t.activatorFrom)}, reskinned.");
+                if (shipRec && b.scenery != null)
+                    Fatal($"beat {i + 1} sets scenery; a ship-then-hold board builds none (its scenery pass walks the two-beat board's objects), so it would be silently ignored.");
                 if (b.scenery is Scenery sc)
                 {
                     if (string.IsNullOrWhiteSpace(sc.model)) Fatal($"beat {i + 1}'s scenery has no model.");
                     if (sc.bounds.Count != 6 || sc.bounds[0] >= sc.bounds[3] || sc.bounds[1] >= sc.bounds[4] || sc.bounds[2] >= sc.bounds[5])
                         Fatal($"beat {i + 1}'s scenery.bounds is [{string.Join(", ", sc.bounds)}]; it is kitbash.py's WHOLE line, six numbers, each min below its max.");
                 }
-                // A two-beat board shows its own boxes: no repair script is there to show one.
-                if ((b.message != null && !two && !rescue) || b.group != null || b.returnTo != null)
-                    Fatal($"beat {i + 1} carries a {(b.message != null && !two && !rescue ? "message" : b.group != null ? "group" : "returnTo")}; the {t.id} kind builds none"
+                // A two-beat board shows its own boxes: no repair script is there to show one. So does a ship-then-hold
+                // board's deliver (28a's "Satellite Repaired"), on its completing stage.
+                bool boxed = two || rescue || (ShipDeliverBoard(r, t) && i == 2);
+                if ((b.message != null && !boxed) || b.group != null || b.returnTo != null)
+                    Fatal($"beat {i + 1} carries a {(b.message != null && !boxed ? "message" : b.group != null ? "group" : "returnTo")}; the {t.id} kind builds none"
                           + (IsBoardSpace(t) && b.message != null && b.repair ? " (its object's script shows its own start, success and fail messages)." : "."));
                 if (b.ask is BeatAsk ask)
                 {
@@ -304,7 +311,24 @@ namespace FrankyCLI
         /// unread which), and 100 pays.
         /// </summary>
         private static bool ShipRecoverBoard(Recipe r, Template t)
-            => IsBoardSpace(t) && r.beats.Count == 2 && r.beats[0].type == "defeat" && r.beats[1].type == "recover";
+            => IsBoardSpace(t) && r.beats.Count is 2 or 3 && r.beats[0].type == "defeat" && r.beats[1].type == "recover"
+               && (r.beats.Count == 2 || r.beats[2].type == "deliver");
+
+        /// <summary>
+        /// The ship-then-hold board with a third beat: the part is DELIVERED to a second object (28a, his 2026-11-11 "yeah a",
+        /// after sk2 played). The second object is a two-beat board's (MB51a's: a copy of the first marker and object pair at
+        /// its own marker, our use hook), gated on the recover's own stage; the deliver takes the part back from him or his
+        /// ship and pays. In sk2's play the part landed in the SHIP's cargo (his screenshot, 2026-11-11 12:3x).
+        /// ⚠ The second object is named `_b2` (OBJECT two), not `_b3`, so every board's second object has one name and a
+        /// rebuild that drops it removes it by that one name.
+        /// </summary>
+        private static bool ShipDeliverBoard(Recipe r, Template t)
+            => ShipRecoverBoard(r, t) && r.beats.Count == 3;
+
+        /// <summary>The recover's own stage on a ship-then-hold board with a deliver after it (50: 40 is the death, 60 the
+        /// guards, and only a rescue's check-in takes 50), and the deliver's objective (40: 30 is the recover's).</summary>
+        private const int ShipRecoverStage = 50;
+        private const int ShipDeliverObjective = 40;
 
         /// <summary>
         /// A one-beat board whose beat is a TALK TO A SHIP (plan OT-9G, a PROBE, his 2026-11-11: "you can just start
@@ -363,7 +387,7 @@ namespace FrankyCLI
                                       IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Dictionary<string, FormKey> markers, BeatsMade bm)
         {
             var beat = r.beats[0];
-            bool two = TwoBeatBoard(r, t), rescue = RescueBoard(r, t), shipRec = ShipRecoverBoard(r, t);
+            bool two = TwoBeatBoard(r, t), rescue = RescueBoard(r, t), shipRec = ShipRecoverBoard(r, t), shipDeliver = ShipDeliverBoard(r, t);
             bool staged = two || rescue || shipRec;   // beat 1 ends on its own stage (40), the last beat on the completing one
             var slot = t.beatSlots.FirstOrDefault();
             if (slot == null) { Console.WriteLine($"REFUSED: template '{t.id}' names no beat slot (the marker and the object it creates there)."); return 1; }
@@ -576,7 +600,20 @@ namespace FrankyCLI
                 SortStages(clone);
                 Console.WriteLine($"  +stage   : {PickupStage}, the pickup");
             }
-            foreach (var (b, st) in staged ? new[] { (beat, PickupStage), (r.beats[^1], slot.journalStage) } : new[] { (beat, slot.journalStage) })
+            if (shipDeliver)
+            {
+                if (clone.Stages!.Any(s => s.Index == ShipRecoverStage) || clone.Objectives!.Any(o => o.Index == ShipDeliverObjective))
+                { Console.WriteLine($"REFUSED: the shell already has a stage {ShipRecoverStage} or objective {ShipDeliverObjective}; a ship-then-hold deliver's must be its own."); return 1; }
+                var recSt = CloneStage(clone, ShipRecoverStage);
+                if (recSt == null) return 1;
+                clone.Stages!.Add(recSt);
+                SortStages(clone);
+                Console.WriteLine($"  +stage   : {ShipRecoverStage}, the recover (the part out of the hold)");
+            }
+            var journals = !staged ? new[] { (beat, slot.journalStage) }
+                : shipDeliver ? new[] { (beat, PickupStage), (r.beats[1], ShipRecoverStage), (r.beats[^1], slot.journalStage) }
+                : new[] { (beat, PickupStage), (r.beats[^1], slot.journalStage) };
+            foreach (var (b, st) in journals)
             {
                 if (b.journal == null) continue;
                 var e = clone.Stages?.FirstOrDefault(s => s.Index == st)?.LogEntries?.FirstOrDefault();
@@ -623,27 +660,31 @@ namespace FrankyCLI
             // 20 copied to 30 and pointed at it. The census that licenses this: every cell of LVLSC_AllSpacePOIs tags
             // se_GeneralMarkerLocRef01 and se_TravelMarkerLocRefB02 on distinct refs (gen_inspect cellrt, 2026-10-27).
             QuestReferenceAlias? target2 = null;
-            if (two)
+            // A ship-then-hold board's deliver (28a) takes the same second object; its beat is the third, its objective 40.
+            if (two || shipDeliver)
             {
-                var b2 = r.beats[1];
+                var b2 = r.beats[^1];
+                int nb = r.beats.Count;
                 var m2 = marker.DeepCopy();
                 m2.ID = NextAliasId(clone);
-                m2.Name = "DelveBeat2Marker";
+                m2.Name = $"DelveBeat{nb}Marker";
                 var rt2 = m2.Conditions.Select(c => c.Data).OfType<HasRefTypeConditionData>().First();
                 rt2.FirstParameter.Link.SetTo(markers[b2.at]);
                 clone.Aliases!.Add(m2);
                 target2 = target.DeepCopy();
                 target2.ID = m2.ID + 1;
-                target2.Name = "DelveBeat2Target";
+                target2.Name = $"DelveBeat{nb}Target";
                 target2.CreateReferenceToObject!.AliasID = (short)m2.ID;
+                // Copied off the SHIP on a ship-then-hold board, which starts disabled until the accept; an object must not.
+                if (shipDeliver) target2.Flags = (target2.Flags ?? 0) & ~QuestReferenceAlias.Flag.InitiallyDisabled;
                 clone.Aliases.Add(target2);
                 bm.OrbitMarkers.Add(((int)m2.ID, markers[b2.at]));
-                Console.WriteLine($"  +slot    : beat 2 -- marker alias {m2.ID} -> {b2.at} from cell {cellId}, object alias {target2.ID}");
+                Console.WriteLine($"  +slot    : beat {nb} -- marker alias {m2.ID} -> {b2.at} from cell {cellId}, object alias {target2.ID}, flags {target2.Flags}");
                 var src2 = myMod.Activators.First(a => a.EditorID == t.activatorFrom);
                 target2.CreateReferenceToObject.Object.SetTo(src2.FormKey);
                 if (ReskinActivator(myMod, clone, t, r.id + "_b2", (int)target2.ID, b2.model, b2.name) != 0) return 1;
                 var ob2 = ob.DeepCopy();
-                ob2.Index = DeliverObjective;
+                ob2.Index = (ushort)(shipDeliver ? ShipDeliverObjective : DeliverObjective);
                 foreach (var x in ob2.Targets.Where(x => x.AliasID == (int)target.ID)) x.AliasID = (int)target2.ID;
                 ob2.DisplayText = Expand(b2.objective!, t);
                 clone.Objectives!.Insert(clone.Objectives.IndexOf(ob) + 1, ob2);
@@ -709,10 +750,22 @@ namespace FrankyCLI
                 // THE PART LEAVING THE HOLD ENDS THE JOB, however he loots it: stock, on the ship, filtered to the part.
                 var fp = new ScriptObjectProperty { Name = "ItemFilter", Flags = ScriptProperty.Flag.Edited };
                 fp.Object.SetTo(shipItem);
-                var h = StageHook("DefaultAliasOnItemRemoved", t.completeStage, PickupStage, fp);
-                if (AttachHook(vma, clone.FormKey, (int)target.ID, h, HookEntry.FindOrCreate, true, bm, t.completeStage, PickupStage) == Hooked.AlreadyCarries)
+                int recovered = shipDeliver ? ShipRecoverStage : t.completeStage;
+                var h = StageHook("DefaultAliasOnItemRemoved", recovered, PickupStage, fp);
+                if (AttachHook(vma, clone.FormKey, (int)target.ID, h, HookEntry.FindOrCreate, true, bm, recovered, PickupStage) == Hooked.AlreadyCarries)
                 { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnItemRemoved."); return 1; }
-                Console.WriteLine($"  +hook    : alias {target.ID} DefaultAliasOnItemRemoved (the part) sets {t.completeStage} after {PickupStage}; the part leaving the wreck's hold pays");
+                Console.WriteLine($"  +hook    : alias {target.ID} DefaultAliasOnItemRemoved (the part) sets {recovered} after {PickupStage}; "
+                                  + (shipDeliver ? "the part out of the wreck's hold ends the recover" : "the part leaving the wreck's hold pays"));
+                // THE DELIVER (28a): our use hook on the second object, gated on the recover's stage, as MB51a's deliver is on
+                // its pickup's: it cannot complete empty-handed.
+                if (shipDeliver)
+                {
+                    var uh = StageHook(UseScript, t.completeStage, ShipRecoverStage,
+                                       new ScriptBoolProperty { Name = "HideAfterUse", Data = true, Flags = ScriptProperty.Flag.Edited });
+                    if (AttachHook(vma, clone.FormKey, (int)target2!.ID, uh, HookEntry.FindOrCreate, true, bm, t.completeStage, ShipRecoverStage) == Hooked.AlreadyCarries)
+                    { Console.WriteLine($"REFUSED: alias {target2.ID} already carries {UseScript}."); return 1; }
+                    Console.WriteLine($"  +hook    : alias {target2.ID} {UseScript} sets {t.completeStage} after {ShipRecoverStage}; the deliver pays");
+                }
             }
             else if (SpaceDefeat(r, t))
             {
@@ -885,14 +938,34 @@ namespace FrankyCLI
                         "Debug.Trace(\"[recover] \" + Self + \" stage " + t.entryStage + ": ship \" + hold + \" holds \" + hold.GetItemCount(Item1) + \" of the part\")",
                     });
                     code[PickupStage] = new() { $"SetObjectiveCompleted({slot.objective})", $"SetObjectiveDisplayed({DeliverObjective})" };
-                    code[t.completeStage] = new() { $"SetObjectiveCompleted({DeliverObjective})" };
+                    if (!shipDeliver)
+                        code[t.completeStage] = new() { $"SetObjectiveCompleted({DeliverObjective})" };
+                    else
+                    {
+                        // THE DELIVER (28a): the recover shows the deliver's objective; the deliver takes the part back from him
+                        // or his ship (sk2's play: it lands in the ship's cargo), MB51a's two places.
+                        code[ShipRecoverStage] = new() { $"SetObjectiveCompleted({DeliverObjective})", $"SetObjectiveDisplayed({ShipDeliverObjective})" };
+                        code[t.completeStage] = new()
+                        {
+                            "Actor player = Game.GetPlayer()",
+                            "If player.GetItemCount(Item1) >= 1",
+                            "    player.RemoveItem(Item1, 1)",
+                            "Else",
+                            "    player.GetCurrentShipRef().RemoveItem(Item1, 1)",
+                            "EndIf",
+                            $"SetObjectiveCompleted({ShipDeliverObjective})",
+                        };
+                    }
                 }
                 else if (rescue && RideBeat.Rescue(myMod, clone, t, r, env, markers, bm, vma, ob, slot.objective, DeliverObjective, PickupStage, (int)target.ID, code, extraProps) != 0) return 1;
-                if (two || rescue)
+                if (two || rescue || shipDeliver)
                 {
                     RemovePrevious(myMod.Messages, e => e.StartsWith(r.id + "_msg"));
                     var msgSrc = myMod.Messages.FirstOrDefault(m => m.EditorID == MessageTemplate);
-                    for (int i = 0; i < 2; i++)
+                    // Which beats may box, and on which stage: the first two of a two-beat or rescue board (pickup, last), the
+                    // deliver alone on a ship-then-hold board (the lint refuses a box on its ship and its recover).
+                    var boxes = shipDeliver ? new[] { (2, t.completeStage) } : new[] { (0, PickupStage), (1, t.completeStage) };
+                    foreach (var (i, boxStage) in boxes)
                     {
                         var bmsg = r.beats[i].message;
                         if (bmsg == null) continue;
@@ -903,7 +976,7 @@ namespace FrankyCLI
                         msg.Description = Expand(bmsg.text!, t);
                         msg.OwnerQuest.SetTo(clone.FormKey);
                         extraProps.Add(("Message", $"Beat{i + 1}Message", msg.FormKey, -1));
-                        code[i == 0 ? PickupStage : t.completeStage].Add($"Beat{i + 1}Message.Show()");
+                        code[boxStage].Add($"Beat{i + 1}Message.Show()");
                         Console.WriteLine($"  +message : {msg.EditorID} {msg.FormKey}  \"{msg.Name}\"");
                     }
                 }
@@ -986,6 +1059,15 @@ namespace FrankyCLI
                         var scene = MakeRadioLine(myMod, clone, r, n, PickupStage, beat.say, bm);
                         sayProps.Add(($"Say{n + 1}", scene.FormKey));
                         code[PickupStage].Add($"Say{n + 1}.Start()");
+                        n++;
+                    }
+                    // A ship-then-hold deliver's middle line plays as the part comes out of the hold (28a's "That's our part
+                    // back"); nothing waits on it.
+                    if (shipDeliver && r.beats[1].say != null)
+                    {
+                        var scene = MakeRadioLine(myMod, clone, r, n, ShipRecoverStage, r.beats[1].say, bm);
+                        sayProps.Add(($"Say{n + 1}", scene.FormKey));
+                        code[ShipRecoverStage].Add($"Say{n + 1}.Start()");
                         n++;
                     }
                     var closer = staged ? r.beats[^1] : beat;
@@ -1534,8 +1616,33 @@ namespace FrankyCLI
                     fail += Check($"the ship's death ends beat 1 (the shell's DefaultAliasOnDeath sets {PickupStage})", P("DefaultAliasOnDeath", "StageToSet").ToString(), PickupStage.ToString());
                     var item = m.MiscItems.FirstOrDefault(x => x.EditorID == r.id + "_item1");
                     var filter = hooks?.FirstOrDefault(s => s.Name == "DefaultAliasOnItemRemoved")?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == "ItemFilter")?.Object.FormKey;
-                    fail += Check($"DefaultAliasOnItemRemoved on the ship sets {t.completeStage} after {PickupStage}",
-                                  $"{P("DefaultAliasOnItemRemoved", "StageToSet")} after {P("DefaultAliasOnItemRemoved", "PrereqStage")}", $"{t.completeStage} after {PickupStage}");
+                    bool deliver = ShipDeliverBoard(r, t);
+                    int recovered = deliver ? ShipRecoverStage : t.completeStage;
+                    fail += Check($"DefaultAliasOnItemRemoved on the ship sets {recovered} after {PickupStage}",
+                                  $"{P("DefaultAliasOnItemRemoved", "StageToSet")} after {P("DefaultAliasOnItemRemoved", "PrereqStage")}", $"{recovered} after {PickupStage}");
+                    if (deliver)
+                    {
+                        // THE DELIVER (28a): our _b2 at its own marker, enabled, our use hook gated on the recover, objective 40
+                        // on it, and the completing stage taking the part back from him or his ship.
+                        var t2 = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.Name == $"DelveBeat{r.beats.Count}Target");
+                        var b2 = m.Activators.FirstOrDefault(a => a.EditorID == r.id + "_b2");
+                        fail += Check($"the deliver's object alias creates {r.id}_b2", t2?.CreateReferenceToObject?.Object.FormKey.ToString() ?? "no alias",
+                                      b2?.FormKey.ToString() ?? "no activator");
+                        fail += Check("the deliver's object does not start disabled (copied off the ship, which does)",
+                                      (t2?.Flags?.HasFlag(QuestReferenceAlias.Flag.InitiallyDisabled) ?? true).ToString(), "False");
+                        var uh = t2 == null ? null : vma.Aliases.FirstOrDefault(a => a.Property.Alias == (int)t2.ID)?.Scripts.FirstOrDefault(s => s.Name == UseScript);
+                        int U(string n) => uh?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == n)?.Data ?? -1;
+                        fail += Check($"{UseScript} on the deliver's object sets {t.completeStage} after {ShipRecoverStage}",
+                                      uh == null ? "no hook" : $"{U("StageToSet")} after {U("PrereqStage")}", $"{t.completeStage} after {ShipRecoverStage}");
+                        var ob40 = q.Objectives.FirstOrDefault(o => o.Index == ShipDeliverObjective);
+                        fail += Check($"objective {ShipDeliverObjective} is the deliver's and points at its object (alias {t2?.ID})",
+                                      ob40 == null ? "missing" : $"{ob40.DisplayText?.String} -> {string.Join(",", ob40.Targets.Select(x => x.AliasID))}",
+                                      $"{Expand(r.beats[2].objective!, t)} -> {t2?.ID}");
+                        string f = File.ReadAllText(bm.PscPath);
+                        int f100 = f.IndexOf($"Function {FragmentFunction(t.completeStage)}()");
+                        fail += Check("the deliver takes the part back from him or his ship",
+                                      (f100 >= 0 && f.IndexOf("player.GetCurrentShipRef().RemoveItem(Item1, 1)", f100) > f100).ToString(), "True");
+                    }
                     fail += Check($"its ItemFilter is our part, {r.id}_item1 \"{r.beats[1].item}\"",
                                   filter?.ToString() ?? "no filter", item == null ? "no item" : $"{item.FormKey}");
                     fail += Check("the part is the recipe's, weightless", item == null ? "no item" : $"{item.Name?.String} {item.Weight}", $"{r.beats[1].item} 0");

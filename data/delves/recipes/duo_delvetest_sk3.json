@@ -1,0 +1,51 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_sk3",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-11 12:3x \"yeah a\": 28a's shape, a ship's defeat, the part out of its hold, then fitted at a second object; sk2 played first (\"worked, ship hold\")",
+  "_note": [
+    "SHIP, HOLD, DELIVER PROBE SK3 (plan OT-37, for 28a): sk2 with a third beat. Silent, placeholder words. Not a mission.",
+    "Reading it: take it, kill the ship, loot the part (it goes to the ship's cargo). The objective moves to 'Fit the test part to the satellite', marked on a satellite at the cell's other marker. Use it: a box, the part goes, the mission pays easy.",
+    "Worth a look: the satellite should be there from the start and should not take the part before the loot (its use is gated on the loot)."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "sk1's."
+  },
+  "prose": {
+    "name": "Bounty: Ship, Hold and Satellite Probe over <Planet>",
+    "briefing": "Test mission. A pirate ship over <Planet> has a stolen part aboard. Destroy it, recover the part and fit it to the satellite.",
+    "card": "Test contract. Destroy the pirate ship over <Planet>, recover the part and fit it. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "se_GeneralMarkerLocRef01",
+      "target": "LvlShip_CrimsonFleet_Combat",
+      "objective": "Destroy the pirate ship over <Planet>",
+      "journal": "Test journal: I destroyed the pirate ship over <Planet>. The part should be in what's left of it."
+    },
+    {
+      "type": "recover",
+      "item": "Test Part",
+      "objective": "Recover the test part from the wreck",
+      "journal": "Test journal: I recovered the test part from the wreck. I need to fit it to the satellite."
+    },
+    {
+      "type": "deliver",
+      "at": "se_TravelMarkerLocRefB02",
+      "objective": "Fit the test part to the satellite",
+      "journal": "Test journal: I fitted the test part to the satellite over <Planet>.",
+      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "name": "Test Satellite",
+      "message": {
+        "title": "Test Part Fitted",
+        "text": "Test box: the part is fitted."
+      },
+      "reward": "easy"
+    }
+  ]
+}
