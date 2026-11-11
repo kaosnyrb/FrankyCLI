@@ -1,0 +1,40 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_sk2",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-11 10:43 \"let's do OT-37\" (the recover-from-wreck half), and 10:54 \"ships have an invetory that you can loot on destruction, we add data slates to ships that can be picked up\"",
+  "_note": [
+    "SHIP THEN HOLD PROBE SK2 (plan OT-37): sk1's Crimson Fleet ship with a part in its hold, silent, placeholder words. Not a mission.",
+    "Reading it: take it, go to the system, kill the ship. The objective should move to 'Recover the test part from the wreck', still marked on the wreck. Loot the part: the mission completes and pays easy.",
+    "Papyrus.0.log: '[recover] ... holds 1 of the part' at the accept. If it says 0, the hold did not take it on a disabled ship.",
+    "Worth noting on the play: where the part lands (his pack or his ship's cargo). The hook does not care; Jessica's words might."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "sk1's."
+  },
+  "prose": {
+    "name": "Bounty: Ship and Hold Probe over <Planet>",
+    "briefing": "Test mission. A pirate ship is holding orbit over <Planet> with a stolen part aboard. Destroy it and recover the part.",
+    "card": "Test contract. Destroy the pirate ship over <Planet> and recover the part. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "se_GeneralMarkerLocRef01",
+      "target": "LvlShip_CrimsonFleet_Combat",
+      "objective": "Destroy the pirate ship over <Planet>",
+      "journal": "Test journal: I destroyed the pirate ship over <Planet>. The part should be in what's left of it."
+    },
+    {
+      "type": "recover",
+      "item": "Test Part",
+      "objective": "Recover the test part from the wreck",
+      "journal": "Test journal: I recovered the test part from the wreck over <Planet>.",
+      "reward": "easy"
+    }
+  ]
+}

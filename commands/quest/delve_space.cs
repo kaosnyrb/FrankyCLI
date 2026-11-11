@@ -80,7 +80,7 @@ namespace FrankyCLI
             // A BOARD has two shapes and only two (27a, his 2026-10-27 "let's do 27a"): ONE use, which is his MB01a's own
             // activator (it takes the kit and pays itself), or a PICKUP THEN A DELIVER on two scriptless objects in the one
             // cell. The pair is the shape built; every other mix is refused here rather than half-wired.
-            bool two = TwoBeatBoard(r, t);
+            bool two = TwoBeatBoard(r, t), shipRec = ShipRecoverBoard(r, t);
             if (IsBoardSpace(t) && r.beats.Count == 1 && r.beats[0].type is not ("use" or "destroy" or "defeat") && !SpaceHail(r, t))
                 Fatal($"beat 1 is a '{r.beats[0].type}'; a one-beat board is a use (his MB01a's activator), a destroy (his MB14a's), a defeat (vanilla's space bounty ship) or a talk with a ship (OT-9G).");
             if (r.beats.Any(b => b.ship != null) && !SpaceHail(r, t))
@@ -102,9 +102,9 @@ namespace FrankyCLI
             }
             // A DEFEAT IN ORBIT (plan OT-37): a hostile SHIP is the target, vanilla's MB_BountySpace01Far shape. Its one field is
             // target (an LvlShip_*); everything an activator or a ground defeat carries would be silently ignored.
-            if (r.beats.Any(b => b.type == "defeat") && !SpaceDefeat(r, t))
-                Fatal("a beat is a defeat and this is not a one-beat board; only a one-beat boardspace defeat (a ship) is built in orbit.");
-            if (SpaceDefeat(r, t))
+            if (r.beats.Any(b => b.type == "defeat") && !SpaceDefeat(r, t) && !shipRec)
+                Fatal("a beat is a defeat and this is not a one-beat board or a defeat then a recover; only those boardspace defeats (a ship) are built in orbit.");
+            if (SpaceDefeat(r, t) || shipRec)
             {
                 var d = r.beats[0];
                 if (string.IsNullOrWhiteSpace(d.target) || !d.target.StartsWith("LvlShip_", StringComparison.Ordinal))
@@ -122,13 +122,18 @@ namespace FrankyCLI
                 Fatal("guards names a levelled ship list, LShip_* (his guarded boards use LShip_CrimsonFleet_Combat and LShip_Spacer_Combat_A).");
             if (SpaceDestroy(r, t) && (r.beats[0].repair || r.beats[0].ask != null))
                 Fatal($"beat 1 is a destroy and sets {(r.beats[0].repair ? "repair" : "ask")}; it is shot, not used, so that would be silently ignored.");
-            if (IsBoardSpace(t) && r.beats.Count >= 2 && !two && !rescue)
-                Fatal($"the beats are {string.Join(" then ", r.beats.Select(x => x.type))}; a board builds a pickup then a deliver, or a rescue's use, talk, ride, talk, and nothing else yet.");
+            // A RECOVER IN ORBIT (OT-37's second half): the part is in the ship's hold (his: "ships have an invetory that you can
+            // loot on destruction"), so a recover is built only straight after the ship's defeat, and has no object or place of
+            // its own: its objective points at the wreck.
+            if (r.beats.Any(b => b.type == "recover") && IsBoardSpace(t) && !shipRec)
+                Fatal("a beat is a recover on a board in orbit and is not beat 2 after a ship's defeat; in orbit the part rides in the ship's hold, so that is the one recover built.");
+            if (IsBoardSpace(t) && r.beats.Count >= 2 && !two && !rescue && !shipRec)
+                Fatal($"the beats are {string.Join(" then ", r.beats.Select(x => x.type))}; a board builds a pickup then a deliver, a ship's defeat then a recover, or a rescue's use, talk, ride, talk, and nothing else yet.");
             if (two && string.Equals(r.beats[0].at, r.beats[1].at, StringComparison.OrdinalIgnoreCase))
                 Fatal($"both beats are at '{r.beats[0].at}'; the two objects need two of the cell's markers.");
             if (two && string.IsNullOrWhiteSpace(r.beats[0].item))
                 Fatal("beat 1 is a pickup with no item; it names what he picks up and the deliver takes back.");
-            if ((two || rescue) && r.beats[0].reward != null)
+            if ((two || rescue || shipRec) && r.beats[0].reward != null)
                 Fatal("beat 1 carries a reward; a two-beat board pays once, from its last stage.");
             if (rescue && r.beats[0].repair)
                 Fatal("beat 1 sets repair; a rescue's use is a plain object on our hook.");
@@ -145,6 +150,17 @@ namespace FrankyCLI
                 var b = r.beats[i];
                 if (t.allows.Count > 0 && !t.allows.Contains(b.type ?? ""))
                     Fatal($"beat {i + 1} is a '{b.type}' and template '{t.id}' builds only {string.Join(", ", t.allows)}. What it cannot do: {string.Join("; ", t.cannot)}");
+                if (shipRec && i == 1)
+                {
+                    // In the ship's hold: no object, no marker of its own, nothing an object or a ground holder carries.
+                    if (string.IsNullOrWhiteSpace(b.item)) Fatal("beat 2 is a recover with no item; it names the part in the ship's hold.");
+                    if (string.IsNullOrWhiteSpace(b.objective)) Fatal("beat 2 has no objective; it points him at the wreck.");
+                    if (!string.IsNullOrEmpty(b.at) && !string.Equals(b.at, r.beats[0].at, StringComparison.OrdinalIgnoreCase))
+                        Fatal($"beat 2 is at '{b.at}'; the part is in the ship's hold, so its objective points at the ship, at '{r.beats[0].at}'.");
+                    if (b.model != null || b.name != null || b.replace || b.outside != null || b.gang != null || b.scenery != null || b.message != null || b.ask != null)
+                        Fatal("beat 2 is a recover from the ship's hold and sets model, name, replace, outside, gang, scenery, message or ask; there is no object or holder, so they would be silently ignored.");
+                    continue;
+                }
                 if (rescue && i > 0)
                 {
                     if (b.exchanges?.Any(x => x.perk != null) == true) Fatal($"beat {i + 1} has a perk on an exchange; a rescue's talk resolves none, so it would be silently ignored.");
@@ -155,7 +171,7 @@ namespace FrankyCLI
                 if (!b.at.StartsWith("se_", StringComparison.OrdinalIgnoreCase))
                     Fatal($"beat {i + 1} is at '{b.at}'; an orbit's markers are its space cell's own (se_*), filled from the cell.");
                 if (string.IsNullOrWhiteSpace(b.objective)) Fatal($"beat {i + 1} has no objective; it is the one line that points him at the object.");
-                if (!SpaceDefeat(r, t) && !SpaceHail(r, t) && (string.IsNullOrWhiteSpace(b.model) || string.IsNullOrWhiteSpace(b.name)))
+                if (!SpaceDefeat(r, t) && !SpaceHail(r, t) && !shipRec && (string.IsNullOrWhiteSpace(b.model) || string.IsNullOrWhiteSpace(b.name)))
                     Fatal($"beat {i + 1} needs a model and a name: its object is a clone of {(RepairBoard(r, t) ? "the base's own activator" : t.activatorFrom)}, reskinned.");
                 if (b.scenery is Scenery sc)
                 {
@@ -280,6 +296,17 @@ namespace FrankyCLI
             => PlainBoard(r, t) && r.beats[0].type == "defeat";
 
         /// <summary>
+        /// A board in orbit with a ship's DEFEAT then a RECOVER (OT-37's second half; 38a, and 28a's first two beats). His
+        /// 2026-11-11: "ships have an invetory that you can loot on destruction, we add data slates to ships that can be picked
+        /// up" (ccs_activatedestroyguarded and the boarding bounties: ship.AddItem(item, 1, False)). So: the defeat's ship as
+        /// SpaceDefeat's; the accept puts the part in its hold; the shell's own DefaultAliasOnDeath, repointed, sets 40; stock
+        /// DefaultAliasOnItemRemoved on the SHIP, filtered to the part, sets 100 however it leaves (his pack or his ship's hold,
+        /// unread which), and 100 pays.
+        /// </summary>
+        private static bool ShipRecoverBoard(Recipe r, Template t)
+            => IsBoardSpace(t) && r.beats.Count == 2 && r.beats[0].type == "defeat" && r.beats[1].type == "recover";
+
+        /// <summary>
         /// A one-beat board whose beat is a TALK TO A SHIP (plan OT-9G, a PROBE, his 2026-11-11: "you can just start
         /// conversations with frienldly ships, so I'm assuming we'd make it a conversation option to progress the quest").
         /// The defeat's ship (PrimaryRef creates the recipe's LvlShip_*, disabled until the accept), friendly, voiced by
@@ -336,7 +363,8 @@ namespace FrankyCLI
                                       IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Dictionary<string, FormKey> markers, BeatsMade bm)
         {
             var beat = r.beats[0];
-            bool two = TwoBeatBoard(r, t), rescue = RescueBoard(r, t);
+            bool two = TwoBeatBoard(r, t), rescue = RescueBoard(r, t), shipRec = ShipRecoverBoard(r, t);
+            bool staged = two || rescue || shipRec;   // beat 1 ends on its own stage (40), the last beat on the completing one
             var slot = t.beatSlots.FirstOrDefault();
             if (slot == null) { Console.WriteLine($"REFUSED: template '{t.id}' names no beat slot (the marker and the object it creates there)."); return 1; }
             var vma = clone.VirtualMachineAdapter;
@@ -477,7 +505,7 @@ namespace FrankyCLI
                 if (n != 1) { Console.WriteLine($"REFUSED: the activator's script named its base quest {n} time(s); one (questobjective) was expected."); return 1; }
                 Console.WriteLine($"  object   : {act.EditorID} keeps {string.Join(", ", act.VirtualMachineAdapter.Scripts.Select(s => s.Name))}; questobjective now this quest");
             }
-            else if (SpaceDefeat(r, t))
+            else if (SpaceDefeat(r, t) || shipRec)
             {
                 // THE SHIP (OT-37): PrimaryRef creates the recipe's levelled ship, as vanilla's space bounty does, and starts
                 // disabled until the accept enables it (MB01a dropped the flag, right for an activator, wrong for a hostile ship
@@ -538,9 +566,9 @@ namespace FrankyCLI
             { Console.WriteLine($"REFUSED: objective {slot.objective} does not target alias {target.ID}, the object."); return 1; }
             ob.DisplayText = Expand(beat.objective!, t);
             // A two-beat board's pickup journals on its own stage; the deliver's goes where a one-beat board's does.
-            if ((two || rescue) && (clone.Stages!.Any(s => s.Index == PickupStage) || clone.Objectives!.Any(o => o.Index == DeliverObjective)))
+            if (staged && (clone.Stages!.Any(s => s.Index == PickupStage) || clone.Objectives!.Any(o => o.Index == DeliverObjective)))
             { Console.WriteLine($"REFUSED: the shell already has a stage {PickupStage} or objective {DeliverObjective}; a two-beat board's must be its own."); return 1; }
-            if (two || rescue)
+            if (staged)
             {
                 var pickSt = CloneStage(clone, PickupStage);
                 if (pickSt == null) return 1;
@@ -548,7 +576,7 @@ namespace FrankyCLI
                 SortStages(clone);
                 Console.WriteLine($"  +stage   : {PickupStage}, the pickup");
             }
-            foreach (var (b, st) in two || rescue ? new[] { (beat, PickupStage), (r.beats[^1], slot.journalStage) } : new[] { (beat, slot.journalStage) })
+            foreach (var (b, st) in staged ? new[] { (beat, PickupStage), (r.beats[^1], slot.journalStage) } : new[] { (beat, slot.journalStage) })
             {
                 if (b.journal == null) continue;
                 var e = clone.Stages?.FirstOrDefault(s => s.Index == st)?.LogEntries?.FirstOrDefault();
@@ -622,6 +650,27 @@ namespace FrankyCLI
             }
             else if (ReskinActivator(myMod, clone, t, r.id + "_b2", -1, null, null) != 0) return 1;   // a rebuild as one beat drops an old _b2: removes, then no model, so no clone
 
+            // A SHIP THEN ITS HOLD (OT-37's recover): the recover's objective is the shell's 20 copied to 30, STILL on the ship,
+            // so the marker stays on the wreck; and the part is a clone of itemSource, weightless, as a two-beat pickup's.
+            FormKey shipItem = FormKey.Null;
+            if (shipRec)
+            {
+                var ob2 = ob.DeepCopy();
+                ob2.Index = DeliverObjective;
+                ob2.DisplayText = Expand(r.beats[1].objective!, t);
+                clone.Objectives!.Insert(clone.Objectives.IndexOf(ob) + 1, ob2);
+                Console.WriteLine($"  +obj     : {DeliverObjective}, the recover, on the ship (alias {target.ID}), the wreck");
+                RemovePrevious(myMod.MiscItems, e => e.StartsWith(r.id + "_item"));
+                var itemSrc = myMod.MiscItems.FirstOrDefault(m => m.EditorID == t.itemSource);
+                if (itemSrc == null) { Console.WriteLine($"REFUSED: itemSource '{t.itemSource}' is not a MiscItem in {t.mod}."); return 1; }
+                var mi = myMod.MiscItems.DuplicateInAsNewRecord(itemSrc);
+                mi.EditorID = $"{r.id}_item1";
+                mi.Name = r.beats[1].item!;
+                mi.Weight = 0f;
+                shipItem = mi.FormKey;
+                Console.WriteLine($"  +item    : {mi.EditorID} {mi.FormKey}  \"{mi.Name}\"  (clone of {itemSrc.EditorID}, weight {itemSrc.Weight} -> 0), into the ship's hold on the accept");
+            }
+
             // THE SCENERY (plan OT-02): beside each beat's object, at its marker. Both beat numbers are walked so a rebuild
             // without scenery removes the Static an earlier build made.
             var objects = two ? new[] { target, target2! } : new[] { target };
@@ -649,7 +698,23 @@ namespace FrankyCLI
 
             // A PLAIN ONE-BEAT BOARD (MB104a, 2026-11-03): our hook sets the completing stage after the accept, as a two-beat
             // board's pickup does. HideAfterUse is the PROMPT (BlockActivation), true on every use; the object itself stays.
-            if (SpaceDefeat(r, t))
+            if (shipRec)
+            {
+                // THE DEATH ENDS BEAT 1, not the job: the shell's own DefaultAliasOnDeath, repointed from 100 to 40.
+                var dh = vma.Aliases.FirstOrDefault(a => a.Property.Alias == (int)target.ID)?.Scripts.FirstOrDefault(s => s.Name == "DefaultAliasOnDeath");
+                var sp = dh?.Properties.OfType<ScriptIntProperty>().FirstOrDefault(p => p.Name == "StageToSet");
+                if (sp == null || sp.Data != t.completeStage) { Console.WriteLine($"REFUSED: the shell's PrimaryRef (alias {target.ID}) carries no DefaultAliasOnDeath setting {t.completeStage} (got {sp?.Data.ToString() ?? "none"}) to repoint."); return 1; }
+                sp.Data = PickupStage;
+                Console.WriteLine($"  hook     : alias {target.ID} keeps the shell's DefaultAliasOnDeath, now setting {PickupStage} (was {t.completeStage}): the ship's death ends beat 1");
+                // THE PART LEAVING THE HOLD ENDS THE JOB, however he loots it: stock, on the ship, filtered to the part.
+                var fp = new ScriptObjectProperty { Name = "ItemFilter", Flags = ScriptProperty.Flag.Edited };
+                fp.Object.SetTo(shipItem);
+                var h = StageHook("DefaultAliasOnItemRemoved", t.completeStage, PickupStage, fp);
+                if (AttachHook(vma, clone.FormKey, (int)target.ID, h, HookEntry.FindOrCreate, true, bm, t.completeStage, PickupStage) == Hooked.AlreadyCarries)
+                { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnItemRemoved."); return 1; }
+                Console.WriteLine($"  +hook    : alias {target.ID} DefaultAliasOnItemRemoved (the part) sets {t.completeStage} after {PickupStage}; the part leaving the wreck's hold pays");
+            }
+            else if (SpaceDefeat(r, t))
             {
                 // No hook of ours: the shell's own DefaultAliasOnDeath on PrimaryRef completes it. Refused if the shell lost it.
                 var dh = vma.Aliases.FirstOrDefault(a => a.Property.Alias == (int)target.ID)?.Scripts.FirstOrDefault(s => s.Name == "DefaultAliasOnDeath");
@@ -807,6 +872,21 @@ namespace FrankyCLI
                         $"SetObjectiveCompleted({DeliverObjective})",
                     };
                 }
+                else if (shipRec)
+                {
+                    // THE PART GOES INTO THE SHIP'S HOLD on the accept, his line (ccs_activatedestroyguarded): AddItem(item, 1,
+                    // False). The trace prints what the hold HOLDS after, read back, never the verb.
+                    extraProps.Add(("Form", "Item1", shipItem, -1));
+                    extraProps.Add(("ReferenceAlias", "Alias_Beat1Target", clone.FormKey, (int)target.ID));
+                    code[t.entryStage].AddRange(new[]
+                    {
+                        "ObjectReference hold = Alias_Beat1Target.GetRef()",
+                        "hold.AddItem(Item1, 1, False)",
+                        "Debug.Trace(\"[recover] \" + Self + \" stage " + t.entryStage + ": ship \" + hold + \" holds \" + hold.GetItemCount(Item1) + \" of the part\")",
+                    });
+                    code[PickupStage] = new() { $"SetObjectiveCompleted({slot.objective})", $"SetObjectiveDisplayed({DeliverObjective})" };
+                    code[t.completeStage] = new() { $"SetObjectiveCompleted({DeliverObjective})" };
+                }
                 else if (rescue && RideBeat.Rescue(myMod, clone, t, r, env, markers, bm, vma, ob, slot.objective, DeliverObjective, PickupStage, (int)target.ID, code, extraProps) != 0) return 1;
                 if (two || rescue)
                 {
@@ -901,14 +981,14 @@ namespace FrankyCLI
                     // 2026-10-26 09:38: the SetStage stack "is waiting on stack <the fragment> to finish"). So ShutdownOnCompletion
                     // stays as shipped and the fragment shuts nothing down itself.
                     // A two-beat board's pickup line plays as the item comes aboard; nothing waits on it.
-                    if ((two || rescue) && beat.say != null)
+                    if (staged && beat.say != null)
                     {
                         var scene = MakeRadioLine(myMod, clone, r, n, PickupStage, beat.say, bm);
                         sayProps.Add(($"Say{n + 1}", scene.FormKey));
                         code[PickupStage].Add($"Say{n + 1}.Start()");
                         n++;
                     }
-                    var closer = two || rescue ? r.beats[^1] : beat;
+                    var closer = staged ? r.beats[^1] : beat;
                     if (closer.say != null)
                     {
                         var scene = MakeRadioLine(myMod, clone, r, n, t.completeStage, closer.say, bm);
@@ -949,7 +1029,7 @@ namespace FrankyCLI
                 ScriptObjectProperty? Prop(string pn) => qsR.Properties.OfType<ScriptObjectProperty>().FirstOrDefault(p => p.Name == pn);
                 foreach (var pn in new[] { "RewardAmountGlobal", "RewardAmountGlobalActual" })
                     if (Prop(pn) == null) { Console.WriteLine($"REFUSED: {t.questScript} carries no {pn} to pay through."); return 1; }
-                if ((two || rescue ? r.beats[^1] : beat).reward is string tier)
+                if ((staged ? r.beats[^1] : beat).reward is string tier)
                 {
                     var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{tier}");
                     if (cg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{tier}."); return 1; }
@@ -975,6 +1055,8 @@ namespace FrankyCLI
             psc.AppendLine($"{{GENERATED by FrankyCLI gen_delve from data/delves/recipes/{r.id}.json (template {t.id}). Do not edit: change");
             psc.AppendLine(two
                 ? "the recipe and rebuild. A two-beat board space Delve: the system objective on the accept, the pickup's on arrival, the deliver's once the item is aboard, and the deliver pays.}"
+                : shipRec
+                ? "the recipe and rebuild. A board space Delve, a ship then its hold: the part goes into the ship's hold on the accept, the system objective too; the ship's objective on arrival; its death shows the recover's; the part leaving the hold pays.}"
                 : IsBoardSpace(t)
                 ? "the recipe and rebuild. A board space Delve: the system objective on the accept, the beat's on arrival, and the object's use pays.}"
                 : "the recipe and rebuild. A space Delve's two stages: the objective on start, and the object's use completes it.}");
@@ -1342,7 +1424,7 @@ namespace FrankyCLI
             var act = m.Activators.FirstOrDefault(a => a.EditorID == r.id + "_b1");
             // A defeat's object is the SHIP (OT-37), and so is a hail's (OT-9G), each graded in its own branch below; every
             // other kind creates our _b1 here.
-            if (SpaceDefeat(r, t) || SpaceHail(r, t))
+            if (SpaceDefeat(r, t) || SpaceHail(r, t) || ShipRecoverBoard(r, t))
                 fail += Check($"alias {slot.activatorAlias} creates the ship at marker alias {slot.markerAlias}",
                               target?.CreateReferenceToObject == null ? "creates nothing" : $"at {target.CreateReferenceToObject.AliasID}",
                               $"at {slot.markerAlias}");
@@ -1434,6 +1516,39 @@ namespace FrankyCLI
                     var closerReply = q.DialogTopics.FirstOrDefault(d => d.EditorID == $"{r.id}_talk1_reply1")?.Responses.FirstOrDefault();
                     fail += Check($"the first reply completes the job (sets {t.completeStage} on END)",
                                   closerReply?.SetParentQuestStage == null ? "none" : $"OnEnd {closerReply.SetParentQuestStage.OnEnd}", $"OnEnd {t.completeStage}");
+                    fail += Check($"no {r.id}_b1 activator is left in the plugin", (objAct != null).ToString(), "False");
+                }
+                else if (ShipRecoverBoard(r, t))
+                {
+                    // A SHIP THEN ITS HOLD (OT-37's recover), read back: the ship as the defeat's; its death ends beat 1 (40); the
+                    // stock item-removed hook on the SHIP, filtered to OUR part, ends the job; 30 points at the ship; the accept
+                    // puts the part in the hold.
+                    var pr = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)slot.activatorAlias);
+                    var made = pr?.CreateReferenceToObject?.Object.FormKey;
+                    fail += Check($"PrimaryRef creates the ship the build resolved from '{r.beats[0].target}'", made?.ToString() ?? "nothing", bm.SpaceShip?.ToString() ?? "unresolved");
+                    fail += Check("that ship is a master's record, not one of ours",
+                                  made is FormKey shipKey ? (shipKey.ModKey == m.ModKey ? $"ours ({shipKey})" : "a master's") : "nothing", "a master's");
+                    fail += Check("PrimaryRef starts disabled (the accept enables it)", (pr?.Flags?.HasFlag(QuestReferenceAlias.Flag.InitiallyDisabled) ?? false).ToString(), "True");
+                    var hooks = vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts;
+                    int P(string script, string n) => hooks?.FirstOrDefault(s => s.Name == script)?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == n)?.Data ?? -1;
+                    fail += Check($"the ship's death ends beat 1 (the shell's DefaultAliasOnDeath sets {PickupStage})", P("DefaultAliasOnDeath", "StageToSet").ToString(), PickupStage.ToString());
+                    var item = m.MiscItems.FirstOrDefault(x => x.EditorID == r.id + "_item1");
+                    var filter = hooks?.FirstOrDefault(s => s.Name == "DefaultAliasOnItemRemoved")?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == "ItemFilter")?.Object.FormKey;
+                    fail += Check($"DefaultAliasOnItemRemoved on the ship sets {t.completeStage} after {PickupStage}",
+                                  $"{P("DefaultAliasOnItemRemoved", "StageToSet")} after {P("DefaultAliasOnItemRemoved", "PrereqStage")}", $"{t.completeStage} after {PickupStage}");
+                    fail += Check($"its ItemFilter is our part, {r.id}_item1 \"{r.beats[1].item}\"",
+                                  filter?.ToString() ?? "no filter", item == null ? "no item" : $"{item.FormKey}");
+                    fail += Check("the part is the recipe's, weightless", item == null ? "no item" : $"{item.Name?.String} {item.Weight}", $"{r.beats[1].item} 0");
+                    var ob30 = q.Objectives.FirstOrDefault(o => o.Index == DeliverObjective);
+                    fail += Check($"objective {DeliverObjective} is the recover's and points at the ship (alias {slot.activatorAlias})",
+                                  ob30 == null ? "missing" : $"{ob30.DisplayText?.String} -> {string.Join(",", ob30.Targets.Select(x => x.AliasID))}",
+                                  $"{Expand(r.beats[1].objective!, t)} -> {slot.activatorAlias}");
+                    string frag = File.ReadAllText(bm.PscPath);
+                    int f10 = frag.IndexOf($"Function {FragmentFunction(t.entryStage)}()");
+                    int fEnd = f10 < 0 ? -1 : frag.IndexOf("EndFunction", f10);
+                    fail += Check("the accept puts the part in the ship's hold",
+                                  (f10 >= 0 && frag.IndexOf("hold.AddItem(Item1, 1, False)", f10) is int a && a > f10 && a < fEnd).ToString(), "True");
+                    fail += Check($"PrimaryRef carries no {UseScript} (a ship is not pressed)", (hooks?.Any(s => s.Name == UseScript) ?? false).ToString(), "False");
                     fail += Check($"no {r.id}_b1 activator is left in the plugin", (objAct != null).ToString(), "False");
                 }
                 else if (SpaceDefeat(r, t))

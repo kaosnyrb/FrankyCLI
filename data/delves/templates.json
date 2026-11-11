@@ -220,8 +220,10 @@
         "ride",
         "talk",
         "destroy",
-        "defeat"
+        "defeat",
+        "recover"
       ],
+      "_recover": "Only as beat 2 after a ship's defeat (OT-37, 2026-11-11, his \"ships have an invetory that you can loot on destruction\"): the part goes into the ship's hold on the accept, the death sets 40, stock DefaultAliasOnItemRemoved on the ship sets 100 however he loots it.",
       "_destroy": "A ONE-beat destroy (plan OT-9I, 2026-11-10): shot from the ship, his classic MB14a's shape on stock parts. The clone takes duo_MB14a_act's Destructible, the accept blocks its prompt, DefaultAliasOnDestroyed sets 100, whose first line disables it.",
       "carriesItem": false,
       "placeAlias": 2,

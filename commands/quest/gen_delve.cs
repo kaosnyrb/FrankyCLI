@@ -1955,7 +1955,9 @@ namespace FrankyCLI
                 .ToDictionary(g => g.Key, g => g.First().FormKey, StringComparer.OrdinalIgnoreCase);
 
             var wanted = new List<string>();
-            foreach (var b in r.beats) if (Placed(b) && !wanted.Contains(b.at, StringComparer.OrdinalIgnoreCase)) wanted.Add(b.at);
+            // A recover from a ship's hold (OT-37) has no marker of its own: its objective points at the ship.
+            foreach (var b in r.beats)
+                if (Placed(b) && !(ShipRecoverBoard(r, t) && b.type == "recover") && !wanted.Contains(b.at, StringComparer.OrdinalIgnoreCase)) wanted.Add(b.at);
             // A support team's landing marker is demanded of its place like a beat's own.
             foreach (var b in r.beats)
                 if (b.support?.land is string ld && !wanted.Contains(ld, StringComparer.OrdinalIgnoreCase)) wanted.Add(ld);

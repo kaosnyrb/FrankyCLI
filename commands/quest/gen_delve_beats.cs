@@ -603,7 +603,8 @@ namespace FrankyCLI
             // A craft wears the same hook on the player as a recover, so the five-copy limit counts both.
             int recoverCount = r.beats.Count(b => b.type is "recover" or "craft");
             if (recoverCount > 5) Fatal($"{recoverCount} recover beats; the player's OnItemAdded hook has the base and four duplicates, so five.");
-            if (recoverCount > 0 && t.playerAlias < 0) Fatal($"template '{t.id}' names no playerAlias for a recover beat's hook.");
+            // A recover from a ship's hold (OT-37) hooks the SHIP, not the player (delve_space.cs ShipRecoverBoard).
+            if (recoverCount > 0 && t.playerAlias < 0 && !ShipRecoverBoard(r, t)) Fatal($"template '{t.id}' names no playerAlias for a recover beat's hook.");
 
             // Delivering needs something in hand: the first deliver must come after a pickup or a recover.
             int carried = 0;
