@@ -12,7 +12,8 @@
     "what it took. THE HOOK: the radio is a hauler who has paid them twice, and his own container is in their hold.",
     "NEEDS 28a's UNBUILT PIECES: a hostile SHIP as a defeat target, and recover on a board. Eliza's to price, once for both.",
     "Every space Delve before these was a satellite (5 of 7); these are about CARGO, his ask. Markers: General01/06/02 and TravelB02 are 51a's and 30a's; which a cell offers is Eliza's. No names, places, factions or currency in a voiced line. Pay: med, capped, placeholder.",
-    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Destroy the toll ship over <Planet> and recover the cargo it took. Payment on contract completion.\""
+    "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Destroy the toll ship over <Planet> and recover the cargo it took. Payment on contract completion.\"",
+    "OT-37 2026-11-11 (Eliza's letter, a-wreck-and-a-gas-leak): the ship is named; the loot comes off the wreck into the player's SHIP's hold, so the words say 'aboard what's left of them', never 'floating'."
   ],
   "place": {
     "altitude": 32.0,
@@ -27,12 +28,12 @@
     {
       "type": "defeat",
       "at": "se_GeneralMarkerLocRef01",
-      "target": "SHIP, UNBUILT",
-      "_target": "A hostile ship, as 28a's. Not an Npc.",
+      "target": "LvlShip_Spacer_Combat",
+      "_target": "Jessica 2026-11-10: Spacers, the toll crew (OT-37 built and played 11-11).",
       "objective": "Destroy the toll ship",
-      "journal": "The toll ship over <Planet> is gone. I need to find the haulers' cargo in what's left of it.",
+      "journal": "The toll ship over <Planet> is gone. I need to search the wreck for the haulers' cargo.",
       "say": [
-        "That's them finished. Their hold will have come apart with the rest of them, so look through what's floating."
+        "That's them finished. Whatever they took will still be aboard what's left of them."
       ]
     },
     {
@@ -43,8 +44,7 @@
       "say": [
         "I can see my own container on your manifest from here. I'll put the word out that they're gone."
       ],
-      "reward": "med",
-      "at": "se_GeneralMarkerLocRef01"
+      "reward": "med"
     }
   ],
   "speaker": {

@@ -12,7 +12,8 @@
     "His 21:51: \"we can place hazard zones\". STAND-IN: place.hazard (kind, radius at the seam). Eliza's to name.",
     "Pay: med.",
     "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover a sample from the toxic seam at the <Place> on <Planet>. Suit up. Payment on contract completion.\"",
-    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him.",
+    "OT-39 2026-11-11: the hazard is per beat, the 5 m toxic gas leak, with the look he liked ('looks smelly'); place.hazard dropped. The close lost its 'X? Good.' tic."
   ],
   "place": {
     "theme": {
@@ -25,12 +26,6 @@
       ]
     },
     "_theme": "A wild site.",
-    "hazard": {
-      "kind": "TOXIC, UNPICKED",
-      "at": "RECenterLocRef",
-      "radius": 8
-    },
-    "_hazard": "STAND-IN: a toxic hazard zone round the seam, there from arrival. His: we can place them. Eliza's field.",
     "parsecs": 12
   },
   "prose": {
@@ -52,9 +47,14 @@
       },
       "journal": "I took a sample from the toxic seam at the <Place>. My suit is still complaining about it.",
       "say": [
-        "Out in one piece? Good. That sample's worth more than you'd think."
+        "You're out in one piece, then. That sample's worth more than you'd think."
       ],
-      "reward": "med"
+      "reward": "med",
+      "hazard": "ENV_GenericHazard_ToxicGas_Leak",
+      "visuals": [
+        "FXGasseousMist_01_10x10",
+        "FXGasJet_GreenToxicGas_01"
+      ]
     }
   ],
   "speaker": {

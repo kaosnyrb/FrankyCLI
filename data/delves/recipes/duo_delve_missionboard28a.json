@@ -19,12 +19,10 @@
     "The broadcast plays at the ship, his 1500 m. Closing line on the radio. Pay: med, capped.",
     "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Recover the stolen satellite part over <Planet> and fit it. Payment on contract completion.\"",
     "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"That's our part.\" became \"That's our part back. Fit it, and we'll be talking again.\". A revoice.",
-    "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"We're back on.\" became \"We're back on, and every channel's clear. They'll not try that again in a hurry.\". A revoice."
+    "LENGTHENED 2026-11-11 on his 'add the check and lengthen' (his ear on MB87a: a terse line gives the voice nothing to work off): \"We're back on.\" became \"We're back on, and every channel's clear. They'll not try that again in a hurry.\". A revoice.",
+    "OT-37 2026-11-11: ship named, place.orbit removed (Eliza). The part lands in the ship's hold, and the deliver takes it from there."
   ],
-  "place": {
-    "orbit": "board",
-    "_orbit": "As 26a: the orbit is the board's target, field name Eliza's."
-  },
+  "place": {},
   "prose": {
     "name": "Recovery: Stolen Part over <Planet>",
     "briefing": "A ship hit the supply run to the communications satellite over <Planet> and kept the replacement part. It hasn't left orbit.",
@@ -34,8 +32,8 @@
     {
       "type": "defeat",
       "at": "se_GeneralMarkerLocRef01",
-      "target": "SHIP, UNBUILT",
-      "_target": "A hostile ship, levelled, whatever the space shell's own target ship is or Eliza's pick. Not an Npc.",
+      "target": "LvlShip_CrimsonFleet_Combat",
+      "_target": "Jessica 2026-11-11: pirates hit the supply run (OT-37's played probe ship).",
       "objective": "Destroy the ship that took the part",
       "journal": "The ship that hit the supply run is gone. I need to find the part in what's left of it."
     },
