@@ -1,0 +1,45 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_hz1",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-11 13:10 \"yeah go\" on OT-39's probe, after his 13:05 \"ENV_CloudHazard_Spores_Toxic [HAZD:00153204]\" and 13:08 \"I believe that hazards can have visuals, not sure if that one does\"",
+  "_note": [
+    "HAZARD PROBE HZ1 (plan OT-39): one use at the site's centre with a toxic gas leak placed at the same marker when he comes within 250 m. Silent, placeholder words. Not a mission.",
+    "ENV_GenericHazard_ToxicGas_Leak: Radius 5, Lifetime 0 (stays until our completing stage deletes it). Picked over the spore cloud (2.5) for size.",
+    "Reading it, his eye: is the zone VISIBLE (a cloud, a tint, anything), and does standing in it HURT (health, a status icon)? Then use the canister: the mission pays and the zone should go.",
+    "Papyrus.0.log: '[hazard] ... beat 1's zone [ObjectReference ...] at ...' when placed. 'None' there means PlaceAtMe refused it.",
+    "A non-hostile site so the only thing hurting him is the gas."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "ch2's: a board request, non-hostile, never a cave."
+  },
+  "prose": {
+    "name": "Hauling: Gas Leak Probe on <Planet>",
+    "briefing": "Test mission. A canister at the <Place> on <Planet> is leaking toxic gas. Shut it off.",
+    "card": "Test contract. Shut off a leaking canister at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "name": "Leaking Canister",
+      "hazard": "ENV_GenericHazard_ToxicGas_Leak",
+      "objective": "Shut off the leaking canister at the <Place>",
+      "journal": "Test journal: I shut off the leaking canister at the <Place>.",
+      "reward": "easy"
+    }
+  ]
+}

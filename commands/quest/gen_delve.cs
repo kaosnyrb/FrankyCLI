@@ -735,6 +735,14 @@ namespace FrankyCLI
         private sealed class Beat
         {
             public string at { get; set; } = "";
+            /// <summary>
+            /// A HAZARD ZONE at this beat's own marker (plan OT-39, a PROBE; his 2026-11-11 "ENV_CloudHazard_Spores_Toxic
+            /// [HAZD:00153204]"): a Hazard EditorID, placed when he comes near the marker (the fight's duo_delve_near, its
+            /// spawned stage) by vanilla's own call, marker.PlaceAtMe(hazard) (PlaceHazardOnDestroyed, BEScript), into an
+            /// empty Optional alias, and deleted by the completing stage. Its size and lifetime are the RECORD's (Radius,
+            /// Lifetime), not the placement's. On a use, pickup or deliver on the ground only, so far.
+            /// </summary>
+            public string? hazard { get; set; }
             public string? objective { get; set; }
             public string? journal { get; set; }
             /// <summary>"main" (default), "second" or "third": which drawn POI this beat happens at.</summary>

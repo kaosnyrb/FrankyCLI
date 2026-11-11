@@ -302,6 +302,15 @@ namespace FrankyCLI
                     if (b.model != null || b.name != null || b.replace)
                         Fatal($"beat {i + 1} is a return; the object is beat {back}'s, so model, name and replace would be ignored.");
                 }
+                // A HAZARD ZONE (OT-39, a probe): at the beat's own marker, on the beats that place an object there and no
+                // spawned stage of their own (a fight's 900 is its enemies'); never on a choose ending, whose stages the
+                // cleanup does not walk yet.
+                if (b.hazard != null && b.type is not ("use" or "pickup" or "deliver"))
+                    Fatal($"beat {i + 1} sets hazard and is a {b.type}; only a use, pickup or deliver places one at its marker (so far), so it would be silently ignored.");
+                else if (b.hazard != null && OwnOrMaster<IHazardGetter>(Allowed(env, t), env, b.hazard) == null)
+                    Fatal($"beat {i + 1} hazard '{b.hazard}' is not a Hazard in {t.mod} or one of its masters.");
+                if (b.hazard != null && b.choose != null)
+                    Fatal($"beat {i + 1} sets hazard and is a choose ending; the cleanup deletes zones on the completing stage only, so it would outlive the job.");
                 if (b.explosion != null && b.type != "use" && b.type != "destroy")
                     Fatal($"beat {i + 1} sets explosion and is a {b.type}; only a use or a destroy beat takes it, so it would be silently ignored.");
                 else if (b.explosion != null && OwnOrMaster<IExplosionGetter>(Allowed(env, t), env, b.explosion) == null)
@@ -851,6 +860,10 @@ namespace FrankyCLI
             public List<int> Holders = new();   // recover beats' empty Optional aliases
             public List<int> SpawnNear = new();   // the holders among them placed outside, carrying SpawnNearScript
             public List<(int on, int to)> SpawnHooks = new();
+            /// <summary>Each hazard zone (OT-39): its beat, its empty alias, the marker it is placed at, its placing stage.</summary>
+            public List<(int beat, int alias, int marker, int stage)> HazardAliases = new();
+            public Dictionary<int, FormKey> HazardForms = new();   // by beat, what the build resolved
+            public int HazardDone = -1;                            // the stage that deletes them (the last step's done)
             public (int place, int cell, int main, FormKey scope)? Orbit;   // an orbit third place: its alias, its space cell's member, the main place it is tested against
             public List<(int alias, FormKey refType)> OrbitMarkers = new();
             public List<(int beat, int alias, int obj)> Scenery = new();   // space only: each beat's scenery alias and the object alias it copies
@@ -1192,6 +1205,8 @@ namespace FrankyCLI
             internal readonly Dictionary<int, int> supportOf = new();
             /// <summary>Each clear's spawned stage, by beat index (SpawnedStageBase): set when its enemies exist.</summary>
             internal readonly Dictionary<int, int> spawnedStage = new();
+            /// <summary>Each hazard beat's alias, by beat index: empty, filled by the PlaceAtMe that makes the zone (OT-39).</summary>
+            internal readonly Dictionary<int, int> hazardOf = new();
 
             /// <summary>
             /// A support team's landing marker carries LandingScript. Like SpawnNear, not a stage hook: no properties, its own
@@ -1488,6 +1503,22 @@ namespace FrankyCLI
                     bm.Linger = LingerStage;
                     bm.LingerFrom = steps[^1].DoneStage;
                     if (clone.Stages!.Any(x => x.Index == LingerStage)) { Console.WriteLine($"REFUSED: stage {LingerStage} already exists on this base; the talk's shutdown stage collides."); return 1; }
+                }
+                // A HAZARD ZONE (OT-39): its beat's spawned stage (the lint keeps it off the fights, whose 900 is their
+                // enemies'), and an EMPTY Optional alias it is placed into, so the completing stage can delete it (the
+                // recover holder's shape: a non-optional alias with no fill would stop the quest starting).
+                foreach (var (hb, _) in inputs.Hazards)
+                {
+                    if (spawnedStage.ContainsKey(hb)) { Console.WriteLine($"REFUSED: beat {hb + 1} already has a spawned stage; its hazard has none of its own."); return 1; }
+                    spawnedStage[hb] = SpawnedStageBase + hb;
+                    var ha = markerPattern.DeepCopy();
+                    ha.ID = NextAliasId(clone);
+                    ha.Name = $"DelveBeat{hb + 1}Hazard";
+                    ha.Location = null;
+                    ha.Flags = QuestReferenceAlias.Flag.Optional;
+                    clone.Aliases!.Add(ha);
+                    hazardOf[hb] = (int)ha.ID;
+                    Console.WriteLine($"  +slot    : beat {hb + 1} hazard -- alias {ha.ID} (EMPTY, Optional; filled by its PlaceAtMe), placed on stage {spawnedStage[hb]}");
                 }
                 foreach (var ss in spawnedStage.Values)
                     if (clone.Stages!.Any(x => x.Index == ss)) { Console.WriteLine($"REFUSED: stage {ss} already exists on this base; a fight's spawned stage collides."); return 1; }
@@ -2269,6 +2300,32 @@ namespace FrankyCLI
                     for (int rank = 0; rank <= 2; rank++)
                         foreach (var b in steps[k].Beats.Where(b => KindOf(r.beats[b])?.EnterRank == rank))
                             KindOf(r.beats[b])!.Enter(this, b, stage);
+                    // A HAZARD ZONE (OT-39, a probe): armed with the step, as a fight is, placed at the beat's marker when he
+                    // comes within ApproachDistance (a remote site's ground does not exist before), by vanilla's own call into
+                    // its empty alias; the trace prints what the alias HOLDS, read back. The last step's done stage deletes it:
+                    // a Lifetime-0 hazard would otherwise outlive the job at the POI.
+                    foreach (var b in steps[k].Beats.Where(hazardOf.ContainsKey))
+                    {
+                        if (steps[^1].IsChoose) throw new InvalidOperationException("a hazard on a Delve ending in a choose; the lint refuses it");
+                        int marker = slotOf[b].markerAlias, spawned = spawnedStage[b];
+                        var near = DistanceHook(clone.FormKey, t.playerAlias, spawned, stage);
+                        near.Name = NearScript;
+                        AttachHook(vma, clone.FormKey, marker, near, HookEntry.FindOrCreate, false, bm, spawned, stage);
+                        bm.SpawnHooks.Add((marker, t.playerAlias));
+                        string mk = $"Alias_Beat{b + 1}Marker", hz = $"Alias_Beat{b + 1}Hazard";
+                        props.Add(("ReferenceAlias", mk, clone.FormKey, marker));
+                        props.Add(("ReferenceAlias", hz, clone.FormKey, hazardOf[b]));
+                        props.Add(("Form", $"Hazard{b + 1}", inputs.Hazards[b], -1));
+                        Add(spawned, $"{mk}.GetRef().PlaceAtMe(Hazard{b + 1}, 1, False, False, True, None, {hz})");
+                        Add(spawned, $"Debug.Trace(\"[hazard] \" + Self + \" stage {spawned}: beat {b + 1}'s zone \" + {hz}.GetRef() + \" at \" + {mk}.GetRef())");
+                        Add(steps[^1].DoneStage, $"If {hz}.GetRef()");
+                        Add(steps[^1].DoneStage, $"    {hz}.GetRef().Delete()");
+                        Add(steps[^1].DoneStage, "EndIf");
+                        bm.HazardAliases.Add((b, hazardOf[b], marker, spawned));
+                        bm.HazardForms[b] = inputs.Hazards[b];
+                        bm.HazardDone = steps[^1].DoneStage;
+                        Console.WriteLine($"  +hazard  : beat {b + 1} {r.beats[b].hazard} {inputs.Hazards[b]} at marker alias {marker} on stage {spawned} ({NearScript} after {stage}, within {ApproachDistance}); deleted on {steps[^1].DoneStage}");
+                    }
                     // A bring (OT-31): the first count is what he already carries, set BEFORE the objective shows, after the
                     // entry stage's counter reset (the counters' lines are added ahead of every Enter).
                     if (IsBringStep(k))
@@ -3193,6 +3250,30 @@ namespace FrankyCLI
             foreach (var a in bm.SpawnNear)
                 fail += Check($"outside holder alias {a} carries {SpawnNearScript} (spawned when the spot's ground loads)",
                               (vma.Aliases.FirstOrDefault(x => x.Property.Alias == a)?.Scripts.Any(s => s.Name == SpawnNearScript) ?? false).ToString(), "True");
+            // A HAZARD ZONE (OT-39), off disk: its alias empty and Optional; the near hook on its marker setting its stage;
+            // that stage placing the Hazard into the alias; the last step's done stage deleting it; the Hazard property the
+            // one the build resolved.
+            foreach (var (hb, ha, hm, hs) in bm.HazardAliases)
+            {
+                var al = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(x => x.ID == (uint)ha);
+                fail += Check($"beat {hb + 1}'s hazard alias {ha} is empty and Optional",
+                              al == null ? "missing" : $"fill {(al.Location == null && al.ForcedReference.IsNull && al.CreateReferenceToObject == null ? "none" : "SET")}, optional {al.Flags?.HasFlag(QuestReferenceAlias.Flag.Optional) ?? false}",
+                              "fill none, optional True");
+                var nh = vma.Aliases.FirstOrDefault(x => x.Property.Alias == hm)?.Scripts.FirstOrDefault(s => s.Name == NearScript);
+                fail += Check($"beat {hb + 1}'s marker alias {hm} carries {NearScript} setting {hs}",
+                              nh?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == "StageToSet")?.Data.ToString() ?? "no hook", hs.ToString());
+                string hsrc = File.ReadAllText(bm.PscPath);
+                int fs = hsrc.IndexOf($"Function {FragmentFunction(hs)}()"), fe = fs < 0 ? -1 : hsrc.IndexOf("EndFunction", fs);
+                fail += Check($"stage {hs} places Hazard{hb + 1} at the marker into alias {ha}",
+                              (fs >= 0 && hsrc.IndexOf($"Alias_Beat{hb + 1}Marker.GetRef().PlaceAtMe(Hazard{hb + 1}, 1, False, False, True, None, Alias_Beat{hb + 1}Hazard)", fs) is int pi && pi > fs && pi < fe).ToString(), "True");
+                int done = bm.HazardDone;
+                int ds = hsrc.IndexOf($"Function {FragmentFunction(done)}()"), de = ds < 0 ? -1 : hsrc.IndexOf("EndFunction", ds);
+                fail += Check($"stage {done} (the last step done) deletes the zone",
+                              (ds >= 0 && hsrc.IndexOf($"Alias_Beat{hb + 1}Hazard.GetRef().Delete()", ds) is int di && di > ds && di < de).ToString(), "True");
+                var hp = vma.Script?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == $"Hazard{hb + 1}");
+                fail += Check($"the fragment's Hazard{hb + 1} is the Hazard the build resolved from '{r.beats[hb].hazard}'",
+                              hp?.Object.FormKey.ToString() ?? "no property", bm.HazardForms.TryGetValue(hb, out var hf) ? hf.ToString() : "unresolved");
+            }
             // A bring (OT-31): the object's check-and-take, the player's counter, the short box, and the first count, each off disk.
             foreach (var br in bm.Brings)
             {

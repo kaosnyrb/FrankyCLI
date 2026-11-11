@@ -48,6 +48,8 @@ namespace FrankyCLI
             public readonly Dictionary<int, (FormKey bench, List<(FormKey part, int count)> parts)> Crafts = new();
             /// <summary>By beat index, for a use with explosion: the Explosion placed at its object.</summary>
             public readonly Dictionary<int, FormKey> Explosions = new();
+            /// <summary>By beat index, for a beat with hazard: the Hazard placed at its marker when he comes near (OT-39).</summary>
+            public readonly Dictionary<int, FormKey> Hazards = new();
             /// <summary>The faction table's two parallel lists (gen_delve factions), when a beat reads the site's faction or
             /// place.faction swaps it (plan OT-01).</summary>
             public FormKey? EncKeywords, EncGangs;
@@ -259,6 +261,14 @@ namespace FrankyCLI
                 var xp = OwnOrMaster<IExplosionGetter>(myMod, env, xn);
                 if (xp == null) { Console.WriteLine($"REFUSED: beat {i + 1} explosion '{xn}' is not an Explosion in {t.mod} or one of its masters."); fail++; continue; }
                 inputs.Explosions[i] = xp.FormKey;
+            }
+            // A beat's hazard zone (OT-39, a probe), the same way.
+            for (int i = 0; i < r.beats.Count && fail == 0; i++)
+            {
+                if (r.beats[i].hazard is not string hn) continue;
+                var hz = OwnOrMaster<IHazardGetter>(myMod, env, hn);
+                if (hz == null) { Console.WriteLine($"REFUSED: beat {i + 1} hazard '{hn}' is not a Hazard in {t.mod} or one of its masters."); fail++; continue; }
+                inputs.Hazards[i] = hz.FormKey;
             }
             // The site's faction (plan OT-01): a hold or a recover spawns from the site's own faction, read off its one
             // LocEnc keyword through the table gen_delve factions wrote; place.faction swaps that keyword at the accept.
