@@ -15,7 +15,8 @@
     "FIXED 2026-11-10: Noor's closing radio line ('Keep a share, you've earned it') came off the talk, which cannot carry a say. Her last word in the chain is now the ask in MB50a.",
     "FRANCES 2026-11-10 (reviews/2026-11-10-delve-MB106a.md): rework, findings 1-8 taken, 9 is chain-only (no card owed), 10 kept. Forced pick answered NO: the regulator does not leave whole. He takes it apart and writes it down, so 'Nobody can make them' (MB50a) is answered by someone who means to make it untrue. The scarcity is in the always-heard greeting now; the age is said once, on Noor's radio.",
     "REBUILT 2026-11-11 on his 2026-11-11 play of MB50a -> MB106a: (1) \"The regulator was at the scrap dealer before me, that doesn't make any sense. She should give me the old scrap regulator.\" (2) \"I wasn't given the option to take the mission, she should offer it and I should accept.\" (3) \"The Commerce option didn't end the quest, which makes it feel like it did nothing\". Built by Eliza the same morning on his \"yeah build, tell Jessica the changes too and we'll rewrite\". The pickup at the hauler's drop is gone: the player arrives CARRYING the regulator (carry), so it is one talk. Commerce ends the job (ends, hard). Every new line is a placeholder for Jessica.",
-    "2026-11-11, his play after the carry rebuild: \"the radio call on the approach to the buyer isn't really needed anymore\". The broadcast (\"It's the heavy one. Mind your back, and don't let them have it cheap.\") and the speaker it was the only line of are out; he already has the regulator in hand."
+    "2026-11-11, his play after the carry rebuild: \"the radio call on the approach to the buyer isn't really needed anymore\". The broadcast (\"It's the heavy one. Mind your back, and don't let them have it cheap.\") and the speaker it was the only line of are out; he already has the regulator in hand.",
+    "2026-11-11: briefing and the Commerce ending rewritten from Eliza's PLACEHOLDERS. The Commerce reply now ends the job, so it closes on the crew being paid, not only on 'a little more'."
   ],
   "place": {
     "theme": {
@@ -31,8 +32,7 @@
   },
   "prose": {
     "name": "Hauling: The Old Regulator on <Planet>",
-    "briefing": "The crew lead at the water reclaimer gave you their old pressure regulator. A scrapper at the <Place> wants it.",
-    "_briefing": "PLACEHOLDER (Eliza 2026-11-11), Jessica's to rewrite. Was: The crew lead from the water reclaimer sent their old pressure regulator on with a hauler. It's waiting at the drop at the <Place>, where a scrapper wants it."
+    "briefing": "The crew lead at the water reclaimer gave me their old pressure regulator. A scrapper at the <Place> will pay for it, and she wants a fair price."
   },
   "beats": [
     {
@@ -69,14 +69,14 @@
         {
           "prompt": "Whatever you're about to offer, it's worth more.",
           "reply": [
-            "It is. Fine. A little more."
+            "It is. Fine, a little more, and I'll pay the crew direct."
           ],
           "perk": "Skill_Commerce",
           "ends": {
-            "journal": "I talked the scrapper at the <Place> up on the water reclaimer crew's old regulator. He's paying them direct, and more than he meant to.",
+            "journal": "I sold the water reclaimer crew's old regulator to the scrapper at the <Place> and talked him up. He's paying them direct.",
             "reward": "hard"
           },
-          "_ends": "PLACEHOLDER journal (Eliza 2026-11-11), Jessica's to rewrite: the Commerce line now ENDS the job on its own, paying hard where the plain sale pays med (his note 3)."
+          "_ends": "REWRITTEN by Jessica 2026-11-11 (was Eliza's placeholder). The Commerce line ENDS the job on its own, paying hard where the plain sale pays med (his note: 'The Commerce option didn't end the quest')."
         },
         {
           "prompt": "Why's it worth anything?",
