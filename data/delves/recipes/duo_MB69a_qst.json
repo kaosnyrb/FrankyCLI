@@ -24,8 +24,8 @@
       ]
     },
     "_theme": "A quiet worked site with a worn-out dig.",
-    "planet": "Bolivar I",
-    "_planet": "Pinned: a planet that carries tungsten, so the ore the bits need is local. Resource lists off the Starfield wiki, 2026-11-10."
+    "planet": "Pluto",
+    "_planet": "Pinned: a planet that carries tungsten. MOVED Bolivar I -> Pluto 2026-11-12, the planet he picked for MB56a and ore1; Bolivar I never placed the crewed site. Whether it becomes the remote shape follows ore1's play."
   },
   "prose": {
     "name": "Fabrication: Drill Bits for the <Place> on <Planet>",
