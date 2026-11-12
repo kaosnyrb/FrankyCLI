@@ -633,9 +633,10 @@ namespace FrankyCLI
             /// OPTIONAL with planet: HOW the planet is given. Null = the condition above. "parent" = vanilla's other way, the
             /// one MQ_TempleQuest_01 and SQ_ShipDebris use (28 vanilla requests, gen_inspect 2026-11-12): a location alias
             /// filled with the planet's location, and the request's ParentSystemLocationAliasID pointing at it, flag 0x40000000,
-            /// no condition. His 2026-11-12 xEdit pointer (ALPN, "Current Alias Planet ID"). ⚠ A PROBE (OT-32): every vanilla
-            /// parent-linked request names its own PCM type, and ours has none. Exit: whichever way deals on his board becomes
-            /// the only way and this field goes.
+            /// no condition. His 2026-11-12 xEdit pointer (ALPN, "Current Alias Planet ID"). ⚠ A PROBE (OT-32): 21 of the 28 vanilla
+            /// parent-linked requests name a PCM type keyword and 7 name none; ours names none. Played 2026-11-12: rp3 (this, on
+            /// Akila) 0 of 3 refreshes listed, rp1 (the condition, on Akila) 1 of 1. Exit: whichever way deals on his board
+            /// becomes the only way and this field goes.
             /// </summary>
             public string? planetBy { get; set; }
             /// <summary>
