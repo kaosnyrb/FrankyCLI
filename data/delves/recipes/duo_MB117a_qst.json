@@ -1,0 +1,59 @@
+{
+  "schema": 2,
+  "id": "duo_MB117a_qst",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-11-12 'yeah start' and 'keep going' (one of every type by the 19th): the first real mission on hailing (OT-9G, played and voiced 11-11)",
+  "_note": [
+    "HAIL: a pilot whose navigation has died is circling over a planet, frightened. He hails the ship and talks him down.",
+    "THE PLAYER'S PART: the talk is the job. A frightened man needs one steady voice, and the closing line is the player telling him what to do.",
+    "One speaker: the pilot is both the call on approach and the ship he hails (a hailed ship speaks in the recipe speaker's voice). No give, ends or perk: the space build resolves none yet."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "His 32 band top."
+  },
+  "prose": {
+    "name": "Rescue: The Circling Pilot over <Planet>",
+    "briefing": "A pilot over <Planet> has lost his navigation and has been flying in circles for an hour. Someone needs to hail him and talk him down.",
+    "card": "A pilot over <Planet> lost his nav and won't stop circling. Hail him and talk him down before his fuel goes."
+  },
+  "speaker": {
+    "name": "Circling Pilot",
+    "voice": "GenericMale01",
+    "elevenlabs": "IKne3meq5aSn9XLyUdCD"
+  },
+  "broadcast": [
+    "Anyone on this channel? My nav's gone and I've been going round in circles for an hour. If you can hear me, please hail me."
+  ],
+  "_speech": "Charlie (ElevenLabs, unused in any Delve), young and frightened, relieved the moment someone answers. His ear decides.",
+  "beats": [
+    {
+      "type": "talk",
+      "at": "se_GeneralMarkerLocRef01",
+      "ship": "LvlShip_UCCitizen_Cargo",
+      "objective": "Hail the circling ship over <Planet>",
+      "greeting": [
+        "Oh, thank goodness, a real voice. My nav's dead, every reading says I'm somewhere I'm not, and I've stopped trusting my own eyes."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Cut the engines. Breathe. Then read me your fuel.",
+          "reply": [
+            "Cutting them. Breathing. Fuel's at a third, which is more than I thought. All right. I can do this now, I just needed someone else to say it."
+          ]
+        },
+        {
+          "prompt": "How long have you been out here?",
+          "reply": [
+            "An hour, maybe two. I stopped looking at the clock when the clock started disagreeing with me."
+          ]
+        }
+      ],
+      "journal": "A pilot over <Planet> had lost his navigation and was flying in circles. I hailed him and talked him down.",
+      "reward": "easy"
+    }
+  ]
+}

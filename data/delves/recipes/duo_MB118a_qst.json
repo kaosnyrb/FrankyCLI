@@ -1,0 +1,46 @@
+{
+  "schema": 2,
+  "id": "duo_MB118a_qst",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-11-12 'yeah start' and 'keep going' (one of every type by the 19th): the hazard family (old MB14) and the first real mission on space destroy (OT-9I and its guarded twin, played 11-10)",
+  "_note": [
+    "HAZARD: a loose asteroid is drifting into the shipping lane over a planet, and scavengers are sheltering behind it. Shoot it to pieces.",
+    "THE PLAYER'S PART: the guards first, then the rock. The guarded twin (sd2's), so it is a fight as well as target practice.",
+    "No faction named aloud: 'scavengers'."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "His 32 band top."
+  },
+  "prose": {
+    "name": "Danger: Loose Asteroid over <Planet>",
+    "briefing": "A loose asteroid is drifting into the shipping lane over <Planet>, and scavengers are using it as cover to jump the haulers. Traffic control wants it broken up.",
+    "card": "A loose asteroid is drifting into our lane over <Planet>, and scavengers are hiding behind it. Break it up."
+  },
+  "speaker": {
+    "name": "Traffic Control",
+    "voice": "GenericFemale01",
+    "elevenlabs": "GZ4PpFJV8ikEGUtBrjK7"
+  },
+  "broadcast": [
+    "That's the rock. Mind the ships tucked in behind it, they've been jumping haulers all week. Clear them off, then break it up before it drifts any further into the lane."
+  ],
+  "beats": [
+    {
+      "type": "destroy",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Break up the asteroid in the shipping lane",
+      "model": "Meshes\\Landscape\\Rocks\\asteroids\\RockAsteroidRoughLarge01.nif",
+      "name": "Loose Asteroid",
+      "guards": "LShip_Spacer_Combat_A",
+      "journal": "A loose asteroid was drifting into the shipping lane over <Planet>, with scavengers hiding behind it. I cleared them off and broke it up.",
+      "say": [
+        "That's the lane clear. The haulers will be glad, and so will I."
+      ],
+      "reward": "med"
+    }
+  ]
+}
