@@ -23,7 +23,8 @@
     "Message box on the pickup only, after the fight: a calm moment (his 2026-10-08 rule). Either or: no say there.",
     "Pay: a guarded pickup; suggest med.",
     "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Shipping Firm Contract. Recover our crate from the wreck at the <Place> and deliver it to the <SecondPlace>. Spacers present. Payment on delivery.\"",
-    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him.",
+    "OT-43 and OT-03, 2026-11-12 (his 'yeah' 11-11 18:04): the drop box became a person, the station keeper the crate was for, at OT-03's late same-system second place. A late place cannot be named in the card or briefing, so they say 'a station in this system'. MB42a is LIVE: a rebuild and a voice spend, his go."
   ],
   "place": {
     "theme": {
@@ -51,15 +52,18 @@
           "LocTypeOE_ThemeShipwreckKeyword",
           "LocTypeOE_ThemeCaveKeyword"
         ]
-      }
+      },
+      "fill": "late",
+      "system": "same",
+      "_fill": "OT-03's late same-system fill (his 'MB42a takes the late-fill shape'), and his small-delivery rule: not across the map."
     },
     "_theme": "A wreck here; the delivery site must never be a wreck itself (two places that could draw one POI warn). ELIZA 2026-10-15, measured: a request can put down 3 wreck sites of 214, so every crash site is one of three; the board places it, so it always starts.",
     "parsecs": 12
   },
   "prose": {
     "name": "Recovery: Crash Site Cargo on <Planet>",
-    "briefing": "A freighter came down at the <Place> with a consignment still aboard. Spacers got to the wreck first. The shipping firm wants its crate delivered to the <SecondPlace>.",
-    "card": "Our freighter came down at the <Place> with a crate aboard, and Spacers got to the wreck first. Get the crate to the <SecondPlace>.",
+    "briefing": "A freighter came down at the <Place> with a consignment still aboard, and spacers got to the wreck first. The crate is owed to a station elsewhere in this system.",
+    "card": "Our freighter came down at the <Place> and spacers got to the wreck first. Get the crate to the station it's owed to.",
     "_card": "Jessica's board.body verbatim, moved into the built field (ELIZA 2026-10-15). Style guide 33 s4: the issuer's we, payer on line one, flat, stock closer. Her board.title was prose.name already."
   },
   "beats": [
@@ -74,18 +78,51 @@
       "message": {
         "title": "Wreck Cargo Crate",
         "text": "The crate's seals are scorched, but they held."
-      }
+      },
+      "journal": "I got the freighter's crate out from under the spacers at the <Place>. I need to take it to the station it was meant for."
     },
     {
-      "type": "deliver",
-      "at": "RECenterLocRef",
+      "type": "talk",
       "place": "second",
-      "objective": "Deliver the crate to the <SecondPlace>",
-      "journal": "A freighter went down at the <Place> and spacers were picking over the wreck. I got the consignment out from under them and delivered it to the <SecondPlace>, where it was meant to go.",
-      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
-      "name": "Consignee Drop",
-      "reward": "med",
-      "_reward": "Jessica's suggestion (a guarded pickup); the tier is his."
+      "at": "RECenterLocRef",
+      "objective": "Deliver the crate to the station's keeper",
+      "person": {
+        "name": "Odette Vane",
+        "template": "UC_NA_MASTWorkerFemale01",
+        "outfit": "Outfit_Clothes_Mechanic_Gray",
+        "voice": "GenericFemale01",
+        "elevenlabs": "DbwWo4rVEd5NrejHYUnm",
+        "hellos": [
+          [
+            "Is that crate scorched? Please tell me it's not scorched inside."
+          ]
+        ],
+        "_bio": {
+          "age": "fifties (authored 2026-11-12)",
+          "from": "keeps a small station running alone (her lines)",
+          "why_there": "the station, on its backup for a month while the coupling was in transit (her lines)",
+          "wants": "the lights back on, and the freighter's crew remembered (her lines)"
+        }
+      },
+      "greeting": [
+        "You've brought my coupling. We've been running on the backup for a month, and the backup was never meant to run a week."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Here's your crate. The seals held.",
+          "reply": [
+            "The seals held. So did we, just about. I'll have the lights back on before you've left orbit."
+          ]
+        },
+        {
+          "prompt": "The freighter went down with it.",
+          "reply": [
+            "I heard. I sent word to the crew's families this morning. It felt wrong to sit here and only wait for a crate."
+          ]
+        }
+      ],
+      "journal": "A freighter went down at the <Place> and spacers were picking over the wreck. I got the consignment out from under them and put it in the hands of the station keeper it was meant for.",
+      "reward": "med"
     }
   ]
 }
