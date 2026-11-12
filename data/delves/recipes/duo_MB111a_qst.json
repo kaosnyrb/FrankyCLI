@@ -25,7 +25,7 @@
   "speaker": {
     "name": "The Captain's Sister",
     "voice": "GenericFemale01",
-    "elevenlabs": "pFZP5JQG7iQjIQuC4Bku"
+    "elevenlabs": "56bWURjYFHyYyVf490Dp"
   },
   "broadcast": [
     "She's been dark for weeks and nobody's answered. If he left anything, it'll be in his log. Mind yourself in there."
@@ -49,5 +49,6 @@
       ],
       "reward": "med"
     }
-  ]
+  ],
+  "_speech": "RECAST 2026-11-12 from Lily (pFZP5JQG...) on his note via Eliza: she did not have the right tone for an alien-filled derelict. Emma (ElevenLabs, middle aged, neutral, conversational): older and lower, a sister who has been waiting weeks, not a bright young voice. His ear decides. Audio tags ([quietly], [nervous]) were the other road; not taken because no subtitled Delve line carries one yet and a tag that reaches the subtitle would print."
 }
