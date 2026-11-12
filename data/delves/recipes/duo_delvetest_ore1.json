@@ -33,8 +33,8 @@
       "at": "REContainerLocRef",
       "replace": true,
       "objective": "Bring tungsten to the ore hopper",
-      "model": "ORE HOPPER, UNPICKED",
-      "_model": "A hopper or ore bin static, his or Kim's pick; the footlocker is the fallback.",
+      "model": "Meshes\\SetDressing\\ConveyorBelt\\ConveyorBeltWide_Hopper02.nif",
+      "_model": "His pick 2026-11-12 11:39, off NifSkope: vanilla's outpost wide conveyor hopper (29 KB, not the 984 B outsource stub). Was the placeholder 'ORE HOPPER, UNPICKED', which rendered nothing.",
       "name": "Ore Hopper",
       "bring": {
         "item": "InorgUncommonTungsten",
