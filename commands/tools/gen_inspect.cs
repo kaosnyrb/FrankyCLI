@@ -3995,7 +3995,7 @@ namespace FrankyCLI
         private static readonly HashSet<string> LocAliasPropsRendered = new()
         {
             "ID", "Name", "Flags", "SpecificLocation", "ALPS", "Conditions",
-            "LocationTypeKeyword", "SystemLocationAliasID", "ALFG",
+            "LocationTypeKeyword", "SystemLocationAliasID", "ALFG", "ReferenceAliasLocation",
         };
 
         // A quest's LOCATION aliases -- the answer to "where does this mission happen", as opposed
@@ -4055,6 +4055,15 @@ namespace FrankyCLI
                     if (vs == null || vs is "Null" or "" or "0") continue;
                     Console.WriteLine($"{pad}    {pi.Name}: {vs}");
                 }
+                fills++;
+            }
+
+            // The location OF a ref alias's ref (2026-11-12, OT-24): how Overtime's 18 boarding quests reach INSIDE the
+            // ship they created (EnemyShipInteriorLocation from PrimaryRef). It printed as "not decoded here" with the
+            // overlay's class name until today. Walked by DescribeSub, never by a guessed member name.
+            if (a.ReferenceAliasLocation != null)
+            {
+                Console.WriteLine($"{pad}  FILL ref-alias-location: {DescribeSub(a.ReferenceAliasLocation, allMods)}");
                 fills++;
             }
 
