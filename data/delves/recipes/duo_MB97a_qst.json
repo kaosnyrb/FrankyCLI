@@ -124,5 +124,6 @@
       "reward": "med"
     }
   ],
-  "minLevel": 15
+  "minLevel": 15,
+  "_shelved": "SHELVED 2026-11-12: waits on a board's third place (N places, Eliza's) and the Crimson member gate, both unbuilt. Today's parts would make it one trace, which undoes his two-trace pick (11-02), so it waits rather than shrinks. Not an old family, so the 19 Nov line does not need it."
 }
