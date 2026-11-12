@@ -1699,6 +1699,15 @@ namespace FrankyCLI
         private static void GradeChain(Recipe r, Template t, string? dataDir, Action<string> Fatal)
         {
             bool chain = IsChain(r);
+            // carry (his 2026-11-11, OT-9Q 2026-11-12): handed over on the board's accept, entryStage 10, which is the
+            // link starting on a chain link and the player taking the job on a plain board Delve. Graded before the
+            // early return below: it sat inside the chain branch, so on a plain board recipe it was never checked at all.
+            if (r.carry != null)
+            {
+                if (!IsBoard(t)) Fatal($"carry is handed over on the board's accept (stage {t.entryStage}), built on the board template only; this is '{t.id}'.");
+                if (string.IsNullOrWhiteSpace(r.carry.item)) Fatal("carry.item is required: the name the player sees in his inventory.");
+                else Console.WriteLine($"  carry    : \"{r.carry.item}\" handed to the player on the accept (stage {t.entryStage}){(chain ? ", as the link starts" : "")}");
+            }
             if (r.next == null && !chain) return;
             if (dataDir == null) { Fatal("next and deal \"chain\" read other recipes, and this lint was given no data folder."); return; }
             Recipe? Sibling(string id) => LoadSiblingRecipe(dataDir, id);
@@ -1751,12 +1760,6 @@ namespace FrankyCLI
                         Fatal("next.accept takes prompt and reply only: it starts the next link, it does not end, give or need a perk.");
                     if (acc.prompt != null) Console.WriteLine($"  accept   : \"{acc.prompt}\" starts {n.id} on stage {ChainAcceptStage}, offered after the completion");
                 }
-            }
-            if (r.carry != null)
-            {
-                if (!chain) Fatal("carry is an item handed over by the link before, so it is on a chain link (deal \"chain\") only.");
-                if (string.IsNullOrWhiteSpace(r.carry.item)) Fatal("carry.item is required: the name the player sees in his inventory.");
-                else Console.WriteLine($"  carry    : \"{r.carry.item}\" handed to the player as the link starts");
             }
             if (chain)
             {

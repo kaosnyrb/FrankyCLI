@@ -622,8 +622,10 @@ namespace FrankyCLI
             // A recover from a ship's hold (OT-37) hooks the SHIP, not the player (delve_space.cs ShipRecoverBoard).
             if (recoverCount > 0 && t.playerAlias < 0 && !ShipRecoverBoard(r, t)) Fatal($"template '{t.id}' names no playerAlias for a recover beat's hook.");
 
-            // Delivering needs something in hand: the first deliver must come after a pickup or a recover.
-            int carried = 0;
+            // Delivering needs something in hand: the first deliver must come after a pickup or a recover, or a carry handed
+            // over on the accept (OT-9Q, 2026-11-12: the build already puts it in `held`, which a deliver takes; only this
+            // count missed it, so a plain deliver could never take a carry although the doc said it did).
+            int carried = r.carry != null ? 1 : 0;
             bool endsOnChoice = false;
             int handBack = HandBackTalk(r, steps);
             for (int i = 0; i < r.beats.Count; i++)
@@ -2547,11 +2549,12 @@ namespace FrankyCLI
                 }
                 var held = new List<int>();   // pickups and recovered items not yet delivered
                 int handBack = HandBackTalk(r, steps);
-                // carry (his 2026-11-11): handed over as the link starts, then carried like a picked-up item until something takes it.
+                // carry (his 2026-11-11; any board Delve since OT-9Q, 2026-11-12): handed over on the accept, which on a chain
+                // link is the link starting, then carried like a picked-up item until something takes it.
                 if (r.carry != null)
                 {
                     props.Add(("Form", $"Item{CarryKey + 1}", itemOf[CarryKey], -1));
-                    Add(t.entryStage, $"Game.GetPlayer().AddItem(Item{CarryKey + 1}, 1, False)   ; carry: handed over by the link before");
+                    Add(t.entryStage, $"Game.GetPlayer().AddItem(Item{CarryKey + 1}, 1, False)   ; carry: handed over on the accept");
                     held.Add(CarryKey);
                 }
                 for (int k = 0; k < steps.Count; k++)

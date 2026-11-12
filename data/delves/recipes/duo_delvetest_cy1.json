@@ -1,0 +1,45 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_cy1",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-12 07:21 \"yup lets do 9Q\" (plan OT-9Q): carry on a plain board Delve, not a chain link, Jessica's ask for the courier and company-delivery families",
+  "_note": [
+    "CARRY PROBE CY1 (plan OT-9Q): one plain deliver, silent, placeholder words. Not a mission; MB05's parcel is the first real one.",
+    "Reading it, in order: the card shows on the board BEFORE you take it and your pack has NO parcel. Take it: the game's own 'added' notice, 'PROBE Parcel' in your pack (Misc, weight 0). Go to the drop and use it: the parcel leaves your pack, the job completes and pays.",
+    "The one thing this can show that MB106a could not: the hand-over waits for the ACCEPT on a quest the board dealt, not for a link starting.",
+    "Any fault is the carry, not the place: b1's footlocker on RECenterLocRef at a quiet site. Unbuilt once a real carry has played."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet worked site, b1's: nothing to fight on the way to the drop."
+  },
+  "prose": {
+    "name": "Hauling: PROBE cy1, One Parcel",
+    "briefing": "Test mission. Take this parcel to the drop at the <Place>.",
+    "card": "Test contract. Carry a parcel to the <Place> on <Planet>. Payment on delivery."
+  },
+  "carry": {
+    "item": "PROBE Parcel"
+  },
+  "beats": [
+    {
+      "type": "deliver",
+      "at": "RECenterLocRef",
+      "objective": "PROBE cy1: deliver the parcel to the drop at the <Place>",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Parcel Drop",
+      "journal": "Test journal: I left the parcel at the drop at the <Place>.",
+      "reward": "easy"
+    }
+  ]
+}
