@@ -938,7 +938,7 @@ namespace FrankyCLI
         /// Only the condition's parameter and global change: each is a copy of the base's own condition, never a
         /// constructed one. Refuses if an anchor is missing; its POSITION is OrderAliases' (a leash is a fill dependency).
         /// </summary>
-        private static int LeashPlaces(Quest clone, BeatsMade bm, FormKey? reach, bool secondRemote = false, bool orbitThird = false, bool secondCity = false)
+        private static int LeashPlaces(Quest clone, BeatsMade bm, FormKey? reach, Template t, int thirdId, bool secondRemote = false, bool orbitThird = false, bool secondCity = false)
         {
             // A PINNED city is where it is: no drive leash, and the lint refuses a third place beside it.
             if (secondCity) { Console.WriteLine("  leash    : none on the second place; it is a named city, pinned"); return 0; }
@@ -947,20 +947,26 @@ namespace FrankyCLI
             // A REQUESTED second place is a new site on (meant to be) another planet: no drive leash to the first, which is
             // the point of it, and its own request carries the parsec limit from the player (the remote source's).
             if (secondRemote) { Console.WriteLine("  leash    : none on the second place; it is a second request, not a drive away"); return 0; }
+            // The drive leashes are the BEATS template's (its places 0, 10 and a created third). Until 2026-11-12 this keyed on the
+            // literal ids 0, 10 and 33 and returned when 10 and 33 were absent, which on every other template they were; then a
+            // board's planetBy "parent" alias was allocated id 33 and read as a third place (OT-32 probe rp2). Template ids now,
+            // and the board leaves here as it always effectively did.
+            if (t.kind != "beats") return 0;
+            uint mainId = (uint)t.placeAlias, secondId = (uint)t.secondPlaceAlias;
             var all = clone.Aliases.ToList();
             // A collection alias has no id of its own; its members carry theirs at its list position (manual 12).
             static uint? IdOf(AQuestAlias a) => a switch { QuestReferenceAlias x => x.ID, QuestLocationAlias x => x.ID, _ => null };
             int Pos(uint id) => all.FindIndex(a => IdOf(a) == id);
             var loc = all.OfType<QuestLocationAlias>().ToDictionary(a => a.ID);
-            if (!loc.ContainsKey(10) && !loc.ContainsKey(33)) return 0;
+            if (!loc.ContainsKey(secondId) && (thirdId < 0 || !loc.ContainsKey((uint)thirdId))) return 0;
             var refs = all.OfType<QuestReferenceAlias>().ToList();
             QuestReferenceAlias? Inside(uint place, bool mapMarker) => refs.FirstOrDefault(a => a.Location != null && a.Location.AliasID == (int)place
                 && (!mapMarker || a.Location.RefType.FormKey.ToString().StartsWith("02271F:")));   // MapMarkerRefType [02271F:Starfield.esm]
 
-            var mainMap = Inside(0, true);
+            var mainMap = Inside(mainId, true);
             if (mainMap == null) { Console.WriteLine("REFUSED: no alias fills the main place's map marker, so the other places have nothing to be near."); return 1; }
             ConditionGlobal? Leash(QuestLocationAlias l) => l.Conditions.OfType<ConditionGlobal>().SingleOrDefault(c => c.Data is GetDistanceConditionData);
-            var second = loc.GetValueOrDefault(10u);
+            var second = loc.GetValueOrDefault(secondId);
             var longDrive = second != null ? Leash(second) : null;
             if (longDrive == null) { Console.WriteLine("REFUSED: the second place carries no single GetDistance leash to copy duo_longdrivedistance from."); return 1; }
             // place.reach overrides the base's duo_longdrivedistance (his 08a, 2026-10-13).
@@ -983,11 +989,11 @@ namespace FrankyCLI
 
             int fail = 0;
             if (second != null) fail += Anchor(second, longDrive, mainMap, "the main place's map marker");
-            if (!orbitThird && loc.GetValueOrDefault(33u) is QuestLocationAlias third)
+            if (!orbitThird && thirdId >= 0 && loc.GetValueOrDefault((uint)thirdId) is QuestLocationAlias third)
             {
                 var c = Leash(third);
                 if (c == null) { Console.WriteLine("REFUSED: the third place carries no single GetDistance leash."); return fail + 1; }
-                var toSecond = Inside(10, false);
+                var toSecond = Inside(secondId, false);
                 if (toSecond == null) { Console.WriteLine("REFUSED: a third place with no alias filling inside the second, so it cannot be held near it."); return fail + 1; }
                 var c2 = c.DeepCopy();
                 third.Conditions.Add(c2);
@@ -3135,9 +3141,20 @@ namespace FrankyCLI
             {
                 var alps = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)label)?.ALPS;
                 if (alps == null && shape?.planet == null) continue;
-                string want = shape?.planet is string pn ? Planets[pn].ToString() : "none";
-                fail += Check($"place alias {label}'s request pins {(shape?.planet ?? "no planet")} (GetIsCurrentLocationExact == 1)",
+                bool byParent = shape?.planetBy == "parent";
+                string want = shape?.planet is string pn && !byParent ? Planets[pn].ToString() : "none";
+                fail += Check($"place alias {label}'s request pins {(byParent ? "no planet by condition (planetBy parent)" : shape?.planet ?? "no planet")} (GetIsCurrentLocationExact == 1)",
                               PinsPlanet(alps?.Conditions)?.ToString() ?? "none", want);
+                // planetBy "parent" (OT-32 probe, 2026-11-12): the request's parent is an alias holding exactly the planet, listed
+                // before it, and the request carries the parent-link bit. Read back, never assumed from the build's print.
+                var req = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)label);
+                var parent = req?.ParentSystemLocationAliasID is int pid ? q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)pid) : null;
+                string gotLink = parent == null ? "none"
+                    : $"{parent.SpecificLocation.FormKey} before={q.Aliases.ToList().IndexOf(parent) < q.Aliases.ToList().IndexOf(req!)} bit={(((uint)(req!.Flags ?? 0)) & 0x40000000u) != 0}";
+                string wantLink = byParent ? $"{Planets[shape!.planet!]} before=True bit=True" : "none";
+                if (byParent || parent != null)
+                    fail += Check($"place alias {label}'s request takes its planet from a parent alias holding {(byParent ? shape!.planet : "nothing")}, listed first, with the link bit",
+                                  gotLink, wantLink);
             }
             // OT-91, his 2026-10-30: a request carries habitability and the level band only when the recipe asked (ShapePlanet).
             foreach (var (shape, label) in new[] { (r.place, t.placeAlias), (r.place.second, t.secondPlaceAlias) })

@@ -630,6 +630,15 @@ namespace FrankyCLI
             /// </summary>
             public string? planet { get; set; }
             /// <summary>
+            /// OPTIONAL with planet: HOW the planet is given. Null = the condition above. "parent" = vanilla's other way, the
+            /// one MQ_TempleQuest_01 and SQ_ShipDebris use (28 vanilla requests, gen_inspect 2026-11-12): a location alias
+            /// filled with the planet's location, and the request's ParentSystemLocationAliasID pointing at it, flag 0x40000000,
+            /// no condition. His 2026-11-12 xEdit pointer (ALPN, "Current Alias Planet ID"). ⚠ A PROBE (OT-32): every vanilla
+            /// parent-linked request names its own PCM type, and ours has none. Exit: whichever way deals on his board becomes
+            /// the only way and this field goes.
+            /// </summary>
+            public string? planetBy { get; set; }
+            /// <summary>
             /// OPTIONAL, place.second only, a request (remote: true): "late" = the second place is NOT filled when the quest
             /// starts, but when the player finishes the step before its first beat (his 2026-10-30, OT-03: "mark the second
             /// location as optional and fill it when the player reaches the first"). With system "same" the request then means
@@ -2144,6 +2153,8 @@ namespace FrankyCLI
                     Fatal($"{label}.system shapes a REQUEST, and {label}.remote is not set.");
                 if (p.system != null && p.system != "same")
                     Fatal($"{label}.system is \"{p.system}\"; the one value built is \"same\" (vanilla's far shape, == 0, is not).");
+                if (p.planetBy != null && p.planet == null)
+                    Fatal($"{label}.planetBy says how a planet is given, and {label}.planet names none.");
                 // place.planet (2026-11-02): a fixed planet, on a REQUEST's own conditions. A board's own place is a request.
                 if (p.planet != null)
                 {
@@ -2154,7 +2165,11 @@ namespace FrankyCLI
                         Fatal($"{label}.planet is '{p.planet}', and fauna.json has no planet or moon by that name ({Planets.Count} do; spelled as the game shows them, e.g. \"Porrima III\").");
                     if (p.system != null)
                         Fatal($"{label}.planet and {label}.system: a pinned planet already fixes its system, and the two could only disagree.");
-                    Console.WriteLine($"  planet   : {label} only on {p.planet} (GetIsCurrentLocationExact on the request, FFCydoniaZ07's shape). "
+                    if (p.planetBy != null && p.planetBy != "parent")
+                        Fatal($"{label}.planetBy is \"{p.planetBy}\"; the one value built is \"parent\" (leave it out for the condition).");
+                    if (p.planetBy == "parent")
+                        Console.WriteLine($"  planet   : {label} on {p.planet} by a PARENT LINK (a location alias holding the planet, ParentSystemLocationAliasID, MQ_TempleQuest_01's shape), no condition. A probe: untested on a typeless request.");
+                    else Console.WriteLine($"  planet   : {label} only on {p.planet} (GetIsCurrentLocationExact on the request, FFCydoniaZ07's shape). "
                                       + "⚠ The pool below is the WHOLE request corpus: nothing here reads which sites the planet content manager can place on one planet, so a planet that cannot take these markers shows as a full pool and never lists.");
                 }
                 if (p.altitude != null && !(label == "place.third" && p.orbit != null))
@@ -3089,7 +3104,7 @@ namespace FrankyCLI
                 if (rg == null) { Console.WriteLine($"REFUSED: place.reach '{r.place.reach}' is not a Global in {t.mod} or one of its masters."); fail++; }
                 else reach = rg.FormKey;
             }
-            if (fail == 0) fail += LeashPlaces(clone, madeBeats, reach, r.place.second?.remote == true, IsOrbit(r), secondCity);
+            if (fail == 0) fail += LeashPlaces(clone, madeBeats, reach, t, made4.ThirdPlaceAlias, r.place.second?.remote == true, IsOrbit(r), secondCity);
             return fail;
         }
 
@@ -3916,6 +3931,20 @@ namespace FrankyCLI
             {
                 if (loc?.ALPS == null) { Console.WriteLine($"REFUSED: {label}.planet is set and place alias {placeAlias} is not a PCM request, so there is no planet test to write it on."); return 1; }
                 if (PinsPlanet(loc.ALPS.Conditions) != null) { Console.WriteLine($"REFUSED: place alias {placeAlias}'s request already pins a planet; the shell carried one."); return 1; }
+                if (shape.planetBy == "parent")
+                {
+                    // MQ_TempleQuest_01's shape: alias 2 holds the planet, the request (alias 4) names it as its parent, flag
+                    // 0x40000000 (ParentLinkFlag, the bit every parent-linked vanilla alias carries), no condition. The planet
+                    // alias is listed BEFORE the request, as the temple quest lists 2 before 4, so it is filled first.
+                    if (loc.ParentSystemLocationAliasID != null) { Console.WriteLine($"REFUSED: place alias {placeAlias}'s request already has a parent link ({loc.ParentSystemLocationAliasID}); the shell carried one."); return 1; }
+                    var held = new QuestLocationAlias { ID = NextAliasId(clone), Name = "PinnedPlanet" };
+                    held.SpecificLocation.SetTo(Planets[pn]);
+                    clone.Aliases!.Insert(clone.Aliases.IndexOf(loc), held);
+                    loc.ParentSystemLocationAliasID = (int)held.ID;
+                    loc.Flags = (loc.Flags ?? 0) | ParentLinkFlag;
+                    Console.WriteLine($"  planet   : place alias {placeAlias} {loc.Name} on {pn} by a parent link: alias {held.ID} PinnedPlanet holds {Planets[pn]}, ParentSystemLocationAliasID {held.ID}, flags {loc.Flags} (MQ_TempleQuest_01's)");
+                    return 0;
+                }
                 loc.ALPS.Conditions.Add(PinnedPlanetCondition(Planets[pn]));
                 Console.WriteLine($"  planet   : place alias {placeAlias} {loc.Name} only on {pn} (GetIsCurrentLocationExact {Planets[pn]} == 1, FFCydoniaZ07's)");
             }
