@@ -3141,7 +3141,8 @@ namespace FrankyCLI
             {
                 var alps = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)label)?.ALPS;
                 if (alps == null && shape?.planet == null) continue;
-                bool byParent = shape?.planetBy == "parent";
+                bool bySurface = shape?.planetBy == "surface";
+                bool byParent = shape?.planetBy == "parent" || bySurface;
                 string want = shape?.planet is string pn && !byParent ? Planets[pn].ToString() : "none";
                 fail += Check($"place alias {label}'s request pins {(byParent ? "no planet by condition (planetBy parent)" : shape?.planet ?? "no planet")} (GetIsCurrentLocationExact == 1)",
                               PinsPlanet(alps?.Conditions)?.ToString() ?? "none", want);
@@ -3151,6 +3152,17 @@ namespace FrankyCLI
                 var parent = req?.ParentSystemLocationAliasID is int pid ? q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)pid) : null;
                 string gotLink = parent == null ? "none"
                     : $"{parent.SpecificLocation.FormKey} before={q.Aliases.ToList().IndexOf(parent) < q.Aliases.ToList().IndexOf(req!)} bit={(((uint)(req!.Flags ?? 0)) & 0x40000000u) != 0}";
+                if (bySurface)
+                {
+                    // planetBy "surface": the surface was found by relation at build (refused unless exactly one), so this
+                    // reads back what is WRITTEN, not a re-derivation: a parent listed first holding a location, the bit,
+                    // and Request Keyword PCM_QuestGeneral on the request.
+                    string gotS = parent == null ? "none"
+                        : $"holds={(parent.SpecificLocation.IsNull ? "nothing" : "a location")} before={q.Aliases.ToList().IndexOf(parent) < q.Aliases.ToList().IndexOf(req!)} bit={(((uint)(req!.Flags ?? 0)) & 0x40000000u) != 0} kw={req!.ALPS?.PcmTypeKeyword.FormKey == QuestGeneralRequest}";
+                    fail += Check($"place alias {label}'s request takes {shape!.planet}'s surface from a parent alias ({(parent == null ? "none" : parent.SpecificLocation.FormKey.ToString())}), listed first, link bit, Request Keyword PCM_QuestGeneral",
+                                  gotS, "holds=a location before=True bit=True kw=True");
+                    continue;
+                }
                 string wantLink = byParent ? $"{Planets[shape!.planet!]} before=True bit=True" : "none";
                 if (byParent || parent != null)
                     fail += Check($"place alias {label}'s request takes its planet from a parent alias holding {(byParent ? shape!.planet : "nothing")}, listed first, with the link bit",

@@ -2166,9 +2166,11 @@ namespace FrankyCLI
                         Fatal($"{label}.planet is '{p.planet}', and fauna.json has no planet or moon by that name ({Planets.Count} do; spelled as the game shows them, e.g. \"Porrima III\").");
                     if (p.system != null)
                         Fatal($"{label}.planet and {label}.system: a pinned planet already fixes its system, and the two could only disagree.");
-                    if (p.planetBy != null && p.planetBy != "parent")
-                        Fatal($"{label}.planetBy is \"{p.planetBy}\"; the one value built is \"parent\" (leave it out for the condition).");
-                    if (p.planetBy == "parent")
+                    if (p.planetBy is not (null or "parent" or "surface"))
+                        Fatal($"{label}.planetBy is \"{p.planetBy}\"; the values built are \"parent\" and \"surface\" (leave it out for the condition).");
+                    if (p.planetBy == "surface")
+                        Console.WriteLine($"  planet   : {label} on {p.planet}'s SURFACE by a parent link, Request Keyword PCM_QuestGeneral (COM_Quest_Andreja_Commitment's shape), no condition. A probe.");
+                    else if (p.planetBy == "parent")
                         Console.WriteLine($"  planet   : {label} on {p.planet} by a PARENT LINK (a location alias holding the planet, ParentSystemLocationAliasID, MQ_TempleQuest_01's shape), no condition. A probe: untested on a typeless request.");
                     else Console.WriteLine($"  planet   : {label} only on {p.planet} (GetIsCurrentLocationExact on the request, FFCydoniaZ07's shape). "
                                       + "⚠ The pool below is the WHOLE request corpus: nothing here reads which sites the planet content manager can place on one planet, so a planet that cannot take these markers shows as a full pool and never lists.");
@@ -3033,7 +3035,7 @@ namespace FrankyCLI
                                              ResolveKeywords(env, theme.exclude, _ => { }));
                 if (fail == 0)
                     fail += ShapePlanet(clone, PlaceAliasOf(t, pi, made4.ThirdPlaceAlias), PlaceAt(r, pi),
-                                        pi == 0 ? "place" : pi == 1 ? "place.second" : "place.third");
+                                        pi == 0 ? "place" : pi == 1 ? "place.second" : "place.third", env);
             }
             if (fail == 0 && (IsBoard(t) || IsBoardSpace(t))) fail += BoardPlaceGates(clone, t, r);
             // ⛔ EVERY PLACE HE IS SENT TO RESERVES ITS LOCATION (his 2026-10-28, "can we add it to the linter", after the board
@@ -3911,7 +3913,10 @@ namespace FrankyCLI
         /// request (a pinned city, an orbit, a placed site) has nothing to shape, unless the recipe asked, which is refused:
         /// a dial must never be silently a no-op.
         /// </summary>
-        private static int ShapePlanet(Quest clone, int placeAlias, Place? shape, string label)
+        /// <summary>PCM_QuestGeneral, the Request Keyword 386 vanilla requests name (COM_Quest_Andreja_Commitment's among them).</summary>
+        private static readonly FormKey QuestGeneralRequest = FormKey.Factory("2C7982:Starfield.esm");
+
+        private static int ShapePlanet(Quest clone, int placeAlias, Place? shape, string label, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
         {
             var loc = clone.Aliases?.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)placeAlias);
             foreach (var (form, field) in PlanetConditionsOff)
@@ -3932,6 +3937,28 @@ namespace FrankyCLI
             {
                 if (loc?.ALPS == null) { Console.WriteLine($"REFUSED: {label}.planet is set and place alias {placeAlias} is not a PCM request, so there is no planet test to write it on."); return 1; }
                 if (PinsPlanet(loc.ALPS.Conditions) != null) { Console.WriteLine($"REFUSED: place alias {placeAlias}'s request already pins a planet; the shell carried one."); return 1; }
+                if (shape.planetBy == "surface")
+                {
+                    // COM_Quest_Andreja_Commitment's shape (alias 3 ShozaII -> alias 4 Overlay, read 2026-11-12): the parent
+                    // alias holds the planet's SURFACE location, flag AllowCleared; the request names it as parent, carries the
+                    // link bit and Request Keyword PCM_QuestGeneral. The surface is found by RELATION, never by EditorID:
+                    // the one Location whose ParentLocation is the planet and which carries LocTypeSurface (manual 14, Jemison).
+                    var surfKw = env.LoadOrder.PriorityOrder.WinningOverrides<IKeywordGetter>().FirstOrDefault(k => k.EditorID == "LocTypeSurface");
+                    if (surfKw == null) { Console.WriteLine("REFUSED: no keyword LocTypeSurface in the load order."); return 1; }
+                    var surfaces = env.LoadOrder.PriorityOrder.WinningOverrides<ILocationGetter>()
+                        .Where(l => l.ParentLocation.FormKey == Planets[pn] && (l.Keywords?.Any(k => k.FormKey == surfKw.FormKey) ?? false))
+                        .ToList();
+                    if (surfaces.Count != 1) { Console.WriteLine($"REFUSED: {pn} has {surfaces.Count} surface location(s) (ParentLocation {Planets[pn]}, LocTypeSurface); exactly one is needed."); return 1; }
+                    if (loc.ParentSystemLocationAliasID != null) { Console.WriteLine($"REFUSED: place alias {placeAlias}'s request already has a parent link ({loc.ParentSystemLocationAliasID}); the shell carried one."); return 1; }
+                    var surf = new QuestLocationAlias { ID = NextAliasId(clone), Name = "PinnedSurface", Flags = (QuestLocationAlias.Flag)0x00010000 };
+                    surf.SpecificLocation.SetTo(surfaces[0].FormKey);
+                    clone.Aliases!.Insert(clone.Aliases.IndexOf(loc), surf);
+                    loc.ParentSystemLocationAliasID = (int)surf.ID;
+                    loc.Flags = (loc.Flags ?? 0) | ParentLinkFlag;
+                    loc.ALPS.PcmTypeKeyword.SetTo(QuestGeneralRequest);
+                    Console.WriteLine($"  planet   : place alias {placeAlias} {loc.Name} on {pn}'s surface by a parent link: alias {surf.ID} PinnedSurface holds {surfaces[0].EditorID} {surfaces[0].FormKey}, Request Keyword PCM_QuestGeneral, flags {loc.Flags} (COM_Quest_Andreja_Commitment's)");
+                    return 0;
+                }
                 if (shape.planetBy == "parent")
                 {
                     // MQ_TempleQuest_01's shape: alias 2 holds the planet, the request (alias 4) names it as its parent, flag
