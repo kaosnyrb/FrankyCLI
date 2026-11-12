@@ -1,0 +1,88 @@
+{
+  "schema": 2,
+  "id": "duo_MB113a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-11-12 'yeah start' and 'keep going' (one of every type by the 19th): the courier family (old MB05, 'a parcel handed over at the start'), on carry (OT-9Q, played 11-12)",
+  "_note": [
+    "COURIER: the parcel is in his pack the moment he takes the job (carry), and the hand-over is a person, not a drop box: the talk that ends the job takes it.",
+    "THE PLAYER'S PART: carrying something that matters to two people who cannot reach each other, and putting it in her hands.",
+    "Register: small and warm. Two sisters on different worlds; the parcel is seeds from the garden they grew up with. No names aloud."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A quiet worked site where someone lives and works.",
+    "parsecs": 12
+  },
+  "carry": {
+    "item": "Wrapped Parcel"
+  },
+  "prose": {
+    "name": "Hauling: A Parcel for the <Place>",
+    "briefing": "A woman sent a parcel to her sister at the <Place>, and asked for it to be put in her sister's hands, not left at a drop.",
+    "card": "A parcel for my sister at the <Place>. Put it in her hands, please, not on a shelf. She'll know what it is."
+  },
+  "speaker": {
+    "name": "The Sender",
+    "voice": "GenericFemale01",
+    "elevenlabs": "wCizWKvnaS3LOIUwHo98"
+  },
+  "broadcast": [
+    "That parcel's for my sister. It's seeds, from the garden we grew up with. Put it in her hands, would you, and not on a shelf."
+  ],
+  "_speech": "Ava (ElevenLabs, unused in any Delve), warm and a little embarrassed to be asking. His ear decides.",
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Give the parcel to the woman at the <Place>",
+      "person": {
+        "name": "Ines Merrow",
+        "template": "UC_NA_MASTWorkerFemale02",
+        "outfit": "Outfit_Clothes_Farmer_01_with_Hat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
+        "hellos": [
+          [
+            "You've got the look of someone carrying something for me."
+          ]
+        ],
+        "_bio": {
+          "age": "forties (authored 2026-11-12)",
+          "from": "grew up with her sister and a garden on another world (the lines)",
+          "why_there": "works the <Place>, a long way from her sister (the broadcast)",
+          "wants": "something from home; her sister's seeds (her lines)"
+        }
+      },
+      "greeting": [
+        "You've got the look of someone carrying something for me. Is that from my sister?"
+      ],
+      "exchanges": [
+        {
+          "prompt": "It's from your sister. She said to put it in your hands.",
+          "reply": [
+            "Seeds. She's sent me the garden. I'll have it planted before she knows I've opened it."
+          ]
+        },
+        {
+          "prompt": "How do you know it's from her?",
+          "reply": [
+            "Nobody else wraps a parcel like they're tying up a lamb. She's done it that way since we were small."
+          ]
+        }
+      ],
+      "journal": "A woman asked me to carry a parcel of seeds to her sister at the <Place> and put it in her hands. I did.",
+      "reward": "easy"
+    }
+  ]
+}

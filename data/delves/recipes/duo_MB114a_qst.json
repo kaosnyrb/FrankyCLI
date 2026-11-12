@@ -1,0 +1,110 @@
+{
+  "schema": 2,
+  "id": "duo_MB114a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-11-12 'yeah start' and 'keep going' (one of every type by the 19th): the company recovery family (old MB26, a recovery delivered to a company), on MB44a's shape (played)",
+  "_note": [
+    "COMPANY RECOVERY: clear the raiders, take the firm's sample case from their takings, hand it to the firm's clerk in the city.",
+    "THE PLAYER'S PART: the fight for the case, and bringing it to a city to a man who only cares that it is unopened.",
+    "No company named (his naming ruling): 'the firm'. The old MB26 went to named companies; a named firm is his call."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A built hostile site the raiders use, MB44a's.",
+    "second": {
+      "settlement": "Akila City"
+    },
+    "_second": "Akila City, so it does not share New Atlantis with MB44a and MB112a.",
+    "parsecs": 12
+  },
+  "prose": {
+    "name": "Recovery: The Firm's Sample Case",
+    "briefing": "Raiders took a mining firm's sample case off a survey crew and are sitting on it at the <Place>. The firm wants it back unopened, delivered to its clerk in <SecondPlace>.",
+    "card": "Raiders took our sample case to the <Place>. We want it back unopened. Bring it to our clerk in <SecondPlace>."
+  },
+  "speaker": {
+    "name": "The Firm's Clerk",
+    "voice": "GenericMale01",
+    "elevenlabs": "zcIk2xc7SGwlywr4TzZu"
+  },
+  "broadcast": [
+    "The case is somewhere in that camp, and the firm would very much like it back before anyone gets curious. Bring it to me in the city, I'll be the one outside looking anxious."
+  ],
+  "_speech": "Simon (ElevenLabs, unused in any Delve), a clerk out of his depth. His ear decides.",
+  "beats": [
+    {
+      "type": "clear",
+      "at": "REMarkerMediumLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 3,
+        "max": 5,
+        "species": "mix"
+      },
+      "objective": "Clear the raiders from the <Place>",
+      "journal": "The raiders at the <Place> are dealt with. I need to find the firm's sample case in their takings."
+    },
+    {
+      "type": "pickup",
+      "at": "RECenterLocRef",
+      "item": "Sample Case",
+      "objective": "Find the sample case in the raiders' takings",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Raiders' Takings",
+      "journal": "I found the firm's sample case, still sealed. I need to take it to their clerk in <SecondPlace>."
+    },
+    {
+      "type": "talk",
+      "place": "second",
+      "at": "AutofillGeneric01",
+      "objective": "Deliver the case to the firm's clerk in <SecondPlace>",
+      "person": {
+        "name": "Corbin Fenwick",
+        "template": "UC_NA_MASTWorkerMale02",
+        "outfit": "Outfit_Clothes_Formal_ShirtSlacks_Vest",
+        "voice": "GenericMale01",
+        "elevenlabs": "zcIk2xc7SGwlywr4TzZu",
+        "hellos": [
+          [
+            "Is that it? Please tell me that's the case."
+          ]
+        ],
+        "_bio": {
+          "age": "thirties (authored 2026-11-12)",
+          "from": "a mining firm's clerk, never off a station before this (his lines)",
+          "why_there": "sent to wait for the case in the city (the broadcast)",
+          "wants": "the case unopened, and to be allowed home (his lines)"
+        }
+      },
+      "greeting": [
+        "That's our case. I'd know those dents anywhere. Has anyone opened it?"
+      ],
+      "exchanges": [
+        {
+          "prompt": "Still sealed. Here it is.",
+          "reply": [
+            "Still sealed. The firm will be delighted, and I might be allowed to go home."
+          ]
+        },
+        {
+          "prompt": "What's in it that matters so much?",
+          "reply": [
+            "Rock, mostly. Very expensive rock, and a map of where the rest of it is."
+          ]
+        }
+      ],
+      "journal": "Raiders took a mining firm's sample case to the <Place>. I cleared them out and brought the case, unopened, to the firm's clerk in <SecondPlace>.",
+      "reward": "med"
+    }
+  ]
+}
