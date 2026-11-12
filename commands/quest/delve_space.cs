@@ -81,8 +81,27 @@ namespace FrankyCLI
             // activator (it takes the kit and pays itself), or a PICKUP THEN A DELIVER on two scriptless objects in the one
             // cell. The pair is the shape built; every other mix is refused here rather than half-wired.
             bool two = TwoBeatBoard(r, t), shipRec = ShipRecoverBoard(r, t);
-            if (IsBoardSpace(t) && r.beats.Count == 1 && r.beats[0].type is not ("use" or "destroy" or "defeat") && !SpaceHail(r, t))
-                Fatal($"beat 1 is a '{r.beats[0].type}'; a one-beat board is a use (his MB01a's activator), a destroy (his MB14a's), a defeat (vanilla's space bounty ship) or a talk with a ship (OT-9G).");
+            if (IsBoardSpace(t) && r.beats.Count == 1 && r.beats[0].type is not ("use" or "destroy" or "defeat" or "board") && !SpaceHail(r, t))
+                Fatal($"beat 1 is a '{r.beats[0].type}'; a one-beat board is a use (his MB01a's activator), a destroy (his MB14a's), a defeat (vanilla's space bounty ship), a board (OT-24) or a talk with a ship (OT-9G).");
+            // A BOARD (OT-24): the defeat's ship, boarded rather than killed, and what is inside it (aboard).
+            if (r.beats.Any(b => b.type == "board") && !SpaceBoarding(r, t))
+                Fatal("a beat is a board and this is not a one-beat boardspace; only a one-beat board in orbit is built (OT-24).");
+            if (r.beats.Any(b => b.aboard != null && b.type != "board"))
+                Fatal("a beat sets aboard and is not a board; aboard is what is inside a ship he boards (OT-24).");
+            if (SpaceBoarding(r, t))
+            {
+                var bd = r.beats[0];
+                if (string.IsNullOrWhiteSpace(bd.target) || !bd.target.StartsWith("LvlShip_", StringComparison.Ordinal))
+                    Fatal("beat 1 is a board; its target names a levelled ship, LvlShip_* (his qst13a boards LvlShip_CrimsonFleet_Combat).");
+                if (string.IsNullOrWhiteSpace(bd.item)) Fatal("beat 1 is a board and names no item: the thing he takes from inside (his old \"Critical UC Files\").");
+                if (bd.aboard == null || string.IsNullOrWhiteSpace(bd.aboard.find))
+                    Fatal("beat 1 is a board and aboard.find is missing: the objective shown once he is inside.");
+                if (bd.aboard?.dark == true && !bd.aboard.derelict)
+                    Fatal("aboard.dark without aboard.derelict: his old script swept the lights only on a disabled ship, and a live crew with the lights out is no look he built.");
+                if (bd.model != null || bd.name != null || bd.elite != null || bd.gang != null || bd.enemies != null || bd.loot != null
+                    || bd.support != null || bd.ask != null || bd.repair || bd.scenery != null || bd.replace || bd.message != null)
+                    Fatal("beat 1 is a board and sets model, name, elite, gang, enemies, loot, support, ask, repair, scenery, replace or message; the ship is its object and aboard is what is inside, so they would be silently ignored.");
+            }
             if (r.beats.Any(b => b.ship != null) && !SpaceHail(r, t))
                 Fatal("a beat sets ship; only a one-beat boardspace talk is a talk with a ship (OT-9G).");
             if (SpaceHail(r, t))
@@ -116,8 +135,8 @@ namespace FrankyCLI
             // A DESTROY IN ORBIT (plan OT-9I): shot from the ship, never pressed, so nothing that rides on a press is built.
             if (r.beats.Any(b => b.type == "destroy") && !SpaceDestroy(r, t))
                 Fatal("a beat is a destroy and this is not a one-beat board; only a one-beat boardspace destroy is built in orbit.");
-            if (r.beats.Any(b => b.guards != null) && !SpaceDestroy(r, t))
-                Fatal("a beat sets guards and is not a one-beat boardspace destroy; only a guarded target is built (his ccs_activatedestroyguarded).");
+            if (r.beats.Any(b => b.guards != null) && !SpaceDestroy(r, t) && !SpaceBoarding(r, t))
+                Fatal("a beat sets guards and is not a one-beat boardspace destroy or board; only a guarded target (his ccs_activatedestroyguarded) and a board's escorts are built.");
             if (r.beats.Any(b => b.guards != null && !b.guards.StartsWith("LShip_", StringComparison.Ordinal)))
                 Fatal("guards names a levelled ship list, LShip_* (his guarded boards use LShip_CrimsonFleet_Combat and LShip_Spacer_Combat_A).");
             if (SpaceDestroy(r, t) && (r.beats[0].repair || r.beats[0].ask != null))
@@ -174,7 +193,7 @@ namespace FrankyCLI
                     Fatal($"beat {i + 1} is at '{b.at}'; an orbit's markers are its space cell's own (se_*), filled from the cell.");
                 if (string.IsNullOrWhiteSpace(b.objective)) Fatal($"beat {i + 1} has no objective; it is the one line that points him at the object.");
                 // A ship-then-hold board's beat 1 is the ship (beat 2 is skipped above); its deliver is an object like any.
-                if (!SpaceDefeat(r, t) && !SpaceHail(r, t) && !(shipRec && i == 0) && (string.IsNullOrWhiteSpace(b.model) || string.IsNullOrWhiteSpace(b.name)))
+                if (!SpaceDefeat(r, t) && !SpaceHail(r, t) && !SpaceBoarding(r, t) && !(shipRec && i == 0) && (string.IsNullOrWhiteSpace(b.model) || string.IsNullOrWhiteSpace(b.name)))
                     Fatal($"beat {i + 1} needs a model and a name: its object is a clone of {(RepairBoard(r, t) ? "the base's own activator" : t.activatorFrom)}, reskinned.");
                 if (shipRec && b.scenery != null)
                     Fatal($"beat {i + 1} sets scenery; a ship-then-hold board builds none (its scenery pass walks the two-beat board's objects), so it would be silently ignored.");
@@ -301,6 +320,29 @@ namespace FrankyCLI
         /// </summary>
         private static bool SpaceDefeat(Recipe r, Template t)
             => PlainBoard(r, t) && r.beats[0].type == "defeat";
+
+        /// <summary>
+        /// A one-beat board whose beat is a BOARD (plan OT-24, his 2026-11-12 "yeah build the board"): he boards a ship and
+        /// takes something from inside. The ship is the defeat's (PrimaryRef creates the recipe's LvlShip_*, disabled until the
+        /// accept). The INSIDE is two vanilla alias fills, copied from his own remote qst14a (read 2026-11-12, the same on all
+        /// 18 of his boarding quests): a location alias that is the ship's own interior (ReferenceAliasLocation, PrimaryRef by
+        /// SpaceshipLinkedInterior) and a collection of every Ship_CrewSpawn_RefType marker in it. Every step is a stock hook:
+        /// DefaultAliasOnLoad on the ship sets BoardLoadStage (the escorts and the derelict's dead systems, his old script's
+        /// OnCellLoad), DefaultAliasOnLocationChange on the Player watching the interior sets BoardedStage (his OnLocationChange
+        /// block, verbatim but for its trace: gravity, lights, the item at a random marker forced into an alias, the crew),
+        /// DefaultAliasOnActivate on the item's alias sets the completing stage, which pays. The ship's death before boarding
+        /// fails the mission (his old OnDeath: fail and stop), by the board's own MissionFailed().
+        /// </summary>
+        private static bool SpaceBoarding(Recipe r, Template t)
+            => PlainBoard(r, t) && r.beats[0].type == "board";
+
+        /// <summary>A board's stages: the ship loaded round him (GuardStage's number: the guards are this stage on a destroy),
+        /// boarded, and the ship lost before boarding. The find's objective is 30, the two-beat board's second.</summary>
+        private const int BoardLoadStage = 60, BoardedStage = 70, BoardLostStage = 90, BoardFindObjective = 30;
+        /// <summary>His remote qst14a, the boarding quest the interior aliases are copied from (the derelict look), and its
+        /// three alias ids: EnemyShipInteriorLocation, the CrewSpawnMarkers collection's member, ShipBoss (the item's alias).</summary>
+        private const string BoardSourceQuest = "duo_artifact_remote_qst14a";
+        private const uint BoardSrcInterior = 22, BoardSrcMarkers = 24, BoardSrcItem = 23;
 
         /// <summary>
         /// A board in orbit with a ship's DEFEAT then a RECOVER (OT-37's second half; 38a, and 28a's first two beats). His
@@ -529,9 +571,9 @@ namespace FrankyCLI
                 if (n != 1) { Console.WriteLine($"REFUSED: the activator's script named its base quest {n} time(s); one (questobjective) was expected."); return 1; }
                 Console.WriteLine($"  object   : {act.EditorID} keeps {string.Join(", ", act.VirtualMachineAdapter.Scripts.Select(s => s.Name))}; questobjective now this quest");
             }
-            else if (SpaceDefeat(r, t) || shipRec)
+            else if (SpaceDefeat(r, t) || shipRec || SpaceBoarding(r, t))
             {
-                // THE SHIP (OT-37): PrimaryRef creates the recipe's levelled ship, as vanilla's space bounty does, and starts
+                // THE SHIP (OT-37; a board's too, OT-24): PrimaryRef creates the recipe's levelled ship, as vanilla's space bounty does, and starts
                 // disabled until the accept enables it (MB01a dropped the flag, right for an activator, wrong for a hostile ship
                 // that would otherwise wait in the cell before he takes the job). No activator: an old _b1 clone is removed.
                 var ship = OwnOrMaster<IGenericBaseFormGetter>(myMod, env, beat.target!);
@@ -712,6 +754,83 @@ namespace FrankyCLI
                 Console.WriteLine($"  +item    : {mi.EditorID} {mi.FormKey}  \"{mi.Name}\"  (clone of {itemSrc.EditorID}, weight {itemSrc.Weight} -> 0), into the ship's hold on the accept");
             }
 
+            // A BOARD (OT-24): THE INSIDE OF THE SHIP. Three aliases COPIED from his own remote qst14a (a slot that works brings
+            // every field this tool does not know; read 2026-11-12, the same on all 18 of his boarding quests): the ship's
+            // interior (a location alias filled as PrimaryRef's location by SpaceshipLinkedInterior), every crew marker in it
+            // (a collection, Ship_CrewSpawn_RefType), and an empty optional alias the item is forced into once placed. Then the
+            // Player (the boarding hook's alias), the item, the find's objective (20 copied to 30, pointed at the item) and the
+            // three stages of its own. All appended, so every alias keeps its id and PrimaryRef fills before the interior.
+            FormKey boardItem = FormKey.Null;
+            QuestLocationAlias? boardInterior = null;
+            QuestReferenceAlias? boardMarkers = null, boardItemAlias = null;
+            int boardPlayer = -1;
+            if (SpaceBoarding(r, t))
+            {
+                var src = myMod.Quests.FirstOrDefault(q => q.EditorID == BoardSourceQuest);
+                var sInt = src?.Aliases?.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == BoardSrcInterior);
+                var sCol = src?.Aliases?.OfType<QuestCollectionAlias>().FirstOrDefault(c => c.Collection.Count == 1 && c.Collection[0].ReferenceAlias?.ID == BoardSrcMarkers);
+                var sItem = src?.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == BoardSrcItem);
+                if (sInt?.ReferenceAliasLocation == null || sCol?.Collection[0].ReferenceAlias?.Location == null || sItem == null)
+                { Console.WriteLine($"REFUSED: {BoardSourceQuest} does not carry its interior ({BoardSrcInterior}, a ReferenceAliasLocation), its crew markers ({BoardSrcMarkers}, filled at a location alias) and its item alias ({BoardSrcItem})."); return 1; }
+
+                boardInterior = sInt.DeepCopy();
+                boardInterior.ID = NextAliasId(clone);
+                boardInterior.Name = "ShipInterior";
+                boardInterior.ReferenceAliasLocation!.AliasID = (int)target.ID;
+                clone.Aliases!.Add(boardInterior);
+
+                var col = sCol.DeepCopy();
+                var entry = col.Collection[0];
+                boardMarkers = entry.ReferenceAlias!;
+                uint mid = NextAliasId(clone);
+                if (entry.ID == boardMarkers.ID) entry.ID = mid;   // vanilla keeps the entry's id equal to its member's; so does the copy
+                boardMarkers.ID = mid;
+                boardMarkers.Name = "CrewSpawnMarkers";
+                boardMarkers.Location!.AliasID = (int)boardInterior.ID;
+                clone.Aliases.Add(col);
+
+                boardItemAlias = sItem.DeepCopy();
+                boardItemAlias.ID = NextAliasId(clone);
+                boardItemAlias.Name = "BoardItem";
+                clone.Aliases.Add(boardItemAlias);
+                Console.WriteLine($"  +inside  : alias {boardInterior.ID} ShipInterior (PrimaryRef {target.ID} by {boardInterior.ReferenceAliasLocation.Keyword.FormKey}), "
+                                  + $"alias {boardMarkers.ID} CrewSpawnMarkers (at {boardInterior.ID}, {boardMarkers.Location.RefType.FormKey}), alias {boardItemAlias.ID} BoardItem (flags {boardItemAlias.Flags}), copied from {BoardSourceQuest}");
+
+                boardPlayer = AddVanillaPlayer(myMod, env, clone);
+                if (boardPlayer < 0) return 1;
+
+                RemovePrevious(myMod.MiscItems, e => e.StartsWith(r.id + "_item"));
+                var itemSrc = myMod.MiscItems.FirstOrDefault(m => m.EditorID == t.itemSource);
+                if (itemSrc == null) { Console.WriteLine($"REFUSED: itemSource '{t.itemSource}' is not a MiscItem in {t.mod}."); return 1; }
+                var bmi = myMod.MiscItems.DuplicateInAsNewRecord(itemSrc);
+                bmi.EditorID = $"{r.id}_item1";
+                bmi.Name = beat.item!;
+                bmi.Weight = 0f;
+                boardItem = bmi.FormKey;
+                Console.WriteLine($"  +item    : {bmi.EditorID} {bmi.FormKey}  \"{bmi.Name}\"  (clone of {itemSrc.EditorID}, weight {itemSrc.Weight} -> 0), placed inside on boarding");
+
+                if (clone.Objectives!.Any(o => o.Index == BoardFindObjective)) { Console.WriteLine($"REFUSED: the shell already has an objective {BoardFindObjective}; the find's must be its own."); return 1; }
+                var obF = ob.DeepCopy();
+                obF.Index = BoardFindObjective;
+                foreach (var x in obF.Targets.Where(x => x.AliasID == (int)target.ID)) x.AliasID = (int)boardItemAlias.ID;
+                obF.DisplayText = Expand(beat.aboard!.find!, t);
+                clone.Objectives.Insert(clone.Objectives.IndexOf(ob) + 1, obF);
+                Console.WriteLine($"  +obj     : {BoardFindObjective}, the find, on the item (alias {boardItemAlias.ID})");
+
+                var stages = new List<int> { BoardedStage, BoardLostStage };
+                if (beat.guards != null || beat.aboard.derelict) stages.Insert(0, BoardLoadStage);
+                foreach (var st in stages)
+                {
+                    if (clone.Stages!.Any(s => s.Index == st)) { Console.WriteLine($"REFUSED: the shell already has a stage {st}; a board's stages must be its own."); return 1; }
+                    var ns = CloneStage(clone, st);
+                    if (ns == null) return 1;
+                    if (ns.LogEntries.FirstOrDefault() is QuestLogEntry le) le.Entry = null;
+                    clone.Stages.Add(ns);
+                }
+                SortStages(clone);
+                Console.WriteLine($"  +stage   : {string.Join(", ", stages)} (loaded round him, boarded, lost before boarding)");
+            }
+
             // THE SCENERY (plan OT-02): beside each beat's object, at its marker. Both beat numbers are walked so a rebuild
             // without scenery removes the Static an earlier build made.
             var objects = two ? new[] { target, target2! } : new[] { target };
@@ -774,6 +893,43 @@ namespace FrankyCLI
                 int set = dh?.Properties.OfType<ScriptIntProperty>().FirstOrDefault(p => p.Name == "StageToSet")?.Data ?? -1;
                 if (set != t.completeStage) { Console.WriteLine($"REFUSED: the shell's PrimaryRef (alias {target.ID}) carries no DefaultAliasOnDeath setting {t.completeStage} (got {set}); the ship's death would complete nothing."); return 1; }
                 Console.WriteLine($"  hook     : alias {target.ID} keeps the shell's DefaultAliasOnDeath (sets {set}); the ship's death completes it");
+            }
+            else if (SpaceBoarding(r, t))
+            {
+                // THE SHIP'S DEATH no longer pays: the shell's DefaultAliasOnDeath (sets 100) goes, and a fresh one sets the lost
+                // stage, which fails the mission, his old OnDeath. TurnOffStage = boarded: once he is inside, a dead ship is moot.
+                var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == (int)target.ID);
+                int gone = entry?.Scripts.RemoveAll(s => s.Name == "DefaultAliasOnDeath") ?? 0;
+                if (gone != 1) { Console.WriteLine($"REFUSED: the shell's PrimaryRef (alias {target.ID}) carries {gone} DefaultAliasOnDeath, not the one a board replaces."); return 1; }
+                var dh = StageHook("DefaultAliasOnDeath", BoardLostStage, t.entryStage,
+                                   new ScriptIntProperty { Name = "TurnOffStage", Data = BoardedStage, Flags = ScriptProperty.Flag.Edited });
+                if (AttachHook(vma, clone.FormKey, (int)target.ID, dh, HookEntry.FindOrCreate, true, bm, BoardLostStage, t.entryStage) == Hooked.AlreadyCarries)
+                { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnDeath."); return 1; }
+                Console.WriteLine($"  +hook    : alias {target.ID} DefaultAliasOnDeath sets {BoardLostStage} after {t.entryStage}, off from {BoardedStage}; a ship lost before boarding fails it");
+                // THE SHIP LOADS ROUND HIM: the escorts and a derelict's dead systems (his old OnCellLoad), sd2's played hook.
+                if (beat.guards != null || beat.aboard!.derelict)
+                {
+                    var lh = StageHook("DefaultAliasOnLoad", BoardLoadStage, t.entryStage);
+                    if (AttachHook(vma, clone.FormKey, (int)target.ID, lh, HookEntry.FindOrCreate, true, bm, BoardLoadStage, t.entryStage) == Hooked.AlreadyCarries)
+                    { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnLoad."); return 1; }
+                    Console.WriteLine($"  +hook    : alias {target.ID} DefaultAliasOnLoad sets {BoardLoadStage} after {t.entryStage}; the ship loads round him");
+                }
+                // BOARDED: the Player's location becomes the ship's interior (the stock hook takes a LOCATION ALIAS, which is
+                // the only way to name an interior that exists only at runtime).
+                var into = new ScriptObjectProperty { Flags = ScriptProperty.Flag.Edited };
+                into.Object.SetTo(clone.FormKey);
+                into.Alias = (short)boardInterior!.ID;
+                var bh = StageHook("DefaultAliasOnLocationChange", BoardedStage, t.entryStage,
+                                   new ScriptObjectListProperty { Name = "LocationAliasesToCheckAgainst", Flags = ScriptProperty.Flag.Edited,
+                                                                  Objects = new Noggog.ExtendedList<ScriptObjectProperty> { into } });
+                if (AttachHook(vma, clone.FormKey, boardPlayer, bh, HookEntry.FindOrCreate, true, bm, BoardedStage, t.entryStage) == Hooked.AlreadyCarries)
+                { Console.WriteLine($"REFUSED: alias {boardPlayer} already carries DefaultAliasOnLocationChange."); return 1; }
+                Console.WriteLine($"  +hook    : alias {boardPlayer} Player DefaultAliasOnLocationChange (into alias {boardInterior.ID}) sets {BoardedStage} after {t.entryStage}; boarded");
+                // THE FIND: picking the item up completes it.
+                var ah = StageHook("DefaultAliasOnActivate", t.completeStage, BoardedStage);
+                if (AttachHook(vma, clone.FormKey, (int)boardItemAlias!.ID, ah, HookEntry.FindOrCreate, true, bm, t.completeStage, BoardedStage) == Hooked.AlreadyCarries)
+                { Console.WriteLine($"REFUSED: alias {boardItemAlias.ID} already carries DefaultAliasOnActivate."); return 1; }
+                Console.WriteLine($"  +hook    : alias {boardItemAlias.ID} DefaultAliasOnActivate sets {t.completeStage} after {BoardedStage}; the find pays");
             }
             else if (SpaceDestroy(r, t))
             {
@@ -888,6 +1044,140 @@ namespace FrankyCLI
                         };
                         Console.WriteLine($"  +stage   : {GuardStage}, the guards: 1 to 3 of {gname} {ships.FormKey} round his ship");
                     }
+                }
+
+                if (SpaceBoarding(r, t))
+                {
+                    // A BOARD (OT-24). His dou_artifact_space_boardingrename_qst, its two blocks moved onto stages, every line
+                    // his but the traces and the names: the load stage is his OnCellLoad (the escorts are the guards loop above),
+                    // the boarded stage his OnLocationChange. What he left out stays out: no rename, no forced faction.
+                    var ab = beat.aboard!;
+                    extraProps.Add(("ReferenceAlias", "Alias_Beat1Target", clone.FormKey, (int)target.ID));
+                    extraProps.Add(("RefCollectionAlias", "Alias_CrewSpawnMarkers", clone.FormKey, (int)boardMarkers!.ID));
+                    extraProps.Add(("ReferenceAlias", "Alias_BoardItem", clone.FormKey, (int)boardItemAlias!.ID));
+                    extraProps.Add(("Form", "BoardItem", boardItem, -1));
+                    if (ab.crew is string crewName)
+                    {
+                        var crew = OwnOrMaster<IFormListGetter>(myMod, env, crewName);
+                        if (crew == null) { Console.WriteLine($"REFUSED: aboard.crew '{crewName}' is not a FormList in {myMod.ModKey.FileName} or its masters."); return 1; }
+                        extraProps.Add(("FormList", "Crew", crew.FormKey, -1));
+                    }
+                    if (ab.dark)
+                    {
+                        var lamps = OwnOrMaster<IFormListGetter>(myMod, env, "duo_flst_shipinteriorlights");
+                        if (lamps == null) { Console.WriteLine($"REFUSED: aboard.dark and no FormList duo_flst_shipinteriorlights (his LightKiller's 100 forms) in {myMod.ModKey.FileName}."); return 1; }
+                        extraProps.Add(("FormList", "ShipInteriorLights", lamps.FormKey, -1));
+                    }
+                    if (beat.guards != null || ab.derelict)
+                    {
+                        var load = new List<string> { "Debug.Trace(\"[board] \" + Self + \" stage " + BoardLoadStage + ": the ship loaded\")" };
+                        if (ab.derelict)
+                        {
+                            // His old OnCellLoad when ShipDisabled == 1: every system killed with repair off, the outside dark.
+                            load.Add("SpaceshipReference wreck = Alias_Beat1Target.GetShipRef()");
+                            load.Add("ActorValue sys");
+                            foreach (int av in new[] { 2027725, 931, 932, 933, 2025673, 2027723 })   // engines, weapons 1-3, shields, grav drive
+                            {
+                                load.Add($"sys = Game.GetFormFromFile({av}, \"Starfield.esm\") as ActorValue");
+                                load.Add("wreck.DamageValue(sys, wreck.GetValue(sys))");
+                                load.Add("wreck.EnablePartRepair(sys, False)");
+                            }
+                            load.Add("wreck.EnablePartRepair(None, False)");
+                            load.Add("wreck.SetValue(Game.GetFormFromFile(1723657, \"Starfield.esm\") as ActorValue, 1)");   // SpaceshipExternalLightsDisabledValue
+                        }
+                        if (beat.guards is string gname)
+                        {
+                            var ships = OwnOrMaster<ILeveledBaseFormGetter>(myMod, env, gname);
+                            if (ships == null) { Console.WriteLine($"REFUSED: guards '{gname}' is not a levelled list (LShip_*) in {myMod.ModKey.FileName} or its masters."); return 1; }
+                            extraProps.Add(("Form", "GuardShips", ships.FormKey, -1));
+                            load.AddRange(new[]
+                            {
+                                "SpaceshipReference playerShip = Game.GetPlayer().GetCurrentShipRef()",
+                                "Float[] placePosition = new Float[3]",
+                                "Int n = Utility.RandomInt(1, 3)",
+                                "Debug.Trace(\"[board] \" + Self + \" escorts: \" + n + \" ship(s) round \" + playerShip)",
+                                "While n > 0",
+                                "    placePosition[0] = Utility.RandomFloat(-3000, 3000)",
+                                "    placePosition[1] = Utility.RandomFloat(-750, 750)",
+                                "    placePosition[2] = Utility.RandomFloat(-3000, 3000)",
+                                "    playerShip.PlaceShipAtMe(GuardShips, 4, True, False, False, True, placePosition, None, None, True)",
+                                "    n -= 1",
+                                "EndWhile",
+                            });
+                        }
+                        code[BoardLoadStage] = load;
+                    }
+                    var inside = new List<string>
+                    {
+                        $"SetObjectiveCompleted({slot.objective})",
+                        $"SetObjectiveDisplayed({BoardFindObjective})",
+                        "ObjectReference[] spots = Alias_CrewSpawnMarkers.GetArray()",
+                        "Debug.Trace(\"[board] \" + Self + \" stage " + BoardedStage + ": boarded, \" + spots.Length + \" crew marker(s)\")",
+                    };
+                    if (ab.derelict)
+                        inside.AddRange(new[]
+                        {
+                            "Cell hull = Game.GetPlayer().GetParentCell()",
+                            "Int grav = Utility.RandomInt(0, 100)",
+                            "If grav < 33",
+                            "    hull.SetGravityScale(0)",
+                            "ElseIf grav < 66",
+                            "    hull.SetGravityScale(Utility.RandomFloat(0, 0.75))",
+                            "Else",
+                            "    hull.SetGravityScale(1)",
+                            "EndIf",
+                        });
+                    if (ab.dark)
+                        inside.AddRange(new[]
+                        {
+                            "ObjectReference[] lamps = Game.GetPlayer().FindAllReferencesOfType(ShipInteriorLights, 100000.0)",
+                            "Int li = 0",
+                            "While li < lamps.Length",
+                            "    If Utility.RandomInt(1, 100) > 20",
+                            "        lamps[li].DisableNoWait(False)",
+                            "    EndIf",
+                            "    li += 1",
+                            "EndWhile",
+                        });
+                    inside.AddRange(new[]
+                    {
+                        // His fallback when the item could not be placed: he has boarded, so he gets it and the job completes.
+                        "If spots.Length == 0",
+                        "    Debug.Trace(\"[board] \" + Self + \" no crew markers: the item goes to him and the job completes\")",
+                        "    Game.GetPlayer().AddItem(BoardItem, 1)",
+                        $"    SetStage({t.completeStage})",
+                        "    Return",
+                        "EndIf",
+                        "ObjectReference found = spots[Utility.RandomInt(0, spots.Length - 1)].PlaceAtMe(BoardItem, 1, True, False, True, None, None, True)",
+                        "Alias_BoardItem.ForceRefTo(found)",
+                        "Debug.Trace(\"[board] \" + Self + \" the item is \" + found)",
+                    });
+                    if (ab.crew != null)
+                        inside.AddRange(new[]
+                        {
+                            "ActorValue suspicious = Game.GetFormFromFile(748, \"Starfield.esm\") as ActorValue",
+                            "ActorValue aggression = Game.GetFormFromFile(700, \"Starfield.esm\") as ActorValue",
+                            "Int foes = Utility.RandomInt(spots.Length / 2, spots.Length)",
+                            "Debug.Trace(\"[board] \" + Self + \" crew: \" + foes)",
+                            "While foes > 0",
+                            "    Actor foe = spots[Utility.RandomInt(0, spots.Length - 1)].PlaceAtMe(Crew.GetAt(Utility.RandomInt(0, Crew.GetSize() - 1)), 1, True, False, True, None, None, True) as Actor",
+                            "    foe.SetValue(suspicious, 2)",
+                            "    foe.SetValue(aggression, 2)",
+                            "    foes -= 1",
+                            "EndWhile",
+                        });
+                    code[BoardedStage] = inside;
+                    // LOST BEFORE BOARDING: the board's own failure (MissionQuestScript.MissionFailed: every objective failed, the
+                    // fail stage, the shutdown), his old OnDeath's fail-and-stop in the board's words.
+                    code[BoardLostStage] = new()
+                    {
+                        "Debug.Trace(\"[board] \" + Self + \" stage " + BoardLostStage + ": the ship was lost before he boarded\")",
+                        "Quest __temp = Self as Quest",
+                        $"{t.questScript} kmyQuest = __temp as {t.questScript}",
+                        "kmyQuest.MissionFailed()",
+                    };
+                    code[t.completeStage].Add($"SetObjectiveCompleted({BoardFindObjective})");
+                    code[t.completeStage].Add("Game.GetPlayer().RemoveItem(BoardItem, 1, True)");
                 }
 
                 if (two)
@@ -1506,7 +1796,7 @@ namespace FrankyCLI
             var act = m.Activators.FirstOrDefault(a => a.EditorID == r.id + "_b1");
             // A defeat's object is the SHIP (OT-37), and so is a hail's (OT-9G), each graded in its own branch below; every
             // other kind creates our _b1 here.
-            if (SpaceDefeat(r, t) || SpaceHail(r, t) || ShipRecoverBoard(r, t))
+            if (SpaceDefeat(r, t) || SpaceHail(r, t) || ShipRecoverBoard(r, t) || SpaceBoarding(r, t))
                 fail += Check($"alias {slot.activatorAlias} creates the ship at marker alias {slot.markerAlias}",
                               target?.CreateReferenceToObject == null ? "creates nothing" : $"at {target.CreateReferenceToObject.AliasID}",
                               $"at {slot.markerAlias}");
@@ -1656,6 +1946,61 @@ namespace FrankyCLI
                     fail += Check("the accept puts the part in the ship's hold",
                                   (f10 >= 0 && frag.IndexOf("hold.AddItem(Item1, 1, False)", f10) is int a && a > f10 && a < fEnd).ToString(), "True");
                     fail += Check($"PrimaryRef carries no {UseScript} (a ship is not pressed)", (hooks?.Any(s => s.Name == UseScript) ?? false).ToString(), "False");
+                    fail += Check($"no {r.id}_b1 activator is left in the plugin", (objAct != null).ToString(), "False");
+                }
+                else if (SpaceBoarding(r, t))
+                {
+                    // A BOARD (OT-24): the defeat's ship, the inside copied from his qst14a, every link between them read back by
+                    // what it points at, never by what the build printed.
+                    var pr = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)slot.activatorAlias);
+                    fail += Check($"PrimaryRef creates the ship the build resolved from '{r.beats[0].target}', starts disabled",
+                                  $"{pr?.CreateReferenceToObject?.Object.FormKey.ToString() ?? "nothing"} {pr?.Flags?.HasFlag(QuestReferenceAlias.Flag.InitiallyDisabled) ?? false}",
+                                  $"{bm.SpaceShip?.ToString() ?? "unresolved"} True");
+                    var inter = q.Aliases.OfType<IQuestLocationAliasGetter>().Where(a => a.Name == "ShipInterior").ToList();
+                    var ral = inter.Count == 1 ? inter[0].ReferenceAliasLocation : null;
+                    fail += Check("one ShipInterior, the location of PrimaryRef by SpaceshipLinkedInterior [0055E9]",
+                                  ral == null ? $"{inter.Count} alias(es), no ReferenceAliasLocation" : $"alias {ral.AliasID} by {ral.Keyword.FormKey}",
+                                  $"alias {slot.activatorAlias} by 0055E9:Starfield.esm");
+                    var cols = q.Aliases.OfType<IQuestCollectionAliasGetter>().Where(c => c.Collection.Count == 1 && c.Collection[0].ReferenceAlias?.Name == "CrewSpawnMarkers").ToList();
+                    var cm = cols.Count == 1 ? cols[0].Collection[0] : null;
+                    fail += Check("one CrewSpawnMarkers collection, every Ship_CrewSpawn_RefType [03F7E7] marker in ShipInterior, entry id = member id",
+                                  cm?.ReferenceAlias?.Location == null ? $"{cols.Count} collection(s)"
+                                      : $"at {cm.ReferenceAlias.Location.AliasID} by {cm.ReferenceAlias.Location.RefType.FormKey}, ids {cm.ID == cm.ReferenceAlias.ID}",
+                                  $"at {(inter.Count == 1 ? inter[0].ID.ToString() : "?")} by 03F7E7:Starfield.esm, ids True");
+                    var item = q.Aliases.OfType<IQuestReferenceAliasGetter>().Where(a => a.Name == "BoardItem").ToList();
+                    fail += Check("one BoardItem alias, optional and empty until the boarded stage forces the item in",
+                                  item.Count != 1 ? $"{item.Count} alias(es)"
+                                      : $"optional {item[0].Flags?.HasFlag(QuestReferenceAlias.Flag.Optional) ?? false}, fill {item[0].CreateReferenceToObject != null || !item[0].ForcedReference.IsNull || item[0].Location != null || item[0].ReferenceCollectionAliasID != null}",
+                                  "optional True, fill False");
+                    var player = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.Name == "Player");
+                    var lc = player == null ? null : vma.Aliases.FirstOrDefault(a => a.Property.Alias == (int)player.ID)?.Scripts.FirstOrDefault(s => s.Name == "DefaultAliasOnLocationChange");
+                    var watched = lc?.Properties.OfType<IScriptObjectListPropertyGetter>().FirstOrDefault(p => p.Name == "LocationAliasesToCheckAgainst");
+                    fail += Check("the Player's DefaultAliasOnLocationChange watches ShipInterior and nothing else",
+                                  watched == null ? "no hook or no list" : string.Join(",", watched.Objects.Select(o => $"{o.Object.FormKey == q.FormKey}:{o.Alias}")),
+                                  $"True:{(inter.Count == 1 ? inter[0].ID.ToString() : "?")}");
+                    var dh = vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.Where(s => s.Name == "DefaultAliasOnDeath").ToList();
+                    fail += Check($"the ship's death sets {BoardLostStage}, never the completing stage, and is off from {BoardedStage}",
+                                  dh == null || dh.Count != 1 ? $"{dh?.Count ?? 0} hook(s)"
+                                      : $"{dh[0].Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == "StageToSet")?.Data} off {dh[0].Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == "TurnOffStage")?.Data}",
+                                  $"{BoardLostStage} off {BoardedStage}");
+                    var obF = q.Objectives.FirstOrDefault(o => o.Index == BoardFindObjective);
+                    fail += Check($"objective {BoardFindObjective} is the find and points at BoardItem",
+                                  obF == null ? "missing" : $"{obF.DisplayText?.String} -> {string.Join(",", obF.Targets.Select(x => x.AliasID))}",
+                                  $"{Expand(r.beats[0].aboard!.find!, t)} -> {(item.Count == 1 ? item[0].ID.ToString() : "?")}");
+                    foreach (var st in new[] { BoardedStage, BoardLostStage })
+                        fail += Check($"stage {st} exists", q.Stages.Any(s => s.Index == st).ToString(), "True");
+                    string frag = File.ReadAllText(bm.PscPath);
+                    string Body(int st) => frag.Split($"Function {FragmentFunction(st)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
+                    fail += Check($"stage {BoardedStage} places the item at a crew marker and forces it into BoardItem",
+                                  (Body(BoardedStage).Contains("PlaceAtMe(BoardItem") && Body(BoardedStage).Contains("Alias_BoardItem.ForceRefTo(found)")).ToString(), "True");
+                    fail += Check($"stage {BoardedStage} spawns a crew exactly when aboard.crew is set",
+                                  Body(BoardedStage).Contains("PlaceAtMe(Crew.GetAt").ToString(), (r.beats[0].aboard!.crew != null).ToString());
+                    fail += Check($"stage {BoardedStage} rolls gravity and sweeps lights exactly as aboard says (derelict, dark)",
+                                  $"{Body(BoardedStage).Contains("SetGravityScale")} {Body(BoardedStage).Contains("FindAllReferencesOfType(ShipInteriorLights")}",
+                                  $"{r.beats[0].aboard!.derelict} {r.beats[0].aboard!.dark}");
+                    fail += Check($"stage {BoardLostStage} fails the mission (MissionFailed)", Body(BoardLostStage).Contains("kmyQuest.MissionFailed()").ToString(), "True");
+                    fail += Check($"PrimaryRef carries no {UseScript} (a ship is not pressed)",
+                                  (vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.Any(s => s.Name == UseScript) ?? false).ToString(), "False");
                     fail += Check($"no {r.id}_b1 activator is left in the plugin", (objAct != null).ToString(), "False");
                 }
                 else if (SpaceDefeat(r, t))

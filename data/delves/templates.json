@@ -221,7 +221,8 @@
         "talk",
         "destroy",
         "defeat",
-        "recover"
+        "recover",
+        "board"
       ],
       "_recover": "Only as beat 2 after a ship's defeat (OT-37, 2026-11-11, his \"ships have an invetory that you can loot on destruction\"): the part goes into the ship's hold on the accept, the death sets 40, stock DefaultAliasOnItemRemoved on the ship sets 100 however he loots it.",
       "_destroy": "A ONE-beat destroy (plan OT-9I, 2026-11-10): shot from the ship, his classic MB14a's shape on stock parts. The clone takes duo_MB14a_act's Destructible, the accept blocks its prompt, DefaultAliasOnDestroyed sets 100, whose first line disables it.",
@@ -248,7 +249,7 @@
       },
       "_tokens": "<Planet> is the orbit alias; his read, 2026-10-26: it prints the body's name (\"Jemison\"), unconfirmed in game.",
       "cannot": [
-        "more than two beats, or any shape but one use, one destroy, one defeat (a ship), or a pickup then a deliver",
+        "more than two beats, or any shape but one use, one destroy, one defeat (a ship), one board (a ship boarded, OT-24), or a pickup then a deliver",
         "a second or third place, a request, a theme, a who",
         "a beat message on one beat (the activator's script shows its own start, success and fail messages)",
         "a recapSay (the closing line is the last beat's say)"

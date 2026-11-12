@@ -155,11 +155,16 @@ namespace FrankyCLI
         public int? ParentSystemLocationAliasID { get; set; }
         /// A PCM request (a place made for the quest rather than found): its own conditions and the content keyword.
         public QAlps? Alps { get; set; }
+        /// The location OF a ref alias's ref, through a keyword (2026-11-12, OT-24): a created ship's interior is PrimaryRef's
+        /// location by SpaceshipLinkedInterior, as in all 18 of his boarding quests. Null = none.
+        public QRefAliasLocation? RefAliasLocation { get; set; }
         // coll: a collection alias is a list of members, each wrapping a ref alias of its own
         public List<QCollectionMember>? Collection { get; set; }
     }
 
     public sealed class QAlps { public List<QCondition>? Conditions { get; set; } public string? PcmTypeKeyword { get; set; } }
+
+    public sealed class QRefAliasLocation { public int? AliasID { get; set; } public string? Keyword { get; set; } }
 
     public sealed class QCollectionMember
     {

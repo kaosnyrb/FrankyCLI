@@ -198,6 +198,13 @@ namespace FrankyCLI
                     Link(ex.Quest, x.Quest);
                     l.ExternalAliasLocation = ex;
                 }
+                // OT-24: a created ship's interior (the read's RefAliasLocation).
+                if (a.RefAliasLocation is { } rl)
+                {
+                    var ral = new ReferenceAliasLocation { AliasID = rl.AliasID };
+                    Link(ral.Keyword, rl.Keyword);
+                    l.ReferenceAliasLocation = ral;
+                }
                 return l;
             }
             if (a.Kind == "coll")

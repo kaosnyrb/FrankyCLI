@@ -278,9 +278,15 @@ namespace FrankyCLI
                             m.External = new QExternal { Quest = Fk(x.Quest), AliasID = x.AliasID };
                             Guard(x, typeof(IExternalAliasLocationGetter), path + ".ExternalAliasLocation", "Quest", "AliasID");
                         }
+                        // OT-24: a created ship's interior, the location of PrimaryRef by SpaceshipLinkedInterior.
+                        if (l.ReferenceAliasLocation is { } ral)
+                        {
+                            m.RefAliasLocation = new QRefAliasLocation { AliasID = ral.AliasID, Keyword = Fk(ral.Keyword) };
+                            Guard(ral, typeof(IReferenceAliasLocationGetter), path + ".ReferenceAliasLocation", "AliasID", "Keyword");
+                        }
                         Guard(l, typeof(IQuestLocationAliasGetter), path, "ID", "Name", "Flags", "ALFG", "AliasIDToForceIntoWhenFilled",
                               "ClosestToAlias", "DisplayName", "SpecificLocation", "LocationTypeKeyword", "SystemLocationAliasID",
-                              "ParentSystemLocationAliasID", "Conditions", "ALPS", "ExternalAliasLocation");
+                              "ParentSystemLocationAliasID", "Conditions", "ALPS", "ExternalAliasLocation", "ReferenceAliasLocation");
                         return m;
                     }
                     case IQuestCollectionAliasGetter c:

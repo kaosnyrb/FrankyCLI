@@ -557,6 +557,17 @@ namespace FrankyCLI
         /// InorgUncommonTungsten, never the Resource ResInorgUncommonTungsten: Red Tape counts the MiscItem); count is how many,
         /// 1 or more. short, OPTIONAL: the box's text when he is short; absent = "I need <count> <name> for this."</summary>
         private sealed class Bring { public string? item { get; set; } public int count { get; set; } public string? @short { get; set; } }
+        /// <summary>
+        /// beats, a boardspace board: aboard (OT-24). find, REQUIRED: the second objective, shown once he is inside (the
+        /// old quests' "Recover the Critical UC Files"); the thing it points at is the beat's item, placed at a random crew
+        /// marker. crew, OPTIONAL: a FormList of actor bases (duo_GangMembersList_Spacer, or a creature list such as
+        /// duo_GangMemberList_Mothwing for the derelict look), half to all of the crew markers, placed hostile; absent = an
+        /// empty ship. derelict, OPTIONAL: the ship's systems are killed with repair off and its exterior lights out when it
+        /// loads, and the gravity inside is rolled (none, low, normal: his old script's thirds). dark, OPTIONAL: his
+        /// LightKiller, the interior lights swept to 20% (duo_flst_shipinteriorlights). The old looks: qst12 derelict + crew,
+        /// qst13 crew alone, qst14 derelict + dark + a creature crew.
+        /// </summary>
+        private sealed class Aboard { public string? find { get; set; } public string? crew { get; set; } public bool derelict { get; set; } public bool dark { get; set; } }
         /// <summary>A FormList of actor bases (Overtime's duo_GangMembersList_Civ_* are the friendly ones) and a count range.</summary>
         private sealed class Company { public string? list { get; set; } public int min { get; set; } public int max { get; set; } }
         /// <summary>
@@ -858,9 +869,15 @@ namespace FrankyCLI
             /// the object loads after the accept, 1 to 3 ships from it are placed round the player's ship, his
             /// ccs_activatedestroyguarded's own loop (PlaceShipAtMe, X and Z +-3000, Y +-750). Destroying the object still
             /// completes the mission; the guards are the danger, not the goal, and nothing removes them (his never did).
-            /// Absent = an unguarded target.
+            /// Absent = an unguarded target. ⭐ Also on a one-beat boardspace BOARD (OT-24): the escorts round the ship.
             /// </summary>
             public string? guards { get; set; }
+            /// <summary>
+            /// beats, a ONE-BEAT boardspace "board" only, REQUIRED there (plan OT-24, his 2026-11-12 "yeah build the board"): what
+            /// is INSIDE the ship he boards. The 18 old boarding quests (remote qst12a to qst14f) are one script whose values
+            /// make three looks; this object is those values. See Aboard.
+            /// </summary>
+            public Aboard? aboard { get; set; }
             /// <summary>
             /// beats, a plain one-beat boardspace use, OPTIONAL: activating the object shows a box with a BUTTON per answer, and
             /// each answer is its own ending, with its own journal line (plan OT-9J, Jessica's choose at an object). The beat's

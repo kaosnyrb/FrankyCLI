@@ -355,7 +355,8 @@ namespace FrankyCLI
                 }
                 if (b.allies != null && b.type != "hold")
                     Fatal($"beat {i + 1} sets allies and is a {b.type}; only a hold places allies, so they would be silently ignored.");
-                if (!IsFight(b) && (b.target != null || b.elite != null || b.gang != null || b.enemies != null || b.loot != null || b.support != null))
+                // A board's target is the ship he boards (OT-24, as a space defeat's), never a fight's spawn.
+                if (!IsFight(b) && ((b.target != null && b.type != "board") || b.elite != null || b.gang != null || b.enemies != null || b.loot != null || b.support != null))
                     Fatal($"beat {i + 1} sets target, elite, gang, enemies, loot or support and is a {b.type}; only a defeat or a clear spawns a fight, so they would be silently ignored.");
                 if (b.name != null && Tokens(b.name).Any())
                     Fatal($"beat {i + 1} name carries a <Token>; an activator name is not an alias context.");
@@ -645,7 +646,9 @@ namespace FrankyCLI
             var itemless = ItemlessPickups(r, steps);
             foreach (int i in itemless)
                 Console.WriteLine($"  beat {i + 1} (pickup) is in the last step and nothing takes its item, so \"{r.beats[i].item}\" is NOT given: the object goes and the job pays (OT-08)");
-            if (carried - itemless.Count > 0 && !endsOnChoice) Warn($"{carried - itemless.Count} picked-up item(s) are never delivered, so they stay in the player's inventory after the quest.");
+            // A board's item is taken back by its own completing stage (OT-24, delve_space.cs), so it is not left in his pack.
+            int boards = r.beats.Count(x => x.type == "board");
+            if (carried - itemless.Count - boards > 0 && !endsOnChoice) Warn($"{carried - itemless.Count} picked-up item(s) are never delivered, so they stay in the player's inventory after the quest.");
 
             var beatStage = StagesOf(steps, t.completeStage, t.entryStage + 10);
             int highest = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Concat(steps.SelectMany(s => s.WaveStages))
