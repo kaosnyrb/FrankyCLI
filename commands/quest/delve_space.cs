@@ -1084,6 +1084,10 @@ namespace FrankyCLI
                             }
                             load.Add("wreck.EnablePartRepair(None, False)");
                             load.Add("wreck.SetValue(Game.GetFormFromFile(1723657, \"Starfield.esm\") as ActorValue, 1)");   // SpaceshipExternalLightsDisabledValue
+                            // His ForceHostile half (qst14a: ForceHostile 1, ShipFaction SpacerFaction 27BB8C): without it a NEUTRAL
+                            // ship (MB111a's UC cargo hauler, 2026-11-12) has every system broken and still will not dock until he shoots it.
+                            load.Add("wreck.RemoveFromAllFactions()");
+                            load.Add("wreck.AddToFaction(Game.GetFormFromFile(2603916, \"Starfield.esm\") as Faction)");   // SpacerFaction
                         }
                         if (beat.guards is string gname)
                         {
@@ -2009,6 +2013,9 @@ namespace FrankyCLI
                     fail += Check($"stage {BoardedStage} rolls gravity and sweeps lights exactly as aboard says (derelict, dark)",
                                   $"{Body(BoardedStage).Contains("SetGravityScale")} {Body(BoardedStage).Contains("FindAllReferencesOfType(ShipInteriorLights")}",
                                   $"{r.beats[0].aboard!.derelict} {r.beats[0].aboard!.dark}");
+                    fail += Check($"stage {BoardLoadStage} makes a derelict hostile exactly when aboard.derelict (his ForceHostile; a neutral wreck will not dock, MB111a)",
+                                  (Body(BoardLoadStage).Contains("wreck.RemoveFromAllFactions()") && Body(BoardLoadStage).Contains("wreck.AddToFaction(Game.GetFormFromFile(2603916")).ToString(),
+                                  r.beats[0].aboard!.derelict.ToString());
                     fail += Check($"stage {BoardLostStage} fails the mission (MissionFailed)", Body(BoardLostStage).Contains("kmyQuest.MissionFailed()").ToString(), "True");
                     fail += Check($"PrimaryRef carries no {UseScript} (a ship is not pressed)",
                                   (vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.Any(s => s.Name == UseScript) ?? false).ToString(), "False");
