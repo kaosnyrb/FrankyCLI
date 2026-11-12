@@ -640,6 +640,14 @@ namespace FrankyCLI
             /// </summary>
             public string? planetBy { get; set; }
             /// <summary>
+            /// OPTIONAL, a REQUESTED place only: the request's Request Keyword (ALPS LNAM). Null = the shell's own (the board's
+            /// is none, a remote source's is PCM_QuestGeneral). "general" = PCM_QuestGeneral, which 386 vanilla requests name;
+            /// "none" = cleared. ⚠ A PROBE (OT-32, 2026-11-12): MB56a on Pluto never dealt from the board (no keyword) while the
+            /// same place by startquest (PCM_QuestGeneral) started. Exit: if the keyword decides it, it becomes the board's
+            /// default and this field goes.
+            /// </summary>
+            public string? requestKeyword { get; set; }
+            /// <summary>
             /// OPTIONAL, place.second only, a request (remote: true): "late" = the second place is NOT filled when the quest
             /// starts, but when the player finishes the step before its first beat (his 2026-10-30, OT-03: "mark the second
             /// location as optional and fill it when the player reaches the first"). With system "same" the request then means
@@ -2154,6 +2162,10 @@ namespace FrankyCLI
                     Fatal($"{label}.system shapes a REQUEST, and {label}.remote is not set.");
                 if (p.system != null && p.system != "same")
                     Fatal($"{label}.system is \"{p.system}\"; the one value built is \"same\" (vanilla's far shape, == 0, is not).");
+                if (p.requestKeyword is not (null or "general" or "none"))
+                    Fatal($"{label}.requestKeyword is \"{p.requestKeyword}\"; the values built are \"general\" and \"none\".");
+                if (p.requestKeyword != null && !(p.remote == true || (label == "place" && IsBoard(t))))
+                    Fatal($"{label}.requestKeyword sets a REQUEST's keyword, and {label} is not one (a board's own place, or remote: true).");
                 if (p.planetBy != null && p.planet == null)
                     Fatal($"{label}.planetBy says how a planet is given, and {label}.planet names none.");
                 // place.planet (2026-11-02): a fixed planet, on a REQUEST's own conditions. A board's own place is a request.
@@ -3931,6 +3943,14 @@ namespace FrankyCLI
                 if (has == 0) continue;
                 loc!.ALPS!.Conditions.RemoveAll(c => NamesConditionForm(c, form));
                 Console.WriteLine($"  planet   : place alias {placeAlias} {loc.Name} drops its {field} condition ({form}); off unless the recipe asks");
+            }
+            // place.requestKeyword (OT-32 probe, 2026-11-12): set or clear the request's Request Keyword.
+            if (shape?.requestKeyword is string rk)
+            {
+                if (loc?.ALPS == null) { Console.WriteLine($"REFUSED: {label}.requestKeyword is set and place alias {placeAlias} is not a PCM request."); return 1; }
+                if (rk == "general") loc.ALPS.PcmTypeKeyword.SetTo(QuestGeneralRequest);
+                else loc.ALPS.PcmTypeKeyword.Clear();
+                Console.WriteLine($"  request  : place alias {placeAlias} {loc.Name} Request Keyword {(rk == "general" ? "PCM_QuestGeneral" : "cleared")} ({label}.requestKeyword)");
             }
             // place.planet (2026-11-02): the request may only use that one planet. The lint already holds it to a request.
             if (shape?.planet is string pn)

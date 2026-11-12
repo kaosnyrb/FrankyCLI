@@ -3136,6 +3136,14 @@ namespace FrankyCLI
                 fail += Check($"place alias {label}'s request keeps to the player's star system (IsInSameCurrentLocationAsRef player LocTypeStarSystem == 1)",
                               HoldsToSystem(pl?.ALPS?.Conditions).ToString(), "True");
             }
+            // place.requestKeyword (OT-32 probe, 2026-11-12): the request's keyword is the one the recipe asked for, read back.
+            foreach (var (shape, label) in new[] { (r.place, t.placeAlias), (r.place.second, t.secondPlaceAlias) })
+            {
+                if (shape?.requestKeyword is not string rk) continue;
+                var alps = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)label)?.ALPS;
+                string got = alps == null ? "no request" : alps.PcmTypeKeyword.IsNull ? "none" : alps.PcmTypeKeyword.FormKey == QuestGeneralRequest ? "general" : alps.PcmTypeKeyword.FormKey.ToString();
+                fail += Check($"place alias {label}'s request keyword is the recipe's ({rk})", got, rk);
+            }
             // place.planet (2026-11-02): a request pins the planet the recipe named, and no request pins one it did not.
             foreach (var (shape, label) in new[] { (r.place, t.placeAlias), (r.place.second, t.secondPlaceAlias) })
             {

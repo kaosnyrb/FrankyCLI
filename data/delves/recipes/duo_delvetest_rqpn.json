@@ -1,0 +1,42 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_rqpn",
+  "template": "beats",
+  "author": "eliza",
+  "source": "his 2026-11-12 11:10 \"yeah\": rqP with ONE change, the Request Keyword cleared (the board's base has none)",
+  "_note": [
+    "RQPN (OT-32): startquest duo_delvetest_rqpn. Fails = a keywordless request cannot place on Pluto (board fix: PCM_QuestGeneral). Starts = the keyword is not it."
+  ],
+  "place": {
+    "remote": true,
+    "planet": "Pluto",
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "parsecs": 50,
+    "_parsecs": "50 > the ~42 pc galaxy: no reach limit, as MB56a on the board has none (a remote request otherwise carries duo_distanceformission, 8 pc from the player)",
+    "requestKeyword": "none"
+  },
+  "prose": {
+    "name": "PROBE rqPn: a site on <Planet>",
+    "briefing": "Test mission. Pick up the crate at the <Place>."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "REContainerLocRef",
+      "replace": true,
+      "objective": "PROBE rqPn: pick up the crate at the <Place>",
+      "journal": "Test journal: I picked up the crate at the <Place>.",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "name": "Probe Crate",
+      "item": "Probe Crate",
+      "reward": "easy"
+    }
+  ]
+}
