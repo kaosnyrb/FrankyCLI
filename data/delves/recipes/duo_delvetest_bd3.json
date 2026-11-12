@@ -1,0 +1,40 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_bd3",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. This build empties it, so anything else on it leaves the board until rebuilt or restored.",
+  "author": "eliza",
+  "source": "his 2026-11-12 15:00 \"sure\" to finishing OT-24: the qst14 look (the real derelict, a creature crew, lights out), his qst14a's crew list",
+  "_note": [
+    "BOARDING PROBE BD3 (plan OT-24): the qst14 DERELICT look. bd1 with only the crew changed: his qst14a's duo_GangMemberList_Mothwing (Charybdis predators and a corpse). Derelict and dark, no escorts. Silent, placeholder words. Not a mission.",
+    "Reading it: take it, go to the system, dock with the dead ship, board. Inside: lights out, creatures, the core snapped to the navmesh (bd2's fix). Pick it up: complete, pays easy.",
+    "Papyrus.0.log: [board] stage 60, stage 70 (markers, the item with marker z and navmesh z, the crew count)."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "sk1's."
+  },
+  "prose": {
+    "name": "Recovery: Board Probe Three over <Planet>",
+    "briefing": "Test mission. A crippled ship is drifting over <Planet>. Board it and recover the test core.",
+    "card": "Test contract. Board the crippled ship over <Planet> and recover the test core. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "board",
+      "at": "se_GeneralMarkerLocRef01",
+      "target": "LvlShip_CrimsonFleet_Combat",
+      "objective": "Board the crippled ship over <Planet>",
+      "item": "Test Core",
+      "aboard": {
+        "find": "Recover the test core",
+        "crew": "duo_GangMemberList_Mothwing",
+        "derelict": true,
+        "dark": true
+      },
+      "journal": "Test journal: I boarded the crippled ship over <Planet> and recovered the test core.",
+      "reward": "easy"
+    }
+  ]
+}
