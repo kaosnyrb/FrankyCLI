@@ -1,0 +1,52 @@
+{
+  "schema": 2,
+  "id": "duo_MB110a_qst",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-11-12 'yeah add it to pre 19th, I dont want players to \"lose\" mission types by upgrading' and 'yeah start' (one of every type by the 19th); OT-24's board beat, played 14:17",
+  "_note": [
+    "BOARDING, LOOK 2 OF 3: the live ship (old remote qst13 'Boarding', 4 quests): its own crew, its escorts, and he disables it himself.",
+    "THE PLAYER'S PART: restraint. Destroying the ship fails the job (the board beat's stage 90), so he has to knock its engines out, not win the fight the easy way, then fight the crew inside for the ledger.",
+    "No faction named aloud or on the card: 'a raider'. Crimson ship, guards and crew (bd1's ship); his ruling OT-94 keeps a Fleet member from being sent against the Fleet, so check this one rides that gate."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "His 32 band top (MB01a's, bd1's)."
+  },
+  "prose": {
+    "name": "Strike: The Raider's Ledger over <Planet>",
+    "briefing": "A raider working the lanes over <Planet> keeps a ledger of every hauler it has robbed. The haulers want the ledger, so the ship can't just be blown apart.",
+    "card": "A raider over <Planet> keeps a ledger of everyone they've robbed. We want it. Disable the ship, don't destroy it."
+  },
+  "speaker": {
+    "name": "Haulers' Union",
+    "voice": "GenericMale01",
+    "elevenlabs": "CjIKi1zuI666pVsFrtyU"
+  },
+  "broadcast": [
+    "They write down every ship they take, cargo and all, and that book is the only proof we've got. Knock their engines out, don't blow them apart, and go in for it."
+  ],
+  "beats": [
+    {
+      "type": "board",
+      "at": "se_GeneralMarkerLocRef01",
+      "target": "LvlShip_CrimsonFleet_Combat",
+      "guards": "LShip_CrimsonFleet_Combat",
+      "objective": "Disable and board the raider ship over <Planet>",
+      "item": "Raider's Ledger",
+      "aboard": {
+        "find": "Take the raider's ledger",
+        "crew": "duo_GangMembersList_Crimson",
+        "derelict": false,
+        "dark": false
+      },
+      "journal": "A raider over <Planet> kept a ledger of every hauler it robbed. I disabled the ship, boarded it and took the ledger.",
+      "say": [
+        "That's every hauler they ever touched, written in their own hand. We'll be busy for a month."
+      ],
+      "reward": "hard"
+    }
+  ]
+}

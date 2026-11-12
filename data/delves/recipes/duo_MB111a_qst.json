@@ -1,0 +1,51 @@
+{
+  "schema": 2,
+  "id": "duo_MB111a_qst",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-11-12 'yeah add it to pre 19th, I dont want players to \"lose\" mission types by upgrading' and 'yeah start' (one of every type by the 19th); OT-24's board beat, played 14:17",
+  "_note": [
+    "BOARDING, LOOK 3 OF 3: the true derelict (old remote qst14 'Recovery', 6 quests): disabled, dark (lights at 20%), a creature crew, an item to find.",
+    "THE PLAYER'S PART: going into the dark, and finding the log among whatever moved in.",
+    "Register: quiet, a family's grief kept short. The sister does not say what she fears, and the close does not read the log aloud. A cargo hull (the hail probe's) as the freighter; his or Kim's pick if another reads more like a home."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "His 32 band top (MB01a's, bd1's)."
+  },
+  "prose": {
+    "name": "Recovery: The Quiet Freighter over <Planet>",
+    "briefing": "A freighter has been drifting dark over <Planet> for weeks. The captain's sister wants his log brought out, whatever is living aboard.",
+    "card": "My brother's freighter has been dark over <Planet> for weeks. Something's aboard. Bring me his log, please."
+  },
+  "speaker": {
+    "name": "The Captain's Sister",
+    "voice": "GenericFemale01",
+    "elevenlabs": "pFZP5JQG7iQjIQuC4Bku"
+  },
+  "broadcast": [
+    "She's been dark for weeks and nobody's answered. If he left anything, it'll be in his log. Mind yourself in there, something's been living aboard her."
+  ],
+  "beats": [
+    {
+      "type": "board",
+      "at": "se_GeneralMarkerLocRef01",
+      "target": "LvlShip_UCCitizen_Cargo",
+      "objective": "Board the dark freighter over <Planet>",
+      "item": "Captain's Log",
+      "aboard": {
+        "find": "Find the captain's log",
+        "crew": "duo_GangMembersList_PreditorMegalist_A",
+        "derelict": true,
+        "dark": true
+      },
+      "journal": "A freighter had drifted dark over <Planet> for weeks. I boarded her, got past what was living aboard, and brought the captain's log out to his sister.",
+      "say": [
+        "That's his writing. I'll read it later, on my own. I'm glad it was you that went in."
+      ],
+      "reward": "med"
+    }
+  ]
+}

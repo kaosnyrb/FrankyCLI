@@ -1,0 +1,52 @@
+{
+  "schema": 2,
+  "id": "duo_MB109a_qst",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-11-12 'yeah add it to pre 19th, I dont want players to \"lose\" mission types by upgrading' and 'yeah start' (one of every type by the 19th); OT-24's board beat, played 14:17",
+  "_note": [
+    "BOARDING, LOOK 1 OF 3: the pirate-held ship (old remote qst12 'Boarding: Derelict', 8 quests): disabled, a crew aboard, escorts outside, lights on, the files to recover. Backport map, his release rule.",
+    "THE PLAYER'S PART: the escorts, the dock, the fight through the crew, and finding the files inside.",
+    "No faction named aloud or on the card (his naming ruling): 'raiders', 'a government courier'. The ship is a Spacer combat ship standing in for the courier; his or Kim's pick if a courier hull reads better."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "His 32 band top (MB01a's, bd1's)."
+  },
+  "prose": {
+    "name": "Recovery: Courier's Files over <Planet>",
+    "briefing": "Raiders hit a government courier over <Planet> and left her crippled with their own crew aboard. The courier's office wants its files back before anyone reads them.",
+    "card": "Our courier was hit over <Planet>. The raiders are still aboard, with friends outside. Get our files off that ship."
+  },
+  "speaker": {
+    "name": "Courier Office",
+    "voice": "GenericMale01",
+    "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
+  },
+  "broadcast": [
+    "That's our courier, and those aren't our people aboard her. Deal with whatever's flying cover, then get inside and bring the files out. I'd rather nobody read them first."
+  ],
+  "beats": [
+    {
+      "type": "board",
+      "at": "se_GeneralMarkerLocRef01",
+      "target": "LvlShip_Spacer_Combat",
+      "guards": "LShip_Spacer_Combat_A",
+      "objective": "Board the crippled courier over <Planet>",
+      "item": "Courier's Files",
+      "aboard": {
+        "find": "Recover the courier's files",
+        "crew": "duo_GangMembersList_Spacer",
+        "derelict": true,
+        "dark": false
+      },
+      "journal": "Raiders took a government courier over <Planet>. I boarded her, fought through their crew and brought the files out.",
+      "say": [
+        "That's the files. Whatever they were after, they didn't get it."
+      ],
+      "reward": "med"
+    }
+  ]
+}
