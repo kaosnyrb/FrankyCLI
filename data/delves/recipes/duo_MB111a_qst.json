@@ -10,7 +10,8 @@
     "BOARDING, LOOK 3 OF 3: the true derelict (old remote qst14 'Recovery', 6 quests): disabled, dark (lights at 20%), a creature crew, an item to find.",
     "THE PLAYER'S PART: going into the dark, and finding the log among whatever moved in.",
     "Register: quiet, a family's grief kept short. The sister does not say what she fears, and the close does not read the log aloud. A cargo hull (the hail probe's) as the freighter; his or Kim's pick if another reads more like a home.",
-    "FRANCES (rework) and KIERAN (rework) 2026-11-12: she cannot see 'his writing' over the radio, so the close is 'You've got it. I'll read it later, on my own.'; 'I'm glad it was you that went in' cut (unearned); the journal no longer walks the log out to her. Frances's pick YES: a creature crew is placed aboard (aboard.crew), so the dread stands. Kieran's pick: the log is a marked pickup deep in the ship (the board beat as built), not handed over on boarding."
+    "FRANCES (rework) and KIERAN (rework) 2026-11-12: she cannot see 'his writing' over the radio, so the close is 'You've got it. I'll read it later, on my own.'; 'I'm glad it was you that went in' cut (unearned); the journal no longer walks the log out to her. Frances's pick YES: a creature crew is placed aboard (aboard.crew), so the dread stands. Kieran's pick: the log is a marked pickup deep in the ship (the board beat as built), not handed over on boarding.",
+    "2026-11-12, his: the sister must not know something is living aboard. Card, briefing and call no longer say it; the player finds out by boarding, and only the closing record names it. A revoice of the call."
   ],
   "place": {
     "altitude": 32.0,
@@ -18,8 +19,8 @@
   },
   "prose": {
     "name": "Recovery: The Quiet Freighter over <Planet>",
-    "briefing": "A freighter has been drifting dark over <Planet> for weeks. The captain's sister wants his log brought out, whatever is living aboard.",
-    "card": "My brother's freighter has been dark over <Planet> for weeks. Something's aboard. Bring me his log, please."
+    "briefing": "A freighter has been drifting dark over <Planet> for weeks. The captain's sister wants his log brought out.",
+    "card": "My brother's freighter has been dark over <Planet> for weeks and nobody answers. Bring me his log, please."
   },
   "speaker": {
     "name": "The Captain's Sister",
@@ -27,7 +28,7 @@
     "elevenlabs": "pFZP5JQG7iQjIQuC4Bku"
   },
   "broadcast": [
-    "She's been dark for weeks and nobody's answered. If he left anything, it'll be in his log. Mind yourself in there, something's been living aboard her."
+    "She's been dark for weeks and nobody's answered. If he left anything, it'll be in his log. Mind yourself in there."
   ],
   "beats": [
     {
