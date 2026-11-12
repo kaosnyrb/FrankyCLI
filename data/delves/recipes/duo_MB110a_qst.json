@@ -9,7 +9,8 @@
   "_note": [
     "BOARDING, LOOK 2 OF 3: the live ship (old remote qst13 'Boarding', 4 quests): its own crew, its escorts, and he disables it himself.",
     "THE PLAYER'S PART: restraint. Destroying the ship fails the job (the board beat's stage 90), so he has to knock its engines out, not win the fight the easy way, then fight the crew inside for the ledger.",
-    "No faction named aloud or on the card: 'a raider'. Crimson ship, guards and crew (bd1's ship); his ruling OT-94 keeps a Fleet member from being sent against the Fleet, so check this one rides that gate."
+    "No faction named aloud or on the card: 'a raider'. Crimson ship, guards and crew (bd1's ship); his ruling OT-94 keeps a Fleet member from being sent against the Fleet, so check this one rides that gate.",
+    "FRANCES (ship) and KIERAN (rework) 2026-11-12: the call now says how (aim for the engines) and warns of the escorts; the journal opens on the act. Frances's pick: YES, the ledger sits deep in the ship among the crew (the board beat places it at a crew spot), so the page stands. Kieran's pick (an escort's or a splash kill failing the job) is a build question, asked of Eliza."
   ],
   "place": {
     "altitude": 32.0,
@@ -26,7 +27,7 @@
     "elevenlabs": "CjIKi1zuI666pVsFrtyU"
   },
   "broadcast": [
-    "They write down every ship they take, cargo and all, and that book is the only proof we've got. Knock their engines out, don't blow them apart, and go in for it."
+    "They write down every ship they take, cargo and all, and that book is the only proof we've got. Aim for the engines, don't blow them apart, and mind the ones flying with them."
   ],
   "beats": [
     {
@@ -42,7 +43,7 @@
         "derelict": false,
         "dark": false
       },
-      "journal": "A raider over <Planet> kept a ledger of every hauler it robbed. I disabled the ship, boarded it and took the ledger.",
+      "journal": "I disabled the raider over <Planet>, boarded it and took the ledger.",
       "say": [
         "That's every hauler they ever touched, written in their own hand. We'll be busy for a month."
       ],

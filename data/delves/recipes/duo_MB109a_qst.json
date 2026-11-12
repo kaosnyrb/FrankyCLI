@@ -9,7 +9,8 @@
   "_note": [
     "BOARDING, LOOK 1 OF 3: the pirate-held ship (old remote qst12 'Boarding: Derelict', 8 quests): disabled, a crew aboard, escorts outside, lights on, the files to recover. Backport map, his release rule.",
     "THE PLAYER'S PART: the escorts, the dock, the fight through the crew, and finding the files inside.",
-    "No faction named aloud or on the card (his naming ruling): 'raiders', 'a government courier'. The ship is a Spacer combat ship standing in for the courier; his or Kim's pick if a courier hull reads better."
+    "No faction named aloud or on the card (his naming ruling): 'raiders', 'a government courier'. The ship is a Spacer combat ship standing in for the courier; his or Kim's pick if a courier hull reads better.",
+    "FRANCES (ship) and KIERAN (rework) 2026-11-12: the journal no longer claims a fight the step doesn't require (it completes on the files); the call says 'get the files'. Frances's pick answered NO: the files are a sealed quest item he cannot read, so the close says 'still sealed'. Kieran's pick answered: it finishes on the pickup (the board beat as built). Most of both reads were the reading sheet hiding the inside (the find objective, its marker, the crew); the sheet now shows it."
   ],
   "place": {
     "altitude": 32.0,
@@ -26,7 +27,7 @@
     "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
   },
   "broadcast": [
-    "That's our courier, and those aren't our people aboard her. Deal with whatever's flying cover, then get inside and bring the files out. I'd rather nobody read them first."
+    "That's our courier, and those aren't our people aboard her. Deal with whatever's flying cover, then get inside and get the files. I'd rather nobody read them first."
   ],
   "beats": [
     {
@@ -42,9 +43,9 @@
         "derelict": true,
         "dark": false
       },
-      "journal": "Raiders took a government courier over <Planet>. I boarded her, fought through their crew and brought the files out.",
+      "journal": "Raiders took a government courier over <Planet>. I boarded her and took the files back.",
       "say": [
-        "That's the files. Whatever they were after, they didn't get it."
+        "That's the files, still sealed. Whatever they were after, they didn't get it."
       ],
       "reward": "med"
     }

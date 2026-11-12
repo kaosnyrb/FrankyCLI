@@ -1,0 +1,117 @@
+{
+  "schema": 2,
+  "id": "duo_MB112a_qst",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-11-12 'yeah start' (one of every type by the 19th): the SOS family (old remote qst09 UC Navy SOS and qst10 Freestar SOS), on MB104a's rescue shape (played 11-04)",
+  "_note": [
+    "SOS: one survivor in an escape pod, his distress call the radio line on approach. MB104a's four steps: open the pod, check on him aboard, fly him to a city, see him off.",
+    "THE PLAYER'S PART: answering a call nobody else did, and the flight with a frightened man aboard.",
+    "The old SOS pair were UC Navy and Freestar; this is the base, and a UC or Freestar caller is a cheap variant (a different voice, a different city). No faction named aloud.",
+    "The pod model is MB104a's drifting cargo module as a stand-in; an escape pod mesh is his or Kim's pick."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "MB104a's.",
+    "second": {
+      "settlement": "New Atlantis"
+    },
+    "_second": "New Atlantis, so the two rescues do not land in the same city."
+  },
+  "prose": {
+    "name": "Rescue: Escape Pod over <Planet>",
+    "briefing": "An escape pod is broadcasting over <Planet>, one survivor aboard and his air running low. He needs picking up and taking somewhere safe.",
+    "card": "Escape pod beacon over <Planet>, one survivor, air running low. Pick him up and get him somewhere safe."
+  },
+  "speaker": {
+    "name": "Voice in the Pod",
+    "voice": "GenericMale01",
+    "elevenlabs": "TX3LPaxmHKxFdv7VOQHJ"
+  },
+  "broadcast": [
+    "This is an escape pod, one aboard, and I've got air for maybe a day. If anyone's out there, I'm the little light that isn't moving. Please don't fly past."
+  ],
+  "_speech": "Young, frightened, holding it together by talking. Liam (ElevenLabs, unused in any Delve) as a stand-in; his ear decides.",
+  "beats": [
+    {
+      "type": "use",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Open the escape pod over <Planet>",
+      "model": "Meshes\\ships\\modules\\cargo\\smod\\smod_cargo_panoptes_degama-1000_port.nif",
+      "_model": "MB104a's drifting cargo module as the pod, a stand-in.",
+      "name": "Escape Pod",
+      "message": {
+        "title": "Escape Pod",
+        "text": "The pod's seal hisses open. He's out and across into your airlock before you've finished docking."
+      }
+    },
+    {
+      "type": "talk",
+      "objective": "Check on him",
+      "person": {
+        "name": "Dane Whitlow",
+        "template": "UC_NA_MASTWorkerMale01",
+        "voice": "GenericMale01",
+        "elevenlabs": "TX3LPaxmHKxFdv7VOQHJ",
+        "hellos": [
+          [
+            "Still breathing. That's the main thing, isn't it?"
+          ],
+          [
+            "I keep listening for the alarm. It's only habit now."
+          ]
+        ],
+        "_bio": {
+          "age": "mid twenties (authored 2026-11-12)",
+          "from": "an engineer on a freighter that lost its reactor (his lines)",
+          "why_there": "the last one out, in a pod that went the wrong way (his lines)",
+          "wants": "to find out who else made it (his lines)"
+        }
+      },
+      "greeting": [
+        "When the ship went, everyone else got to the other pods first. I was the last one out, and mine went the wrong way. Where are we headed?"
+      ],
+      "exchanges": [
+        {
+          "prompt": "Somewhere safe. Sit down and breathe.",
+          "reply": [
+            "That I can do. Wake me if anything on this ship starts beeping."
+          ]
+        },
+        {
+          "prompt": "What happened to your ship?",
+          "reply": [
+            "The reactor went. We had about a minute, and most of us used it well."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ride",
+      "at": "AutofillGeneric01",
+      "place": "second",
+      "objective": "Fly him to <SecondPlace>",
+      "rider": 2
+    },
+    {
+      "type": "talk",
+      "rider": 2,
+      "objective": "See him off",
+      "journal": "An escape pod over <Planet> was broadcasting with one survivor and a day of air. I took him aboard and flew him to <SecondPlace>.",
+      "reward": "med",
+      "greeting": [
+        "This is me. The first thing I'm doing is finding out who else made it."
+      ],
+      "exchanges": [
+        {
+          "prompt": "I hope they all did.",
+          "reply": [
+            "So do I. Whatever happens, I owe you a drink I can't afford yet."
+          ]
+        }
+      ]
+    }
+  ]
+}

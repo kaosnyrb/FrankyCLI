@@ -9,7 +9,8 @@
   "_note": [
     "BOARDING, LOOK 3 OF 3: the true derelict (old remote qst14 'Recovery', 6 quests): disabled, dark (lights at 20%), a creature crew, an item to find.",
     "THE PLAYER'S PART: going into the dark, and finding the log among whatever moved in.",
-    "Register: quiet, a family's grief kept short. The sister does not say what she fears, and the close does not read the log aloud. A cargo hull (the hail probe's) as the freighter; his or Kim's pick if another reads more like a home."
+    "Register: quiet, a family's grief kept short. The sister does not say what she fears, and the close does not read the log aloud. A cargo hull (the hail probe's) as the freighter; his or Kim's pick if another reads more like a home.",
+    "FRANCES (rework) and KIERAN (rework) 2026-11-12: she cannot see 'his writing' over the radio, so the close is 'You've got it. I'll read it later, on my own.'; 'I'm glad it was you that went in' cut (unearned); the journal no longer walks the log out to her. Frances's pick YES: a creature crew is placed aboard (aboard.crew), so the dread stands. Kieran's pick: the log is a marked pickup deep in the ship (the board beat as built), not handed over on boarding."
   ],
   "place": {
     "altitude": 32.0,
@@ -41,9 +42,9 @@
         "derelict": true,
         "dark": true
       },
-      "journal": "A freighter had drifted dark over <Planet> for weeks. I boarded her, got past what was living aboard, and brought the captain's log out to his sister.",
+      "journal": "A freighter had drifted dark over <Planet> for weeks. I boarded her, got past what was living aboard, and found the captain's log for his sister.",
       "say": [
-        "That's his writing. I'll read it later, on my own. I'm glad it was you that went in."
+        "You've got it. I'll read it later, on my own."
       ],
       "reward": "med"
     }
