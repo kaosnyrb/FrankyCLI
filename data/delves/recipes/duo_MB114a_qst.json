@@ -9,7 +9,8 @@
   "_note": [
     "COMPANY RECOVERY: clear the raiders, take the firm's sample case from their takings, hand it to the firm's clerk in the city.",
     "THE PLAYER'S PART: the fight for the case, and bringing it to a city to a man who only cares that it is unopened.",
-    "No company named (his naming ruling): 'the firm'. The old MB26 went to named companies; a named firm is his call."
+    "No company named (his naming ruling): 'the firm'. The old MB26 went to named companies; a named firm is his call.",
+    "2026-11-12, Frances and Kieran (office/contractors/*/reviews/2026-11-12-delve-MB114a.md), both ship: Frances's pick, does the clerk know what's in it: NO, out of his depth all the way down. 'Looking anxious' and 'the firm will be delighted' cut, the record states the act. Kieran's pick, can he open it: NO, a carried item; 'still sealed' is always true. Kieran's marker on the clerk: a talk's marker sits on the person."
   ],
   "place": {
     "theme": {
@@ -38,7 +39,7 @@
     "elevenlabs": "zcIk2xc7SGwlywr4TzZu"
   },
   "broadcast": [
-    "The case is somewhere in that camp, and the firm would very much like it back before anyone gets curious. Bring it to me in the city, I'll be the one outside looking anxious."
+    "The case is somewhere in that camp, and the firm would very much like it back before anyone gets curious. Bring it to me in the city. I'll be waiting."
   ],
   "_speech": "Simon (ElevenLabs, unused in any Delve), a clerk out of his depth. His ear decides.",
   "beats": [
@@ -93,17 +94,17 @@
         {
           "prompt": "Still sealed. Here it is.",
           "reply": [
-            "Still sealed. The firm will be delighted, and I might be allowed to go home."
+            "Still sealed. I might be allowed to go home."
           ]
         },
         {
           "prompt": "What's in it that matters so much?",
           "reply": [
-            "Rock, mostly. Very expensive rock, and a map of where the rest of it is."
+            "I'm not allowed to know. That's rather the point."
           ]
         }
       ],
-      "journal": "Raiders took a mining firm's sample case to the <Place>. I cleared them out and brought the case, unopened, to the firm's clerk in <SecondPlace>.",
+      "journal": "I cleared the raiders at the <Place> and brought the firm's sample case, unopened, to their clerk in <SecondPlace>.",
       "reward": "med"
     }
   ]

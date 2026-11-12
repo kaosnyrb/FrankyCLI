@@ -9,7 +9,8 @@
   "_note": [
     "HAZARD: a loose asteroid is drifting into the shipping lane over a planet, and scavengers are sheltering behind it. Shoot it to pieces.",
     "THE PLAYER'S PART: the guards first, then the rock. The guarded twin (sd2's), so it is a fight as well as target practice.",
-    "No faction named aloud: 'scavengers'."
+    "No faction named aloud: 'scavengers'.",
+    "2026-11-12, Frances and Kieran (office/contractors/*/reviews/2026-11-12-delve-MB118a.md): both reworks were the sheet: it never showed the destroy's guard ships (fixed in delve_sheet). Frances's pick, are scavengers placed: YES, the guarded twin. Taken: the objective says ships then rock, her gladness is done ('haulers waiting all week') rather than said, the record states the act. Open for Eliza: whether the rock can break before the guards are dead; if it can, 'lane clear' can be early."
   ],
   "place": {
     "altitude": 32.0,
@@ -32,13 +33,13 @@
     {
       "type": "destroy",
       "at": "se_GeneralMarkerLocRef01",
-      "objective": "Break up the asteroid in the shipping lane",
+      "objective": "Clear the scavengers, then break up the asteroid",
       "model": "Meshes\\Landscape\\Rocks\\asteroids\\RockAsteroidRoughLarge01.nif",
       "name": "Loose Asteroid",
       "guards": "LShip_Spacer_Combat_A",
-      "journal": "A loose asteroid was drifting into the shipping lane over <Planet>, with scavengers hiding behind it. I cleared them off and broke it up.",
+      "journal": "I cleared the scavengers off the loose asteroid over <Planet> and broke it up.",
       "say": [
-        "That's the lane clear. The haulers will be glad, and so will I."
+        "That's the lane clear. I've had haulers waiting all week."
       ],
       "reward": "med"
     }

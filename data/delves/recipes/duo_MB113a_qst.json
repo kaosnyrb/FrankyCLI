@@ -9,7 +9,8 @@
   "_note": [
     "COURIER: the parcel is in his pack the moment he takes the job (carry), and the hand-over is a person, not a drop box: the talk that ends the job takes it.",
     "THE PLAYER'S PART: carrying something that matters to two people who cannot reach each other, and putting it in her hands.",
-    "Register: small and warm. Two sisters on different worlds; the parcel is seeds from the garden they grew up with. No names aloud."
+    "Register: small and warm. Two sisters on different worlds; the parcel is seeds from the garden they grew up with. No names aloud.",
+    "2026-11-12, Frances and Kieran (office/contractors/*/reviews/2026-11-12-delve-MB113a.md), both ship: Frances's pick, does the sender name the seeds: NO, so the sister's 'Seeds. She's sent me the garden.' is the reveal on the always-heard path. Her doubled hello cut (the greeting says it rather than asks it), the lamb is knots. Kieran's pick, a real parcel: YES, carry gives it on accept and the talk takes it (the sheet now shows carry). His hostile-residents worry: the theme already requires a non-hostile site."
   ],
   "place": {
     "theme": {
@@ -38,7 +39,7 @@
     "elevenlabs": "wCizWKvnaS3LOIUwHo98"
   },
   "broadcast": [
-    "That parcel's for my sister. It's seeds, from the garden we grew up with. Put it in her hands, would you, and not on a shelf."
+    "That parcel's for my sister. Put it in her hands, would you, and not on a shelf. She'll know what it is."
   ],
   "_speech": "Ava (ElevenLabs, unused in any Delve), warm and a little embarrassed to be asking. His ear decides.",
   "beats": [
@@ -65,7 +66,7 @@
         }
       },
       "greeting": [
-        "You've got the look of someone carrying something for me. Is that from my sister?"
+        "That's from my sister."
       ],
       "exchanges": [
         {
@@ -77,7 +78,7 @@
         {
           "prompt": "How do you know it's from her?",
           "reply": [
-            "Nobody else wraps a parcel like they're tying up a lamb. She's done it that way since we were small."
+            "Nobody else puts that many knots in a parcel. She's done it that way since we were small."
           ]
         }
       ],

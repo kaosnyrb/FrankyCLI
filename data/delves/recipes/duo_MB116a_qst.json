@@ -9,7 +9,8 @@
   "_note": [
     "DARK SITE: a hostile site holds a prototype nobody is meant to know about. He uses the site's terminal to open the vault, then destroys what's inside.",
     "THE PLAYER'S PART: getting to the terminal and the vault through a site that is guarded by whoever holds it, and the destroy, which is the job.",
-    "No faction named aloud (his naming ruling): 'whoever's running that site'. Quiet register: the caller does not explain the prototype, and the close says only that it is gone."
+    "No faction named aloud (his naming ruling): 'whoever's running that site'. Quiet register: the caller does not explain the prototype, and the close says only that it is gone.",
+    "2026-11-12, Frances and Kieran (office/contractors/*/reviews/2026-11-12-delve-MB116a.md): Frances's pick, does it place hostiles: YES, the who-guard (MB42a's built field), so the client's warning is true on every draw; the card gains the keepers. 'Something heavy behind you' cut to what the machine did; the record states the act. Kieran's terminal marker: a use step's marker sits on its object."
   ],
   "place": {
     "theme": {
@@ -22,13 +23,21 @@
       ]
     },
     "_theme": "A built hostile site, held by whoever built it.",
-    "parsecs": 20
+    "parsecs": 20,
+    "who": {
+      "kind": "spacers",
+      "list": "duo_GangMembersList_Spacer",
+      "min": 3,
+      "max": 5,
+      "beat": 1
+    },
+    "_who": "Frances and Kieran 2026-11-12: the guards the call warns of are placed, not left to the draw's residents. MB42a's built field."
   },
   "minLevel": 10,
   "prose": {
     "name": "Sabotage: The Dark Site at the <Place> on <Planet>",
     "briefing": "Someone is building something at the <Place> that isn't on any register. The client wants the site's vault opened and whatever is inside destroyed.",
-    "card": "There's a vault at the <Place> that isn't on any register. Open it from their own terminal, then destroy what's inside."
+    "card": "There's a vault at the <Place> that isn't on any register, and its keepers won't want you near it. Open it, then destroy what's inside."
   },
   "speaker": {
     "name": "The Client",
@@ -47,7 +56,7 @@
       "objective": "Open the vault from the site's terminal",
       "message": {
         "title": "Site Terminal",
-        "text": "Vault seals released. Somewhere behind you, something heavy unlocks."
+        "text": "Vault seals released."
       },
       "journal": "I opened the vault at the <Place> from their own terminal. I need to destroy what's inside it."
     },
@@ -59,7 +68,7 @@
       "name": "Prototype",
       "explosion": "fragGrenadeExplosion",
       "objective": "Destroy the prototype in the vault",
-      "journal": "Someone was building something at the <Place> that wasn't on any register. I opened their vault and destroyed what was inside.",
+      "journal": "I opened the vault at the <Place> from their own terminal and destroyed what was inside.",
       "say": [
         "That's it gone, then. Nobody will be building another one from those parts."
       ],

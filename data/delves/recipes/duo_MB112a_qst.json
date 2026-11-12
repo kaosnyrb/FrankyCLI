@@ -10,7 +10,8 @@
     "SOS: one survivor in an escape pod, his distress call the radio line on approach. MB104a's four steps: open the pod, check on him aboard, fly him to a city, see him off.",
     "THE PLAYER'S PART: answering a call nobody else did, and the flight with a frightened man aboard.",
     "The old SOS pair were UC Navy and Freestar; this is the base, and a UC or Freestar caller is a cheap variant (a different voice, a different city). No faction named aloud.",
-    "The pod model is MB104a's drifting cargo module as a stand-in; an escape pod mesh is his or Kim's pick."
+    "The pod model is MB104a's drifting cargo module as a stand-in; an escape pod mesh is his or Kim's pick.",
+    "2026-11-12, Frances and Kieran (office/contractors/*/reviews/2026-11-12-delve-MB112a.md): Frances's forced pick, does he speak at the goodbye: YES, and he already did; the sheet hid a rider talk's lines (fixed in delve_sheet). His thanks is now her 'You didn't fly past', handed back. Taken: 'most of us used it well' cut (it said some died, after 'everyone else got to the pods'), the seal opens when he lets go of the controls, the stock walk-up cut. Kieran's 'day of air as a clock': NO, a line on the card; a clock on a rescue taxi turns kindness into a race."
   ],
   "place": {
     "altitude": 32.0,
@@ -44,7 +45,7 @@
       "name": "Escape Pod",
       "message": {
         "title": "Escape Pod",
-        "text": "The pod's seal hisses open. He's out and across into your airlock before you've finished docking."
+        "text": "The pod's seal hisses open. He's out and across into your airlock before you've let go of the controls."
       }
     },
     {
@@ -56,9 +57,6 @@
         "voice": "GenericMale01",
         "elevenlabs": "TX3LPaxmHKxFdv7VOQHJ",
         "hellos": [
-          [
-            "Still breathing. That's the main thing, isn't it?"
-          ],
           [
             "I keep listening for the alarm. It's only habit now."
           ]
@@ -83,7 +81,7 @@
         {
           "prompt": "What happened to your ship?",
           "reply": [
-            "The reactor went. We had about a minute, and most of us used it well."
+            "The reactor went. We had about a minute."
           ]
         }
       ]
@@ -99,7 +97,7 @@
       "type": "talk",
       "rider": 2,
       "objective": "See him off",
-      "journal": "An escape pod over <Planet> was broadcasting with one survivor and a day of air. I took him aboard and flew him to <SecondPlace>.",
+      "journal": "An escape pod over <Planet> was broadcasting with one survivor and a day of air. I took him aboard, flew him to <SecondPlace> and saw him off.",
       "reward": "med",
       "greeting": [
         "This is me. The first thing I'm doing is finding out who else made it."
@@ -108,7 +106,7 @@
         {
           "prompt": "I hope they all did.",
           "reply": [
-            "So do I. Whatever happens, I owe you a drink I can't afford yet."
+            "So do I. You didn't fly past, you know. I won't forget that."
           ]
         }
       ]

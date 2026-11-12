@@ -9,7 +9,8 @@
   "_note": [
     "HAIL: a pilot whose navigation has died is circling over a planet, frightened. He hails the ship and talks him down.",
     "THE PLAYER'S PART: the talk is the job. A frightened man needs one steady voice, and the closing line is the player telling him what to do.",
-    "One speaker: the pilot is both the call on approach and the ship he hails (a hailed ship speaks in the recipe speaker's voice). No give, ends or perk: the space build resolves none yet."
+    "One speaker: the pilot is both the call on approach and the ship he hails (a hailed ship speaks in the recipe speaker's voice). No give, ends or perk: the space build resolves none yet.",
+    "2026-11-12, Frances and Kieran (office/contractors/*/reviews/2026-11-12-delve-MB117a.md): both reworks were the sheet: it hid a ship talk's lines (fixed in delve_sheet); the first prompt is the steady instruction. Frances's pick, does the player steer him: NO, he steadies him, so 'talk him down' (a landing nobody stages) became 'calm him down' on the card, objective and record. The fuel clock is off the card (Kieran: no clock, and a scared man on a timer is a race). Kieran's pick: one path, the calming line first."
   ],
   "place": {
     "altitude": 32.0,
@@ -17,8 +18,8 @@
   },
   "prose": {
     "name": "Rescue: The Circling Pilot over <Planet>",
-    "briefing": "A pilot over <Planet> has lost his navigation and has been flying in circles for an hour. Someone needs to hail him and talk him down.",
-    "card": "A pilot over <Planet> lost his nav and won't stop circling. Hail him and talk him down before his fuel goes."
+    "briefing": "A pilot over <Planet> has lost his navigation and has been flying in circles for an hour. Someone needs to hail him and calm him down.",
+    "card": "A pilot over <Planet> lost his nav and won't stop circling. Hail him and calm him down."
   },
   "speaker": {
     "name": "Circling Pilot",
@@ -34,7 +35,7 @@
       "type": "talk",
       "at": "se_GeneralMarkerLocRef01",
       "ship": "LvlShip_UCCitizen_Cargo",
-      "objective": "Hail the circling ship over <Planet>",
+      "objective": "Hail the circling pilot and calm him down",
       "greeting": [
         "Oh, thank goodness, a real voice. My nav's dead, every reading says I'm somewhere I'm not, and I've stopped trusting my own eyes."
       ],
@@ -52,7 +53,7 @@
           ]
         }
       ],
-      "journal": "A pilot over <Planet> had lost his navigation and was flying in circles. I hailed him and talked him down.",
+      "journal": "A pilot over <Planet> had lost his navigation and was flying in circles. I hailed him and calmed him down.",
       "reward": "easy"
     }
   ]
