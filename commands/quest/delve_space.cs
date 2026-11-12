@@ -817,7 +817,10 @@ namespace FrankyCLI
                 clone.Objectives.Insert(clone.Objectives.IndexOf(ob) + 1, obF);
                 Console.WriteLine($"  +obj     : {BoardFindObjective}, the find, on the item (alias {boardItemAlias.ID})");
 
-                var stages = new List<int> { BoardedStage, BoardLostStage };
+                // A derelict has no lost-before-boarding stage: vanilla's derelict is a DEAD ship (crew zero), so its death
+                // fires on load (MB111a, 2026-11-12); his ruling: no death-fail on a derelict. A live ship keeps it.
+                var stages = new List<int> { BoardedStage };
+                if (!beat.aboard!.derelict) stages.Add(BoardLostStage);
                 if (beat.guards != null || beat.aboard.derelict) stages.Insert(0, BoardLoadStage);
                 foreach (var st in stages)
                 {
@@ -901,11 +904,15 @@ namespace FrankyCLI
                 var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == (int)target.ID);
                 int gone = entry?.Scripts.RemoveAll(s => s.Name == "DefaultAliasOnDeath") ?? 0;
                 if (gone != 1) { Console.WriteLine($"REFUSED: the shell's PrimaryRef (alias {target.ID}) carries {gone} DefaultAliasOnDeath, not the one a board replaces."); return 1; }
-                var dh = StageHook("DefaultAliasOnDeath", BoardLostStage, t.entryStage,
-                                   new ScriptIntProperty { Name = "TurnOffStage", Data = BoardedStage, Flags = ScriptProperty.Flag.Edited });
-                if (AttachHook(vma, clone.FormKey, (int)target.ID, dh, HookEntry.FindOrCreate, true, bm, BoardLostStage, t.entryStage) == Hooked.AlreadyCarries)
-                { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnDeath."); return 1; }
-                Console.WriteLine($"  +hook    : alias {target.ID} DefaultAliasOnDeath sets {BoardLostStage} after {t.entryStage}, off from {BoardedStage}; a ship lost before boarding fails it");
+                if (!beat.aboard!.derelict)
+                {
+                    var dh = StageHook("DefaultAliasOnDeath", BoardLostStage, t.entryStage,
+                                       new ScriptIntProperty { Name = "TurnOffStage", Data = BoardedStage, Flags = ScriptProperty.Flag.Edited });
+                    if (AttachHook(vma, clone.FormKey, (int)target.ID, dh, HookEntry.FindOrCreate, true, bm, BoardLostStage, t.entryStage) == Hooked.AlreadyCarries)
+                    { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnDeath."); return 1; }
+                    Console.WriteLine($"  +hook    : alias {target.ID} DefaultAliasOnDeath sets {BoardLostStage} after {t.entryStage}, off from {BoardedStage}; a ship lost before boarding fails it");
+                }
+                else Console.WriteLine($"  -hook    : alias {target.ID} has no death-fail: a derelict is a dead ship to the game (crew zero), his 2026-11-12 ruling");
                 // THE SHIP LOADS ROUND HIM: the escorts and a derelict's dead systems (his old OnCellLoad), sd2's played hook.
                 if (beat.guards != null || beat.aboard!.derelict)
                 {
@@ -1184,7 +1191,7 @@ namespace FrankyCLI
                     code[BoardedStage] = inside;
                     // LOST BEFORE BOARDING: the board's own failure (MissionQuestScript.MissionFailed: every objective failed, the
                     // fail stage, the shutdown), his old OnDeath's fail-and-stop in the board's words.
-                    code[BoardLostStage] = new()
+                    if (!beat.aboard!.derelict) code[BoardLostStage] = new()
                     {
                         "Debug.Trace(\"[board] \" + Self + \" stage " + BoardLostStage + ": the ship was lost before he boarded\")",
                         "Quest __temp = Self as Quest",
@@ -1997,13 +2004,13 @@ namespace FrankyCLI
                     fail += Check($"the ship's death sets {BoardLostStage}, never the completing stage, and is off from {BoardedStage}",
                                   dh == null || dh.Count != 1 ? $"{dh?.Count ?? 0} hook(s)"
                                       : $"{dh[0].Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == "StageToSet")?.Data} off {dh[0].Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == "TurnOffStage")?.Data}",
-                                  $"{BoardLostStage} off {BoardedStage}");
+                                  r.beats[0].aboard!.derelict ? "0 hook(s)" : $"{BoardLostStage} off {BoardedStage}");
                     var obF = q.Objectives.FirstOrDefault(o => o.Index == BoardFindObjective);
                     fail += Check($"objective {BoardFindObjective} is the find and points at BoardItem",
                                   obF == null ? "missing" : $"{obF.DisplayText?.String} -> {string.Join(",", obF.Targets.Select(x => x.AliasID))}",
                                   $"{Expand(r.beats[0].aboard!.find!, t)} -> {(item.Count == 1 ? item[0].ID.ToString() : "?")}");
-                    foreach (var st in new[] { BoardedStage, BoardLostStage })
-                        fail += Check($"stage {st} exists", q.Stages.Any(s => s.Index == st).ToString(), "True");
+                    fail += Check($"stage {BoardedStage} exists", q.Stages.Any(s => s.Index == BoardedStage).ToString(), "True");
+                    fail += Check($"stage {BoardLostStage} exists exactly when the ship is not a derelict", q.Stages.Any(s => s.Index == BoardLostStage).ToString(), (!r.beats[0].aboard!.derelict).ToString());
                     string frag = File.ReadAllText(bm.PscPath);
                     string Body(int st) => frag.Split($"Function {FragmentFunction(st)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
                     fail += Check($"stage {BoardedStage} places the item at a crew marker and forces it into BoardItem",
@@ -2019,7 +2026,7 @@ namespace FrankyCLI
                     fail += Check($"stage {BoardLoadStage} makes the ship a vanilla derelict exactly when aboard.derelict (BEDerelict + crew to zero; a neutral wreck hails, MB111a)",
                                   (Body(BoardLoadStage).Contains("wreck.AddKeyword(Game.GetFormFromFile(1305684") && Body(BoardLoadStage).Contains("wreck.DamageValue(crewAV, wreck.GetValue(crewAV))")).ToString(),
                                   r.beats[0].aboard!.derelict.ToString());
-                    fail += Check($"stage {BoardLostStage} fails the mission (MissionFailed)", Body(BoardLostStage).Contains("kmyQuest.MissionFailed()").ToString(), "True");
+                    fail += Check($"stage {BoardLostStage} fails the mission (MissionFailed) exactly when the ship is not a derelict", Body(BoardLostStage).Contains("kmyQuest.MissionFailed()").ToString(), (!r.beats[0].aboard!.derelict).ToString());
                     fail += Check($"PrimaryRef carries no {UseScript} (a ship is not pressed)",
                                   (vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.Any(s => s.Name == UseScript) ?? false).ToString(), "False");
                     fail += Check($"no {r.id}_b1 activator is left in the plugin", (objAct != null).ToString(), "False");
