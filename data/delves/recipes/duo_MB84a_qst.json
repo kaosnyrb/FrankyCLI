@@ -2,8 +2,8 @@
   "schema": 2,
   "id": "duo_MB84a_qst",
   "template": "board",
-  "deal": "_duo_MB_MissionNode_test",
-  "_deal": "The board's test node, until he plays it.",
+  "deal": "duo_MB_MissionNode_Assault",
+  "_deal": "Assault, his pick 2026-11-12 14:55 after his play (a hold against raiders, as MB55a).",
   "author": "jessica",
   "source": "his 2026-10-30 07:49 \"I like the idea of medic missions to, going out to help people\", then 07:51 \"yup\"",
   "_note": [
