@@ -2104,8 +2104,14 @@ namespace FrankyCLI
                                   to?.External == null ? "not an external ship alias"
                                       : $"{measured!.Object.FormKey} {to.External.Quest.FormKey} alias {to.External.AliasID} optional {to.Flags?.HasFlag(QuestReferenceAlias.Flag.Optional)}",
                                   $"{q.FormKey} 0174A2:Starfield.esm alias 0 optional True");
-                    fail += Check("no unique-actor Player alias (nothing measures to the player in space)",
-                                  q.Aliases.OfType<IQuestReferenceAliasGetter>().Count(a => a.UniqueActor.FormKey == PlayerNpc).ToString(), "0");
+                    // A board carries ONE Player alias of its own: the boarded hook (DefaultAliasOnLocationChange into the interior),
+                    // a location change, never a distance. This leg said "0" for every space Delve and met a board with an arrival
+                    // call for the first time on MB111a (2026-11-12): the rule was coarser than its subject. The leg above still
+                    // proves the arrival hook measures to his ship.
+                    bool boards = SpaceBoarding(r, t);
+                    fail += Check(boards ? "exactly one unique-actor Player alias, the board's boarded hook (no distance measures to the player in space)"
+                                         : "no unique-actor Player alias (nothing measures to the player in space)",
+                                  q.Aliases.OfType<IQuestReferenceAliasGetter>().Count(a => a.UniqueActor.FormKey == PlayerNpc).ToString(), boards ? "1" : "0");
                 }
                 var says = (vma.Script?.Properties ?? new List<IScriptPropertyGetter>()).OfType<IScriptObjectPropertyGetter>().Where(p => p.Name.StartsWith("Say")).ToList();
                 fail += Check("each Say property names one of this quest's scenes",
