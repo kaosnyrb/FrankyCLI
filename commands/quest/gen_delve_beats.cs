@@ -949,7 +949,7 @@ namespace FrankyCLI
             if (secondRemote) { Console.WriteLine("  leash    : none on the second place; it is a second request, not a drive away"); return 0; }
             // The drive leashes are the BEATS template's (its places 0, 10 and a created third). Until 2026-11-12 this keyed on the
             // literal ids 0, 10 and 33 and returned when 10 and 33 were absent, which on every other template they were; then a
-            // board's planetBy "parent" alias was allocated id 33 and read as a third place (OT-32 probe rp2). Template ids now,
+            // board probe's parent-link alias (planetBy, retired 2026-11-12) got id 33 and read as a third place (OT-32 probe rp2). Template ids now,
             // and the board leaves here as it always effectively did.
             if (t.kind != "beats") return 0;
             uint mainId = (uint)t.placeAlias, secondId = (uint)t.secondPlaceAlias;
@@ -3136,45 +3136,14 @@ namespace FrankyCLI
                 fail += Check($"place alias {label}'s request keeps to the player's star system (IsInSameCurrentLocationAsRef player LocTypeStarSystem == 1)",
                               HoldsToSystem(pl?.ALPS?.Conditions).ToString(), "True");
             }
-            // place.requestKeyword (OT-32 probe, 2026-11-12): the request's keyword is the one the recipe asked for, read back.
-            foreach (var (shape, label) in new[] { (r.place, t.placeAlias), (r.place.second, t.secondPlaceAlias) })
-            {
-                if (shape?.requestKeyword is not string rk) continue;
-                var alps = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)label)?.ALPS;
-                string got = alps == null ? "no request" : alps.PcmTypeKeyword.IsNull ? "none" : alps.PcmTypeKeyword.FormKey == QuestGeneralRequest ? "general" : alps.PcmTypeKeyword.FormKey.ToString();
-                fail += Check($"place alias {label}'s request keyword is the recipe's ({rk})", got, rk);
-            }
             // place.planet (2026-11-02): a request pins the planet the recipe named, and no request pins one it did not.
             foreach (var (shape, label) in new[] { (r.place, t.placeAlias), (r.place.second, t.secondPlaceAlias) })
             {
                 var alps = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)label)?.ALPS;
                 if (alps == null && shape?.planet == null) continue;
-                bool bySurface = shape?.planetBy == "surface";
-                bool byParent = shape?.planetBy == "parent" || bySurface;
-                string want = shape?.planet is string pn && !byParent ? Planets[pn].ToString() : "none";
-                fail += Check($"place alias {label}'s request pins {(byParent ? "no planet by condition (planetBy parent)" : shape?.planet ?? "no planet")} (GetIsCurrentLocationExact == 1)",
+                string want = shape?.planet is string pn ? Planets[pn].ToString() : "none";
+                fail += Check($"place alias {label}'s request pins {(shape?.planet ?? "no planet")} (GetIsCurrentLocationExact == 1)",
                               PinsPlanet(alps?.Conditions)?.ToString() ?? "none", want);
-                // planetBy "parent" (OT-32 probe, 2026-11-12): the request's parent is an alias holding exactly the planet, listed
-                // before it, and the request carries the parent-link bit. Read back, never assumed from the build's print.
-                var req = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)label);
-                var parent = req?.ParentSystemLocationAliasID is int pid ? q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)pid) : null;
-                string gotLink = parent == null ? "none"
-                    : $"{parent.SpecificLocation.FormKey} before={q.Aliases.ToList().IndexOf(parent) < q.Aliases.ToList().IndexOf(req!)} bit={(((uint)(req!.Flags ?? 0)) & 0x40000000u) != 0}";
-                if (bySurface)
-                {
-                    // planetBy "surface": the surface was found by relation at build (refused unless exactly one), so this
-                    // reads back what is WRITTEN, not a re-derivation: a parent listed first holding a location, the bit,
-                    // and Request Keyword PCM_QuestGeneral on the request.
-                    string gotS = parent == null ? "none"
-                        : $"holds={(parent.SpecificLocation.IsNull ? "nothing" : "a location")} before={q.Aliases.ToList().IndexOf(parent) < q.Aliases.ToList().IndexOf(req!)} bit={(((uint)(req!.Flags ?? 0)) & 0x40000000u) != 0} kw={req!.ALPS?.PcmTypeKeyword.FormKey == QuestGeneralRequest}";
-                    fail += Check($"place alias {label}'s request takes {shape!.planet}'s surface from a parent alias ({(parent == null ? "none" : parent.SpecificLocation.FormKey.ToString())}), listed first, link bit, Request Keyword PCM_QuestGeneral",
-                                  gotS, "holds=a location before=True bit=True kw=True");
-                    continue;
-                }
-                string wantLink = byParent ? $"{Planets[shape!.planet!]} before=True bit=True" : "none";
-                if (byParent || parent != null)
-                    fail += Check($"place alias {label}'s request takes its planet from a parent alias holding {(byParent ? shape!.planet : "nothing")}, listed first, with the link bit",
-                                  gotLink, wantLink);
             }
             // OT-91, his 2026-10-30: a request carries habitability and the level band only when the recipe asked (ShapePlanet).
             foreach (var (shape, label) in new[] { (r.place, t.placeAlias), (r.place.second, t.secondPlaceAlias) })
