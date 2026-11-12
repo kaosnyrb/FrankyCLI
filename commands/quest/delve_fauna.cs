@@ -318,8 +318,23 @@ namespace FrankyCLI
             var table = JsonSerializer.Deserialize<FaunaTable>(File.ReadAllText(path), StrictJsonOpts)
                         ?? throw new InvalidOperationException($"place.planet: {path} is empty.");
             if (table.schema != 1) throw new InvalidOperationException($"place.planet: {path} is schema {table.schema}; this build reads 1.");
-            return table.planets.ToDictionary(p => p.name, p => FormKey.Factory(p.location), StringComparer.Ordinal);
+            var all = table.planets.ToDictionary(p => p.name, p => FormKey.Factory(p.location), StringComparer.Ordinal);
+            foreach (var (name, loc) in LifelessBodies)
+                if (!all.TryAdd(name, loc))
+                    throw new InvalidOperationException($"place.planet: '{name}' is in fauna.json now; take it out of LifelessBodies.");
+            return all;
         }
+
+        /// <summary>
+        /// Bodies a recipe may pin that fauna.json cannot list (it holds only worlds WITH life). A CLOSED table, as the
+        /// settlements one is: a body is added when a recipe needs one, its location read off the record (gen_inspect
+        /// location), never searched for by name at build. The class fix is `gen_delve fauna` writing every planet and moon;
+        /// not done here because the hunt missions read that file. Pluto: his 2026-11-12 pick for OT-32 (tungsten).
+        /// </summary>
+        private static readonly (string name, FormKey loc)[] LifelessBodies =
+        {
+            ("Pluto", FormKey.Factory("01B780:Starfield.esm")),   // SSol_PPluto, LocTypePlanet + LocTypeMajorOrbital
+        };
 
         private sealed class FaunaTable
         {
