@@ -53,7 +53,7 @@
       "at": "REMarkerMediumLocRef",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Site Terminal",
-      "objective": "Open the vault from the site's terminal",
+      "objective": "Open the vault from the terminal at the <Place>",
       "message": {
         "title": "Site Terminal",
         "text": "Vault seals released."
