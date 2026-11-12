@@ -1,0 +1,69 @@
+{
+  "schema": 2,
+  "id": "duo_MB116a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-11-12 'yeah start' and 'keep going' (one of every type by the 19th): the dark site family (old MB15: get in somewhere you shouldn't be, do a thing, get out), and the verb grid's use-then-destroy (OT-4F)",
+  "_note": [
+    "DARK SITE: a hostile site holds a prototype nobody is meant to know about. He uses the site's terminal to open the vault, then destroys what's inside.",
+    "THE PLAYER'S PART: getting to the terminal and the vault through a site that is guarded by whoever holds it, and the destroy, which is the job.",
+    "No faction named aloud (his naming ruling): 'whoever's running that site'. Quiet register: the caller does not explain the prototype, and the close says only that it is gone."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A built hostile site, held by whoever built it.",
+    "parsecs": 20
+  },
+  "minLevel": 10,
+  "prose": {
+    "name": "Sabotage: The Dark Site at the <Place> on <Planet>",
+    "briefing": "Someone is building something at the <Place> that isn't on any register. The client wants the site's vault opened and whatever is inside destroyed.",
+    "card": "There's a vault at the <Place> that isn't on any register. Open it from their own terminal, then destroy what's inside."
+  },
+  "speaker": {
+    "name": "The Client",
+    "voice": "GenericMale01",
+    "elevenlabs": "nPczCjzI2devNBz1zQrb"
+  },
+  "broadcast": [
+    "Whoever's running that site won't be pleased to see you. Their terminal opens the vault. What's inside, I don't need back. I need it gone."
+  ],
+  "beats": [
+    {
+      "type": "use",
+      "at": "REMarkerMediumLocRef",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Site Terminal",
+      "objective": "Open the vault from the site's terminal",
+      "message": {
+        "title": "Site Terminal",
+        "text": "Vault seals released. Somewhere behind you, something heavy unlocks."
+      },
+      "journal": "I opened the vault at the <Place> from their own terminal. I need to destroy what's inside it."
+    },
+    {
+      "type": "destroy",
+      "at": "RECenterLocRef",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "_model": "A prototype or sealed device, his or Kim's pick; the footlocker is the stand-in.",
+      "name": "Prototype",
+      "explosion": "fragGrenadeExplosion",
+      "objective": "Destroy the prototype in the vault",
+      "journal": "Someone was building something at the <Place> that wasn't on any register. I opened their vault and destroyed what was inside.",
+      "say": [
+        "That's it gone, then. Nobody will be building another one from those parts."
+      ],
+      "reward": "hard"
+    }
+  ]
+}

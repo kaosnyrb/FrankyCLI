@@ -1,0 +1,58 @@
+{
+  "schema": 2,
+  "id": "duo_MB115a_qst",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-11-12 'yeah start' and 'keep going' (one of every type by the 19th): the asteroid survey family (old MB08: fly out and scan, a random box), with the first real use of ask at an object (OT-9J, played as a probe 11-04)",
+  "_note": [
+    "ASTEROID SURVEY: a survey probe left on a rock months ago; he reads it, it shows a rich seam, and he decides who gets the reading.",
+    "THE PLAYER'S PART: the choice. Both answers are bad or worse (his CHOICE rule): the office that hired him will strip the rock with a company rig; the prospector who has been asking will work it by hand and pay more, but the office paid for the probe.",
+    "Replaces the old payoff (a random box from fifteen) with a decision; his 11-03 worry was exactly 'move to a place and push a button'.",
+    "The probe model is the one-beat board's default activator (MB01a's); a survey probe mesh is his or Kim's pick."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "His 32 band top."
+  },
+  "prose": {
+    "name": "Survey: The Probe on the Rock over <Planet>",
+    "briefing": "A survey office left a probe on an asteroid over <Planet> months ago and never went back for the reading. They want it collected.",
+    "card": "We left a survey probe on a rock over <Planet> and never collected the reading. Fly out and get it for us."
+  },
+  "speaker": {
+    "name": "Survey Office",
+    "voice": "GenericFemale01",
+    "elevenlabs": "r5iFzIytiA1rzjhWFCjW"
+  },
+  "broadcast": [
+    "That's our probe on the big rock, the one with the light. Pull the reading and send it straight to us. It's been out there long enough that someone else might come looking."
+  ],
+  "beats": [
+    {
+      "type": "use",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Read the survey probe over <Planet>",
+      "name": "Survey Probe",
+      "ask": {
+        "title": "Survey Probe",
+        "text": "The reading shows a seam of rare metal running right through the rock. A prospector has left a message on the probe too: he'll pay double for the coordinates, and he works by hand.",
+        "answers": [
+          {
+            "label": "Send it to the survey office",
+            "journal": "I read the survey probe over <Planet> and sent its reading to the office that hired me. They'll bring a company rig to strip the rock.",
+            "reward": "med"
+          },
+          {
+            "label": "Sell it to the prospector",
+            "journal": "I read the survey probe over <Planet> and sold the coordinates to the prospector instead. He'll work it by hand. The office paid for that probe.",
+            "reward": "hard"
+          }
+        ]
+      },
+      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "_model": "28a's satellite beacon as the probe, a stand-in; his or Kim's pick."
+    }
+  ]
+}
