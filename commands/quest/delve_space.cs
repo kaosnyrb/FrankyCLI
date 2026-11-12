@@ -1148,9 +1148,17 @@ namespace FrankyCLI
                         $"    SetStage({t.completeStage})",
                         "    Return",
                         "EndIf",
-                        "ObjectReference found = spots[Utility.RandomInt(0, spots.Length - 1)].PlaceAtMe(BoardItem, 1, True, False, True, None, None, True)",
+                        // A crew marker is an ACTOR spawn point: an actor settles onto the navmesh, a placed item stays where the
+                        // marker is, and on bd2 (2026-11-12) that was under a deck. Vanilla's own drop, LC165QuestScript.DropStarbornItem:
+                        // an XMarker (00003B) snapped to the nearest navmesh, the item placed there and keyframed, the marker deleted.
+                        "ObjectReference spot = spots[Utility.RandomInt(0, spots.Length - 1)]",
+                        "ObjectReference floor = spot.PlaceAtMe(Game.GetFormFromFile(59, \"Starfield.esm\"), 1, False, False, True, None, None, True)",
+                        "floor.MoveToNearestNavmeshLocation()",
+                        "ObjectReference found = floor.PlaceAtMe(BoardItem, 1, True, False, True, None, None, True)",
+                        "found.SetMotionType(2)",
                         "Alias_BoardItem.ForceRefTo(found)",
-                        "Debug.Trace(\"[board] \" + Self + \" the item is \" + found)",
+                        "Debug.Trace(\"[board] \" + Self + \" the item is \" + found + \", marker z \" + spot.GetPositionZ() + \", navmesh z \" + floor.GetPositionZ())",
+                        "floor.Delete()",
                     });
                     if (ab.crew != null)
                         inside.AddRange(new[]
@@ -1993,6 +2001,9 @@ namespace FrankyCLI
                     string Body(int st) => frag.Split($"Function {FragmentFunction(st)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
                     fail += Check($"stage {BoardedStage} places the item at a crew marker and forces it into BoardItem",
                                   (Body(BoardedStage).Contains("PlaceAtMe(BoardItem") && Body(BoardedStage).Contains("Alias_BoardItem.ForceRefTo(found)")).ToString(), "True");
+                    fail += Check($"stage {BoardedStage} snaps the item to the navmesh and keyframes it (a crew marker can sit under a deck, bd2)",
+                                  (Body(BoardedStage).Contains("floor.MoveToNearestNavmeshLocation()") && Body(BoardedStage).Contains("found = floor.PlaceAtMe(BoardItem")
+                                   && Body(BoardedStage).Contains("found.SetMotionType(2)")).ToString(), "True");
                     fail += Check($"stage {BoardedStage} spawns a crew exactly when aboard.crew is set",
                                   Body(BoardedStage).Contains("PlaceAtMe(Crew.GetAt").ToString(), (r.beats[0].aboard!.crew != null).ToString());
                     fail += Check($"stage {BoardedStage} rolls gravity and sweeps lights exactly as aboard says (derelict, dark)",
