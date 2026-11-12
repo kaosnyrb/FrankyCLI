@@ -13,7 +13,8 @@
     "hold. MB55a's shape with a person. Buildable today (the bay model is a stand-in). Pay: med.",
     "FIXED 2026-11-10: 'defend: 1' pointed at the talk, which leaves no object to defend; dropped, so the hold holds the bay (defending a person is not a part, and his rule: missions must not rely on NPCs). Her greeting no longer opens on the 'X? Good.' tic; her hello asks if you're the help, the greeting answers it. _bio added. Her voice line changed: one revoice.",
     "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Settlement Contract. Protect the medic's treatment bay at the <Place> on <Planet> until her patient is stable. Payment on contract completion.\"",
-    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him.",
+    "REWRITTEN 2026-11-12, his play ('the lore was off. The mission was in an unfinished hanger so there was no med bay etc') and his pick, route A: true at ANY site. No bay, no patient on a table: she stands alone at the centre, so the stake is what she carries, the painkillers for her whole round. A placed bay waits on OT-61 (place.dressing). Voiced lines changed: broadcast, greeting, three replies, the hold's close (a revoice)."
   ],
   "place": {
     "theme": {
@@ -29,9 +30,9 @@
     "parsecs": 12
   },
   "prose": {
-    "name": "Defense: Treatment Bay at the <Place> on <Planet>",
-    "briefing": "A medic at the <Place> is mid-operation in a field treatment bay, and someone outside wants the painkillers in her cabinet.",
-    "card": "I'm mid-operation at the <Place>, and people outside want the painkillers in my cabinet. Keep them out until my patient is stable."
+    "name": "Defense: The Medic's Case at the <Place> on <Planet>",
+    "briefing": "A travelling medic at the <Place> carries the painkillers for every settlement on her round, and raiders have come for them.",
+    "card": "I carry the painkillers for every settlement on my round, and someone's found out. I'm at the <Place>. Keep them off me."
   },
   "beats": [
     {
@@ -52,35 +53,35 @@
         "_bio": {
           "age": "fifties (authored 2026-11-10)",
           "from": "the site's medic (her lines)",
-          "why_there": "mid-operation when the raiders came for her painkillers (her lines, the briefing)",
-          "wants": "her patient stable, and the door held (her lines)"
+          "why_there": "a travelling medic on her round, carrying every settlement's painkillers (her lines)",
+          "wants": "the case kept whole, so every patient on her round gets their medicine (her lines)"
         }
       },
       "greeting": [
-        "Then listen. I've got a patient open on the table and people outside who want what's in my cabinet. Keep them out of this bay until I'm done."
+        "Then listen. Every painkiller for every settlement on my round is in this case, and the people out there want it. Keep them off me until they give up."
       ],
       "exchanges": [
         {
           "prompt": "I'll hold them off.",
           "reply": [
-            "Every minute you give me is one he keeps."
+            "Then I'll stay right here behind you. Don't let anyone near the case."
           ]
         },
         {
           "prompt": "I can assist if you need another pair of hands.",
           "perk": "Skill_Medicine",
           "reply": [
-            "I need you on the door more. But come back after, and I'll show you what I did."
+            "Right now I need your hands on a rifle. Afterwards I'll take all the help I can get."
           ]
         },
         {
-          "prompt": "What do they want with your cabinet?",
+          "prompt": "What do they want with painkillers?",
           "reply": [
-            "Painkillers. They'll sell them on. I'd rather they were in my patient."
+            "To sell them on, mostly. I'd rather they ended up in my patients than in somebody's pocket."
           ]
         }
       ],
-      "journal": "Someone is coming for the medic's painkillers at the <Place>. I need to hold the treatment bay until her patient is stable."
+      "journal": "Raiders are coming for a travelling medic's painkillers at the <Place>. I need to hold them off until they give up."
     },
     {
       "type": "hold",
@@ -95,10 +96,10 @@
         "squad",
         "horde"
       ],
-      "objective": "Hold the treatment bay until the patient is stable",
-      "journal": "I held the medic's treatment bay at the <Place> until her patient was stable.",
+      "objective": "Protect the medic and her case",
+      "journal": "Raiders came for a travelling medic's painkillers at the <Place>. I held them off until they gave up.",
       "say": [
-        "He's stable. You can stop shooting now. Please."
+        "That's the last of them. Everyone on my round gets their medicine this week."
       ],
       "reward": "med"
     }
@@ -109,7 +110,7 @@
     "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
-    "The treatment bay's in the middle of the site. Come straight in, and don't stop to talk to anyone outside."
+    "I'm in the middle of the site, and I'm the one with the medical case. They'll come at me from the edges, so come straight to me and don't stop to talk to anyone."
   ],
   "_speech": "Halima: brisk, warm underneath, no time. A stand-in voice; his ear decides."
 }
