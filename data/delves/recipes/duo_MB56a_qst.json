@@ -34,8 +34,8 @@
       ]
     },
     "_theme": "A quiet built site with people working it: the crew who are short.",
-    "planet": "Bolivar I",
-    "_planet": "Pinned: a planet that carries tungsten. Resource lists off the Starfield wiki's Mined Resources, 2026-11-10 (C:/tmp/planet_resources.json on the rig)."
+    "planet": "Pluto",
+    "_planet": "Pinned: a planet that carries tungsten. MOVED Bolivar I -> Pluto 2026-11-12 on his pick (\"Pluto in Sol\", his knowledge that it carries tungsten): Bolivar I never placed this crewed NonHostile site (startquest probe rq1, 2 of 2 universes), Pluto did (rqP, a Science Outpost). Was off the Starfield wiki's Mined Resources, 2026-11-10 (C:/tmp/planet_resources.json on the desktop). minLevel 35 was set for Bolivar's level; Sol's is Jessica's call."
   },
   "prose": {
     "name": "Requisition: Tungsten for the <Place> on <Planet>",
