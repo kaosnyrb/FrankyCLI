@@ -51,7 +51,7 @@
       "type": "deliver",
       "at": "REContainerLocRef",
       "replace": true,
-      "model": "ORE HOPPER, UNPICKED",
+      "model": "Meshes\\SetDressing\\ConveyorBelt\\ConveyorBeltWide_Hopper02.nif",
       "name": "Ore Hopper",
       "objective": "Bring cobalt to the ore hopper",
       "bring": {
