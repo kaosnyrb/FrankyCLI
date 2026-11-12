@@ -39,7 +39,7 @@
       "item": "Captain's Log",
       "aboard": {
         "find": "Find the captain's log",
-        "crew": "duo_GangMembersList_PreditorMegalist_A",
+        "crew": "duo_GangMemberList_BoardingCataxi",
         "derelict": true,
         "dark": true
       },
