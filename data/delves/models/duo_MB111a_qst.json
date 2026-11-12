@@ -1,5 +1,5 @@
 {
-  "FormKey": "0053A1:du_overtime.esm",
+  "FormKey": "0053B5:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -25,7 +25,7 @@
     "1E266F:Starfield.esm"
   ],
   "TextDisplayGlobals": [
-    "0053AA:du_overtime.esm"
+    "0053BE:du_overtime.esm"
   ],
   "MissionBoardInfoPanels": [
     {
@@ -672,7 +672,7 @@
           "Name": "Say1",
           "Flags": 1,
           "Object": {
-            "Form": "0053A6:du_overtime.esm",
+            "Form": "0053BA:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -682,7 +682,7 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "0053A9:du_overtime.esm",
+            "Form": "0053BD:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -692,7 +692,7 @@
           "Name": "Alias_Beat1Target",
           "Flags": 1,
           "Object": {
-            "Form": "0053A1:du_overtime.esm",
+            "Form": "0053B5:du_overtime.esm",
             "Alias": 3,
             "Unused": 0
           }
@@ -702,7 +702,7 @@
           "Name": "Alias_CrewSpawnMarkers",
           "Flags": 1,
           "Object": {
-            "Form": "0053A1:du_overtime.esm",
+            "Form": "0053B5:du_overtime.esm",
             "Alias": 19,
             "Unused": 0
           }
@@ -712,7 +712,7 @@
           "Name": "Alias_BoardItem",
           "Flags": 1,
           "Object": {
-            "Form": "0053A1:du_overtime.esm",
+            "Form": "0053B5:du_overtime.esm",
             "Alias": 20,
             "Unused": 0
           }
@@ -722,7 +722,7 @@
           "Name": "BoardItem",
           "Flags": 1,
           "Object": {
-            "Form": "0053A2:du_overtime.esm",
+            "Form": "0053B6:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -835,7 +835,7 @@
                   "Name": "targetLocationAlias",
                   "Flags": 1,
                   "Object": {
-                    "Form": "0053A1:du_overtime.esm",
+                    "Form": "0053B5:du_overtime.esm",
                     "Alias": 8,
                     "Unused": 0
                   }
@@ -876,7 +876,7 @@
             "Name": "TargetSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "0053A1:du_overtime.esm",
+              "Form": "0053B5:du_overtime.esm",
               "Alias": 8,
               "Unused": 0
             }
@@ -886,7 +886,7 @@
             "Name": "TargetPlanetLocation",
             "Flags": 1,
             "Object": {
-              "Form": "0053A1:du_overtime.esm",
+              "Form": "0053B5:du_overtime.esm",
               "Alias": 2,
               "Unused": 0
             }
@@ -896,7 +896,7 @@
             "Name": "PlayerShip",
             "Flags": 1,
             "Object": {
-              "Form": "0053A1:du_overtime.esm",
+              "Form": "0053B5:du_overtime.esm",
               "Alias": 9,
               "Unused": 0
             }
@@ -916,7 +916,7 @@
             "Name": "PrimaryRef",
             "Flags": 1,
             "Object": {
-              "Form": "0053A1:du_overtime.esm",
+              "Form": "0053B5:du_overtime.esm",
               "Alias": 3,
               "Unused": 0
             }
@@ -932,7 +932,7 @@
             "Name": "SpaceMapMarker",
             "Flags": 1,
             "Object": {
-              "Form": "0053A1:du_overtime.esm",
+              "Form": "0053B5:du_overtime.esm",
               "Alias": 16,
               "Unused": 0
             }
@@ -952,7 +952,7 @@
             "Name": "RewardAmountGlobalActual",
             "Flags": 1,
             "Object": {
-              "Form": "0053AA:du_overtime.esm",
+              "Form": "0053BE:du_overtime.esm",
               "Alias": -1,
               "Unused": 0
             }
@@ -962,7 +962,7 @@
             "Name": "PlayerStarSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "0053A1:du_overtime.esm",
+              "Form": "0053B5:du_overtime.esm",
               "Alias": 0,
               "Unused": 0
             }
@@ -979,7 +979,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0053A1:du_overtime.esm",
+            "Form": "0053B5:du_overtime.esm",
             "Alias": 3,
             "Unused": 0
           }
@@ -1036,7 +1036,7 @@
                 "Name": "TargetAlias",
                 "Flags": 1,
                 "Object": {
-                  "Form": "0053A1:du_overtime.esm",
+                  "Form": "0053B5:du_overtime.esm",
                   "Alias": 22,
                   "Unused": 0
                 }
@@ -1071,7 +1071,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0053A1:du_overtime.esm",
+            "Form": "0053B5:du_overtime.esm",
             "Alias": 16,
             "Unused": 0
           }
@@ -1123,7 +1123,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0053A1:du_overtime.esm",
+            "Form": "0053B5:du_overtime.esm",
             "Alias": 21,
             "Unused": 0
           }
@@ -1151,7 +1151,7 @@
                 "Flags": 1,
                 "ObjectList": [
                   {
-                    "Form": "0053A1:du_overtime.esm",
+                    "Form": "0053B5:du_overtime.esm",
                     "Alias": 18,
                     "Unused": 0
                   }
@@ -1169,7 +1169,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0053A1:du_overtime.esm",
+            "Form": "0053B5:du_overtime.esm",
             "Alias": 20,
             "Unused": 0
           }
@@ -1200,7 +1200,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "0053A6:du_overtime.esm",
+        "FormKey": "0053BA:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1209,7 +1209,7 @@
         },
         "EditorID": "duo_MB111a_qst_say1_scene",
         "Flags": 128,
-        "Quest": "0053A1:du_overtime.esm",
+        "Quest": "0053B5:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1240,12 +1240,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "0053A4:du_overtime.esm"
+            "Topic": "0053B8:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "0053A9:du_overtime.esm",
+        "FormKey": "0053BD:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1254,7 +1254,7 @@
         },
         "EditorID": "duo_MB111a_qst_say2_scene",
         "Flags": 128,
-        "Quest": "0053A1:du_overtime.esm",
+        "Quest": "0053B5:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1285,14 +1285,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "0053A7:du_overtime.esm"
+            "Topic": "0053BB:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "0053A4:du_overtime.esm",
+        "FormKey": "0053B8:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1301,7 +1301,7 @@
         },
         "EditorID": "duo_MB111a_qst_say1_topic",
         "Priority": 50,
-        "Quest": "0053A1:du_overtime.esm",
+        "Quest": "0053B5:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1309,11 +1309,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "0053A5:du_overtime.esm"
+          "0053B9:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "0053A5:du_overtime.esm",
+            "FormKey": "0053B9:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1321,14 +1321,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_MB111a_qst_say1_info",
-            "Speaker": "0053A3:du_overtime.esm",
+            "Speaker": "0053B7:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 21412,
+                "WEMFile": 21432,
                 "EmotionOut": 0,
                 "ResponseText": "She\u0027s been dark for weeks and nobody\u0027s answered. If he left anything, it\u0027ll be in his log. Mind yourself in there, something\u0027s been living aboard her.",
                 "ScriptNotes": "",
@@ -1341,7 +1341,7 @@
         ]
       },
       {
-        "FormKey": "0053A7:du_overtime.esm",
+        "FormKey": "0053BB:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1350,7 +1350,7 @@
         },
         "EditorID": "duo_MB111a_qst_say2_topic",
         "Priority": 50,
-        "Quest": "0053A1:du_overtime.esm",
+        "Quest": "0053B5:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1358,11 +1358,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "0053A8:du_overtime.esm"
+          "0053BC:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "0053A8:du_overtime.esm",
+            "FormKey": "0053BC:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1370,14 +1370,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_MB111a_qst_say2_info",
-            "Speaker": "0053A3:du_overtime.esm",
+            "Speaker": "0053B7:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 21415,
+                "WEMFile": 21435,
                 "EmotionOut": 0,
                 "ResponseText": "You\u0027ve got it. I\u0027ll read it later, on my own.",
                 "ScriptNotes": "",
