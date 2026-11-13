@@ -17,7 +17,8 @@
     "order; none relies on another. person.voice / person.elevenlabs are PROPOSED too: the person speaks, so the",
     "voice belongs to the person, not to a radio speaker.",
     "The talk beat speaks, so it has no message box; the pickup and deliver have boxes, nothing speaks there.",
-    "The page's board posting is held back: this deals from the slate pool, so the opening is the briefing."
+    "The page's board posting is held back: this deals from the slate pool, so the opening is the briefing.",
+    "OPENER 2026-11-13, his catch on MB114a ('Is that the ___, please tell me that's the ___'; 'quite a lot of greetings are similar'): 17 people greeted the player by asking about what he carried. His 'all 17': this one now opens on the person, and the thing turns up in the conversation. A revoice if voiced."
   ],
   "place": {
     "theme": {
@@ -72,7 +73,7 @@
         ]
       },
       "greeting": [
-        "You're here for the survey crate? I've had it here for days and I've been told not to open it. They took my lunch, mind."
+        "I've had a crate here for days and I've been told not to open it. They took my lunch, mind."
       ],
       "exchanges": [
         {

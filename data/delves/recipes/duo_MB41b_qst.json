@@ -12,7 +12,8 @@
     "FRANCES 2026-10-31 (reviews/2026-10-31-delve-MB41b.md): ship, all six findings taken. Forced pick answered YES: the pride is the story, so her greeting says it and his first answer returns it ('tell her we didn't ask').",
     "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Delivery Contract. Deliver a drill bit from the <Place>, <Planet> to the <SecondPlace>, <SecondPlanet>. Payment on delivery.\"",
     "SAME SYSTEM 2026-11-11 (his: not across the whole map to deliver a coffee): the second place was any other planet; now another place in the same star system.",
-    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him.",
+    "OPENER 2026-11-13, his catch on MB114a ('Is that the ___, please tell me that's the ___'; 'quite a lot of greetings are similar'): 17 people greeted the player by asking about what he carried. His 'all 17': this one now opens on the person, and the thing turns up in the conversation. A revoice if voiced."
   ],
   "author": "jessica",
   "source": "his 2026-10-31 07:51: \"the cargo run family, where you delover the toolbox, can we add a few industrial ones\"",
@@ -131,7 +132,7 @@
         ]
       },
       "greeting": [
-        "Is that the bit? She's sent it, then. We've not hit anything worth hauling in six weeks, and I'd stopped telling the crew it was the rock."
+        "She's sent it, then. We've not hit anything worth hauling in six weeks, and I'd stopped telling the crew it was the rock."
       ],
       "exchanges": [
         {

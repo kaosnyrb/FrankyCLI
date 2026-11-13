@@ -15,7 +15,8 @@
     "STAND-INS, Eliza's: (1) place.hazards, many zones across the site from the start; (2) the talk at an EDGE marker,",
     "where he arrives, not the centre; (3) residents 'evacuated': the site's own people moved out to her, which is",
     "what person.company does today (they stand round her at the edge). Without (3) the site's residents would be",
-    "standing in the gas, which every line here says they are not. Pay: med."
+    "standing in the gas, which every line here says they are not. Pay: med.",
+    "OPENER 2026-11-13, his catch on MB114a ('Is that the ___, please tell me that's the ___'; 'quite a lot of greetings are similar'): 17 people greeted the player by asking about what he carried. His 'all 17': this one now opens on the person, and the thing turns up in the conversation. A revoice if voiced."
   ],
   "place": {
     "theme": {
@@ -69,7 +70,7 @@
         }
       },
       "greeting": [
-        "You're here about the gas? The main valve stuck open in the night and filled the whole site. We got out. The valve's in the middle, of course."
+        "The main valve stuck open in the night and filled the whole site. We got out. The valve's in the middle, of course."
       ],
       "exchanges": [
         {

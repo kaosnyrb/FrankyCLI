@@ -16,7 +16,8 @@
     "Every word holds at any military site: nothing names the site, the faction or the weather; everything the lines",
     "point at is placed. Pay: med, capped.",
     "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Take the medical crate to the holdouts inside the <Place> on <Planet>. Payment on contract completion.\"",
-    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him."
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 12: an easy or med job stays within about 40 systems of him.",
+    "OPENER 2026-11-13, his catch on MB114a ('Is that the ___, please tell me that's the ___'; 'quite a lot of greetings are similar'): 17 people greeted the player by asking about what he carried. His 'all 17': this one now opens on the person, and the thing turns up in the conversation. A revoice if voiced."
   ],
   "place": {
     "theme": {
@@ -88,7 +89,7 @@
         ]
       },
       "greeting": [
-        "A medical crate? What's left of us is holding this corner, and we've been out of dressings for three days."
+        "What's left of us is holding this corner, and we've been out of dressings for three days."
       ],
       "exchanges": [
         {

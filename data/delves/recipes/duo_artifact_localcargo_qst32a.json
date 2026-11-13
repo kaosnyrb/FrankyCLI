@@ -16,7 +16,8 @@
     "Her reply to exchange 0 answers HIS question with her own move: she will go to him. The player carries the",
     "present, never the answer.",
     "MODEL WANTED: a small gift box. The freight crate stands in, and the box text admits it is a crate. Kim's list.",
-    "Voiced lines: no names, no places, no flags (speech-lines.md rules, 2026-10-12)."
+    "Voiced lines: no names, no places, no flags (speech-lines.md rules, 2026-10-12).",
+    "OPENER 2026-11-13, his catch on MB114a ('Is that the ___, please tell me that's the ___'; 'quite a lot of greetings are similar'): 17 people greeted the player by asking about what he carried. His 'all 17': this one now opens on the person, and the thing turns up in the conversation. A revoice if voiced."
   ],
   "place": {
     "theme": {
@@ -64,7 +65,7 @@
         ]
       },
       "greeting": [
-        "You're here for the package? Quickly, before I change my mind."
+        "Quickly, before I change my mind."
       ],
       "exchanges": [
         {
@@ -133,7 +134,7 @@
         ]
       },
       "greeting": [
-        "That's got a ribbon on it. Nobody ties ribbons. Is that for me?"
+        "That's got a ribbon on it. Nobody ties ribbons."
       ],
       "exchanges": [
         {

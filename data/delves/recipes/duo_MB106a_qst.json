@@ -18,7 +18,8 @@
     "2026-11-11, his play after the carry rebuild: \"the radio call on the approach to the buyer isn't really needed anymore\". The broadcast (\"It's the heavy one. Mind your back, and don't let them have it cheap.\") and the speaker it was the only line of are out; he already has the regulator in hand.",
     "2026-11-11: briefing and the Commerce ending rewritten from Eliza's PLACEHOLDERS. The Commerce reply now ends the job, so it closes on the crew being paid, not only on 'a little more'.",
     "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): parsecs 20: a hard job may fly further.",
-    "VENDOR 2026-11-12, his 'having people selling stuff, little lore things or quest objectives' and Eliza's sells part (v1 played 11-11): Oskar the scrapper sells salvage (magnets, iron, cobalt, tungsten, the last two the ore jobs' objectives), with a poor man's purse. Lore on what he sells waits on slates as stock (unread). One new voiced line."
+    "VENDOR 2026-11-12, his 'having people selling stuff, little lore things or quest objectives' and Eliza's sells part (v1 played 11-11): Oskar the scrapper sells salvage (magnets, iron, cobalt, tungsten, the last two the ore jobs' objectives), with a poor man's purse. Lore on what he sells waits on slates as stock (unread). One new voiced line.",
+    "OPENER 2026-11-13, his catch on MB114a ('Is that the ___, please tell me that's the ___'; 'quite a lot of greetings are similar'): 17 people greeted the player by asking about what he carried. His 'all 17': this one now opens on the person, and the thing turns up in the conversation. A revoice if voiced."
   ],
   "place": {
     "theme": {
@@ -79,7 +80,7 @@
         "credits": "LL_Vendor_Credits_Radiant_Poor"
       },
       "greeting": [
-        "Is that the reclaimer regulator? Let me see. Nobody can make what's inside these any more."
+        "Put it on the bench, gently. Nobody can make what's inside these any more."
       ],
       "exchanges": [
         {

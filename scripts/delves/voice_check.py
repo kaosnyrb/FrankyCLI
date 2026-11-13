@@ -38,6 +38,10 @@ Four more added 2026-10-29 after his "Sassy ending lines are becoming a tic", me
 a check-in question opening a say 40, "X? Then Y." 27, an apologising hello 5, a broadcast's short last line 13. THE SASSY TAIL ITSELF IS NOT HERE: a wry last clause is meaning, not pattern (about
 45 of 63 closing lines by eye, 2026-10-29), so it is read, not counted.
 
+One more 2026-11-13, his catch on MB114a ("Is that the ___, Please tell me thats the _____", "quite a lot of
+greetings are similar"): 17 greetings and walk-ups opened by asking about what the player carried. All 17 rewritten
+on his "all 17" to open on the person; the cap is 2, so a third person greeting the parcel warns.
+
 WHAT IT CANNOT SEE, stated rather than papered. A LONE line ("They may still be watching for it.", his catch
 on the Culture Canister): each list item is its own take, so a fragment that only works after the line before
 is delivered flat. Whether a line stands alone is meaning, not pattern; a short-line count fires on "Thank you.
@@ -77,6 +81,9 @@ TICS = [  # (name, pattern, cap on recipes, flags[, where]): where, if given, is
     ('"X? Then Y." (a question, then its own answer)', r"\?\s+Then\b", 6, 0),
     ('a hello that apologises ("Sorry, ...")', r"^(Oh\. )?(Hello\. )?Sorry\b", 2, 0, r"hello"),
     ('a broadcast ending on a short line of its own', r"[.?!]\s+(\S+\s+){0,3}\S+[.?!]$", 6, 0, r"^broadcast$"),
+    # 2026-11-13, his catch on MB114a: 17 people greeted the player by asking about what he carried.
+    ('a greeting that opens on what the player carries ("Is that the X?")',
+     r"^(Is that\b|(Please )?[Tt]ell me (you|that)|Please say|You're here (for|about)|You've (got|brought) (the|my|our)\b)", 2, 0, r"greeting|hello"),
 ]
 DASH = "—"
 
