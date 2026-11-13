@@ -1819,6 +1819,8 @@ namespace FrankyCLI
                 Fatal($"recipe has {r.beats.Count} beat(s); template '{t.id}' tops out at {maxBeats}.");
 
             GradeBeats(r, t, env, Fatal, Warn);
+            lap.Mark("models");
+            GradeModels(r, t, env.DataFolderPath.Path, Fatal, Warn);
             if (IsBoard(t))
             {
                 // The board's own shape, refused rather than half-built: its base has only a place and a marker to give.
@@ -2540,6 +2542,8 @@ namespace FrankyCLI
         }
 
         /// <summary>
+        /// ⚠ SUPERSEDED 2026-11-13 by the lint's GradeModels (archive name tables, every lint, ~0.6 s): kept until his
+        /// ruling on removing it, because it alone also accepts a model "used by some record".
         /// `gen_delve models [recipe ...]`: THE FINAL TEST that every beat model resolves, over every recipe (or the ones
         /// named) in one process, so the whole-load-order walk is paid once. Until 2026-10-20 this ran inside every lint
         /// and build, and a vanilla mesh made each one pay ~36 s (his: "this can be a single final test at the end").
@@ -2589,6 +2593,71 @@ namespace FrankyCLI
         }
 
         // ------------------------------------------------------------------ the build
+
+        /// <summary>
+        /// THE LINT'S MODEL CHECK (2026-11-13, his "can we add a check to the linter so models are actually valid"), after
+        /// 37a's model "STATION, UNPICKED" passed lint and a dry build: the only existence check was `gen_delve models`, a
+        /// separate final test nobody had run on it. This one is cheap enough for every lint because it reads archive NAME
+        /// TABLES, never the load order: a model resolves when it is in Starfield's own archives ("Starfield - *.ba2", the
+        /// template mod's only master) or the template mod's ("{mod} - *.ba2"), and is FATAL when it is in neither and not
+        /// loose either. LOOSE ONLY is a WARN: it renders on this rig and on no player's until it is packed. Another mod's
+        /// archive does not count: it would render for him and for nobody who lacks that mod. Every model prints a line,
+        /// pass or fail.
+        /// </summary>
+        private static void GradeModels(Recipe r, Template t, string dataDir, Action<string> fatal, Action<string> warn)
+        {
+            for (int i = 0; i < r.beats.Count; i++)
+            {
+                string? m = r.beats[i].model;
+                if (string.IsNullOrWhiteSpace(m)) continue;
+                if (!m.EndsWith(".nif", StringComparison.OrdinalIgnoreCase))
+                {
+                    fatal($"beat {i + 1}'s model '{m}' is not a .nif path; a placeholder renders nothing");
+                    continue;
+                }
+                string key = m.Replace('\\', '/').ToLowerInvariant();
+                string? where = ArchiveNames(dataDir, t.mod).TryGetValue(key, out var a) ? a : null;
+                bool loose = File.Exists(Path.Combine(dataDir, m));
+                if (where != null) Console.WriteLine($"  model    : beat {i + 1} {m} in {where}");
+                else if (loose)
+                {
+                    Console.WriteLine($"  model    : beat {i + 1} {m} LOOSE ONLY");
+                    warn($"beat {i + 1}'s model '{m}' is loose in Data and in no archive: it renders here, and on no player's game until it is packed into {t.mod} - Main.ba2");
+                }
+                else
+                {
+                    Console.WriteLine($"  model    : beat {i + 1} {m} NOT FOUND");
+                    fatal($"beat {i + 1}'s model '{m}' is not in Starfield's archives, {t.mod}'s archives or loose in Data; it would render nothing");
+                }
+            }
+        }
+
+        /// <summary>Every member path (lower case, forward slashes) of "Starfield - *.ba2" and "{mod} - *.ba2" in Data, to the
+        /// archive that holds it. Read once per process (a `lint --all` pays it once) from the BTDX name tables, which is
+        /// FindAsset's own walk widened to the master.</summary>
+        private static Dictionary<string, string>? archiveNames;
+        private static Dictionary<string, string> ArchiveNames(string dataDir, string mod)
+        {
+            if (archiveNames != null) return archiveNames;
+            var names = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var ba2 in Directory.GetFiles(dataDir, "Starfield - *.ba2").Concat(Directory.GetFiles(dataDir, mod + " - *.ba2")))
+            {
+                using var f = File.OpenRead(ba2);
+                using var br = new BinaryReader(f);
+                if (new string(br.ReadChars(4)) != "BTDX") continue;
+                f.Seek(12, SeekOrigin.Begin);
+                uint count = br.ReadUInt32();
+                long nameTable = (long)br.ReadUInt64();
+                f.Seek(nameTable, SeekOrigin.Begin);
+                for (uint i = 0; i < count; i++)
+                {
+                    int len = br.ReadUInt16();
+                    string name = System.Text.Encoding.ASCII.GetString(br.ReadBytes(len)).Replace('\\', '/').ToLowerInvariant();
+                    names.TryAdd(name, Path.GetFileName(ba2));
+                }
+            }
+            return archiveNames = names;
+        }
 
         /// <summary>
         /// Where a data-relative asset path actually lives: the name of the first "{mod} - *.ba2" whose

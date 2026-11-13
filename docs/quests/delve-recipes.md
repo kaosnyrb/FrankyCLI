@@ -415,6 +415,8 @@ masters, never the CK bridge `du_overtime.esp`) · a place whose pool is zero ·
 can be the same POI · a token in a name · an item or NPC name already in the game, or used by two
 recipes (each beat's `item` / `person.name`) · an empty message box · a journal the offer would overwrite · a `deal` that is not a Story Manager quest node in the template's own mod (the refusal lists the mod's nodes).
 
+**A beat's `model`, every lint (2026-11-13, his *"can we add a check to the linter so models are actually valid"*):** refused when it is not a `.nif` path (a placeholder such as `"STATION, UNPICKED"`) or is in none of `Starfield - *.ba2`, `du_overtime - *.ba2` or loose in Data; read off the archives' name tables, about 0.6 s once per process. Another mod's archive does not count: it renders for him and for no player without that mod. **Warned** when it is LOOSE ONLY: it renders on this rig and on no player's game until it is packed. Every model prints its line (`model : beat N <path> in <archive>` / `LOOSE ONLY` / `NOT FOUND`). ⚠ **The "model" in the refused list above was FALSE from 2026-10-20 to 11-13:** the existence check had moved out to `gen_delve models` to save ~36 s a lint, nobody ran it, and 37a's placeholder passed lint and a dry build. `gen_delve models` stays until he rules on removing it; the lint now does its job with no load-order walk.
+
 **Warned:** a first objective that names no place (his, 2026-10-11: *"the first objective name should
 have a POI name in it. It helps to know what POI your looking for"*) · an object beat (a use, pickup or deliver that is not a `returnTo`) with no `model` or no
 `name`, because absent means the base's boss crate and generic prompt (his, 2026-10-11: *"we dont really
