@@ -389,6 +389,10 @@ namespace FrankyCLI
         /// ForcedVoice and VoiceTypes both 2BCA32), read 2026-11-11.</summary>
         private static readonly FormKey HailShipVoice = FormKey.Factory("2BCA32:Starfield.esm");
 
+        /// <summary>The keyword every vanilla generic ship-dialogue quest refuses (DialogueGenericCitizensShips,
+        /// DialogueGenericPiracyShips and siblings: HasKeyword(NoGenericSpaceVO) == 0), read 2026-11-13 (OT-9U).</summary>
+        private static readonly FormKey NoGenericSpaceVO = FormKey.Factory("080237:Starfield.esm");
+
         /// <summary>
         /// A guarded destroy's guard stage (OT-9I's twin): set by DefaultAliasOnLoad on the object after the accept, so the
         /// ships come when the target loads round him, as his ccs_activatedestroyguarded's OnLoad does. 60: 30 is the
@@ -605,6 +609,13 @@ namespace FrankyCLI
                 }
                 target.ForcedVoice.SetTo(voice);
                 target.VoiceTypes.SetTo(voice);
+                // NO GENERIC SHIP LINES (OT-9U, his "a" 2026-11-13): vanilla's trade, chatter and piracy hail options are
+                // offered by DialogueGeneric*Ships to any ship of a citizen voice type, in Bethesda's recordings, beside ours.
+                // Every one of those quests opens on HasKeyword(NoGenericSpaceVO) == 0, and vanilla's own hailing ships
+                // (SE_Player_FAB01, SE_KT01, alias 95 HailingShip) carry the keyword on the ALIAS, as this one now does.
+                // Piracy goes with them: it checks the same keyword (his 11-11 "that's funny" ruled on, 11-13).
+                target.Keywords ??= new Noggog.ExtendedList<IFormLinkGetter<IKeywordGetter>>();
+                if (!target.Keywords.Any(k => k.FormKey == NoGenericSpaceVO)) target.Keywords.Add(new FormLink<IKeywordGetter>(NoGenericSpaceVO));
                 bm.SpaceShip = ship.FormKey;
                 if (ReskinActivator(myMod, clone, t, r.id + "_b1", -1, null, null) != 0) return 1;
                 Console.WriteLine($"  +ship    : alias {target.ID} {target.Name} creates {beat.ship} {ship.FormKey} at alias {target.CreateReferenceToObject.AliasID}, InitiallyDisabled, voice {voice}" + (r.speaker == null ? " (vanilla's hail ship's, silent)" : $" ({r.speaker.voice}, the speaker's)"));
@@ -1930,6 +1941,8 @@ namespace FrankyCLI
                     fail += Check("the ship's ForcedVoice and VoiceTypes agree" + (r.speaker == null ? $" and are vanilla's hail ship's" : ""),
                                   $"{gotVoice} {pr?.VoiceTypes.FormKeyNullable}",
                                   r.speaker == null ? $"{HailShipVoice} {HailShipVoice}" : $"{gotVoice} {gotVoice}");
+                    fail += Check("the ship carries NoGenericSpaceVO (vanilla's trade, chatter and piracy lines stay off it)",
+                                  (pr?.Keywords?.Any(k => k.FormKey == NoGenericSpaceVO) ?? false).ToString(), "True");
                     var hooks = vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts;
                     // Only the completing hooks are refused. A broadcast puts its arrival hook (DefaultAliasOnDistanceLessThan,
                     // the radio at 1500) on this same alias and completes nothing; comparing the WHOLE list to empty failed the
