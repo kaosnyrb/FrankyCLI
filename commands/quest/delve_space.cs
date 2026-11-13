@@ -1900,8 +1900,12 @@ namespace FrankyCLI
                                   $"{gotVoice} {pr?.VoiceTypes.FormKeyNullable}",
                                   r.speaker == null ? $"{HailShipVoice} {HailShipVoice}" : $"{gotVoice} {gotVoice}");
                     var hooks = vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts;
+                    // Only the completing hooks are refused. A broadcast puts its arrival hook (DefaultAliasOnDistanceLessThan,
+                    // the radio at 1500) on this same alias and completes nothing; comparing the WHOLE list to empty failed the
+                    // first hail with a broadcast (MB117a, 2026-11-13) while the label said death and use only.
+                    string[] completing = { "DefaultAliasOnDeath", "DefaultAliasOnDestroyed", "DefaultAliasOnActivate" };
                     fail += Check("the ship carries no death hook and no use hook (shooting it or pressing it completes nothing)",
-                                  string.Join(",", hooks?.Select(s => s.Name) ?? Array.Empty<string>()), "");
+                                  string.Join(",", hooks?.Select(s => s.Name).Where(n => completing.Contains(n)) ?? Array.Empty<string>()), "");
                     var mine = q.Scenes.Where(s => s.EditorID?.StartsWith($"{r.id}_talk1_") == true).ToList();
                     fail += Check("a greeting and one scene per exchange", mine.Count.ToString(), (1 + r.beats[0].exchanges!.Count).ToString());
                     var ungated = mine.Where(s => !s.Conditions.Any(c => c.Data is IGetIsAliasRefConditionDataGetter g && g.FirstParameter == slot.activatorAlias)
