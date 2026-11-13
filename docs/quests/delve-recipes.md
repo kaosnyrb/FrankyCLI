@@ -758,8 +758,19 @@ frienldly ships, so I'm assuming we'd make it a conversation option to progress 
 `boardspace`, a `talk` with `"ship": "LvlShip_*"` in place of a `person`: PrimaryRef creates the ship at `at` from the
 space cell (OT-37's defeat's creation: disabled until the accept), friendly, with its death hook removed (shooting it
 completes nothing) and no use hook. He hails it and gets the talk's menu: `greeting`, then `exchanges`, `exchanges[0]`
-first, its reply completing (and paying) the job. Vanilla's own ship lines stay beside ours (trade, piracy, chatter):
-**his ruling, piracy left in, *"that's funny"*.**
+first, its reply completing (and paying) the job.
+
+**⭐ THE STANDARD FOR EVERY SHIP HAIL (his 2026-11-13, *"Make this the standard appoarch for ship hails"*, after both hails
+on MB117a showed only our lines): the ship speaks in a voice type OF OUR OWN.** The build makes
+`duo_ShipVoice_<speaker voice>` once in the plugin (a copy of the speaker's voice type, reused after) and sets the ship
+alias's `ForcedVoice` and `VoiceTypes` to it; the ship's talk lines are filed under that folder, the speaker NPC's radio
+lines keep the speaker's own. Why: vanilla's trade, chatter and piracy hail options (`DialogueGeneric*Ships`) are offered
+to any ship whose voice type is on `VoicesDialogueCitizensShipAll` (GenericMale01 among them), in Bethesda's voice beside
+ours; a record in our plugin is on no vanilla list. Verify refuses a hail ship whose voice type is not ours. ⛔ **Not the
+keyword:** `NoGenericSpaceVO` on the alias lapsed after the completion, and `AddKeyword` on the reference hid nothing
+(home-office manual 39). Piracy goes with the rest (his "a", superseding the 11-11 *"that's funny"*).
+⚠ **The voice cache keys on the voice type**, so a ship moved onto its own voice type is re-voiced once (MB117a: 364
+characters); price it before rebuilding an already-voiced hail.
 
 ```json
 "speaker": { "name": "UC Mule", "voice": "GenericMale01", "elevenlabs": "<id>" },
