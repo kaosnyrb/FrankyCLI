@@ -64,8 +64,8 @@
     {
       "type": "destroy",
       "at": "RECenterLocRef",
-      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
-      "_model": "A prototype or sealed device, his or Kim's pick; the footlocker is the stand-in.",
+      "model": "Meshes\\ccs\\prototypecradle01.nif",
+      "_model": "Kim's prototype cradle (his pick 'cradle'), baked 2026-11-13 from Overtime kitbash/prototypecradle01.json. Was the footlocker.",
       "name": "Prototype",
       "explosion": "fragGrenadeExplosion",
       "objective": "Destroy the prototype in the vault",

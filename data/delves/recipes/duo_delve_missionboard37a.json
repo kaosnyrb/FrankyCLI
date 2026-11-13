@@ -44,8 +44,8 @@
       "at": "se_TravelMarkerLocRefB02",
       "objective": "Deliver the container to the station",
       "journal": "I delivered the sealed container. It held soil from Earth, sealed by her family the year they left.",
-      "model": "STATION, UNPICKED",
-      "_model": "A small station static in orbit, not boardable. His or Kim's pick.",
+      "model": "Meshes\\ccs\\stationsmall01.nif",
+      "_model": "Kim's small station (his 'station looks good'), baked 2026-11-13 from Overtime kitbash/stationsmall01.json: 120 x 163 x 25 m, not boardable.",
       "name": "Receiving Station",
       "message": {
         "title": "Container Delivered",
