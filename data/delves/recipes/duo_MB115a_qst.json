@@ -2,7 +2,7 @@
   "schema": 2,
   "id": "duo_MB115a_qst",
   "template": "boardspace",
-  "deal": "_duo_MB_MissionNode_test",
+  "deal": "duo_MB_MissionNode_Exploration",
   "_deal": "The board's test node, until he plays it.",
   "author": "jessica",
   "source": "his 2026-11-12 'yeah start' and 'keep going' (one of every type by the 19th): the asteroid survey family (old MB08: fly out and scan, a random box), with the first real use of ask at an object (OT-9J, played as a probe 11-04)",
