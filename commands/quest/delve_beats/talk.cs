@@ -34,6 +34,13 @@ namespace FrankyCLI
             /// <summary>A give's tag, the literal words vanilla opens the player's line with: "[Give Med Pack] ", "[Give 3 Addichrone] ".</summary>
             internal static string GiveTag(string name, int count) => count > 1 ? $"[Give {count} {name}] " : $"[Give {name}] ";
 
+            /// <summary>A hailed ship's OWN voice type, a copy of the speaker's (OT-9U, his "Remove the cause", 2026-11-13).
+            /// Vanilla's trade, chatter and piracy hail lines (DialogueGeneric*Ships) are offered to any ship whose voice type
+            /// is on VoicesDialogueCitizensShipAll, GenericMale01 among them, in Bethesda's recordings beside ours. A voice
+            /// type in our plugin is on no vanilla list, so those conditions cannot match. The ship's talk lines are filed
+            /// under this name (the folder the game looks in); the speaker NPC's radio lines keep the speaker's own.</summary>
+            internal static string ShipVoiceName(string voice) => "duo_ShipVoice_" + voice;
+
             // OT-9A, a wounded person: vanilla's forms, every one read off OE_BryanB_FamilyInNeed (gen_inspect qalias / qall,
             // 2026-11-10) except the package, which is the generic one (no OwnerQuest; it sits only while SQ_WoundedState reads
             // wounded, so HealActor's state change is what stands him up).
@@ -394,7 +401,7 @@ namespace FrankyCLI
                 string tag = $"{r.id}_talk{b + 1}";
                 // The voice: the person's own, a rescue's goodbye the check-in's person again, a ship the recipe's speaker's.
                 var who = ship ? null : tb.person ?? r.beats[tb.rider!.Value - 1].person!;
-                string? vt = ship ? r.speaker?.voice : who!.voice, vid = ship ? r.speaker?.elevenlabs : who!.elevenlabs;
+                string? vt = ship ? (r.speaker?.voice is string sv ? ShipVoiceName(sv) : null) : who!.voice, vid = ship ? r.speaker?.elevenlabs : who!.elevenlabs;
                 bool voiced = vt != null && vid != null;
                 // The closers: exchanges[0] on the beat's stage, and on the talk that ends the Delve every exchange carrying
                 // "ends" on its own ending stage (MB93d; TalkEndings, written in Stages). One closer is the shape as it was.
