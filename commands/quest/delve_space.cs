@@ -391,7 +391,7 @@ namespace FrankyCLI
 
         /// <summary>The keyword every vanilla generic ship-dialogue quest refuses (DialogueGenericCitizensShips,
         /// DialogueGenericPiracyShips and siblings: HasKeyword(NoGenericSpaceVO) == 0), read 2026-11-13 (OT-9U).</summary>
-        private static readonly FormKey NoGenericSpaceVO = FormKey.Factory("080237:Starfield.esm");
+        private const int NoGenericSpaceVOId = 0x080237;
 
         /// <summary>
         /// A guarded destroy's guard stage (OT-9I's twin): set by DefaultAliasOnLoad on the object after the accept, so the
@@ -609,13 +609,8 @@ namespace FrankyCLI
                 }
                 target.ForcedVoice.SetTo(voice);
                 target.VoiceTypes.SetTo(voice);
-                // NO GENERIC SHIP LINES (OT-9U, his "a" 2026-11-13): vanilla's trade, chatter and piracy hail options are
-                // offered by DialogueGeneric*Ships to any ship of a citizen voice type, in Bethesda's recordings, beside ours.
-                // Every one of those quests opens on HasKeyword(NoGenericSpaceVO) == 0, and vanilla's own hailing ships
-                // (SE_Player_FAB01, SE_KT01, alias 95 HailingShip) carry the keyword on the ALIAS, as this one now does.
-                // Piracy goes with them: it checks the same keyword (his 11-11 "that's funny" ruled on, 11-13).
-                target.Keywords ??= new Noggog.ExtendedList<IFormLinkGetter<IKeywordGetter>>();
-                if (!target.Keywords.Any(k => k.FormKey == NoGenericSpaceVO)) target.Keywords.Add(new FormLink<IKeywordGetter>(NoGenericSpaceVO));
+                // Vanilla's generic hail lines are kept off by the accept fragment's AddKeyword on the reference (OT-9U, see
+                // the fragment), not by an alias keyword: the alias's stopped applying after the completion.
                 bm.SpaceShip = ship.FormKey;
                 if (ReskinActivator(myMod, clone, t, r.id + "_b1", -1, null, null) != 0) return 1;
                 Console.WriteLine($"  +ship    : alias {target.ID} {target.Name} creates {beat.ship} {ship.FormKey} at alias {target.CreateReferenceToObject.AliasID}, InitiallyDisabled, voice {voice}" + (r.speaker == null ? " (vanilla's hail ship's, silent)" : $" ({r.speaker.voice}, the speaker's)"));
@@ -1058,6 +1053,18 @@ namespace FrankyCLI
                 code[arrive] = new() { $"SetObjectiveCompleted({systemObjective})", $"SetObjectiveDisplayed({slot.objective})" };
                 code[t.completeStage] = new() { $"SetObjectiveCompleted({slot.objective})" };
                 bm.ArriveStage = arrive;
+                if (SpaceHail(r, t))
+                {
+                    // NO GENERIC SHIP LINES, ON THE SHIP ITSELF (OT-9U). Vanilla's trade, chatter and piracy hail options
+                    // (DialogueGeneric*Ships) are all gated HasKeyword(NoGenericSpaceVO) == 0. On the ALIAS (vanilla's
+                    // SE_Player_FAB01 shape) it held for his first hail and was GONE on the second, after the completion,
+                    // though the ship was still in the alias (our side question, gated on it, still showed): his MB117a
+                    // play 2026-11-13. Vanilla's hail ships grav-jump away, so never meet that; ours lingers. So the accept
+                    // puts it on the REFERENCE (ObjectReference.AddKeyword, as BEScript does to its ships), where it stays.
+                    extraProps.Add(("ReferenceAlias", "Alias_Beat1Target", clone.FormKey, (int)target.ID));
+                    code[t.entryStage].Add($"Alias_Beat1Target.GetRef().AddKeyword(Game.GetFormFromFile({NoGenericSpaceVOId}, \"Starfield.esm\") as Keyword)   ; NoGenericSpaceVO");
+                    code[t.entryStage].Add($"Debug.Trace(\"[board] \" + Self + \" hail: NoGenericSpaceVO \" + Alias_Beat1Target.GetRef().HasKeyword(Game.GetFormFromFile({NoGenericSpaceVOId}, \"Starfield.esm\") as Keyword))");
+                }
                 if (SpaceDestroy(r, t))
                 {
                     // Shot, never pressed: the accept blocks the prompt (his MB14a's OnInit), and the wreck goes as the
@@ -1941,8 +1948,6 @@ namespace FrankyCLI
                     fail += Check("the ship's ForcedVoice and VoiceTypes agree" + (r.speaker == null ? $" and are vanilla's hail ship's" : ""),
                                   $"{gotVoice} {pr?.VoiceTypes.FormKeyNullable}",
                                   r.speaker == null ? $"{HailShipVoice} {HailShipVoice}" : $"{gotVoice} {gotVoice}");
-                    fail += Check("the ship carries NoGenericSpaceVO (vanilla's trade, chatter and piracy lines stay off it)",
-                                  (pr?.Keywords?.Any(k => k.FormKey == NoGenericSpaceVO) ?? false).ToString(), "True");
                     var hooks = vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts;
                     // Only the completing hooks are refused. A broadcast puts its arrival hook (DefaultAliasOnDistanceLessThan,
                     // the radio at 1500) on this same alias and completes nothing; comparing the WHOLE list to empty failed the
@@ -2214,7 +2219,15 @@ namespace FrankyCLI
                     string linger = src.Split($"Function {FragmentFunction(HailLingerStage)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
                     fail += Check($"a hail: stage {HailLingerStage} exists and its fragment shuts the quest down",
                                   (q.Stages.Any(s => s.Index == HailLingerStage) && linger.Contains("kmyQuest.MissionShutdown()")).ToString(), "True");
-                    var unload = vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.FirstOrDefault(s => s.Name == "DefaultAliasOnUnload");
+                    // OT-9U: the ship REFERENCE carries NoGenericSpaceVO from the accept (an alias keyword stopped applying
+                    // after the completion, his second hail on MB117a), and the property names the ship's alias.
+                    string accept = src.Split($"Function {FragmentFunction(t.entryStage)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
+                    fail += Check($"a hail: the accept (stage {t.entryStage}) adds NoGenericSpaceVO to the ship reference",
+                                  accept.Contains($"Alias_Beat1Target.GetRef().AddKeyword(Game.GetFormFromFile({NoGenericSpaceVOId}, \"Starfield.esm\") as Keyword)").ToString(), "True");
+                    // The fragment's properties sit on vma.Script (the fragment entry), not in vma.Scripts.
+                    var shipProp = vma.Script?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == "Alias_Beat1Target");
+                    fail += Check("a hail: Alias_Beat1Target is bound to the ship's alias", $"{shipProp?.Alias}", $"{slot.activatorAlias}");
+                    var unload =vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.FirstOrDefault(s => s.Name == "DefaultAliasOnUnload");
                     int Prop(string pn) => unload?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == pn)?.Data ?? -1;
                     fail += Check($"a hail: the ship's DefaultAliasOnUnload sets {HailLingerStage} after {t.completeStage}",
                                   $"{Prop("StageToSet")} {Prop("PrereqStage")}", $"{HailLingerStage} {t.completeStage}");
