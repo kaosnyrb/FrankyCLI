@@ -772,6 +772,25 @@ keyword:** `NoGenericSpaceVO` on the alias lapsed after the completion, and `Add
 ⚠ **The voice cache keys on the voice type**, so a ship moved onto its own voice type is re-voiced once (MB117a: 364
 characters); price it before rebuilding an already-voiced hail.
 
+## The comms satellite and the dataslates (every space board, automatic)
+
+**His 2026-11-13:** *"yeah lets make it a chance on the installation"*, *"It'd be good to have a gameplay setting for comms
+sat and dataslate drop chance"*, defaults and hostile-only his. Both are his original space missions' own behaviour
+(`ccs_activaterepair` and kin), put back on every `boardspace` Delve. No recipe field: the build adds them by shape.
+
+- **Comms satellite:** a board whose first beat is an OBJECT (a one-beat `use`, `pickup` or `destroy`, the pickup-then-deliver
+  pair, the rescue) hooks the object's load (`DefaultAliasOnLoad` sets 60 after the accept, the guarded destroy's own stage).
+  Stage 60 rolls `duo_CommsSatChance` and on a hit places one of `duo_ShipList_Installation` at his script's offsets. A
+  `repair` board keeps his own script, which places one every time.
+- **Dataslates:** every HOSTILE ship the Delve creates rolls `duo_ShipSlateChance` for one of `duo_ArtifactList_Remote` in its
+  hold: the target of a `defeat`, a ship-recover and a `board` at the accept, and each guard or escort as it is placed.
+  Friendly ships (a hail, a support landing) never roll.
+- **The settings:** *Comms Satellite Chance* (default 25) and *Dataslate Drop Chance* (default 50), sliders 0 to 100 in steps of
+  10 in Overtime's settings group, mirrored into the two globals by `duo_gameplayoptions`. Made once by
+  `gen_delve settings`; a build refuses to roll if they are not in the plugin.
+- ⚠ A space Delve built before 2026-11-13 has neither until it is rebuilt (OT-83, the release rebuild). Papyrus reserves
+  `guard` (the `Guard` lock blocks): a fragment variable named that does not compile.
+
 ```json
 "speaker": { "name": "UC Mule", "voice": "GenericMale01", "elevenlabs": "<id>" },
 "beats": [ { "type": "talk", "at": "se_GeneralMarkerLocRef01", "ship": "LvlShip_UCCitizen_Cargo",

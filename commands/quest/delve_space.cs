@@ -387,6 +387,16 @@ namespace FrankyCLI
         private static bool SpaceHail(Recipe r, Template t)
             => PlainBoard(r, t) && r.beats[0].type == "talk" && r.beats[0].ship != null;
 
+        /// <summary>A board whose first beat is an OBJECT of ours (an activator, not a ship): where his originals' activator
+        /// scripts placed an installation on load. Repair keeps his own script, which places one itself.</summary>
+        private static bool SpaceObjectBoard(Recipe r, Template t)
+            => (PlainBoard(r, t) && r.beats[0].type is "use" or "pickup" or "destroy") || TwoBeatBoard(r, t) || RescueBoard(r, t);
+
+        /// <summary>A board whose first beat's alias IS a hostile ship the quest creates (a defeat, a ship to recover from,
+        /// a ship to board): it rolls for a dataslate in its hold at the accept.</summary>
+        private static bool HostileShipBoard(Recipe r, Template t)
+            => SpaceDefeat(r, t) || ShipRecoverBoard(r, t) || SpaceBoarding(r, t);
+
         /// <summary>
         /// A guarded destroy's guard stage (OT-9I's twin): set by DefaultAliasOnLoad on the object after the accept, so the
         /// ships come when the target loads round him, as his ccs_activatedestroyguarded's OnLoad does. 60: 30 is the
@@ -1084,11 +1094,15 @@ namespace FrankyCLI
                             "    placePosition[0] = Utility.RandomFloat(-3000, 3000)",
                             "    placePosition[1] = Utility.RandomFloat(-750, 750)",
                             "    placePosition[2] = Utility.RandomFloat(-3000, 3000)",
-                            "    playerShip.PlaceShipAtMe(GuardShips, 4, True, False, False, True, placePosition, None, None, True)",
+                            "    SpaceshipReference guardShip = playerShip.PlaceShipAtMe(GuardShips, 4, True, False, False, True, placePosition, None, None, True)",
+                            "    If guardShip && Utility.RandomInt(1, 100) <= ShipSlateChance.GetValue()",
+                            "        guardShip.AddItem(SlateList.GetAt(Utility.RandomInt(0, SlateList.GetSize() - 1)), 1, False)",
+                            "        Debug.Trace(\"[slate] \" + Self + \" a guard carries a dataslate: \" + guardShip)",
+                            "    EndIf",
                             "    n -= 1",
                             "EndWhile",
                         };
-                        Console.WriteLine($"  +stage   : {GuardStage}, the guards: 1 to 3 of {gname} {ships.FormKey} round his ship");
+                        Console.WriteLine($"  +stage   : {GuardStage}, the guards: 1 to 3 of {gname} {ships.FormKey} round his ship, each rolling {DelveSettings.SlateGlobal} for a slate");
                     }
                 }
 
@@ -1153,7 +1167,11 @@ namespace FrankyCLI
                                 "    placePosition[0] = Utility.RandomFloat(-3000, 3000)",
                                 "    placePosition[1] = Utility.RandomFloat(-750, 750)",
                                 "    placePosition[2] = Utility.RandomFloat(-3000, 3000)",
-                                "    playerShip.PlaceShipAtMe(GuardShips, 4, True, False, False, True, placePosition, None, None, True)",
+                                "    SpaceshipReference guardShip = playerShip.PlaceShipAtMe(GuardShips, 4, True, False, False, True, placePosition, None, None, True)",
+                                "    If guardShip && Utility.RandomInt(1, 100) <= ShipSlateChance.GetValue()",
+                                "        guardShip.AddItem(SlateList.GetAt(Utility.RandomInt(0, SlateList.GetSize() - 1)), 1, False)",
+                                "        Debug.Trace(\"[slate] \" + Self + \" an escort carries a dataslate: \" + guardShip)",
+                                "    EndIf",
                                 "    n -= 1",
                                 "EndWhile",
                             });
@@ -1482,6 +1500,67 @@ namespace FrankyCLI
                 code[t.completeStage] = new() { $"SetObjectiveCompleted({slot.objective})", "CompleteQuest()" };
                 if (IsSlateSpace(t) && SlateSpeechAndPay(myMod, clone, t, r, env, beat, code, sayProps, bm) != 0) return 1;
                 code[t.completeStage].Add("Stop()");
+            }
+            // THE COMMS SATELLITE AND THE DATASLATES (his 2026-11-13, both his originals', both chance sliders: DelveSettings).
+            // An OBJECT board's object rolls duo_CommsSatChance when it loads (DefaultAliasOnLoad sets GuardStage after the
+            // accept, the guarded destroy's own hook and stage) and places one of duo_ShipList_Installation at his
+            // ccs_activaterepair's offsets. A HOSTILE ship the quest creates rolls duo_ShipSlateChance at the accept for one of
+            // duo_ArtifactList_Remote in its hold; the guard loops roll per ship above. Properties come from USE: any line
+            // naming the list or the global gets its property, so a branch cannot use one and forget to declare it.
+            if (IsBoardSpace(t))
+            {
+                void Need(string type, string pn, FormKey key, int alias) { if (!extraProps.Any(p => p.pname == pn)) extraProps.Add((type, pn, key, alias)); }
+                if (SpaceObjectBoard(r, t))
+                {
+                    var lh = StageHook("DefaultAliasOnLoad", GuardStage, t.entryStage);
+                    var hooked = AttachHook(vma, clone.FormKey, (int)target.ID, lh, HookEntry.FindOrCreate, true, bm, GuardStage, t.entryStage);
+                    if (hooked == Hooked.AlreadyCarries && r.beats[0].guards == null)
+                    { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnLoad and it is not the guards'."); return 1; }
+                    if (!clone.Stages!.Any(s => s.Index == GuardStage))
+                    {
+                        var gs = CloneStage(clone, GuardStage);
+                        if (gs == null) return 1;
+                        clone.Stages.Add(gs);
+                        if (gs.LogEntries.FirstOrDefault() is QuestLogEntry gle) gle.Entry = null;
+                        SortStages(clone);
+                    }
+                    if (!code.ContainsKey(GuardStage)) code[GuardStage] = new();
+                    Need("ReferenceAlias", "Alias_Beat1Target", clone.FormKey, (int)target.ID);
+                    code[GuardStage].AddRange(new[]
+                    {
+                        "Int commsRoll = Utility.RandomInt(1, 100)",
+                        "If commsRoll <= CommsSatChance.GetValue()",
+                        "    Float[] instPos = new Float[3]",
+                        "    instPos[0] = Utility.RandomFloat(-30, 30) * 100",
+                        "    instPos[1] = Utility.RandomFloat(-7, 7) * 100",
+                        "    instPos[2] = Utility.RandomFloat(-30, 30) * 100",
+                        "    Alias_Beat1Target.GetRef().PlaceAtMe(InstallationList.GetAt(Utility.RandomInt(0, InstallationList.GetSize() - 1)), 1, True, False, True, instPos, None, True)",
+                        "EndIf",
+                        "Debug.Trace(\"[comms] \" + Self + \" stage " + GuardStage + ": rolled \" + commsRoll + \" against \" + CommsSatChance.GetValue())",
+                    });
+                    Console.WriteLine($"  +comms   : alias {target.ID} loads -> stage {GuardStage} rolls {DelveSettings.CommsGlobal}, one of {DelveSettings.InstallationList} on a hit");
+                }
+                if (HostileShipBoard(r, t))
+                {
+                    Need("ReferenceAlias", "Alias_Beat1Target", clone.FormKey, (int)target.ID);
+                    code[t.entryStage].AddRange(new[]
+                    {
+                        "If Utility.RandomInt(1, 100) <= ShipSlateChance.GetValue()",
+                        "    Alias_Beat1Target.GetRef().AddItem(SlateList.GetAt(Utility.RandomInt(0, SlateList.GetSize() - 1)), 1, False)",
+                        "    Debug.Trace(\"[slate] \" + Self + \" the target ship carries a dataslate\")",
+                        "EndIf",
+                    });
+                    Console.WriteLine($"  +slate   : the target ship rolls {DelveSettings.SlateGlobal} at the accept, one of {DelveSettings.SlateList} on a hit");
+                }
+                string all = string.Join("\n", code.Values.SelectMany(v => v));
+                foreach (var (type, pn, id) in new[] { ("FormList", "InstallationList", DelveSettings.InstallationList), ("GlobalVariable", "CommsSatChance", DelveSettings.CommsGlobal),
+                                                       ("FormList", "SlateList", DelveSettings.SlateList), ("GlobalVariable", "ShipSlateChance", DelveSettings.SlateGlobal) })
+                {
+                    if (!all.Contains(pn + ".")) continue;
+                    FormKey? key = type == "FormList" ? OwnOrMaster<IFormListGetter>(myMod, env, id)?.FormKey : OwnOrMaster<IGlobalGetter>(myMod, env, id)?.FormKey;
+                    if (key == null) { Console.WriteLine($"REFUSED: {id} is not in {myMod.ModKey.FileName}; run gen_delve settings first."); return 1; }
+                    Need(type, pn, key.Value, -1);
+                }
             }
             var psc = new StringBuilder();
             psc.AppendLine($"Scriptname {name} Extends Quest Hidden Const");
@@ -2129,9 +2208,10 @@ namespace FrankyCLI
                     // version of this check read Scripts and reported "no property" over a correct build, 2026-11-10).
                     var gprop = vma.Script?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == "GuardShips");
                     bool guarded = r.beats[0].guards != null;
-                    fail += Check("DefaultAliasOnLoad on the object (the guards' trigger)",
+                    // Since 2026-11-13 every object board's object hooks its load (the comms roll), guarded or not.
+                    fail += Check("DefaultAliasOnLoad on the object (the guards' and the comms roll's trigger)",
                                   lh == null ? "no hook" : $"sets {LProp("StageToSet")} after {LProp("PrereqStage")}",
-                                  guarded ? $"sets {GuardStage} after {t.entryStage}" : "no hook");
+                                  $"sets {GuardStage} after {t.entryStage}");
                     int f60 = frag.IndexOf($"Function {FragmentFunction(GuardStage)}()");
                     fail += Check($"stage {GuardStage} places the guards from GuardShips round his ship",
                                   (q.Stages.Any(s => s.Index == GuardStage) && f60 >= 0 && frag.IndexOf("playerShip.PlaceShipAtMe(GuardShips,", f60) > f60).ToString(), guarded.ToString());
@@ -2221,6 +2301,37 @@ namespace FrankyCLI
                 // global, on EVERY board quest (RewardActual, 2026-11-09).
                 fail += VerifyRewardActual(m, q, vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase)),
                                            r, bm.PaidGlobal);
+                // THE COMMS SATELLITE AND THE DATASLATES (his 2026-11-13). Read off the written fragment and its properties.
+                string FragBody(int st) => src.Split($"Function {FragmentFunction(st)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
+                string? Edid(string pn) { var k = vma.Script?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == pn)?.Object.FormKey;
+                                          return k == null ? null : (m.Globals.FirstOrDefault(g => g.FormKey == k)?.EditorID ?? m.FormLists.FirstOrDefault(f => f.FormKey == k)?.EditorID); }
+                if (SpaceObjectBoard(r, t))
+                {
+                    var loadHook = vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.FirstOrDefault(s => s.Name == "DefaultAliasOnLoad");
+                    int LoadProp(string n) => loadHook?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == n)?.Data ?? -1;
+                    fail += Check($"comms: the object's DefaultAliasOnLoad sets {GuardStage} after the accept",
+                                  $"{LoadProp("StageToSet")} {LoadProp("PrereqStage")}", $"{GuardStage} {t.entryStage}");
+                    fail += Check($"comms: stage {GuardStage} rolls CommsSatChance and places one of InstallationList at the object",
+                                  (FragBody(GuardStage).Contains("<= CommsSatChance.GetValue()") && FragBody(GuardStage).Contains("Alias_Beat1Target.GetRef().PlaceAtMe(InstallationList.GetAt(")).ToString(), "True");
+                    fail += Check("comms: CommsSatChance and InstallationList name the setting's records",
+                                  $"{Edid("CommsSatChance")} {Edid("InstallationList")}", $"{DelveSettings.CommsGlobal} {DelveSettings.InstallationList}");
+                }
+                bool guardsHere = r.beats[0].guards != null;
+                if (HostileShipBoard(r, t) || guardsHere)
+                {
+                    if (HostileShipBoard(r, t))
+                        fail += Check($"slate: the accept (stage {t.entryStage}) rolls ShipSlateChance for the target ship's hold",
+                                      (FragBody(t.entryStage).Contains("<= ShipSlateChance.GetValue()") && FragBody(t.entryStage).Contains("Alias_Beat1Target.GetRef().AddItem(SlateList.GetAt(")).ToString(), "True");
+                    if (guardsHere)
+                    {
+                        int placed = src.Split("= playerShip.PlaceShipAtMe(GuardShips,").Length - 1, rolled = src.Split("guardShip.AddItem(SlateList.GetAt(").Length - 1;
+                        fail += Check("slate: every guard loop rolls ShipSlateChance for each ship it places", $"{placed} placed, {rolled} rolled", $"{Math.Max(placed, 1)} placed, {Math.Max(placed, 1)} rolled");
+                    }
+                    fail += Check("slate: ShipSlateChance and SlateList name the setting's records",
+                                  $"{Edid("ShipSlateChance")} {Edid("SlateList")}", $"{DelveSettings.SlateGlobal} {DelveSettings.SlateList}");
+                }
+                else
+                    fail += Check("slate: no hostile ship here, so no slate roll", src.Contains("SlateList.").ToString(), "False");
                 fail += Check($"the beat's objective {slot.objective} shows on arrival stage {bm.ArriveStage}",
                               (src.Split($"Function {FragmentFunction(bm.ArriveStage)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0].Contains($"SetObjectiveDisplayed({slot.objective})") == true).ToString(), "True");
             }

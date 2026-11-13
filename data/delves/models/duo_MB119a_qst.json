@@ -1,5 +1,5 @@
 {
-  "FormKey": "005510:du_overtime.esm",
+  "FormKey": "005528:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -25,7 +25,7 @@
     "196523:Starfield.esm"
   ],
   "TextDisplayGlobals": [
-    "005519:du_overtime.esm"
+    "005531:du_overtime.esm"
   ],
   "MissionBoardInfoPanels": [
     {
@@ -409,7 +409,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "005511:du_overtime.esm",
+        "Object": "005529:du_overtime.esm",
         "AliasID": 12,
         "Create": 0,
         "Level": 2
@@ -575,7 +575,7 @@
           "Name": "Say1",
           "Flags": 1,
           "Object": {
-            "Form": "005515:du_overtime.esm",
+            "Form": "00552D:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -585,7 +585,7 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "005518:du_overtime.esm",
+            "Form": "005530:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -595,7 +595,7 @@
           "Name": "Alias_Beat1Target",
           "Flags": 1,
           "Object": {
-            "Form": "005510:du_overtime.esm",
+            "Form": "005528:du_overtime.esm",
             "Alias": 3,
             "Unused": 0
           }
@@ -606,6 +606,46 @@
           "Flags": 1,
           "Object": {
             "Form": "0B13B1:Starfield.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "InstallationList",
+          "Flags": 1,
+          "Object": {
+            "Form": "000BDF:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "CommsSatChance",
+          "Flags": 1,
+          "Object": {
+            "Form": "00551A:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "SlateList",
+          "Flags": 1,
+          "Object": {
+            "Form": "000B29:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "ShipSlateChance",
+          "Flags": 1,
+          "Object": {
+            "Form": "00551C:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -682,7 +722,7 @@
                   "Name": "targetLocationAlias",
                   "Flags": 1,
                   "Object": {
-                    "Form": "005510:du_overtime.esm",
+                    "Form": "005528:du_overtime.esm",
                     "Alias": 8,
                     "Unused": 0
                   }
@@ -723,7 +763,7 @@
             "Name": "TargetSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "005510:du_overtime.esm",
+              "Form": "005528:du_overtime.esm",
               "Alias": 8,
               "Unused": 0
             }
@@ -733,7 +773,7 @@
             "Name": "TargetPlanetLocation",
             "Flags": 1,
             "Object": {
-              "Form": "005510:du_overtime.esm",
+              "Form": "005528:du_overtime.esm",
               "Alias": 2,
               "Unused": 0
             }
@@ -743,7 +783,7 @@
             "Name": "PlayerShip",
             "Flags": 1,
             "Object": {
-              "Form": "005510:du_overtime.esm",
+              "Form": "005528:du_overtime.esm",
               "Alias": 9,
               "Unused": 0
             }
@@ -763,7 +803,7 @@
             "Name": "PrimaryRef",
             "Flags": 1,
             "Object": {
-              "Form": "005510:du_overtime.esm",
+              "Form": "005528:du_overtime.esm",
               "Alias": 3,
               "Unused": 0
             }
@@ -779,7 +819,7 @@
             "Name": "SpaceMapMarker",
             "Flags": 1,
             "Object": {
-              "Form": "005510:du_overtime.esm",
+              "Form": "005528:du_overtime.esm",
               "Alias": 16,
               "Unused": 0
             }
@@ -799,7 +839,7 @@
             "Name": "RewardAmountGlobalActual",
             "Flags": 1,
             "Object": {
-              "Form": "005519:du_overtime.esm",
+              "Form": "005531:du_overtime.esm",
               "Alias": -1,
               "Unused": 0
             }
@@ -809,7 +849,7 @@
             "Name": "PlayerStarSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "005510:du_overtime.esm",
+              "Form": "005528:du_overtime.esm",
               "Alias": 0,
               "Unused": 0
             }
@@ -826,7 +866,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "005510:du_overtime.esm",
+            "Form": "005528:du_overtime.esm",
             "Alias": 3,
             "Unused": 0
           }
@@ -889,7 +929,7 @@
                 "Name": "TargetAlias",
                 "Flags": 1,
                 "Object": {
-                  "Form": "005510:du_overtime.esm",
+                  "Form": "005528:du_overtime.esm",
                   "Alias": 18,
                   "Unused": 0
                 }
@@ -924,7 +964,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "005510:du_overtime.esm",
+            "Form": "005528:du_overtime.esm",
             "Alias": 16,
             "Unused": 0
           }
@@ -973,7 +1013,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "005515:du_overtime.esm",
+        "FormKey": "00552D:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -982,7 +1022,7 @@
         },
         "EditorID": "duo_MB119a_qst_say1_scene",
         "Flags": 128,
-        "Quest": "005510:du_overtime.esm",
+        "Quest": "005528:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1013,12 +1053,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "005513:du_overtime.esm"
+            "Topic": "00552B:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "005518:du_overtime.esm",
+        "FormKey": "005530:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1027,7 +1067,7 @@
         },
         "EditorID": "duo_MB119a_qst_say2_scene",
         "Flags": 128,
-        "Quest": "005510:du_overtime.esm",
+        "Quest": "005528:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1058,14 +1098,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "005516:du_overtime.esm"
+            "Topic": "00552E:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "005513:du_overtime.esm",
+        "FormKey": "00552B:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1074,7 +1114,7 @@
         },
         "EditorID": "duo_MB119a_qst_say1_topic",
         "Priority": 50,
-        "Quest": "005510:du_overtime.esm",
+        "Quest": "005528:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1082,11 +1122,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "005514:du_overtime.esm"
+          "00552C:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "005514:du_overtime.esm",
+            "FormKey": "00552C:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1094,14 +1134,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_MB119a_qst_say1_info",
-            "Speaker": "005512:du_overtime.esm",
+            "Speaker": "00552A:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 21779,
+                "WEMFile": 21803,
                 "EmotionOut": 0,
                 "ResponseText": "That\u0027s it, the one with no lights on. Whoever took it keeps a few ships close, so deal with them first. I don\u0027t need to know who\u0027s been listening. I need it to stop.",
                 "ScriptNotes": "",
@@ -1114,7 +1154,7 @@
         ]
       },
       {
-        "FormKey": "005516:du_overtime.esm",
+        "FormKey": "00552E:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1123,7 +1163,7 @@
         },
         "EditorID": "duo_MB119a_qst_say2_topic",
         "Priority": 50,
-        "Quest": "005510:du_overtime.esm",
+        "Quest": "005528:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1131,11 +1171,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "005517:du_overtime.esm"
+          "00552F:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "005517:du_overtime.esm",
+            "FormKey": "00552F:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1143,14 +1183,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_MB119a_qst_say2_info",
-            "Speaker": "005512:du_overtime.esm",
+            "Speaker": "00552A:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 21782,
+                "WEMFile": 21806,
                 "EmotionOut": 0,
                 "ResponseText": "That\u0027s it gone quiet. Whoever was listening will have to find another way.",
                 "ScriptNotes": "",

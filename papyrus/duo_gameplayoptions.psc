@@ -12,6 +12,15 @@ GameplayOption Property ClassicMissionsOption Auto Const Mandatory
 GlobalVariable Property ClassicMissionsGlobal Auto Const Mandatory
 {duo_ClassicMissions: 1 when the option is on, 0 when off. Read by every _Legacy node.}
 
+GameplayOption Property CommsSatOption Auto Const Mandatory
+{The Comms Satellite Chance slider, 0 to 100 in steps of 10 (gen_delve settings, his 2026-11-13).}
+GlobalVariable Property CommsSatGlobal Auto Const Mandatory
+{duo_CommsSatChance: the percent a space Delve's object places an installation when it loads.}
+GameplayOption Property ShipSlateOption Auto Const Mandatory
+{The Dataslate Drop Chance slider, 0 to 100 in steps of 10.}
+GlobalVariable Property ShipSlateGlobal Auto Const Mandatory
+{duo_ShipSlateChance: the percent a hostile ship a Delve spawns carries a remote dataslate.}
+
 Event OnQuestInit()
     ; Register first so a change made while we sync is not missed, then sync once: an option set at
     ; the start menu, or before this quest first ran on an existing save, never fires a change event.
@@ -29,4 +38,7 @@ Function Sync()
     else
         ClassicMissionsGlobal.SetValue(0)
     endif
+    ; The two chances are percents: the slider's value is the global's.
+    CommsSatGlobal.SetValue(CommsSatOption.GetValue())
+    ShipSlateGlobal.SetValue(ShipSlateOption.GetValue())
 EndFunction

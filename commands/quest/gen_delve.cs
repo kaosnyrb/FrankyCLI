@@ -1102,6 +1102,7 @@ namespace FrankyCLI
                 case "legacy": return DelveLegacy.Run(args, dataDir, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList(), dry);
                 // the rare tier: commands/quest/delve_rare.cs
                 case "rare": return DelveRare.Run(args, dataDir, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList(), dry);
+                case "settings": return DelveSettings.Run(args, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList(), dry);
                 // a built Delve changes pool by a list edit, never a rebuild: commands/quest/delve_move.cs
                 case "nodes": return DelveNodes.Run(args, dataDir, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList());
                 case "move": return DelveMove.Run(args, dataDir, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList(), dry);
