@@ -7,10 +7,11 @@
   "author": "jessica",
   "source": "his 2026-11-13: 'dark site' is the term for space installations, 'they are just activators, not boardable stations. The destroy asteroid quest is the same logic'. The dark site family (old MB15 stations, artifact_remote Dark Site), on MB118a's guarded space destroy.",
   "_note": [
-    "DARK SITE: an installation in orbit that isn't on any register, with ships guarding it. Clear the guards, then destroy it.",
+    "DARK SITE FAMILY, named as the originals were: a listening post in orbit, built to watch the lanes and taken by somebody else (old MB15a Hijacked Spy Station, remote qst11a to c). Clear the guards, then destroy it.",
     "THE PLAYER'S PART: the guards first, then the installation: MB118a's guarded twin, with a station for a rock.",
     "Quiet register: the client does not say what the site was for. No faction named aloud: 'whoever runs it'.",
-    "The ground job that wore this name first is MB116a, now the Unregistered Vault."
+    "The ground job that wore this name first is MB116a, now the Unregistered Vault.",
+    "2026-11-13, his: \"'Dark Site' doesn't read right, the original missions used actual names for things.\" The originals printed 'Dark Site: <the installation>': eleven on MB15 (Hijacked Spy Station, Covert Drug Lab, EMP Platform, Freebooters Stockpile, Crimson Anchorage...) and the fuel depot and drug lab on remote qst11. So this one is a listening post; the others are cheap variants on the same recipe."
   ],
   "place": {
     "altitude": 32.0,
@@ -18,9 +19,9 @@
   },
   "minLevel": 10,
   "prose": {
-    "name": "Sabotage: The Dark Site over <Planet>",
-    "briefing": "There is an installation in orbit over <Planet> that isn't on any register, and ships are guarding it. The client wants it destroyed.",
-    "card": "There's an installation over <Planet> that isn't on any register, with ships guarding it. Destroy it."
+    "name": "Sabotage: The Listening Post over <Planet>",
+    "briefing": "A listening post in orbit over <Planet> was built to watch the shipping lanes. Somebody else took it, and everything it hears now goes to them. The client wants it destroyed.",
+    "card": "Our listening post over <Planet> was taken, and it reports to someone else now. Clear its guards and destroy it."
   },
   "speaker": {
     "name": "The Client",
@@ -29,20 +30,20 @@
   },
   "_speech": "MB116a's client carried over, the same quiet man; his ear decides.",
   "broadcast": [
-    "That's it, the one with no lights on. Whoever runs it keeps a few ships close, so deal with them first. I don't need to know what's inside. I need it gone."
+    "That's it, the one with no lights on. Whoever took it keeps a few ships close, so deal with them first. I don't need to know who's been listening. I need it to stop."
   ],
   "beats": [
     {
       "type": "destroy",
       "at": "se_GeneralMarkerLocRef01",
-      "objective": "Clear the guard ships, then destroy the dark site over <Planet>",
+      "objective": "Clear the guard ships, then destroy the listening post over <Planet>",
       "model": "Meshes\\ccs\\stationsmall01.nif",
       "_model": "Kim's small station (his 'station looks good', baked 2026-11-13, MB37a's), not boardable: his 'they are just activators'.",
-      "name": "Dark Site",
+      "name": "Listening Post",
       "guards": "LShip_Spacer_Combat_A",
-      "journal": "I cleared the ships guarding an unregistered installation over <Planet> and destroyed it.",
+      "journal": "Someone had taken a listening post over <Planet>. I cleared the ships guarding it and destroyed it.",
       "say": [
-        "It's gone, then. Nobody will be finishing whatever they started up there."
+        "That's it gone quiet. Whoever was listening will have to find another way."
       ],
       "reward": "hard"
     }
