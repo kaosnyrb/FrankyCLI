@@ -3165,6 +3165,22 @@ namespace FrankyCLI
             var items = m.MiscItems.Where(x => x.EditorID != null && x.EditorID.StartsWith(r.id + "_item", StringComparison.Ordinal)).ToList();
             var heavy = items.Where(x => x.Weight != 0f).Select(x => $"{x.EditorID} weighs {x.Weight}").ToList();
             fail += Check($"every pickup item weighs 0 ({items.Count} item(s))", heavy.Count == 0 ? "all 0" : string.Join("; ", heavy), "all 0");
+            // A destroy whose hook waits on a stage after the entry cannot be shot before it (MB116a, 2026-11-13): its object
+            // starts disabled and that stage's fragment enables it. Keyed on the hook as WRITTEN, so a destroy the builder did
+            // not mean to order is caught too.
+            string frag = bm.PscPath.Length > 0 && File.Exists(bm.PscPath) ? File.ReadAllText(bm.PscPath) : "";
+            foreach (var ae in vma.Aliases)
+                foreach (var sc in ae.Scripts.Where(s => s.Name == "DefaultAliasOnDestroyed"))
+                {
+                    int pre = sc.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == "PrereqStage")?.Data ?? -1;
+                    if (pre == t.entryStage || pre < 0) continue;
+                    int al = ae.Property.Alias;
+                    var ra = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)al);
+                    string? pn = vma.Script?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Alias == al)?.Name;
+                    string body = frag.Split($"Function {FragmentFunction(pre)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
+                    fail += Check($"a destroy that waits on stage {pre}: its object (alias {al}) starts disabled and stage {pre} enables it",
+                                  $"{ra?.Flags?.HasFlag(QuestReferenceAlias.Flag.InitiallyDisabled) ?? false} {pn != null && body.Contains($"{pn}.GetRef().Enable()")}", "True True");
+                }
             if (bm.SecondPlanet is int spId)
             {
                 var sp = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)spId);

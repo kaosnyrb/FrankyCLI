@@ -106,6 +106,19 @@ namespace FrankyCLI
                     script = Destroys ? "DefaultAliasOnDestroyed" : CarriesItem && build.itemOf.ContainsKey(b) ? PickupScript
                            : beat.bring != null ? BringUseScript : UseScript;
                 }
+                if (Destroys && prereq != build.t.entryStage)
+                {
+                    // A DESTROY AFTER AN EARLIER STEP IS NOT THERE UNTIL ITS STEP (his MB116a play 2026-11-13: "you can destroy
+                    // the vault before hitting the button and it breaks the mission"; his "yeah A"). The stock hook's prereq
+                    // check (DefaultScriptFunctions.TryToSetStage, IsValidToSetStage) does nothing when the event fires early,
+                    // and a destroyed object never fires again, so the job is stuck for good. So the object starts disabled
+                    // and the step before it enables it: it cannot be shot before its turn. The same shape as the space
+                    // boards' target (InitiallyDisabled, the accept enables it). A destroy in the first step is untouched.
+                    // The flag is set here; the Enable() line is StageLines' (the fragment pass, where code and props exist).
+                    var target = build.clone.Aliases.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)hookAlias);
+                    target.Flags = (target.Flags ?? 0) | QuestReferenceAlias.Flag.InitiallyDisabled;
+                    Console.WriteLine($"  +reveal  : beat {b + 1}'s object (alias {hookAlias}) starts disabled; stage {prereq} enables it");
+                }
                 var sc = StageHook(script, build.beatStage[b], prereq);
                 if (Destroys) { }   // no prompt to hide: the entry stage blocked activation
                 else if (beat.bring != null)
@@ -163,6 +176,13 @@ namespace FrankyCLI
                 if (!goes && !blows) return;
                 string ta = $"Alias_Beat{b + 1}Target";
                 build.props.Add(("ReferenceAlias", ta, build.clone.FormKey, build.slotOf[b].activatorAlias));
+                // A destroy after an earlier step starts disabled (Hook) and is enabled by the stage its step waits on.
+                int prereq = k == 0 ? build.t.entryStage : build.steps[k - 1].DoneStage;
+                if (Destroys && prereq != build.t.entryStage)
+                {
+                    if (!build.code.ContainsKey(prereq)) build.code[prereq] = new();
+                    build.code[prereq].Add($"{ta}.GetRef().Enable()   ; its step starts: until now it could be shot out of order");
+                }
                 int st = build.beatStage[b];
                 if (!build.code.ContainsKey(st)) build.code[st] = new();
                 if (goes) build.code[st].Insert(0, $"{ta}.GetRef().Disable()");
