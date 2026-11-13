@@ -395,6 +395,9 @@ namespace FrankyCLI
         /// arrival, 40 the pickup and the ask, 50 the rescue's check-in.
         /// </summary>
         private const int GuardStage = 60;
+        /// <summary>A hail that ends the job lingers (his MB117a play, 2026-11-13): this stage, set when the hailed ship unloads
+        /// after the completion, is the one that shuts the quest down. The ground board's LingerStage, 1000, for the same reason.</summary>
+        private const int HailLingerStage = 1000;
 
         /// <summary>A two-beat board's stages and objective: the pickup's own stage, and the deliver's objective beside the
         /// shell's 20. Neither exists on his MB01a (the build refuses if one does). 40, not 30: the broadcast's arrival is
@@ -967,6 +970,26 @@ namespace FrankyCLI
                                    (int)target.ID, FormKey.Null, r.speaker?.voice?.Contains("Female", StringComparison.OrdinalIgnoreCase) == true, bm,
                                    new Dictionary<(int beat, int ex), FormKey>(), new Dictionary<(int beat, int ex), (FormKey item, string name, int count)>(),
                                    ship: true);
+                // THE LINGER, ported from the ground board (gen_delve_beats, his 2026-10-19 on 15a: the side questions stay
+                // askable after the completion). His MB117a play, 2026-11-13: "the 'How long have you been out here' line doesn't
+                // work after finishing the mission, it just shows nothing and returns to the menu". MissionComplete() shut the
+                // quest down (ShutdownOnCompletion, default true) while the hail's menu was still open, and a stopped quest takes
+                // its scenes. So it is turned off, and stage HailLingerStage shuts down instead, set by vanilla's
+                // DefaultAliasOnUnload on the hailed ship once the job is complete: when he flies or jumps away from it.
+                if (clone.Stages!.Any(s => s.Index == HailLingerStage)) { Console.WriteLine($"REFUSED: the shell already has a stage {HailLingerStage}; the hail's shutdown stage collides."); return 1; }
+                var ls = CloneStage(clone, HailLingerStage);
+                if (ls == null) return 1;
+                if (ls.LogEntries.FirstOrDefault() is QuestLogEntry lle) lle.Entry = null;
+                clone.Stages.Add(ls);
+                SortStages(clone);
+                var uh = StageHook("DefaultAliasOnUnload", HailLingerStage, t.completeStage);
+                if (AttachHook(vma, clone.FormKey, (int)target.ID, uh, HookEntry.FindOrCreate, true, bm, HailLingerStage, t.completeStage) == Hooked.AlreadyCarries)
+                { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnUnload."); return 1; }
+                var hqs = vma.Scripts.First(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase));
+                hqs.Properties.RemoveAll(p => p.Name == "ShutdownOnCompletion");
+                hqs.Properties.Add(new ScriptBoolProperty { Name = "ShutdownOnCompletion", Data = false, Flags = ScriptProperty.Flag.Edited });
+                Console.WriteLine($"  +hook    : the ship (alias {target.ID}) unloading after {t.completeStage} sets {HailLingerStage}, which shuts the quest down; until then the hail's side questions still answer");
+                Console.WriteLine($"  linger   : {t.questScript}.ShutdownOnCompletion false; stage {HailLingerStage} calls MissionShutdown()");
             }
             else if (PlainBoard(r, t) || rescue)
             {
@@ -992,6 +1015,14 @@ namespace FrankyCLI
 
             string name = FragmentScriptName(r);
             var code = new SortedDictionary<int, List<string>>();
+            // The hail's linger (see the hail branch): the shutdown MissionComplete() no longer does, once the ship unloads.
+            if (SpaceHail(r, t))
+                code[HailLingerStage] = new()
+                {
+                    "Quest __temp = Self as Quest",
+                    $"{t.questScript} kmyQuest = __temp as {t.questScript}",
+                    "kmyQuest.MissionShutdown()   ; the hailed ship unloaded after the completion (DefaultAliasOnUnload)",
+                };
             var sayProps = new List<(string pname, FormKey scene)>();   // the fragment's Scene properties, one per spoken line
             var extraProps = new List<(string type, string pname, FormKey key, int alias)>();   // a two-beat board's item, boxes and object
             if (IsBoardSpace(t))
@@ -2161,8 +2192,23 @@ namespace FrankyCLI
                     fail += Check($"stage {t.completeStage} pays through {t.questScript}.MissionComplete(), after the closing line",
                                   (done.Contains("kmyQuest.MissionComplete()")
                                    && (bm.ClosingLine == null || done.IndexOf($"{bm.ClosingLine}.IsPlaying()") < done.IndexOf("kmyQuest.MissionComplete()"))).ToString(), "True");
-                fail += Check($"{t.questScript}.ShutdownOnCompletion is as shipped (unset, so true)",
-                              vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase))?.Properties.Any(p => p.Name == "ShutdownOnCompletion").ToString() ?? "no script", "False");
+                if (SpaceHail(r, t))
+                {
+                    // The hail lingers (his MB117a play): completion does not stop it, the ship's unload does.
+                    fail += Check($"a hail: {t.questScript}.ShutdownOnCompletion is off",
+                                  vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase))?.Properties.OfType<IScriptBoolPropertyGetter>()
+                                      .FirstOrDefault(p => p.Name == "ShutdownOnCompletion")?.Data.ToString() ?? "unset (true)", "False");
+                    string linger = src.Split($"Function {FragmentFunction(HailLingerStage)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
+                    fail += Check($"a hail: stage {HailLingerStage} exists and its fragment shuts the quest down",
+                                  (q.Stages.Any(s => s.Index == HailLingerStage) && linger.Contains("kmyQuest.MissionShutdown()")).ToString(), "True");
+                    var unload = vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.FirstOrDefault(s => s.Name == "DefaultAliasOnUnload");
+                    int Prop(string pn) => unload?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == pn)?.Data ?? -1;
+                    fail += Check($"a hail: the ship's DefaultAliasOnUnload sets {HailLingerStage} after {t.completeStage}",
+                                  $"{Prop("StageToSet")} {Prop("PrereqStage")}", $"{HailLingerStage} {t.completeStage}");
+                }
+                else
+                    fail += Check($"{t.questScript}.ShutdownOnCompletion is as shipped (unset, so true)",
+                                  vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase))?.Properties.Any(p => p.Name == "ShutdownOnCompletion").ToString() ?? "no script", "False");
                 // RewardAmountGlobal the tier (when the beat carries one), RewardAmountGlobalActual the quest's own writable
                 // global, on EVERY board quest (RewardActual, 2026-11-09).
                 fail += VerifyRewardActual(m, q, vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase)),
