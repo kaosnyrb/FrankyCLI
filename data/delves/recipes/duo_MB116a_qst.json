@@ -7,11 +7,12 @@
   "author": "jessica",
   "source": "his 2026-11-12 'yeah start' and 'keep going' (one of every type by the 19th): the dark site family (old MB15: get in somewhere you shouldn't be, do a thing, get out), and the verb grid's use-then-destroy (OT-4F)",
   "_note": [
-    "DARK SITE: a hostile site holds a prototype nobody is meant to know about. He uses the site's terminal to open the vault, then destroys what's inside.",
+    "UNREGISTERED VAULT: a hostile site holds a prototype nobody is meant to know about. He uses the site's terminal to open the vault, then destroys what's inside.",
     "THE PLAYER'S PART: getting to the terminal and the vault through a site that is guarded by whoever holds it, and the destroy, which is the job.",
     "No faction named aloud (his naming ruling): 'whoever's running that site'. Quiet register: the caller does not explain the prototype, and the close says only that it is gone.",
     "2026-11-12, Frances and Kieran (office/contractors/*/reviews/2026-11-12-delve-MB116a.md): Frances's pick, does it place hostiles: YES, the who-guard (MB42a's built field), so the client's warning is true on every draw; the card gains the keepers. 'Something heavy behind you' cut to what the machine did; the record states the act. Kieran's terminal marker: a use step's marker sits on its object.",
-    "His 2026-11-12 17:43: dark sites are hostile places so should have guards. The who-guard stays."
+    "His 2026-11-12 17:43: dark sites are hostile places so should have guards. The who-guard stays.",
+    "2026-11-13, his catch: \"dark site\" is the term for SPACE installations (old MB15 stations and artifact_remote Dark Site). This is a ground sabotage, so renamed, and it does NOT cover that family; the space dark site is still owed."
   ],
   "place": {
     "theme": {
@@ -36,7 +37,7 @@
   },
   "minLevel": 10,
   "prose": {
-    "name": "Sabotage: The Dark Site at the <Place> on <Planet>",
+    "name": "Sabotage: The Unregistered Vault at the <Place> on <Planet>",
     "briefing": "Someone is building something at the <Place> that isn't on any register. The client wants the site's vault opened and whatever is inside destroyed.",
     "card": "There's a vault at the <Place> that isn't on any register, and its keepers won't want you near it. Open it, then destroy what's inside."
   },
