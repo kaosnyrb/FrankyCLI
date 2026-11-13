@@ -1,0 +1,50 @@
+{
+  "schema": 2,
+  "id": "duo_MB119a_qst",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-11-13: 'dark site' is the term for space installations, 'they are just activators, not boardable stations. The destroy asteroid quest is the same logic'. The dark site family (old MB15 stations, artifact_remote Dark Site), on MB118a's guarded space destroy.",
+  "_note": [
+    "DARK SITE: an installation in orbit that isn't on any register, with ships guarding it. Clear the guards, then destroy it.",
+    "THE PLAYER'S PART: the guards first, then the installation: MB118a's guarded twin, with a station for a rock.",
+    "Quiet register: the client does not say what the site was for. No faction named aloud: 'whoever runs it'.",
+    "The ground job that wore this name first is MB116a, now the Unregistered Vault."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "His 32 band top."
+  },
+  "minLevel": 10,
+  "prose": {
+    "name": "Sabotage: The Dark Site over <Planet>",
+    "briefing": "There is an installation in orbit over <Planet> that isn't on any register, and ships are guarding it. The client wants it destroyed.",
+    "card": "There's an installation over <Planet> that isn't on any register, with ships guarding it. Destroy it."
+  },
+  "speaker": {
+    "name": "The Client",
+    "voice": "GenericMale01",
+    "elevenlabs": "nPczCjzI2devNBz1zQrb"
+  },
+  "_speech": "MB116a's client carried over, the same quiet man; his ear decides.",
+  "broadcast": [
+    "That's it, the one with no lights on. Whoever runs it keeps a few ships close, so deal with them first. I don't need to know what's inside. I need it gone."
+  ],
+  "beats": [
+    {
+      "type": "destroy",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Clear the guard ships, then destroy the dark site over <Planet>",
+      "model": "Meshes\\ccs\\stationsmall01.nif",
+      "_model": "Kim's small station (his 'station looks good', baked 2026-11-13, MB37a's), not boardable: his 'they are just activators'.",
+      "name": "Dark Site",
+      "guards": "LShip_Spacer_Combat_A",
+      "journal": "I cleared the ships guarding an unregistered installation over <Planet> and destroyed it.",
+      "say": [
+        "It's gone, then. Nobody will be finishing whatever they started up there."
+      ],
+      "reward": "hard"
+    }
+  ]
+}
