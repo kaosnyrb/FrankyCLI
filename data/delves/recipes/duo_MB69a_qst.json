@@ -1,9 +1,9 @@
 {
   "schema": 2,
   "id": "duo_MB69a_qst",
-  "template": "board",
-  "deal": "_duo_MB_MissionNode_test",
-  "_deal": "The board's test node, until he plays it.",
+  "template": "beats",
+  "deal": "_duo_MS_ArtifactMapRemotePlanet_TEST",
+  "_deal": "The remote-planet slate's test node, until he plays it; then its real pool.",
   "author": "jessica",
   "source": "his 2026-10-29 21:56 \"now look at the indurstrial missions in eve online\", then 22:04 \"yup go ahead. We have the bones of 4 with the terrabrew missions. They ask you to deliver the items with no mention how to get\"",
   "_note": [
@@ -12,7 +12,9 @@
     "mid-rarity ore, then a deliver, at a site on a planet that carries it (MB56a's place.resource).",
     "REWORKED 2026-11-10 (Eliza's 11-09 bring letter; OT-32 retired on his 10:07 ruling, 'limit the mission to a single planet where we know the resources are there'): the tungsten ingredient is ResInorgUncommonTungsten (a craft takes the Resource record, the lint says so); pinned to Bolivar I.",
     "CARD 2026-11-10 (his 11-04 ruling, a posting by whoever set the job: no payer label, no payment line; his 11-10 'we still have all those X Contract things'). Was: \"Private Contract. Make a set of tungsten drill bits and deliver them to the <Place> on <Planet>. Payment on contract completion.\"",
-    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): minLevel 35: pinned to Bolivar I, a level-35 system."
+    "LEVEL AND DISTANCE 2026-11-11 (his: 'some quests shouldnt be given to a level 1 player' and 'not sending them across the whole map just to deliver a coffee'; Eliza's minLevel and place.parsecs, FrankyCLI 3c81f6a): minLevel 35: pinned to Bolivar I, a level-35 system.",
+    "OT-32, 2026-11-13 (his 11-12 'our ore missions don't seem to work on missonboards, changed them to remote', and ore1 played 11:48 'yup that worked'): a REMOTE Delve now, ore1's shape. POOL: the slate's remote-planet node (duo_MS_ArtifactMap_RemotePlanetNode), on its test node until he plays it: the job is pinned to a planet elsewhere, which is what that pool deals. FAMILY: Requisition (old MB02 to 04), on the closed list. No card (a slate has none) and no minLevel (board only); parsecs 50, as ore1.",
+    "The call opened 'Those the bits?', the carried-thing opener he caught 11-13; it opens on the job now."
   ],
   "place": {
     "theme": {
@@ -25,12 +27,14 @@
     },
     "_theme": "A quiet worked site with a worn-out dig.",
     "planet": "Pluto",
-    "_planet": "Pinned: a planet that carries tungsten. MOVED Bolivar I -> Pluto 2026-11-12, the planet he picked for MB56a and ore1; Bolivar I never placed the crewed site. Whether it becomes the remote shape follows ore1's play."
+    "_planet": "Pinned: a planet that carries tungsten. MOVED Bolivar I -> Pluto 2026-11-12, the planet he picked for MB56a and ore1; Bolivar I never placed the crewed site. Whether it becomes the remote shape follows ore1's play.",
+    "remote": true,
+    "_remote": "OT-32: ore jobs are remote Delves (his 11-12); ore1 is the played shape.",
+    "parsecs": 50
   },
   "prose": {
     "name": "Fabrication: Drill Bits for the <Place> on <Planet>",
-    "briefing": "The dig at the <Place> has worn through its last drill bits. They need a new set made with tungsten, and there's tungsten on <Planet>.",
-    "card": "Our dig at the <Place> has worn through its last drill bits. We need a new set made with tungsten. There's tungsten on <Planet>."
+    "briefing": "The dig at the <Place> has worn through its last drill bits. They need a new set made with tungsten, and there's tungsten on <Planet>."
   },
   "beats": [
     {
@@ -77,8 +81,7 @@
     "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
   },
   "broadcast": [
-    "Those the bits? Drop them in the crate and we'll fit them."
+    "Drop the bits in the crate when you've made them, and we'll fit them before the next shift."
   ],
-  "_speech": "Cheerful, mostly about his drill. A stand-in voice; his ear decides.",
-  "minLevel": 35
+  "_speech": "Cheerful, mostly about his drill. A stand-in voice; his ear decides."
 }
