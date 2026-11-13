@@ -41,8 +41,8 @@
       "type": "use",
       "at": "se_GeneralMarkerLocRef01",
       "objective": "Open the escape pod over <Planet>",
-      "model": "Meshes\\ships\\modules\\cargo\\smod\\smod_cargo_panoptes_degama-1000_port.nif",
-      "_model": "MB104a's drifting cargo module as the pod, a stand-in.",
+      "model": "Meshes\\ccs\\droppod01.nif",
+      "_model": "Our drop pod (Kim's pick, his yes, her letter 2026-11-13; vanilla capsules are 0.5 m). Was MB104a's drifting cargo module.",
       "name": "Escape Pod",
       "message": {
         "title": "Escape Pod",

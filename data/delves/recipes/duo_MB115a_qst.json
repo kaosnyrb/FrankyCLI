@@ -53,8 +53,8 @@
           }
         ]
       },
-      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
-      "_model": "28a's satellite beacon as the probe, a stand-in; his or Kim's pick."
+      "model": "Meshes\\ships\\satellite\\satellitecamera\\satellitecamera01.nif",
+      "_model": "Kim's pick satellitecamera01 (8 m, a sphere, two solar wings, whip antennas), his yes, her letter 2026-11-13. Was 28a's satellite beacon."
     }
   ]
 }
