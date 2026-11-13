@@ -128,6 +128,9 @@ namespace FrankyCLI
             if (recordType.Equals("smtree", StringComparison.OrdinalIgnoreCase))
                 return StoryManagerTree(allMods, search, env.LinkCache);
 
+            if (recordType.Equals("linksto", StringComparison.OrdinalIgnoreCase))
+                return LinksTo(allMods, search);
+
             if (recordType.Equals("worldspace_objects", StringComparison.OrdinalIgnoreCase))
             {
                 int found3 = 0;
@@ -2674,6 +2677,51 @@ namespace FrankyCLI
         }
 
         /// <summary>EditorID alone (no FormKey suffix) for a compact column; "?" if unresolvable.</summary>
+        /// <summary>
+        /// `linksto <FormKey | EditorID>`: every major record in the load order whose form links include the
+        /// target, one line each (plugin, type, FormKey, EditorID). 2026-11-13, OT-9U: vanilla's generic ship
+        /// dialogue is gated `HasKeyword(NoGenericSpaceVO) == 0`, no Papyrus names the keyword, so the question
+        /// "which records put it on a ship" had no instrument. A link inside a record (an alias keyword, a
+        /// condition) reports the record that owns it, so a quest line means "somewhere in this quest".
+        /// Refuses an EditorID that is missing or ambiguous rather than picking one.
+        /// </summary>
+        private static int LinksTo(List<IStarfieldModGetter> allMods, string search)
+        {
+            FormKey target;
+            if (!FormKey.TryFactory(search, out target))
+            {
+                var hits = EditorIdIndex(allMods).Where(kv => string.Equals(kv.Value, search, StringComparison.OrdinalIgnoreCase)).Select(kv => kv.Key).Distinct().ToList();
+                if (hits.Count != 1)
+                {
+                    Console.WriteLine($"REFUSED: '{search}' names {hits.Count} records by EditorID; pass a FormKey (e.g. 080237:Starfield.esm).");
+                    return 1;
+                }
+                target = hits[0];
+            }
+            Console.WriteLine($"LINKSTO\t{target}\t{ResolveEditorIdOnly(target, allMods)}");
+            int n = 0;
+            // Mutagen cannot decode every record (a NavigationMesh's geometry threw on the first run). A record
+            // whose links cannot be read is COUNTED and its type named, never skipped silently: an unread
+            // record is "not searched", which is a different fact from "does not link".
+            var unread = new Dictionary<string, int>();
+            foreach (var mod in allMods)
+                foreach (var rec in mod.EnumerateMajorRecords())
+                {
+                    if (rec.FormKey == target) continue;
+                    string type = rec.GetType().Name.Replace("BinaryOverlay", "");
+                    bool links;
+                    try { links = rec.EnumerateFormLinks().Any(l => l.FormKey == target); }
+                    catch (Exception) { unread[$"{mod.ModKey} {type}"] = unread.GetValueOrDefault($"{mod.ModKey} {type}") + 1; continue; }
+                    if (!links) continue;
+                    Console.WriteLine($"LINK\t{mod.ModKey}\t{type}\t{rec.FormKey}\t{rec.EditorID}");
+                    n++;
+                }
+            Console.WriteLine($"Total records linking: {n}");
+            foreach (var kv in unread.OrderByDescending(kv => kv.Value))
+                Console.WriteLine($"UNREAD\t{kv.Value}\t{kv.Key}\t(links not decodable: NOT searched)");
+            return 0;
+        }
+
         private static string ResolveEditorIdOnly(FormKey fk, List<IStarfieldModGetter>? allMods)
         {
             if (fk.IsNull) return "(null)";
@@ -2748,6 +2796,7 @@ namespace FrankyCLI
             "MissionBoardDescription", "MissionBoardInfoPanels", "MissionTypeKeyword",
             "QuestType", "QuestFaction", "QuestGroup", "Location", "SourceQuest",
             "QuestTimeLimit", "Event", "Keywords", "TextDisplayGlobals", "UnusedConditions",
+            "DialogConditions",
             "Timestamp", "Unknown",
             // structural / not content
             "FormVersion", "Version2", "VersionControl", "IsCompressed", "IsDeleted",
@@ -2901,6 +2950,37 @@ namespace FrankyCLI
                             Console.WriteLine($"    [UNHANDLED ALIAS TYPE: {alias.GetType().Name}] -- extend DumpQuestEverything.");
                             break;
                     }
+                }
+            Console.WriteLine();
+
+            // ---- Dialogue conditions: the gate on EVERY line the quest owns -------------------
+            // 2026-11-13, OT-9U (his MB117a play: vanilla's generic hail options beside ours). Vanilla's
+            // DialogueGenericCitizensShips and DialogueGenericPiracyShips decide which ships offer trade,
+            // chatter and piracy HERE, not on a line, and this reader listed the field as undecoded.
+            // Every argument is printed by reflection and every link resolved to its EditorID, because
+            // DescribeCondition only reads properties named *Parameter and a HasKeyword or GetIsVoiceType
+            // argument is not named that way.
+            var dcs = q.DialogConditions;
+            Console.WriteLine($"  DialogConditions [{dcs?.Count ?? 0}]:");
+            if (dcs != null)
+                foreach (var c in dcs)
+                {
+                    string fn = c.Data.GetType().Name.Replace("ConditionDataBinaryOverlay", "").Replace("ConditionData", "");
+                    var args = new List<string>();
+                    foreach (var p in c.Data.GetType().GetProperties())
+                    {
+                        if (p.GetIndexParameters().Length > 0 || p.Name is "Unknown1" or "Unknown2" or "Unknown3" or "UseAliases" or "UsePackageData") continue;
+                        object? v;
+                        try { v = p.GetValue(c.Data); } catch { continue; }
+                        if (v == null) continue;
+                        if (v is not IFormLinkGetter && v.GetType().GetProperty("Link")?.GetValue(v) is IFormLinkGetter inner) v = inner;
+                        string s = v is IFormLinkGetter fl
+                            ? (fl.IsNull ? "" : $"{fl.FormKey} {ResolveEditorIdOnly(fl.FormKey, allMods)}")
+                            : (v.GetType().IsPrimitive || v is Enum || v is string ? v.ToString() ?? "" : "");
+                        if (s.Length > 0 && s != "0" && s != "Subject") args.Add($"{p.Name}={s}");
+                    }
+                    string val = c is IConditionFloatGetter cf ? cf.ComparisonValue.ToString(System.Globalization.CultureInfo.InvariantCulture) : "(global)";
+                    Console.WriteLine($"    {fn}({string.Join(", ", args)}) {c.CompareOperator} {val}{(c.Flags != 0 ? $" [{c.Flags}]" : "")}");
                 }
             Console.WriteLine();
 
