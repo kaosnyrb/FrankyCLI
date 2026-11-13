@@ -3751,14 +3751,18 @@ namespace FrankyCLI
                 loc.ALPS.Conditions.Add(new ConditionFloat { Data = d, CompareOperator = CompareOperator.LessThan, ComparisonValue = (float)ps });
                 Console.WriteLine($"  request  : {loc.Name} within {ps} parsecs of the player (GetDistanceGalacticParsec PlayerRef < {ps}, MB_Bounty01Far's, which uses 30)");
             }
-            if (r.minLevel is int ml)
-            {
-                var g = new GetLevelConditionData { RunOnType = Condition.RunOnType.Reference };
-                g.Reference.SetTo(PlayerRef);
-                loc.Conditions.Add(new ConditionFloat { Data = g, CompareOperator = CompareOperator.GreaterThanOrEqualTo, ComparisonValue = ml });
-                Console.WriteLine($"  minLevel : {loc.Name} fills only for a player at level {ml}+ (GetLevel on PlayerRef >= {ml}); below it the board does not deal the quest");
-            }
+            if (r.minLevel is int ml) AddLevelGate(loc, ml);
             return 0;
+        }
+
+        /// <summary>minLevel's one spelling, for a ground board's main place and a space board's orbit alike (the space
+        /// builder did not call BoardPlaceGates, so MB119a's floor was dropped until its verify caught it, 2026-11-13).</summary>
+        internal static void AddLevelGate(QuestLocationAlias loc, int ml)
+        {
+            var g = new GetLevelConditionData { RunOnType = Condition.RunOnType.Reference };
+            g.Reference.SetTo(PlayerRef);
+            loc.Conditions.Add(new ConditionFloat { Data = g, CompareOperator = CompareOperator.GreaterThanOrEqualTo, ComparisonValue = ml });
+            Console.WriteLine($"  minLevel : {loc.Name} fills only for a player at level {ml}+ (GetLevel on PlayerRef >= {ml}); below it the board does not deal the quest");
         }
 
         /// <summary>His settled orbit altitude band (manual 12, 2026-08-04): 4 "much better", 32 "feels cool", 256 discarded.</summary>

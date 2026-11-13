@@ -48,6 +48,8 @@ namespace FrankyCLI
                 Fatal("place.system and place.parsecs are both set; one rung, one way of saying near (S6 was the number, S7 vanilla's test).");
             if (p.over != null && (p.system != null || p.parsecs != null))
                 Fatal("place.over is set beside place.system or place.parsecs; over CLEARS the orbit's conditions, so the others would test nothing.");
+            if (p.over != null && r.minLevel != null)
+                Fatal("place.over is set beside minLevel; vanilla's parent-linked orbits carry NO conditions, so a level gate on one is unproven. Drop one, or prove it on a probe first.");
             if (p.playerShip != null && p.playerShip != "flying")
                 Fatal($"place.playerShip is \"{p.playerShip}\"; the one value built is \"flying\" (SQ_PlayerShip's PlayerShip with him aboard, SE_Player_GenericTemplate's).");
             if (p.player == false)
@@ -517,6 +519,9 @@ namespace FrankyCLI
                 Console.WriteLine($"  orbit    : {orbit.Name} altitude {alt} (was {AltitudeOf(orbit):0.###})");
                 SetAltitude(orbit, alt);
             }
+            // minLevel on the orbit (the space board's main place), AFTER "same" and "over" have rewritten its conditions, or
+            // they would clear it. Ground boards get it in BoardPlaceGates; this path never called that (MB119a, 2026-11-13).
+            if (r.minLevel is int ml) AddLevelGate(orbit, ml);
             // THE SHIP HE IS FLYING, vanilla's way (rung S11). The shell's PlayerShip is SQ_PlayerShip's HomeShip (alias 16),
             // Optional and unconditioned; vanilla's player space encounters use SQ_PlayerShip's PlayerShip (alias 0) and fill
             // only while he is aboard (ShipContainsRef(player) == 1). COPIED from SE_Player_GenericTemplate, never composed:
