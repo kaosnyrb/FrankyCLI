@@ -33,7 +33,7 @@
     {
       "type": "destroy",
       "at": "se_GeneralMarkerLocRef01",
-      "objective": "Clear the scavengers, then break up the asteroid",
+      "objective": "Clear the scavengers, then break up the asteroid over <Planet>",
       "model": "Meshes\\Landscape\\Rocks\\asteroids\\RockAsteroidRoughLarge01.nif",
       "name": "Loose Asteroid",
       "guards": "LShip_Spacer_Combat_A",

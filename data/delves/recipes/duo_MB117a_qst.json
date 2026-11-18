@@ -36,7 +36,7 @@
       "type": "talk",
       "at": "se_GeneralMarkerLocRef01",
       "ship": "LvlShip_UCCitizen_Cargo",
-      "objective": "Hail the circling pilot and calm him down",
+      "objective": "Hail the circling pilot over <Planet> and calm him down",
       "greeting": [
         "Oh, thank goodness, a real voice. My nav's dead, every reading says I'm somewhere I'm not, and I've stopped trusting my own eyes."
       ],
